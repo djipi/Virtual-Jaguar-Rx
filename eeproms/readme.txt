@@ -1,1 +1,0 @@
-Virtual Jaguar will create EEPROM images here.
