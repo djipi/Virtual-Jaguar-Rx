@@ -1,0 +1,283 @@
+Virtual Jaguar v2.1.3 Rx GCC/Qt
+-------------------------------
+
+* For an accurate update, please read the vj_ReleaseNotes.txt
+
+
+
+Virtual Jaguar v2.1.3 GCC/Qt
+----------------------------
+
+* Added interlaced mode handling. [Shamus]
+
+
+Virtual Jaguar v2.1.2 GCC/Qt
+----------------------------
+
+* Bugfix for catastrophic failure in Controller config dialog. Thanks to ggn for
+  reporting this! [Shamus]
+* Bugfix for non-English locales. Thanks to SCPCD for reporting! [Shamus]
+
+
+Virtual Jaguar v2.1.1 GCC/Qt
+----------------------------
+
+* Added controller profiles. What this means is that if you left your gamepad
+  behind and/or have a different one, VJ will let you create a controller
+  config for the new controller without destroying the old one. This also means
+  that if you have *no* controllers, you can still play VJ with the keyboard.
+  [Shamus]
+* Fixed a few problems with the DSP timing; as a result, the sound in Rayman
+  and the FACTS demo is correct now. [Shamus]
+* Removed toolbar from full screen mode. [Shamus]
+* Added analog inputs to gamepad support. [Shamus]
+* Fixed 6MB cartridge space access limitation. 6MB carts should work now.
+  [Shamus]
+* Fixed problem with JERRY interrupts corrupting the M68K core. [Shamus]
+
+
+Virtual Jaguar v2.1.0 GCC/Qt
+----------------------------
+
+* Added gamepad support. [Shamus]
+* Added fullscreen option. [Shamus]
+* Added some more developer goodies to Alpine mode. [Shamus]
+* Re-added command line switches. [Shamus]
+* Moved JERRY into host audio IRQ. This should make sound much smoother, though
+  it may run ahead of the rest of the emulator. [Shamus]
+* Kludged a fix into the audio handler to set the correct frequency for audio
+  playback. Note that there could still be problems with this approach, as it
+  can be easily fooled. Thanks to Dr. Typo for the initial analysis and insight
+  into this bug. :-) [Shamus]
+* Preliminary fixes for proper emulation of memory reads between $200000 and
+  $800000. [Shamus]
+* Proper handling in the OP of objects with 0 IWIDTH. [Shamus]
+
+
+Virtual Jaguar v2.0.2 GCC/Qt
+----------------------------
+
+* Fixed problem on OP with 24BPP bitmaps. [Shamus]
+* Cosmetic GUI fixes. [Shamus]
+* Switched to UAE 68000 CPU core. [Shamus]
+* Fixed some RISC STORE and LOAD alignment issues. Still need to verify against
+  real hardware. [Shamus]
+* Fixed video frame timing for both NTSC *and* PAL. [Shamus]
+* Improved OP logging, added emulation of OP bug. [Shamus]
+* Fixed addressing bug with UAE 68000 core. [Shamus]
+
+
+Virtual Jaguar v2.0.1 GCC/Qt
+----------------------------
+
+* Fixed NTSC timings; they were hardwired to PAL rates. [Shamus]
+* Fixed possible missing trailing slash on path fields input by user. [Shamus]
+* Fixed exit hotkey to work on Win32. [Shamus]
+* Changed PAL/NTSC switch to only work when virtual machine is powered off.
+  [Shamus]
+* Miscellaneous documentation fixes. [Shamus]
+
+
+Virtual Jaguar v2.0.0 GCC/Qt
+----------------------------
+
+* Switched GUI to Qt. And there was much rejoicing. ;-) [Shamus]
+* Added detection code to fish out files from inside ZIP archives. What this
+  means is that now you can have other goodies inside of your ROM ZIP like
+  labels, box art, and overlays. See built-in help for details. [Shamus]
+* Various usability improvements, too many to list here. ;-) [Shamus]
+* Various compatibility improvements to the Jaguar core, too many to list
+  here. ;-) [Shamus]
+
+
+Virtual Jaguar v1.1.0 GCC/SDL (r299 - Never officially released)
+----------------------------------------------------------------
+
+* Switched OpenGL rendering to 32 BPP. This is not only how a real Jaguar
+  renders graphics, but it also gives VJ a nice speed boost. ;-) [Shamus]
+* Changed execution to a time-based solution so that timers and IRQs and
+  such can happen when they're supposed to. [Shamus]
+* Fixed blitter writes so that Intensity[0-3] and Z[0-3] are written in the
+  correct order. [Shamus]
+* Major rewrite of blitter to conform the the TOM ASIC nets. This should fix a
+  bunch of stuff that wasn't working correctly before. [Shamus]
+* Fixed writes to 64 bit blitter registers. [Shamus]
+* Refactored GUI to be more maintainable, better looking and more responsive.
+  [Shamus]
+
+
+Virtual Jaguar v1.0.7 GCC/SDL
+-----------------------------
+
+* Various fixes to make for smoother compilation on MacOS. [Adam Green]
+* Fixes to filetype parsing. VJ now properly recognizes .abs, .jag, .rom,
+  and .j64 files--be sure to check the README for the gory details! [Shamus]
+* Added a kludge to allow homebrew demos to run without a Stubulator ROM and
+  without crashing the emulator. [Shamus]
+* Fixed a blitter intensity addition problem. This fixes the title in Hover
+  Strike and the road/shadows in Checkered Flag. [Shamus]
+* Partially fixed a problem with the SUBC opcode in the RISC processors. This
+  allows Hover Strike, Phase Zero and Fight For Life to boot into their title
+  screens and makes them somewhat playable. [Shamus]
+* Fixed a horizontal scaling problem in the OP and the off-by-one bug that it
+  reintroduced. This fixes the road in Atari Karts and probably a few others.
+  [Shamus]
+* Fixed a long standing blitter bug that kept certain doors in AvP from
+  rendering correctly. [Shamus]
+* Fixed some vertical positioning bugs in the OP. Now Checkered Flag, Alien
+  vs Predator and probably others now work as they should (graphically ;-)
+  [Caz]
+* Better GUI support. Most options in the GUI work now, and more are expected
+  to be functional in the near future. [Shamus]
+* Fixed a few more lingering blitter bugs (there are more to be found). This
+  fixes most of the glitches in Cybermorph and Alien vs Predator. [Shamus]
+* Fixed an Object Processor scaled bitmap bug that caused incorrect
+  positioning of scaled bitmaps that started outside the line buffer, and
+  also fixed a problem that caused the OP to hang in certain situations. This
+  fixes Bubsy, International Sensible Soccer, and probably a few others.
+  [Shamus]
+* Cleaned up various bits of video rendering related code. [nwagenaar]
+* Added support for OpenGL textures with a depth of 16bpp, 24bpp or 32bpp.
+  [nwagenaar]
+* Rewrote several OpenGL related rendering code concerning the new OpenGL
+  texture depths and texture sizes. [nwagenaar]
+* Rewrote several OpenGL rendering functions concerning speed related items.
+  [nwagenaar]
+* Several bugs resolved due to OpenGL and normal rendering code. [nwagenaar]
+* Default resolution for OpenGL is now 640x480. [nwagenaar]
+
+
+Virtual Jaguar v1.0.6 GCC/SDL
+-----------------------------
+
+* Added support for gzipped ROM files. [Adam Green]
+* Added OpenGL support. Because of this, aspect ratios in the various
+  graphic modes should be correct now. Thanks goes to Niels for enlightenment
+  in this area. :-) [Shamus]
+* Moved all platform specific video code to video.cpp. This should make it
+  easier to add functionality to the video subsystem without having to chase
+  code around in places where it didn't belong. [Shamus]
+* Key bindings are now customizable. [Shamus]
+* VJ now uses a config file (vj.cfg) for commonly used settings. Settings in
+  the config file can still be overridden by command line switches. [Shamus]
+* Preliminary GUI mouse support. [Shamus]
+* Fixed an off-by-one bug in the Object Processor when dealing with scaled
+  bitmap objects. [Shamus]
+* Fully virtualized screen size. What this means is that we can keep the
+  Jagaur screen displayed in a convenient size (320 x 240) and the graphics
+  that various ROMs display will now be properly centered (more or less, they
+  were really centered for a TV display). [Shamus]
+* Border color is now displayed properly. [Shamus]
+* Fully pipelined DSP core. Because of this, Wolfenstein 3D now has sound. To
+  use the old core, use the -nopipeline switch. [Shamus]
+
+
+Virtual Jaguar v1.0.5 GCC/SDL
+-----------------------------
+
+* Various fixes to the codebase so that it compiles and works properly on
+  Linux. :-) The makefiles are almost identical now, the only thing that's
+  different between them are the SYSTYPE and EXESUFFIX variables defined at
+  the top. [Shamus]
+* Fixed a pernicious blitter bug that kept Rayman from doing proper collision
+  detection. [Shamus]
+* Added a simple file selector so that typing in long filenames in order to
+  run the emulator is no longer necessary. :-) To use it, instead of
+  supplying a ROM name, simply put in the name of the directory where your
+  ROMs live. [Shamus]
+* Removed all the assembly language code from the DSP, so it should be a
+  little less buggy now. Also, removed some brain-dead timeslice releasing
+  that was causing a bunch of problems with various ROMs. [Shamus]
+* Added sound support! In order to hear any sound, you probably have to
+  start VJ with the -dspon switch. Also, unless you have a very fast computer
+  the sound is going to be choppy. Hopefully future optimizations will cure
+  this. ;-) [Shamus]
+* Added GUI support. You can see the results by hitting the TAB key while the
+  emulator is running. ;-) [Shamus]
+* Lots of cleanups to the source code including the ability to trace who
+  writes what to where. [Shamus]
+
+
+Virtual Jaguar v1.0.4 GCC/SDL - source only release
+---------------------------------------------------
+
+* Lots of bugfixes. [Shamus]
+* Jaguar BIOS now works properly and is used by default. BIOS failure was
+  due to a bug in the GPU (specifically in the SUBC and ADDC opcodes). To
+  override this behavior, use the -nobios switch. [Shamus]
+* Rewrote the OP code--mostly because it was pissing me off. ;-) Not
+  to mention that it was almost completely unmaintainable in its former
+  state and was just plain wrong in its implementation in many places.
+  Because of this, some RMW effects that were missing from AvP are present
+  now and leftover crud in scaled bitmaps in Rayman is gone now. ;-) [Shamus]
+* ZIP support! Now there is no longer any need to unzip ROMs (although if
+  you prefer to waste HD space, VJ will gladly accomodate you). The code to
+  support this is a pretty ugly hack, but it works and there are other fish
+  to fry at the moment. Also, ZLIB is now required to compile VJ. [Shamus]
+* Support for PD ROMs. Currently the only one that works at all is JagMania,
+  though as the hardware emulation gets better more PD ROMs will begin to
+  work. Note that you must use the -nobios switch for this to work. [Shamus]
+* Preliminary support for PAL Jaguar emulation. Default is NTSC. To use it,
+  use the -pal switch. [Shamus]
+* Support for DSP activation. The DSP is now *off* by default, since it
+  doesn't work properly yet. Use the -dspon switch to force the DSP on.
+  [Shamus]
+* Removed all hacks that were written to support a specific ROM from the OP
+  and GPU code (much more remains to be removed). Since the CRCs that were
+  calculated to support these hacks were done on byte swapped ROMs, they
+  weren't working anyway. Besides which, a hack means that you don't
+  understand the hardware properly and/or don't know how to write the code to
+  properly emulate the hardware. ;-) [Shamus]
+* Renamed the executable from the ridiculously named jag_em to the more
+  sensibly named vj. Note that the Jag_em.cpp file has also been changed to
+  reflect this name change. [Shamus]
+* Removed Aaron Giles 68K dissasembler in favor of the one included with the
+  Musashi core. It's there, why not use it? ;-) [Shamus]
+* Reordered the order of A, B, and C buttons to more accurately reflect their
+  respective positions on a real Jaguar controller. Also fixed a small bug that
+  kept the number pad from reporting the right numbers to the emulator. :-)
+  [Shamus]
+* Started to remove the !__PORT__ defintions from the source code. Since this
+  is supposed to be a portable emulator, we won't be using any MS specific
+  code anyway. [Shamus]
+* Fixed some problems with the blitter when doing clipping and bit expansion.
+  Also fixed (reintroduced?) a bug that existed in the real blitter HW (the
+  YADD1 bit in A2--fixes Tempest 2000). [Shamus]
+* Probably a bunch of other stuff that I've forgotten about. ;-) [Shamus]
+
+NOTE: Tested only on WIN32 platform! ;-)
+
+
+Virtual Jaguar v1.0.3 GCC/SDL - source only release
+---------------------------------------------------
+
+* Converted GNU assembly in the GPU core to C code -- Rayman and
+  Alien vs Predator work again. :-) [Shamus]
+* Removed closed source Starscream and replaced it with the open source
+  Musashi core. Because of this, VJ runs a little faster now. :-) [Shamus]
+* Various cleanups to the source files (still lots of work to do!). [Shamus]
+
+NOTE: Tested only on WIN32 platform!
+
+
+1.0.1 - 1.0.2 - Unreleased, mostly for testing/finding bugs
+-----------------------------------------------------------
+
+* Lots of stuff happened, but we can't remember any of it. :-)
+
+
+Virtual Jaguar v1.0.0 GCC/SDL - initial source release
+------------------------------------------------------
+
+* Converted VC++ assembly to standard GNU assembly.
+* Fixed small bugs in SDL related items (keyboard/graphics).
+* Added *some* optimalisations to the graphics sources.
+* Added joystick support (not tested).
+* Added joystick port support (not tested).
+* Added frameskip support.
+
+Source only release. Tested on BeOS, Linux, FreeBSD and WIN32.
+SOUND emulation was NOT done. Need help with this one :)
+
+
+SDLEMU (Niels Wagenaar & Caz) - http://sdlemu.ngemu.com

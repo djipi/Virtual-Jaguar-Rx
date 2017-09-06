@@ -1,0 +1,303 @@
+<html>
+
+<head>
+<title>Virtual Jaguar: The Documentation [FRENCH]</title>
+</head>
+
+<body>
+<h1><i>Virtual Jaguar:</i> The Documentation</h1>
+
+<h2><i>Virtual Jaguar</i> Quick Start</h2>
+
+<p>Welcome to <i>Virtual Jaguar!</i> If this is your first time using <i>Virtual Jaguar</i>, you can get a feel for what it is and does by doing the following:
+
+<ul>
+<li>Select &ldquo;Insert Cartridge&rdquo; from the &ldquo;Jaguar&rdquo; menu, or press the &ldquo;Insert Cartridge&rdquo; toolbar button.</li>
+<li>In the dialog that shows up, you will see the pack-in title of <i>Downfall</i> which is brought to you courtesy of <b>Reboot</b> (<a href="http://reboot.atari.org">http://reboot.atari.org</a>).</li>
+<li>Click on the <i>Insert</i> button in the lower right hand corner of the dialog or simply press the <b>Enter</b> key on your keyboard.</li>
+<li>In a few moments, the <i>Downfall</i> title screen should show in the <i>Virtual Jaguar</i> main window.</li>
+</ul>
+
+<p>To play, use the left and right keys (mapped to <b>Z</b> and <b>C</b> on your keyboard) and the the B button (mapped to <b>K</b> on your keyboard). You can pause <i>Virtual Jaguar</i> by selecting &ldquo;Pause&rdquo; from the &ldquo;Jaguar&rdquo; menu, pressing the &ldquo;Pause&rdquo; toolbar button, or by pressing the <b>Esc</b> key on your keyboard. You can quit <i>Virtual Jaguar</i> by selecting &ldquo;Exit&rdquo; from the &ldquo;Jaguar&rdquo; menu, or by pressing <b>Ctrl</b> + <b>Q</b> on your keyboard.</p>
+
+<h2>System Requirements</h2>
+
+<p><i>Virtual Jaguar</i> should be able to run on most late model computers equipped with an OpenGL compliant video card. It requires a lot of raw <i>oomph</i> in it&rsquo;s present form to run well; do not be surprised if it doesn&rsquo;t run at 100% speed with all the options turned on. Certain subsystems of the Jaguar are not optimized yet and as such take more time than they would if they were optimized. To run <i>Virtual Jaguar</i> at full speed with all options on, we recommend using liquid nitrogen. At least until we get it properly optimized. ;-)</p>
+
+<h2><i>Virtual Jaguar</i> In Depth</h2>
+
+<p>This version of <i>Virtual Jaguar</i> has been redesigned with a modern GUI and as such should be fairly easy to use and understand. However, some options may not do what you expect: What follows is an exhaustive look at what the various toolbar buttons and menu options do.</p>
+
+<h2>The Toolbar</h2>
+
+<p>The main <i>Virtual Jaguar</i> toolbar contains the following buttons:</p>
+
+<ul>
+<li>Power</li>
+<li>Pause</li>
+<li>Insert Cartridge</li>
+<li>Use CD Unit</li>
+<li>Scale x1</li>
+<li>Scale x2</li>
+<li>Scale x3</li>
+<li>NTSC</li>
+<li>PAL</li>
+<li>Blur</li>
+<li>Full Screen</li>
+</ul>
+
+<p>Here&rsquo;s what they do.</p>
+
+<h3>Power</h3>
+
+<p>This toolbar button acts just like the power switch on a real Jaguar, complete with untuned tank circuit noise showing on the screen when the emulated Jaguar is turned off. Some options can only be changed after the power has been turned off, such as the NTSC/PAL switches, or the &ldquo;Use CD Unit&rdquo; option. The &ldquo;Use Jaguar BIOS&rdquo; option in the Configuration dialog will only take effect after the power has been cycled.</p>
+
+<h3>Pause</h3>
+
+<p>Pressing the Pause toolbar button will pause execution of the emulated Jaguar. Note that most games have a pause feature that is built into the game; this feature is separate from and will override any built-in game pause feature. Also, the emulator will go into pause mode if the power is on when you activate the &ldquo;Insert Cartridge&rdquo; dialog. Pressing the <b>Esc</b> key will also activate this option. Selecting this option in any of the ways listed above, while in pause mode, will take it out of pause mode.</p>
+
+<h3>Insert Cartridge</h3>
+
+<p>Pressing the Insert Cartridge button will bring up the Insert Cartridge dialog; it can also be launched by pressing <b>Ctrl</b> + <b>I</b> on your keyboard. On the left side of the dialog will be a list of software that <i>Virtual Jaguar</i> recognizes from the directory you tell it to look into (see the &ldquo;Configure&rdquo; menu option and the &ldquo;General&rdquo; tab, &ldquo;Software&rdquo; item for more information). Selecting an item in the list will bring up some information about the software on the right side of the dialog, if <i>Virtual Jaguar</i> knows about it. Pressing the icon in the lower right hand side of the dialog will then cause <i>Virtual Jaguar</i> to attempt to run the selected item. <i>Virtual Jaguar</i> cycles the power when it attempts to run the software you select.</p>
+
+<p>There are also some keyboard shortcuts that come with the Insert Cartridge dialog: Pressing a letter key will highlight the nearest item in the list that starts with that letter. Pressing more than one letter key in quick succession will narrow in on the item that matches those letter keys pressed. Pressing the <b>Esc</b> key will dismiss the dialog without attempting to load anything, and pressing the <b>Enter</b> key is the same as pressing the icon in the lower right hand side of the dialog.</p>
+
+<h3>Use CD Unit</h3>
+
+<p>Pressing this toolbar button will virtually plug in a Jaguar CD unit into the emulated Jaguar. It can only be toggled with the virtual machine powered <b>off</b>.</p>
+
+<p>As of the release date for this emulator, this option <b>DOES NOT WORK</b> 100% the way it&rsquo;s intended to: When it&rsquo;s working correctly, selecting this option will allow you to insert a Jaguar CD game into your computer&rsquo;s CD/DVD drive and play it as if it were on a real Jaguar. For now, you can see the CD BIOS make pretty patterns on your screen if you use it.</p>
+
+<p>Note that once this is working as it should, the DSP will be required to be <b>enabled</b> for it to work properly. It <b>WILL NOT WORK</b> properly without the DSP.</p>
+
+<h3>Scale x1</h3>
+
+<p>Selecting this toolbar button will cause the screen to be displayed with pixels that are sized 1 to 1 with your display; this will give you a very small display.</p>
+
+<h3>Scale x2</h3>
+
+<p>This will cause the screen to be displayed with pixels that are sized 2 to 1 with your display.</p>
+
+<h3>Scale x3</h3>
+
+<p>This will cause the screen to be displayed with pixels that are sized 3 to 1 with your display; this should yield a fairly large display.</p>
+
+<h3>NTSC</h3>
+
+<p>Selecting this item will cause the emulated Jaguar to behave as if it were an NTSC type Jaguar, running at 60 Hz. This option can only be toggled when the virtual machine is powered <b>off</b>.</p>
+
+<h3>PAL</h3>
+
+<p>Selecting this item will cause the emulated Jaguar to behave as if it were an PAL type Jaguar, running at 50 Hz. As an added bonus, you also get a few extra scan lines as compared with NTSC mode; some games will even utilize this extra screen real estate. This option can only be toggled when the virtual machine is powered <b>off</b>.</p>
+
+<h3>Blur</h3>
+
+<p>Normally, the emulated Jaguar&rsquo;s display shows pixels that are razor sharp and is what you would likely see if the Jaguar was hooked up to a high quality monitor. Selecting this item will cause the emulated Jaguar&rsquo;s display to be averaged, resulting in a screen that looks slightly blurry&mdash;more like what you would expect to see if the Jaguar was hooked up to a television. This is an aesthetic option that some people prefer; you may or may not like it.</p>
+
+<h3>Full Screen</h3>
+
+<p>Selecting this toolbar button will switch the display into full screen mode; selecting it again will switch it back to windowed mode. This option can also be activated by pressing the <b>F9</b> key on your keyboard. Note that on monitors with a wide aspect ratio that <i>Virtual Jaguar</i> will still display its virtual screen in a 4:3 aspect ratio&mdash;this is normal and expected.</p>
+
+
+<h2>Jaguar Menu</h2>
+
+<p>This menu has the following options:</p>
+
+<ul>
+<li>Power</li>
+<li>Pause</li>
+<li>Frame Advance</li>
+<li>Insert Cartridge...</li>
+<li>Use CD Unit</li>
+<li>Configure</li>
+<li>Exit</li>
+</ul>
+
+<p><b>Power</b> does the same as the toolbar button; see the &ldquo;Power&rdquo; toolbar button description for details.</p>
+
+<p><b>Pause</b> does the same as the toolbar button; see the &ldquo;Pause&rdquo; toolbar button description for details.</p>
+
+<p><b>Frame Advance</b> causes <i>Virtual Jaguar</i> to run for one frame (1/60th of a second for NTSC, 1/50th for PAL), and update the screen. This function can also be activated by pressing the <b>F7</b> key on your keyboard. This option only works when <i>Virtual Jaguar</i> is paused.</p>
+
+<p><b>Insert Cartridge...</b> does the same as the toolbar button; see the &ldquo;Insert Cartridge&rdquo; toolbar button description for details.</p>
+
+<p><b>Use CD Unit</b> does the same as the toolbar button; see the &ldquo;Use CD Unit&rdquo; toolbar button description for details.</p>
+
+<p><b>Configure</b> launches the Configure dialog. A full description is given in the &ldquo;Configure Dialog&rdquo; section below.</p>
+
+<p><b>Exit</b> quits <i>Virtual Jaguar</i> immediately. You can also quit <i>Virtual Jaguar</i> by pressing <b>Ctrl</b> + <b>Q</b> on your keyboard.</p>
+
+<h2>Help Menu</h2>
+
+<p>This menu has the following options:</p>
+
+<ul>
+<li>Contents</li>
+<li>About</li>
+</ul>
+
+<p>The <b>Contents</b> is what you&rsquo;re reading right now. The voice you are hearing in your head is probably your own, though we can&rsquo;t guarantee that. ;-) This dialog can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <b>Esc</b> key on your keyboard.</p>
+
+<p>The <b>About</b> option shows a credits dialog. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <b>Esc</b> key on your keyboard.</p>
+
+<h2>The Configure Dialog</h2>
+
+<p>The Configure dialog has the following tabs:</p>
+
+<ul>
+<li>General</li>
+<li>Controller</li>
+</ul>
+
+<h2>General Tab</h2>
+
+<p>Under the General tab, there are the following options:</p>
+
+<ul>
+<li>EEPROMs</li>
+<li>Software</li>
+<li>Enable Jaguar BIOS</li>
+<li>Enable GPU</li>
+<li>Enable DSP</li>
+<li>Show all files in file chooser</li>
+<li>Use fast blitter</li>
+</ul>
+
+<p>Here&rsquo;s what they do.</p>
+
+<h3>EEPROMs</h3>
+
+<p>This field holds the location on your filesystem where your EEPROM files will live (see the &ldquo;EEPROMs&rdquo; section below for details). The path can be either absolute or relative; if relative, it will be relative to where the <i>Virtual Jaguar</i> executable is located on your filesystem.</p>
+
+<h3>Software</h3>
+
+<p>This field holds the location on your filesystem where your Jaguar software files will live (see the &ldquo;Software&rdquo; section below for details). The path can be either absolute or relative; if relative, it will be relative to where the <i>Virtual Jaguar</i> executable is located on your filesystem.</p>
+
+<h3>Enable Jaguar BIOS</h3>
+
+<p>Checking this option will cause the emulated Jaguar to run with the built-in system BIOS upon powering on. This is usually not necessary, but some games will not run correctly without it. Note that this option will only affect cartridge images; it has no effect on Alpine ROMs or homebrew files. Also, it won't take effect until the virtual machine has been power cycled.</p>
+
+<h3>Enable GPU</h3>
+
+<p>The GPU is one of the three main processors in the Jaguar, and checking this option enables it. Most software will not work without this.</p>
+
+<h3>Enable DSP</h3>
+
+<p>The DSP is one of the three main processors in the Jaguar, and checking this option enables it. Much software will work without it, however, there is some software that will not. Note that if the DSP is disabled, there will be <b>no</b> sound.</p>
+
+<h3>Show all files in file chooser</h3>
+
+<p>Normally the &ldquo;Insert Cartridge...&rdquo; dialog will ignore any files it encounters that it doesn&rsquo;t know how to deal with. You can override this behavior by checking this option. However, this will <b>not</b> cause <i>Virtual Jaguar</i> to be able to load such files.</p>
+
+<h3>Use fast blitter</h3>
+
+<p>Checking this option will force <i>Virtual Jaguar</i> to use the older, less compatible yet faster blitter. Some games will <b>not</b> work properly with this option checked!</p>
+
+<h2>Controller Tab</h2>
+
+<p>Under the Controller tab, there are the following options:</p>
+
+<ul>
+<li>A combobox labeled &ldquo;Host Device&rdquo;</li>
+<li>A combobox labeled &ldquo;Map Name&rdquo;</li>
+<li>Two buttons labelled &ldquo;+&rdquo; and &ldquo;-&rdquo;</li>
+<li>A combobox labeled &ldquo;Maps to&rdquo;</li>
+<li>A picture of a Jaguar controller showing which inputs are defined</li>
+<li>A button labeled &ldquo;Define All Inputs&rdquo;</li>
+</ul>
+
+<p><i>Virtual Jaguar</i> utilizes a profile system for controllers. What this means is that you can set up any device that <i>Virtual Jaguar</i> recognizes with any number of different configurations for it. Here&rsquo;s how it works:</p>
+
+<p>The &ldquo;Host Device&rdquo; combobox lets you select whichever gamepad device you have connected to your computer. This, plus the unique &ldquo;Map Name&rdquo; will show the keymapping set up for that particular host device/key map combination.</p>
+
+<p>The &ldquo;Map Name&rdquo; combobox lets you set up multiple key maps for your detected device. To add a new key map to the current device, press the &ldquo;+&rdquo; button next to the combobox. It will then ask your for a human readable name for the new map. If you want to remove any maps that you don't want anymore, you can delete the currently selected map by pressing the &ldquo;-&rdquo; button; it will ask for confirmation. Keep in mind that this action cannot be undone!</p>
+
+<p>The &ldquo;Maps to&rdquo; combobox tells <i>Virtual Jaguar</i> which virtual controller slot you would like your device to be plugged into. Selecting <i>None</i> disables that key mapping for that device. Selecting <i>Controller #1</i> will map the device to virtual controller slot #1. Selecting <i>Controller #2</i> will map the device to virtual controller slot #2. Selecting <i>Either one that&rsquo;s free</i> will attempt to connect the device to a free virtual controller slot if one is still available after all other connected devices have had a chance to plug into a definite slot. If other devices have filled up the virtual slots, this option will cause the device to <b>not</b> attempt to connect itself.</p>
+
+<p>Hovering over a letter on the picture of the Jaguar controller will highlight it; clicking on the letter will let you redefine that input by pressing a key on the keyboard or button on a connected gamepad. If you prefer, you can define all inputs at once by clicking on the &ldquo;Define All Inputs&rdquo; button. It will then step through each input on the controller, one at a time, and wait for you to press the key/button that you wish to set it to. You can exit the key redefinition process at any time by pressing the <b>Esc</b> key on your keyboard.</p>
+
+<p>NOTE: For gamepads to be detected, they must be connected to the computer before starting <i>Virtual Jaguar</i>.</p>
+
+<h2>EEPROMs</h2>
+
+<p>EEPROMs (Electrically Erasable Programmable Read Only Memory) were typically installed on Jaguar cartridges to save high scores and the like, and <i>Virtual Jaguar</i> emulates this. The EEPROMs are keyed to specific games by making a CRC32 checksum of the game and using this as a filename. If an EEPROM file does not exist, it is created when the emulated Jaguar writes to it. The EEPROM files are stored in the location specified by the &ldquo;EEPROMs&rdquo; field of the Configuration dialog, under the &ldquo;General&rdquo; tab.</p>
+
+<h2>Software</h2>
+
+<p>Software can be either uncompressed or stored in a ZIP file. <i>Virtual Jaguar</i> looks for software in the location specified by the &ldquo;Software&rdquo; field in the Configuration dialog, under the &ldquo;General&rdquo; tab.</p>
+
+<p><i>Virtual Jaguar</i> is a bit picky about file formats, but tries its best to figure out what you&rsquo;re trying to feed it. In general, if the file is a ROM image, or an Alpine image, <i>Virtual Jaguar</i> will recognize and utilize it. If it&rsquo;s a file meant to load into the emulated Jaguar&rsquo;s RAM space, <i>Virtual Jaguar</i> will load and run it as long as the file contains proper headers. A headerless file of this kind (as opposed to a cartridge or Alpine ROM image) is useless; it contains no information to help <i>Virtual Jaguar</i> know how to load and run it. There is no excuse for this kind of file to exist other than programmer laziness: So, if a file is not recognized by <i>Virtual Jaguar</i>, complain to the author and ask <i>politely</i> for a file with headers. :-)</p>
+
+<h2>Some Issues You May Encounter</h2>
+
+<p>Most of the time <i>Virtual Jaguar</i> tries to do the right thing with what you tell it to do. There are some options, however, that would be more annoying to use if <i>Virtual Jaguar</i> got in the way and forced you to do the right thing, so, in those places where it&rsquo;s possible to tell <i>Virtual Jaguar</i> to do bad things, it will willingly oblige.</p>
+
+<p>Some cartridge based games will not work without either the DSP enabled, the BIOS enabled, or both. <i>Virtual Jaguar</i> will let you attempt to run those games with those options disabled, but the result probably won&rsquo;t be what you want.</p>
+
+<h2>Jaguar Programmer&rsquo;s Zone</h2>
+
+<p><i>Virtual Jaguar</i> has a mode available that makes it more convenient for developers to use. In order to use this mode, you must start <i>Virtual Jaguar</i> with the --alpine option.</p>
+
+<p>When started in this mode, an Alpine tab is made available in the configuration dialog which gives you the following options:</p>
+
+<ul>
+<li>ROM to load</li>
+<li>ABS to load</li>
+</ul>
+
+<p><b>ROM to load</b> is the path to a Jaguar executable file that will be loaded into the Jaguar&rsquo;s cartridge memory space at $800000 (Alpine ROM images will load at $802000). As a convenience to coders, this file can be of any length, as long as it fits into the cartridge memory space (a file of this type is treated as an Alpine ROM and is loaded at $802000). The file thus loaded into memory will not be executed.</p>
+
+<p><b>ABS to load</b> is the path to a Jaguar executable file that will be loaded in the Jaguar&rsquo;s main RAM. This file must have valid headers, otherwise <i>Virtual Jaguar</i> won&rsquo;t be able to load it. Assuming the file exists and has the correct headers in it, it will be loaded and run when <i>Virtual Jaguar</i> is first run.</p>
+
+<p>Also, when in Alpine mode, extra toolbar buttons are defined (also found under the extra &ldquo;Debug&rdquo; menu):</p>
+
+<ul>
+<li>Memory Browser</li>
+<li>CPU Browser</li>
+<li>OP Browser</li>
+<li>M68K Disassembly Browser</li>
+<li>RISC Disassembly Browser</li>
+</ul>
+
+<h3>Memory Browser</h3>
+
+<p>This window lets you inspect <i>Virtual Jaguar</i>&rsquo;s emulated memory space. The <b>PgDn</b> key will advance the top of the window&rsquo;s memory location by 480 bytes, and <b>PgUp</b> will go back by the same amount. The <b>Plus (+)</b> key will advance the top of the window&rsquo;s memory location by 16 bytes, and <b>Minus (-)</b> will go back by the same amount. Entering a memory location, in hexadecimal, in the edit field and pressing the <b>Go</b> button will display memory from that location. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <b>Esc</b> key on your keyboard.</p>
+
+<h3>CPU Browser</h3>
+
+<p>This window shows the state of the various CPUs in the emulated Jaguar. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <b>Esc</b> key on your keyboard.</p>
+
+<h3>OP Browser</h3>
+
+<p>This window shows the current state of object list that the Object Processor is pointing to. Note that most of the time, this will likely show an object list that has had its objects processed. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <b>Esc</b> key on your keyboard.</p>
+
+<h3>M68K Disassembly Browser</h3>
+
+<p>This window provides a disassembly of 68000 opcodes. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <b>Esc</b> key on your keyboard.</p>
+
+<h3>RISC Disassembly Browser</h3>
+
+<p>This window provides a disassembly of RISC opcodes. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <b>Esc</b> key on your keyboard.</p>
+
+<p>The aforementioned options will only work when <i>Virtual Jaguar</i> is run in Alpine mode, that is, when the --alpine flag is passed in. If you do not pass in the --alpine flag, <i>Virtual Jaguar</i> will run as it normally does, i.e., as a stock Jaguar, and nothing will be loaded by default.</p>
+
+<h2>For The Curious</h2>
+
+<p>If you&rsquo;re wondering why some cartridges have labels in the &ldquo;Insert Cartridge...&rdquo; dialog and some don&rsquo;t, read on...</p>
+
+<p><i>Virtual Jaguar</i> looks at your ZIP file as a container&mdash;if it finds what it expects in the ZIP, it will use it. For example, label images: If you put an image file of a cartridge label in the ZIP file with your ROM image, <i>Virtual Jaguar</i> will use that image in the &ldquo;Insert Cartridge...&rdquo; dialog&mdash;assuming it&rsquo;s a valid image file. The image should be 365 x 168 for it to show up on the big cartridge image without any scaling; any bigger is just a waste of space and <i>Virtual Jaguar</i> will scale it down to 365 x 168 anyway.</p>
+
+<p>Using the ZIP file as a container this way opens up some exciting possibilities: Box art, overlays and documentation can be included and future versions of <i>Virtual Jaguar</i> will be able to utilize them.</p>
+
+<h2>Legal Nigglings</h2>
+
+<p>Or, as it&rsquo;s more commonly known, the disclaimer: <i>&ldquo;O liability, I do disclaim thee!&rdquo;</i></p>
+
+<p>Trademarks used in <i>Virtual Jaguar</i> and/or this documentation are the property of their respective owners. The user(s) of <i>Virtual Jaguar</i> assumes all risk associated with using the software; the authors are not responsible for anything the user(s) does with said software or what happens to the user(s) as a result of using this software.</p>
+
+<p><i>Virtual Jaguar</i> is Free (as in Libre) software and is licensed under the GPL version 3. You should have received a copy of the license with this software; if you did not, you may view a copy at <a href="http://www.gnu.org/licenses">http://www.gnu.org/licenses</a>. A copy of the source code is available at <a href="http://icculus.org/virtualjaguar">http://icculus.org/virtualjaguar</a>.</p>
+
+<p><i>Downfall</i> is &copy; 2011 <b>Reboot</b>, All Rights Reserved. Distribution of <i>Downfall</i> with <i>Virtual Jaguar</i> has been graciously authorized by <b>Reboot</b>, and may not be distributed as part of any other package.</p>
+
+</body>
+</html>

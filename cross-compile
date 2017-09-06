@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# Short script to do cross compilation with MXE on Linux
+#
+# by James Hammons
+# (C) 2012 Underground Software
+#
+#NOPE, doesn't work: PREFIX=i686-pc-mingw32.static
+#rm makefile-qt
+
+echo "Cross compiling for Win32..."
+SUFFIX=win32
+export PATH=/opt/mxe-32/usr/bin:$PATH
+/opt/mxe-32/usr/bin/i686-w64-mingw32.static-qmake-qt5 -o makefile-qt
+make CROSS=i686-w64-mingw32.static-
+
+#echo "Cross compiling for Win64..."
+#SUFFIX=win64
+#export PATH=/opt/mxe/usr/bin:$PATH
+#/opt/mxe/usr/bin/x86_64-w64-mingw32.static-qmake-qt5 -o makefile-qt
+#make CROSS=x86_64-w64-mingw32.static-
+
+#rel=`svn info | grep Revision | cut -f 2 -d ' '`
+rel=`git log -1 --pretty=format:%ci | cut -d ' ' -f 1 | tr -d -`
+cd release && upx -9v virtualjaguar.exe && zip -9v vj-$rel-${SUFFIX}.zip virtualjaguar.exe
+

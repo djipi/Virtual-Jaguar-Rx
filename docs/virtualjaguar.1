@@ -1,0 +1,155 @@
+.TH virtualjaguar 1 2017-09-06 Virtualjaguar Rx
+.SH NAME
+virtualjaguar \- An Atari Jaguar emulator
+
+.SH SYNOPSIS
+.B virtualjaguar
+.RI [options]
+.RI [rom\ image\ file]
+
+.SH DESCRIPTION
+Virtualjaguar is an emulator for the Atari Jaguar videogame system.
+
+.SH OPTIONS
+.TP
+.B [rom image file]
+Name of file to load
+.TP
+.B \-a, \-\-alpine
+Run in Alpine emulation mode
+.TP
+.B \-b, \-\-bios
+Boot using Jaguar BIOS
+.TP
+.B \-\-no\-bios
+Do not use Jaguar BIOS
+.TP
+.B \-a, \-\-debugger
+Run in Debugger emulation mode
+.TP
+.B \-a, \-\-dram-max
+Set the main ram to 8MB
+.TP
+.B \-g, \-\-gpu
+Enable GPU emulation
+.TP
+.B \-\-no\-gpu
+Disable GPU emulation
+.TP
+.B \-l, \-\-log
+Create and use log file
+.TP
+.B \-\-no\-log
+Do not use log file
+.TP
+.B \-h, \-\-help
+Show command line help
+
+.SH SOUND
+DSP emulation is needed for audio output
+.TP
+.B \-d, \-\-dsp
+Enable DSP emulation
+.TP
+.B \-\-no\-dsp
+Disable DSP emulation
+
+.SH VIDEO
+.TP
+.B \-f, \-\-fullscreen
+Start in full screen mode
+.TP
+.B \-p, \-\-pal
+PAL mode
+.TP
+.B \-n, \-\-ntsc
+NTSC mode
+.TP
+.B \-B, \-\-blur
+Enable GL bilinear filter
+.TP
+.B \-\-no\-blur
+Disable GL bilinear filter
+.TP
+.B \-z, \-\-please\-dont\-kill\-my\-computer
+Do not show emulation of tv static. This can be slow on low end CPUs.
+
+.SH CONTROLS
+.TP
+.B Ctrl-Q
+Quit virtualjaguar
+.TP
+.B Ctrl-I
+Load a new program
+.TP
+.B Esc
+Pause emulation
+.TP
+.B F7
+Advance the emulation by a single frame
+.TP
+.B F9
+Toggle full screen mode
+
+.TP
+The default keybindings for controller 1 are:
+(Keybindings can be changed in the configuration dialog.)
+.TP
+.B S
+Up
+.TP
+.B X
+Down
+.TP
+.B A
+Left
+.TP
+.B D
+Right
+.TP
+.B P
+Pause
+.TP
+.B O
+Option
+.TP
+.B J
+Button C
+.TP
+.B K
+Button B
+.TP
+.B L
+Button A
+.TP
+.B 1 through 0
+Buttons 1 through 0 on the keypad
+.TP
+.B =
+Keypad *
+.TP
+.B -
+Keypad #
+
+.SH FILES
+.TP
+.B virtualjaguar.log
+Virtualjaguar log file. Only written if the log option (\-l or
+\-\-log) is given. If the file cannot be opened, the log it sent to
+standard output instead. The log file is overwritten on startup. Note
+that the file is written to the current directory.
+.TP
+.B ${XDG_DATA_HOME}/virtualjaguar/eeproms/ (typically ~/.local/share/data/virtualjaguar/eeproms/)
+Some Atari Jaguar cartridges feature a small writable EEPROM, used for
+saving game state and score lists. If this directory exists,
+virtualjaguar will emulate the EEPROM by saving the state in file in
+this directory.
+.TP
+.B ${XDG_DATA_HOME}/virtualjaguar/software/ (typically ~/.local/share/data/virtualjaguar/software/)
+The virtualjaguar GUI for loading software scans this directory, and
+shows the loadable files, along with information about the program,
+and a label image if one is included in a zip archive of the software.
+
+.SH AUTHOR
+This manual page was written by Teemu Hukkanen <tjhukkan@iki.fi>.
+Additional informations written by Flynn.

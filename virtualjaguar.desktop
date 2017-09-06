@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Virtual Jaguar
+Comment=Emulate the Atari Jaguar console
+Exec=virtualjaguar
+Icon=virtualjaguar
+Terminal=false
+Type=Application
+Categories=Qt;Game;Emulator

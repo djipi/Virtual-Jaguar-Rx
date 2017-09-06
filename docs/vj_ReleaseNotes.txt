@@ -1,0 +1,111 @@
+Release 3 (TBC)
+---------------
+0) Fixed the windows respawning in the next emulator launch without --alpine or --debugger options
+1) Added an Exception Vector Table browser window
+2) Modified the About window to update the credits list in a more appropriate way
+-- Updated the emulator application credits line
+3) Added 'Rx' word to the emulator name to make distinction with the original version
+
+Release 2 (3rd September 2017)
+------------------------------
+0) Added some error detections when reading the ELF executable file
+1) Added all hardware labels (based on the document scans from the Version 2.4 - June 7, 1995)
+2) "Step Over" code function for BSR/JSR functions
+3) Added the .debug_ranges detection to avoid a detection error
+4) DWARF support
+-- TAG: Compilation Unit, Subprogram, Variables, Types
+-- Line numbers, symbols, functions
+5) Added an All Watch browser window for non-local variables
+6) Added a heap allocator browser window based on my own memory allocation functions
+7) Added additional 4 memory browser windows with address input based on hexa, decimal or symbol name
+8) Windows refreshing executed only if windows is visible
+9) Added a restart function
+-- Restart only the 68000 program counter to his original set
+10) Modified the icons color backgound for the "Step In" and "Step Over" functions
+11) Updated the About window to update the credits list
+12) 64 bits Release executable
+13) Fixed (hacking) the display of the SP (Stack) memory browser
+14) Set the emulator in Halt mode when launched in alpine debug mode without a loaded rom
+-- Otherwise the 68000 program counter will have a 0 value and will execute the code at this address
+15) Added some information in the --help/-h/-? option
+16) --debugger option no longer force the log file
+17) Added a --dram-max option to extend the DRAM size to 8MB
+18) Added the "enter" key support when setting the BPM (Breapoint)
+19) Save the windows positions, size and visibilities (show or hide) status
+-- Such windows will automatically respawn in the next emulator launch
+
+Release 1 (12th February 2017)
+------------------------------
+0) BPM (Breapoint) now stop at the designated address and no longer stop after executing the code
+1) Clean-up the tracing / no-tracing flags for better U.I understanding
+2) Added SP (Stack) memory browser
+3) User can change now the number of lines of disassembly displayed in the tracing window
+4) User can turn on/off the op-codes associated in the disassembly lines displayed in the M68K tracing window
+5) Added an emulator status window (GPU status, M68K debugger & tracking status)
+6) Added a GPU disassembly tracing window - Display the current PC pointer
+7) Added a DSP disassembly tracing window - Display the current PC pointer
+8) Added possibility to change refresh rate of browser windows when emulation is launched
+9) Display partial hardware labels (Internal Memory & Graphics sub-system address space) in the disassembly lines displayed in the M68K tracing window
+-- Display first the hardware labels (based from the Jag V8 dev. PDF) and then the ones possibly found in the ELF debug symbol
+10) Minor U.I cosmetic changes
+11) User can turn on/off the hardware labels associated in the disassembly lines displayed in the M68K tracing window
+-- It doesn't apply to the hardware labels possibly found in the ELF debug symbol
+
+Release 0 (5th January 2017)
+----------------------------
+0) New option --debugger
+1) ELF format support
+2) ELF debug symbol support
+3) "Step Into" code function
+4) Menus layout dedicated to the debugger
+5) Added a dedicated main window for tracing (M68K)
+6) Added a Debugger tab in the config tab
+7) Visual Studio 2015 project support
+8) libelf-0.8.13 library support
+9) 64 bits debug executable only
+
+
+Known issues
+============
+1) Video output is not displayed due to OpenGL / QT5 integration problems with VS 2015
+2) The BPM (Breapoint) remains stuck on his address when user wants to continue the code execution
+-- Need to trace over the BPM or unset the BPM
+3) To handle DWARF 2 issues with GCC, the code must be compiled with the -gdwarf-2 option
+4) The Watch variables list may display not available (N/A) type information
+-- Such missing information may be included in future release
+5) The 2MB mirroring is no longer applied in case of --dram-max option usage
+6) Stack must reflect the --dram-max option usage otherwise the stack may be corrupted
+-- The application needs to set the SP (Stack) in accordance
+7) The Exception Vector Table broswer window displays only 65 vectors
+-- Missing vectors may be added in future release
+
+Cosmetic / UX issues
+====================
+1) The SP (Stack) icon color backgound doesn't look similar with the other ones
+2) The emulator status option has no icon
+3) The SP (Stack) window size always open at a forced size no matter if the size has been changed
+
+Legacy issues/hints
+===================
+1) Emulator seems to have easter egg(s)
+-- The option --yarrr displays a single message and end the application
+2) The --alpine option force the log file but it can be override if --no-log option is set after the --alpine option
+
+Project information
+===================
+1) Code based on the Shamus Hammons source code available via Gethub by the 13th June 2016
+2) Visual Studio 2015 project support for 64 bits
+3) libelf 0.8.13 library 64bits for VS 2015
+4) libdwarf 1.41 library 64bits for VS 2015, cygwin64 & Msys2/MinGW64
+5) QT 5.5.1 library 64bits for VS 2015
+6) Zlib 1.2.8 library 64bits for VS 2015
+7) SDL 1.2.15 library 64bits for VS 2015
+8) The original make files have been modified to follow the requirements and modifications
+9) The 'Rx' word has been added to the emulator name to make distinction with the original version
+
+
+Download statistics
+-------------------
+jaguar64eu : 15 downloads for the Release 0 on the 12th Feb, 2017
+jaguar64eu : 18 downloads for the Release 1 on the 21st May, 2017
+No downloads available for the Release 2

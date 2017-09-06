@@ -1,0 +1,75 @@
+Stuff to add/fix for the next release of Virtual Jaguar
+-------------------------------------------------------
+
+- Fix VC behavior to match what a real Jaguar does. Still not sure just what
+  the heck is going on there. [Shamus]
+- Create an EEPROMs directory (or whatever is in EEPROMPath[]) if it doesn't
+  already exist. [Shamus]
+- It would be nice to have the emulator pick up where you last left off, or at
+  least give you the option of continuing from your last session. This would
+  require save states, 'natch. ;-) [Shamus]
+- It would be nice to have "save states" for instant save/load capability.
+  [Shamus]
+- Cycle accuracy for GPU/DSP/OP/Blitter. [Shamus]
+- Need to propagate blitter fixes in the A1 <- A2 direction to the A1 -> A2
+  direction and the GPU fixes to various instructions to the DSP. [Shamus]
+- Blitter needs fixing. [Shamus]
+- In emulator screenshots. [Shamus]
+- Audio/video dumping. [Shamus]
+- Need to emulate bus contention. [Shamus]
+- Need to fix timing in the OP. As it is now, it gives a false impression of
+  how much it's capable of. [Shamus]
+- Fix coming out of fullscreen on Win32. As of now, it doesn't restore the
+  window position correctly [CJ]
+- Fix the Tripper Getem ROM so that it works. It has some tight coupling
+  between the M68K and the DSP that causes the DSP to starve itself; fixing
+  this will probably fix a bunch of other timing related issues as well.
+  [Shamus]
+
+
+Stuff that was added/fixed
+--------------------------
+
+- Controller handling. [Shamus] [DONE--Shamus]
+- Full screen option. [Shamus] [DONE--Shamus]
+- Command line switches for frontends. [Shamus] [DONE-Shamus]
+- Fix DSP code so that it doesn't hang in a spinlock waiting for the sound
+  buffer to empty. Probably a CS lock contention issue. [Shamus] [DONE-Shamus]
+- Need to fix PAL mode to work with the virtual screen code. [DONE--Shamus]
+- There are a few ROMs that use some "quasi-illegal" 68K instructions. Need
+  to patch the 68K core to deal with these in a better way than they are
+  now. [DONE--Shamus]
+  NOTE: This behavior was verified on Rayman, the problem was due to attempting
+        to press both left & right at the same time!
+- We need a comprehensive way of determining what gets written where and
+  by whom (i.e., blitter wrote to range $F03000-$F03230) in order to figure
+  out the remaining problems with various ROMs. [DONE--Shamus]
+- Would also be nice to be able to dynamically change the keybindings for
+  the various keys on the emulated Jaguar controller while inside the emulator.
+  [DONE--Shamus]
+- Make sure that VJ doesn't crash if the useJaguarBIOS key is set to 1 and the
+  BIOS file isn't available. [DONE--Shamus]
+- There is a bug either with the GPU or the blitter (most likely the latter)
+  which causes the spinning "A"s in the BIOS startup code to be corrupted
+  when they are showing their backsides. [Shamus] [DONE--Shamus]
+  NOTE: This behavior has been verified on a real Jaguar and as such is not
+        an emulator bug. A Jaguar boot ROM bug, yes, but not ours. ;-)
+- Make it possible to completely disable the GUI (using a switch like -nogui
+  or the like) for people running VJ in a cabinet. [Shamus] [DONE--Shamus]
+- Code to stretch the display in a generic way would be nice. [Shamus]
+  [DONE for OpenGL--nwagenaar]
+- Would be nice to have a GUI for things that are set on the command line or
+  in the config file. [Shamus] [DONE--Shamus]
+- DSP code needs to be rewritten. [Shamus] [DONE but still work to be done--Shamus]
+- We need to have an external configuration file for remembering a user's
+  preferences, such as key bindings, etc. [Shamus] [DONE--Shamus]
+- We need to come up with a way to fix the aspect ratio for pixel modes that
+  aren't square (PWIDTH != 4). [Shamus] [DONE for OpenGL--Shamus]
+- GUI for ROM selection [Shamus] [DONE--Shamus]
+- Need to rewrite the main Jaguar execution loop to increment the VC by one
+  instead of by two, which is how the real Jaguar works. [Shamus] [DONE--Shamus]
+- Sound needs a rewrite. With SDL, this shouldn't be much of a problem.
+  Of course, whoever does this should realize that the PCM outs are probably
+  not being used for a majority of the ROMs out there--according to the JTRM,
+  you're supposed to use the I2S interface to output sound since the PCM outs
+  aren't even physically hooked up in the console! [Shamus] [DONE--Shamus]

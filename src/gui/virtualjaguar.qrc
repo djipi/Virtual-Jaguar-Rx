@@ -1,0 +1,48 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+	<file>../../res/vj-icon.png</file>
+	<file>../../res/power-off.png</file>
+	<file>../../res/power-on-red.png</file>
+	<file>../../res/power-on-green.png</file>
+	<file>../../res/pause-off.png</file>
+	<file>../../res/pause-on.png</file>
+	<file>../../res/frame-advance.png</file>
+	<file>../../res/StepOver.png</file>
+	<file>../../res/StepInto.png</file>
+	<file>../../res/Restart.png</file>
+	<file>../../res/zoom100.png</file>
+	<file>../../res/zoom200.png</file>
+	<file>../../res/zoom300.png</file>
+	<file>../../res/blur-off.png</file>
+	<file>../../res/blur-on.png</file>
+	<file>../../res/fullscreen.png</file>
+	<file>../../res/Watch.png</file>
+	<file>../../res/tool-memory.png</file>
+	<file>../../res/tool-stack.png</file>
+	<file>../../res/tool-cpu.png</file>
+	<file>../../res/tool-op.png</file>
+	<file>../../res/tool-68k-dis.png</file>
+	<file>../../res/tool-risc-dis.png</file>
+	<file>../../res/generic.png</file>
+	<file>../../res/cart-blank.png</file>
+	<file>../../res/label-blank.png</file>
+	<file>../../res/vj_title_small.png</file>
+	<file>../../res/controller.png</file>
+	<file>../../res/insert.png</file>
+	<file>../../res/software.png</file>
+	<file>../../res/ntsc.png</file>
+	<file>../../res/pal.png</file>
+	<file>../../res/compact-disc.png</file>
+	<file>../../res/wrench.png</file>
+	<file>../../res/upper-left.png</file>
+	<file>../../res/upper-right.png</file>
+	<file>../../res/alpine-file.png</file>
+	<file>../../res/skunkboard-file.png</file>
+	<file>../../res/homebrew-file.png</file>
+	<file>../../res/unknown-file.png</file>
+	<file>../../res/ELF-file.png</file>
+	<file>../../res/test-pattern.jpg</file>
+	<file>../../res/test-pattern-pal.jpg</file>
+	<file>../../res/help.html</file>
+</qresource>
+</RCC>
