@@ -44,7 +44,7 @@ Jaguar binary images that are NOT cartridge images:
     .jag
     .rom
     .bin
-	.elf
+    .elf
 
 The first type, the .abs file, is a DRI/Alcyon format absolute location
 executable. These come in two different flavors and contain load and run
