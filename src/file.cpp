@@ -22,7 +22,7 @@
 
 #include "file.h"
 #if defined(_MSC_VER)
-#include "_MSC_VER\config.h"
+#include "_MSC_VER/config.h"
 #endif // _MSC_VER
 #include <stdarg.h>
 #include <string.h>
@@ -35,11 +35,11 @@
 #include "universalhdr.h"
 #include "unzip.h"
 #include "zlib.h"
-#include "libelf\libelf.h"
-#include "libelf\gelf.h"
+#include "libelf/libelf.h"
+#include "libelf/gelf.h"
 #include "libdwarf.h"
-#include "Debugger\ELFManager.h"
-#include "debugger\DBGManager.h"
+#include "Debugger/ELFManager.h"
+#include "debugger/DBGManager.h"
 
 
 // Private function prototypes
