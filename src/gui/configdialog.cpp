@@ -19,7 +19,7 @@
 #include "configdialog.h"
 
 #include "alpinetab.h"
-#include	"debugger\debuggertab.h"
+#include "debugger/debuggertab.h"
 #include "controllertab.h"
 #include "controllerwidget.h"
 #include "generaltab.h"

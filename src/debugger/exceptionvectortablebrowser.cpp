@@ -13,9 +13,9 @@
 // STILL TO DO:
 //
 
-#include "debugger\exceptionvectortablebrowser.h"
+#include "debugger/exceptionvectortablebrowser.h"
 #include "memory.h"
-#include "debugger\DBGManager.h"
+#include "debugger/DBGManager.h"
 
 
 //

@@ -13,9 +13,9 @@
 // STILL TO DO:
 //
 
-#include "debugger\heapallocatorbrowser.h"
+#include "debugger/heapallocatorbrowser.h"
 #include "memory.h"
-#include "debugger\DBGManager.h"
+#include "debugger/DBGManager.h"
 #include "m68000/m68kinterface.h"
 
 

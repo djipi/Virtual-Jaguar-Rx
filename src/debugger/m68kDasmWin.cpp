@@ -16,7 +16,7 @@
 //
 
 #include	<stdlib.h>
-#include "debugger\m68kDasmWin.h"
+#include "debugger/m68kDasmWin.h"
 //#include "memory.h"
 #include "m68000/m68kinterface.h"
 #include "dsp.h"

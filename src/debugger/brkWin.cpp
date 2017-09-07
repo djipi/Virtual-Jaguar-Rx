@@ -13,9 +13,9 @@
 // STILL TO DO:
 //
 
-#include "debugger\brkWin.h"
+#include "debugger/brkWin.h"
 //#include "memory.h"
-#include "debugger\DBGManager.h"
+#include "debugger/DBGManager.h"
 
 
 //

@@ -30,7 +30,7 @@
 #include "profile.h"
 #include "settings.h"
 #include "version.h"
-#include "debugger\DBGManager.h"
+#include "debugger/DBGManager.h"
 
 // Apparently on win32, SDL is hijacking main from Qt. So let's do this:
 #if defined (__GCCWIN32__) || defined (_MSC_VER)

@@ -14,8 +14,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "libelf\libelf.h"
-#include "libelf\gelf.h"
+#include "libelf/libelf.h"
+#include "libelf/gelf.h"
 #include "libdwarf.h"
 #include "log.h"
 #include "ELFManager.h"
@@ -78,7 +78,9 @@ char *ELFManager_GetSymbolnameFromSymbolindex(size_t Index);
 // ELF section type detection
 size_t	ELFManager_GetSectionType(char *SectionName)
 {
-	for (int i = 0; i < ELF_END_TYPE; i++)
+	size_t i;
+
+	for (i = 0; i < ELF_END_TYPE; i++)
 	{
 		if (!strcmp(ELFTabSectionType[i].SectionName, SectionName))
 		{
@@ -86,7 +88,7 @@ size_t	ELFManager_GetSectionType(char *SectionName)
 		}
 	}
 
-	return ELF_NO_TYPE;
+	return (size_t)ELF_NO_TYPE;
 }
 
 

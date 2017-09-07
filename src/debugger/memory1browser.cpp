@@ -15,7 +15,7 @@
 
 #include "memory1browser.h"
 #include "memory.h"
-#include "debugger\DBGManager.h"
+#include "debugger/DBGManager.h"
 
 
 //

@@ -159,7 +159,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 	setWindowIcon(QIcon(":/res/vj-icon.png"));
 
-	QString title = QString(tr("Virtual Jaguar " VJ_RELEASE_VERSION "Rx"));
+	QString title = QString(tr("Virtual Jaguar " VJ_RELEASE_VERSION " Rx"));
 
 	if (vjs.hardwareTypeAlpine)
 		title += QString(tr(" - Alpine Mode"));
@@ -639,7 +639,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	// We set this initially, to make VJ behave somewhat as it would if no
 	// cart were inserted and the BIOS was set as active...
 	jaguarCartInserted = true;
-	WriteLog("Virtual Jaguar %s (Last full build was on %s %s)\n", VJ_RELEASE_VERSION, __DATE__, __TIME__);
+	WriteLog("Virtual Jaguar %s Rx (Last full build was on %s %s)\n", VJ_RELEASE_VERSION, __DATE__, __TIME__);
 	WriteLog("VJ: Initializing jaguar subsystem...\n");
 	JaguarInit();
 //	memcpy(jagMemSpace + 0xE00000, jaguarBootROM, 0x20000);	// Use the stock BIOS
@@ -1129,7 +1129,7 @@ void MainWin::TogglePowerState(void)
 // cart, we expect to run the cart! Maybe have a RemoveCart function that only
 // works if the CD unit is active?
 			setWindowTitle(QString("Virtual Jaguar " VJ_RELEASE_VERSION
-				" - Now playing: Jaguar CD"));
+				" Rx - Now playing: Jaguar CD"));
 		}
 
 		WriteLog("GUI: Resetting Jaguar...\n");
@@ -1346,7 +1346,7 @@ void MainWin::LoadSoftware(QString file)
 
 	if ((!vjs.hardwareTypeAlpine || !vjs.softTypeDebugger) && !loadAndGo && jaguarRunAddress)
 	{
-		QString newTitle = QString("Virtual Jaguar " VJ_RELEASE_VERSION " - Now playing: %1")
+		QString newTitle = QString("Virtual Jaguar " VJ_RELEASE_VERSION " Rx - Now playing: %1")
 			.arg(filePickWin->GetSelectedPrettyName());
 		setWindowTitle(newTitle);
 	}

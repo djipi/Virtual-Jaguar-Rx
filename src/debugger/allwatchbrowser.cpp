@@ -13,9 +13,9 @@
 // STILL TO DO:
 //
 
-#include "debugger\allwatchbrowser.h"
+#include "debugger/allwatchbrowser.h"
 #include "memory.h"
-#include "debugger\DBGManager.h"
+#include "debugger/DBGManager.h"
 
 
 AllWatchBrowserWindow::AllWatchBrowserWindow(QWidget * parent/*= 0*/) : QWidget(parent, Qt::Dialog),
@@ -100,7 +100,7 @@ void AllWatchBrowserWindow::RefreshContents(void)
 		{
 			if (PtrWatchInfo[i].PtrVariableName && PtrWatchInfo[i].PtrVariableBaseTypeName)
 			{
-				sprintf(string, "%i : %s | %s | 0x%06X | %s", (i + 1), PtrWatchInfo[i].PtrVariableBaseTypeName, PtrWatchInfo[i].PtrVariableName, PtrWatchInfo[i].addr, (PtrWatchInfo[i].TypeTag & 0x8) ? "" : DBGManager_GetExternalVariableValue(i + 1));
+				sprintf(string, "%i : %s | %s | 0x%06X | %s", (i + 1), PtrWatchInfo[i].PtrVariableBaseTypeName, PtrWatchInfo[i].PtrVariableName, (unsigned int)PtrWatchInfo[i].addr, (PtrWatchInfo[i].TypeTag & 0x8) ? "" : DBGManager_GetExternalVariableValue(i + 1));
 				WatchAll += QString(string);
 				sprintf(string, "<br>");
 				WatchAll += QString(string);
