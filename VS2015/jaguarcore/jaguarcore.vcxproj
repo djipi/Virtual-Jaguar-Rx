@@ -162,6 +162,7 @@
     <ClInclude Include="..\..\src\mmu.h" />
     <ClInclude Include="..\..\src\settings.h" />
     <ClInclude Include="..\..\src\tom.h" />
+    <ClInclude Include="..\..\src\unzip.h" />
     <ClInclude Include="..\..\src\_MSC_VER\config.h" />
   </ItemGroup>
   <ItemGroup>

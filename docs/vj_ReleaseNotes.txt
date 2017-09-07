@@ -102,6 +102,7 @@ Project information
 7) SDL 1.2.15 library 64bits for VS 2015
 8) The original make files have been modified to follow the requirements and modifications
 9) The 'Rx' word has been added to the emulator name to make distinction with the original version
+10) The project source is set at https://github.com/djipi/Virtual-Jaguar-Rx
 
 
 Download statistics
