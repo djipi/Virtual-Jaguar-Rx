@@ -38,7 +38,7 @@
 #include "libelf\libelf.h"
 #include "libelf\gelf.h"
 #include "libdwarf.h"
-#include "Debugger\ELFManager.h"
+#include "debugger\ELFManager.h"
 #include "debugger\DBGManager.h"
 
 
