@@ -38,13 +38,8 @@
 #include "libelf/libelf.h"
 #include "libelf/gelf.h"
 #include "libdwarf.h"
-<<<<<<< HEAD
 #include "debugger/ELFManager.h"
 #include "debugger/DBGManager.h"
-=======
-#include "debugger\ELFManager.h"
-#include "debugger\DBGManager.h"
->>>>>>> origin/master
 
 
 // Private function prototypes
