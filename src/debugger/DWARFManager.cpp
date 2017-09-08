@@ -660,12 +660,15 @@ void DWARFManager_InitDMI(void)
 			else
 			{
 				// Set each source lines pointer to NULL
-				i = PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].NbLinesSrc - 1].NumLineSrc;
-				if (PtrCU[NbCU].PtrLinesLoadSrc = (char **)calloc(i, sizeof(char *)))
+				if (PtrCU[NbCU].NbSubProgs)
 				{
-					for (j = 0; j < i; j++)
+					i = PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].NbLinesSrc - 1].NumLineSrc;
+					if (PtrCU[NbCU].PtrLinesLoadSrc = (char **)calloc(i, sizeof(char *)))
 					{
-						PtrCU[NbCU].PtrLinesLoadSrc[j] = NULL;
+						for (j = 0; j < i; j++)
+						{
+							PtrCU[NbCU].PtrLinesLoadSrc[j] = NULL;
+						}
 					}
 				}
 			}
