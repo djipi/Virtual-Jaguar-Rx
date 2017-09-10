@@ -16,8 +16,9 @@
 // JLH  03/05/2013  Fixed console redireciton on win32 platform  :-P
 // JPM  06/06/2016  Visual Studio support
 // JPM  06/19/2016  Soft debugger support (--debugger)
-// JPM  09/  /2017  Added option (--dram-max)
+// JPM  09/  /2017  Added option (--dram-max) to support 8MB ram (which doesn't exist)
 // JPM  09/06/2017  Added the 'Rx' word to the emulator name and updated the credits line
+// JPM  09/08/2017  Added option (--es-all, --es-ui, --es-alpine & --es-debugger) to support the erase settings
 //
 
 #include "app.h"
@@ -137,6 +138,7 @@ int main(int argc, char * argv[])
 	return retVal;
 }
 
+
 //
 // Main app constructor--we stick globally accessible stuff here... (?)
 //
@@ -203,6 +205,10 @@ bool ParseCommandLine(int argc, char * argv[])
 				"   --no-log          Do not use log file (default)\n"
 				"   --help        -h  Show this message\n"
 				"                 -?  Show this message\n"
+				"   --es-all          Erase all settings\n"
+				"   --es-ui           Erase UI settings only\n"
+				"   --es-alpine       Erase alpine mode settings only\n"
+				"   --es-debugger     Erase debugger mode settings only\n"
 				"   --please-dont-kill-my-computer\n"
 				"                 -z  Run Virtual Jaguar without \"snow\"\n"
 				"\n"
@@ -218,6 +224,22 @@ bool ParseCommandLine(int argc, char * argv[])
 			printf("\n");
 			printf("Shiver me timbers!\n");
 			printf("\n");
+			return false;
+		}
+
+		// Erase settings
+		if (strstr(argv[i], "--es-"))
+		{
+			printf("\n");
+			if (EraseSettings(&argv[i][5]))
+			{
+				printf("Settings have been erased");
+			}
+			else
+			{
+				printf("No requested settings have been found");
+			}
+			printf("\n\n");
 			return false;
 		}
 

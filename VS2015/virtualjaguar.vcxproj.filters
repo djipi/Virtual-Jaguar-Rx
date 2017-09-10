@@ -50,11 +50,11 @@
     <Filter Include="Source Files\gui">
       <UniqueIdentifier>{80c96e24-c02d-4a78-abbf-c0ea5d732f87}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\gui\debug">
-      <UniqueIdentifier>{6d036353-43b6-415d-a763-9927565b7ee9}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Docs">
       <UniqueIdentifier>{087bea28-2669-4bd0-b281-0cceb50774c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\alpine">
+      <UniqueIdentifier>{6d036353-43b6-415d-a763-9927565b7ee9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -140,27 +140,24 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\debug\cpubrowser.cpp">
-      <Filter>Source Files\gui\debug</Filter>
+      <Filter>Source Files\alpine</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\debug\memorybrowser.cpp">
-      <Filter>Source Files\gui\debug</Filter>
+      <Filter>Source Files\alpine</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\debug\opbrowser.cpp">
-      <Filter>Source Files\gui\debug</Filter>
+      <Filter>Source Files\alpine</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\debug\m68kdasmbrowser.cpp">
-      <Filter>Source Files\gui\debug</Filter>
+      <Filter>Source Files\alpine</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\debug\riscdasmbrowser.cpp">
-      <Filter>Source Files\gui\debug</Filter>
+      <Filter>Source Files\alpine</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\about.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\alpinetab.cpp">
-      <Filter>Source Files\gui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\gui\app.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\configdialog.cpp">
@@ -206,7 +203,7 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\debug\stackbrowser.cpp">
-      <Filter>Source Files\gui\debug</Filter>
+      <Filter>Source Files\alpine</Filter>
     </ClCompile>
     <ClCompile Include="..\src\debugger\GPUDasmWin.cpp">
       <Filter>Source Files\debugger</Filter>
@@ -262,6 +259,24 @@
     <ClCompile Include="..\src\debugger\exceptionvectortablebrowser.cpp">
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\app.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\unzip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\crc32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -298,6 +313,24 @@
       <Filter>Header Files\debugger</Filter>
     </ClInclude>
     <ClInclude Include="..\src\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gui\app.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\unzip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\crc32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\settings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -443,9 +476,6 @@
     <None Include="..\docs\WHATSNEW">
       <Filter>Docs</Filter>
     </None>
-    <None Include="..\docs\GPLv3">
-      <Filter>Docs</Filter>
-    </None>
     <None Include="..\docs\INSTALL">
       <Filter>Docs</Filter>
     </None>
@@ -456,6 +486,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\docs\vj_ReleaseNotes.txt">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="..\docs\LICENSE">
       <Filter>Docs</Filter>
     </None>
   </ItemGroup>
@@ -537,9 +570,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\gui\about.h">
-      <Filter>Header Files\gui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\gui\app.h">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
     <ClInclude Include="..\src\gui\filelistmodel.h">

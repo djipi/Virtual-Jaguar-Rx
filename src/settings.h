@@ -26,12 +26,29 @@
 
 #define MaxMemory1BrowserWindow		4
 
+
+// List the erase settings possibilities
+typedef enum
+{
+	SETTINGS_NONE = 0,
+	SETTINGS_ALL,
+	SETTINGS_UI,
+	SETTINGS_ALPINE,
+	SETTINGS_DEBUGGER,
+	SETTINGS_END
+};
+
+
+// functions declarations
+extern bool EraseSettings(char *Setting);
+
+
 // Settings struct
 struct VJSettings
 {
 	bool useJoystick;
 	int32_t joyport;											// Joystick port
-	bool hardwareTypeNTSC;										// Set to false for PAL
+	bool hardwareTypeNTSC;										// Set to false for PAL, otherwise it is NTSC
 	bool useJaguarBIOS;
 	bool GPUEnabled;
 	bool DSPEnabled;
@@ -39,15 +56,15 @@ struct VJSettings
 	bool fullscreen;
 	bool useOpenGL;
 	uint32_t glFilter;
-	bool hardwareTypeAlpine;
-	bool softTypeDebugger;										// Soft type debugger
+	bool hardwareTypeAlpine;									// Alpine mode
+	bool softTypeDebugger;										// Soft type debugger mode
 	bool audioEnabled;
 	uint32_t frameSkip;
 	uint32_t renderType;
 	uint32_t refresh;
 	bool allowWritesToROM;
 	uint32_t biosType;
-	uint32_t nbrdisasmlines;
+	size_t nbrdisasmlines;										// Number of lines to show in the M68K tracing window
 	bool disasmopcodes;
 	bool displayHWlabels;
 	bool useFastBlitter;

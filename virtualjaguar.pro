@@ -117,7 +117,12 @@ HEADERS = \
 	src/debugger/memory1browser.h \
 	src/debugger/heapallocatorbrowser.h \
 	src/debugger/brkWin.h \
-	src/debugger/exceptionvectortablebrowser.h
+	src/debugger/exceptionvectortablebrowser.h \
+	src/log.h \
+	src/unzip.h \
+	src/crc32.h \
+	src/settings.h \
+	src/file.h
 
 SOURCES = \
 	src/gui/about.cpp \
@@ -158,5 +163,10 @@ SOURCES = \
 	src/debugger/memory1browser.cpp \
 	src/debugger/heapallocatorbrowser.cpp \
 	src/debugger/brkWin.cpp \
-	src/debugger/exceptionvectortablebrowser.cpp
-	
+	src/debugger/exceptionvectortablebrowser.cpp \
+	src/log.cpp \
+	src/unzip.cpp \
+	src/crc32.cpp \
+	src/settings.cpp \
+	src/file.cpp
+		

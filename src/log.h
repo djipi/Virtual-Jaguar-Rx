@@ -7,20 +7,24 @@
 
 #include <stdio.h>
 
+#if 0
 #ifdef __cplusplus
 extern "C" {
 #endif
+#endif
 
-int LogInit(const char *);
-FILE * LogGet(void);
-void LogDone(void);
-void WriteLog(const char * text, ...);
+extern int LogInit(const char *);
+extern FILE * LogGet(void);
+extern void LogDone(void);
+extern void WriteLog(const char * text, ...);
 
+#if 0
 #ifdef __cplusplus
 }
 #endif
+#endif
 
-// Some useful defines... :-)
+// Some useful defines... :-) but not used
 //#define GPU_DEBUG
 //#define LOG_BLITS
 

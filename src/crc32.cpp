@@ -13,7 +13,7 @@
 // JLH  01/16/2010  Created this log ;-)
 //
 
-#include "crc32.h"
+//#include "crc32.h"
 
 static unsigned long crctable[256] =
 {

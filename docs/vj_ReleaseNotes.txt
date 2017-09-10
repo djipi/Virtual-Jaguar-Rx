@@ -4,7 +4,11 @@ Release 3 (TBC)
 1) Added an Exception Vector Table browser window
 2) Modified the About window to update the credits list in a more appropriate way
 -- Updated the emulator application credits line
-3) Added 'Rx' word to the emulator name to make distinction with the original version
+3) Added 'Rx' word to the emulator name
+4) Fixed a crash when reading the DWARF information in the case of the DWARF2 format has not been used
+5) Added ui, alpine & debugger groups in the settings
+6) Added the possibility to erase settings
+7) Added the --es-all, --es-ui, --es-alpine & --es-debugger options to erase specific settings
 
 Release 2 (3rd September 2017)
 ------------------------------
@@ -101,8 +105,10 @@ Project information
 6) Zlib 1.2.8 library 64bits for VS 2015
 7) SDL 1.2.15 library 64bits for VS 2015
 8) The original make files have been modified to follow the requirements and modifications
-9) The 'Rx' word has been added to the emulator name to make distinction with the original version
+9) The 'Rx' word has been added to the emulator name to make distinction with the official version
 10) The project source is set at https://github.com/djipi/Virtual-Jaguar-Rx
+11) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
+-- Text / License terms are the same
 
 
 Download statistics

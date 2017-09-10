@@ -20,7 +20,7 @@ struct ZipFileEntry
 	uint8_t filename[512];
 };
 
-bool GetZIPHeader(FILE *, ZipFileEntry &);
-int UncompressFileFromZIP(FILE *, ZipFileEntry, uint8_t *);
+extern bool GetZIPHeader(FILE *, ZipFileEntry &);
+extern int UncompressFileFromZIP(FILE *, ZipFileEntry, uint8_t *);
 
 #endif	// __UNZIP_H__

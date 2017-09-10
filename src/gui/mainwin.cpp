@@ -47,8 +47,8 @@
 
 // Uncomment this for debugging...
 //#define DEBUG
-//#define DEBUGFOO			// Various tool debugging...
-//#define DEBUGTP				// Toolpalette debugging...
+//#define DEBUGFOO			// Various tool debugging... but not used
+//#define DEBUGTP			// Toolpalette debugging... but not used
 
 #include "mainwin.h"
 
@@ -1620,7 +1620,7 @@ void MainWin::ResizeMainWindow(void)
 }
 
 
-//
+// Read settings
 void MainWin::ReadSettings(void)
 {
 	QSettings settings("Underground Software", "Virtual Jaguar");
@@ -1642,21 +1642,30 @@ void MainWin::ReadSettings(void)
 	vjs.useOpenGL = settings.value("useOpenGL", true).toBool();
 	vjs.glFilter = settings.value("glFilterType", 1).toInt();
 	vjs.renderType = settings.value("renderType", 0).toInt();
-	vjs.allowWritesToROM = settings.value("writeROM", false).toBool();
 	vjs.biosType = settings.value("biosType", BT_M_SERIES).toInt();
 	vjs.useFastBlitter = settings.value("useFastBlitter", false).toBool();
 	strcpy(vjs.EEPROMPath, settings.value("EEPROMs", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/eeproms/")).toString().toUtf8().data());
 	strcpy(vjs.ROMPath, settings.value("ROMs", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/software/")).toString().toUtf8().data());
-	strcpy(vjs.alpineROMPath, settings.value("DefaultROM", "").toString().toUtf8().data());
+
+	// Read settings from the Debugger mode
+	settings.beginGroup("debugger");
 	strcpy(vjs.debuggerROMPath, settings.value("DefaultROM", "").toString().toUtf8().data());
-	strcpy(vjs.absROMPath, settings.value("DefaultABS", "").toString().toUtf8().data());
 	vjs.nbrdisasmlines = settings.value("NbrDisasmLines", 32).toUInt();
-	vjs.refresh = settings.value("refresh", 60).toUInt();
 	vjs.disasmopcodes = settings.value("DisasmOpcodes", true).toBool();
 	vjs.displayHWlabels = settings.value("DisplayHWLabels", true).toBool();
 	vjs.displayFullSourceFilename = settings.value("displayFullSourceFilename", true).toBool();
 	vjs.nbrmemory1browserwindow = settings.value("NbrMemory1BrowserWindow", MaxMemory1BrowserWindow).toUInt();
+	settings.endGroup();
 
+	// Read settings from the Alpine mode
+	settings.beginGroup("alpine");
+	strcpy(vjs.alpineROMPath, settings.value("DefaultROM", "").toString().toUtf8().data());
+	strcpy(vjs.absROMPath, settings.value("DefaultABS", "").toString().toUtf8().data());
+	vjs.refresh = settings.value("refresh", 60).toUInt();
+	vjs.allowWritesToROM = settings.value("writeROM", false).toBool();
+	settings.endGroup();
+
+	// Write important settings to the log file
 	WriteLog("MainWin: Paths\n");
 	WriteLog("     EEPROMPath = \"%s\"\n", vjs.EEPROMPath);
 	WriteLog("        ROMPath = \"%s\"\n", vjs.ROMPath);
@@ -1731,7 +1740,9 @@ void MainWin::ReadUISettings(void)
 	size_t i;
 	QSize size;
 
+	// Point on the emulator settings
 	QSettings settings("Underground Software", "Virtual Jaguar");
+	settings.beginGroup("ui");
 
 	// Emulator main window UI information
 	mainWinPosition = settings.value("pos", QPoint(200, 200)).toPoint();
@@ -1835,16 +1846,19 @@ void MainWin::ReadUISettings(void)
 			mem1BrowseWin[i]->resize(size);
 		}
 	}
+
+	settings.endGroup();
 }
 
  
 // Save the settings
 void MainWin::WriteSettings(void)
 {
+	// Point on the emulator settings
 	QSettings settings("Underground Software", "Virtual Jaguar");
-	settings.setValue("pos", pos());
-	settings.setValue("size", size());
-	settings.setValue("cartLoadPos", filePickWin->pos());
+	//settings.setValue("pos", pos());
+	//settings.setValue("size", size());
+	//settings.setValue("cartLoadPos", filePickWin->pos());
 
 	settings.setValue("zoom", zoomLevel);
 	settings.setValue("showUnknownSoftware", allowUnknownSoftware);
@@ -1863,21 +1877,31 @@ void MainWin::WriteSettings(void)
 	settings.setValue("useOpenGL", vjs.useOpenGL);
 	settings.setValue("glFilterType", vjs.glFilter);
 	settings.setValue("renderType", vjs.renderType);
-	settings.setValue("writeROM", vjs.allowWritesToROM);
 	settings.setValue("biosType", vjs.biosType);
 	settings.setValue("useFastBlitter", vjs.useFastBlitter);
 	settings.setValue("JagBootROM", vjs.jagBootPath);
 	settings.setValue("CDBootROM", vjs.CDBootPath);
 	settings.setValue("EEPROMs", vjs.EEPROMPath);
 	settings.setValue("ROMs", vjs.ROMPath);
+
+	// Read settings from the Alpine mode
+	settings.beginGroup("alpine");
+	settings.setValue("refresh", vjs.refresh);
 	settings.setValue("DefaultROM", vjs.alpineROMPath);
 	settings.setValue("DefaultABS", vjs.absROMPath);
+	settings.setValue("writeROM", vjs.allowWritesToROM);
+	settings.endGroup();
+
+	// Read settings from the Debugger mode
+	settings.beginGroup("debugger");
 	settings.setValue("DisplayHWLabels", vjs.displayHWlabels);
 	settings.setValue("NbrDisasmLines", vjs.nbrdisasmlines);
-	settings.setValue("refresh", vjs.refresh);
 	settings.setValue("DisasmOpcodes", vjs.disasmopcodes);
 	settings.setValue("displayFullSourceFilename", vjs.displayFullSourceFilename);
 	settings.setValue("NbrMemory1BrowserWindow", (unsigned int)vjs.nbrmemory1browserwindow);
+	settings.setValue("DefaultROM", vjs.debuggerROMPath);
+
+	settings.endGroup();
 
 #if 0
 	settings.setValue("p1k_up", vjs.p1KeyBindings[BUTTON_U]);
@@ -1935,7 +1959,9 @@ void MainWin::WriteUISettings(void)
 	char mem1Name[100];
 	size_t i;
 
+	// Point on the emulator settings
 	QSettings settings("Underground Software", "Virtual Jaguar");
+	settings.beginGroup("ui");
 	
 	// Emulator UI information
 	settings.setValue("pos", pos());
@@ -1992,6 +2018,8 @@ void MainWin::WriteUISettings(void)
 			settings.setValue(mem1Name, mem1BrowseWin[i]->size());
 		}
 	}
+
+	settings.endGroup();
 }
 
 

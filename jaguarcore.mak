@@ -2,9 +2,10 @@
 # Makefile for Virtual Jaguar core library
 #
 # by James Hammons
+# Edited by Jean-Paul Mari
 #
 # This software is licensed under the GPL v3 or any later version. See the
-# file GPLv3 for details. ;-)
+# file LICENSE file for details. ;-)
 #
 
 ifeq ("$(V)","1")
@@ -51,12 +52,10 @@ OBJS := \
 	obj/blitter.o      \
 	obj/cdintf.o       \
 	obj/cdrom.o        \
-	obj/crc32.o        \
 	obj/dac.o          \
 	obj/dsp.o          \
 	obj/eeprom.o       \
 	obj/event.o        \
-	obj/file.o         \
 	obj/filedb.o       \
 	obj/gpu.o          \
 	obj/jagbios.o      \
@@ -69,16 +68,13 @@ OBJS := \
 	obj/jaguar.o       \
 	obj/jerry.o        \
 	obj/joystick.o     \
-	obj/log.o          \
 	obj/memory.o       \
 	obj/memtrack.o     \
 	obj/mmu.o          \
 	obj/op.o           \
-	obj/settings.o     \
 	obj/state.o        \
 	obj/tom.o          \
 	obj/universalhdr.o \
-	obj/unzip.o        \
 	obj/wavetable.o
 
 # Targets for convenience sake, not "real" targets
