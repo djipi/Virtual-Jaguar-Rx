@@ -18,9 +18,6 @@ endif
 # Gah
 OSTYPE := $(shell uname -a)
 
-# Cygwin hack
-#QMAKE_DIR := C:/cygwin64/lib/qt5/bin/
-
 # Should catch both 'darwin' and 'darwin7.0'
 ifeq "$(findstring Darwin,$(OSTYPE))" "Darwin"
 QMAKE_EXTRA := -spec macx-g++
@@ -56,11 +53,11 @@ obj:
 
 prepare: obj
 	@echo -e "\033[01;33m***\033[00;32m Preparing to compile Virtual Jaguar...\033[00m"
-#	@echo "#define VJ_RELEASE_VERSION \"v2.1.3\"" > src/version.h
-#	@echo "#define VJ_RELEASE_SUBVERSION \"Final\"" >> src/version.h
-#	@echo "#define VJ_REMOVE_DEV_CODE" >> src/version.h
-	@echo "#define VJ_RELEASE_VERSION \"GIT `git log -1 --pretty=format:%ci | cut -d ' ' -f 1 | tr -d -`\"" > src/version.h
-	@echo "#define VJ_RELEASE_SUBVERSION \"2.1.3 Prerelease\"" >> src/version.h
+	@echo "#define VJ_RELEASE_VERSION \"v2.1.3\"" > src/version.h
+	@echo "#define VJ_RELEASE_SUBVERSION \"Final\"" >> src/version.h
+	@echo "#define VJ_REMOVE_DEV_CODE" >> src/version.h
+#	@echo "#define VJ_RELEASE_VERSION \"GIT `git log -1 --pretty=format:%ci | cut -d ' ' -f 1 | tr -d -`\"" > src/version.h
+#	@echo "#define VJ_RELEASE_SUBVERSION \"2.1.4 Prerelease\"" >> src/version.h
 
 virtualjaguar: sources libs makefile-qt
 	@echo -e "\033[01;33m***\033[00;32m Making Virtual Jaguar GUI...\033[00m"
@@ -68,7 +65,7 @@ virtualjaguar: sources libs makefile-qt
 
 makefile-qt: virtualjaguar.pro
 	@echo -e "\033[01;33m***\033[00;32m Creating Qt makefile...\033[00m"
-	$(Q)$(CROSS)$(QMAKE_DIR)qmake $(QMAKE_EXTRA) virtualjaguar.pro -o makefile-qt
+	$(Q)$(CROSS)qmake $(QMAKE_EXTRA) virtualjaguar.pro -o makefile-qt
 
 libs: obj/libm68k.a obj/libjaguarcore.a
 	@echo -e "\033[01;33m***\033[00;32m Libraries successfully made.\033[00m"

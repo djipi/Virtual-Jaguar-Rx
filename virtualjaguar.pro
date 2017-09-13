@@ -90,6 +90,7 @@ HEADERS = \
 	src/gui/filethread.h \
 	src/gui/gamepad.h \
 	src/gui/generaltab.h \
+	src/gui/keybindingstab.h \
 	src/gui/glwidget.h \
 	src/gui/help.h \
 	src/gui/imagedelegate.h \
@@ -136,6 +137,7 @@ SOURCES = \
 	src/gui/filethread.cpp \
 	src/gui/gamepad.cpp \
 	src/gui/generaltab.cpp \
+	src/gui/keybindingstab.cpp \
 	src/gui/glwidget.cpp \
 	src/gui/help.cpp \
 	src/gui/imagedelegate.cpp \

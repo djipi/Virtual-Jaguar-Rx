@@ -12,6 +12,7 @@
 // JLH  07/15/2011  Created this file
 
 #include "alpinetab.h"
+#include "settings.h"
 
 
 AlpineTab::AlpineTab(QWidget * parent/*= 0*/): QWidget(parent)
@@ -70,6 +71,32 @@ AlpineTab::AlpineTab(QWidget * parent/*= 0*/): QWidget(parent)
 	setLayout(layout4);
 }
 
+
+//
 AlpineTab::~AlpineTab()
 {
 }
+
+
+// Load / Update the tabs dialog from the settings
+void AlpineTab::GetSettings(void)
+{
+	QVariant v(vjs.refresh);
+	edit1->setText(vjs.alpineROMPath);
+	edit2->setText(vjs.absROMPath);
+	edit3->setText(v.toString());
+	writeROM->setChecked(vjs.allowWritesToROM);
+}
+
+
+// Save / Update the settings from the tabs dialog
+void AlpineTab::SetSettings(void)
+{
+	bool ok;
+
+	strcpy(vjs.alpineROMPath, edit1->text().toUtf8().data());
+	strcpy(vjs.absROMPath, edit2->text().toUtf8().data());
+	vjs.refresh = edit3->text().toUInt(&ok, 10);
+	vjs.allowWritesToROM = writeROM->isChecked();
+}
+

@@ -9,6 +9,8 @@ Release 3 (TBC)
 5) Added ui, alpine & debugger groups in the settings
 6) Added the possibility to erase settings
 7) Added the --es-all, --es-ui, --es-alpine & --es-debugger options to erase specific settings
+8) Added a keybindings tab and adapted the configuration dialog tabs
+-- User can modify the keybindings where appropriate
 
 Release 2 (3rd September 2017)
 ------------------------------
@@ -88,6 +90,7 @@ Cosmetic / UX issues
 1) The SP (Stack) icon color backgound doesn't look similar with the other ones
 2) The emulator status option has no icon
 3) The SP (Stack) window size always open at a forced size no matter if the size has been changed
+4) Not every features have associated keybindings
 
 Legacy issues/hints
 ===================
@@ -97,7 +100,7 @@ Legacy issues/hints
 
 Project information
 ===================
-1) Code based on the Shamus Hammons source code available via Gethub by the 13th June 2016
+1) Code based on the Shamus Hammons source code available via Gethub by the 12th September 2017 (2.1.3 Final)
 2) Visual Studio 2015 project support for 64 bits
 3) libelf 0.8.13 library 64bits for VS 2015
 4) libdwarf 1.41 library 64bits for VS 2015, cygwin64 & Msys2/MinGW64
@@ -115,4 +118,4 @@ Download statistics
 -------------------
 jaguar64eu : 15 downloads for the Release 0 on the 12th Feb, 2017
 jaguar64eu : 18 downloads for the Release 1 on the 21st May, 2017
-No downloads available for the Release 2
+No downloads statistics available for the Release 2

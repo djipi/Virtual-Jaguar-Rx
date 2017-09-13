@@ -12,6 +12,7 @@
 // JLH  06/23/2011  Created this file
 
 #include "generaltab.h"
+#include "settings.h"
 
 
 GeneralTab::GeneralTab(QWidget * parent/*= 0*/): QWidget(parent)
@@ -72,9 +73,54 @@ GeneralTab::GeneralTab(QWidget * parent/*= 0*/): QWidget(parent)
 	setLayout(layout4);
 }
 
+
 GeneralTab::~GeneralTab()
 {
 }
+
+
+// Load / Update the tabs dialog from the settings
+void GeneralTab::GetSettings(void)
+{
+	//	generalTab->edit1->setText(vjs.jagBootPath);
+	//	generalTab->edit2->setText(vjs.CDBootPath);
+	edit3->setText(vjs.EEPROMPath);
+	edit4->setText(vjs.ROMPath);
+	useBIOS->setChecked(vjs.useJaguarBIOS);
+	useGPU->setChecked(vjs.GPUEnabled);
+	useDSP->setChecked(vjs.DSPEnabled);
+	useFullScreen->setChecked(vjs.fullscreen);
+	//	generalTab->useHostAudio->setChecked(vjs.audioEnabled);
+	useFastBlitter->setChecked(vjs.useFastBlitter);
+}
+
+
+// Save / Update the settings from the tabs dialog
+void GeneralTab::SetSettings(void)
+{
+	//	strcpy(vjs.jagBootPath, generalTab->edit1->text().toAscii().data());
+	//	strcpy(vjs.CDBootPath,  generalTab->edit2->text().toAscii().data());
+	strcpy(vjs.EEPROMPath, CheckForTrailingSlash(edit3->text()).toUtf8().data());
+	strcpy(vjs.ROMPath, CheckForTrailingSlash(edit4->text()).toUtf8().data());
+
+	vjs.useJaguarBIOS = useBIOS->isChecked();
+	vjs.GPUEnabled = useGPU->isChecked();
+	vjs.DSPEnabled = useDSP->isChecked();
+	vjs.fullscreen = useFullScreen->isChecked();
+	//	vjs.audioEnabled   = generalTab->useHostAudio->isChecked();
+	vjs.useFastBlitter = useFastBlitter->isChecked();
+}
+
+
+// Append a slash or a backslash at the end of the string
+QString GeneralTab::CheckForTrailingSlash(QString s)
+{
+	if (!s.endsWith('/') && !s.endsWith('\\'))
+		s.append('/');
+
+	return s;
+}
+
 
 #if 0
 	vjs.useJoystick      = settings.value("useJoystick", false).toBool();

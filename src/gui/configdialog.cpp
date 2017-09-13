@@ -14,22 +14,24 @@
 // JLH  10/14/2011  Fixed possibly missing final slash in paths
 // JPM  06/06/2016  Visual Studio support
 // JPM  06/19/2016  Soft debugger support
+// JPM  09/  /2017  Added the Keybindings tab
 //
 
 #include "configdialog.h"
-
 #include "alpinetab.h"
 #include "debugger/debuggertab.h"
 #include "controllertab.h"
 #include "controllerwidget.h"
 #include "generaltab.h"
+#include "KeyBindingsTab.h"
 #include "settings.h"
 
 
-ConfigDialog::ConfigDialog(QWidget * parent/*= 0*/): QDialog(parent),
-	tabWidget(new QTabWidget),
-	generalTab(new GeneralTab(this)),
-	controllerTab1(new ControllerTab(this))
+ConfigDialog::ConfigDialog(QWidget * parent/*= 0*/) : QDialog(parent),
+tabWidget(new QTabWidget),
+generalTab(new GeneralTab(this)),
+controllerTab1(new ControllerTab(this)),
+keybindingsTab(new KeyBindingsTab(this))
 {
 //	tabWidget = new QTabWidget;
 //	generalTab = new GeneralTab(this);
@@ -42,6 +44,7 @@ ConfigDialog::ConfigDialog(QWidget * parent/*= 0*/): QDialog(parent),
 	tabWidget->addTab(generalTab, tr("General"));
 	tabWidget->addTab(controllerTab1, tr("Controllers"));
 //	tabWidget->addTab(controllerTab2, tr("Controller #2"));
+	tabWidget->addTab(keybindingsTab, tr("Keybindings"));
 
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
@@ -75,39 +78,23 @@ ConfigDialog::~ConfigDialog()
 }
 
 
+// Load / Update the tabs dialog from the settings
 void ConfigDialog::LoadDialogFromSettings(void)
 {
-//	generalTab->edit1->setText(vjs.jagBootPath);
-//	generalTab->edit2->setText(vjs.CDBootPath);
-	generalTab->edit3->setText(vjs.EEPROMPath);
-	generalTab->edit4->setText(vjs.ROMPath);
+	// General & Keybindings tab settings
+	generalTab->GetSettings();
+	keybindingsTab->GetSettings();
 
-	generalTab->useBIOS->setChecked(vjs.useJaguarBIOS);
-	generalTab->useGPU->setChecked(vjs.GPUEnabled);
-	generalTab->useDSP->setChecked(vjs.DSPEnabled);
-	generalTab->useFullScreen->setChecked(vjs.fullscreen);
-//	generalTab->useHostAudio->setChecked(vjs.audioEnabled);
-	generalTab->useFastBlitter->setChecked(vjs.useFastBlitter);
-
+	// Alpine tab settings (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
-		QVariant v(vjs.refresh);
-		alpineTab->edit1->setText(vjs.alpineROMPath);
-		alpineTab->edit2->setText(vjs.absROMPath);
-		alpineTab->edit3->setText(v.toString());
-		alpineTab->writeROM->setChecked(vjs.allowWritesToROM);
+		alpineTab->GetSettings();
 	}
 
+	// Debugger tab settings
 	if (vjs.softTypeDebugger)
 	{
-		QVariant v(vjs.nbrdisasmlines);
-		//debuggerTab->edit1->setText(vjs.debuggerROMPath);
-		//debuggerTab->edit2->setText(vjs.absROMPath);
-		debuggerTab->edit3->setText(v.toString());
-		//debuggerTab->writeROM->setChecked(vjs.allowWritesToROM
-		debuggerTab->displayHWlabels->setChecked(vjs.displayHWlabels);
-		debuggerTab->disasmopcodes->setChecked(vjs.disasmopcodes);
-		debuggerTab->displayFullSourceFilename->setChecked(vjs.displayFullSourceFilename);
+		debuggerTab->GetSettings();
 	}
 
 #ifdef _MSC_VER
@@ -127,41 +114,20 @@ void ConfigDialog::LoadDialogFromSettings(void)
 }
 
 
+// Save / Update the settings from the tabs dialog
 void ConfigDialog::UpdateVJSettings(void)
 {
-	bool ok;
-
-//	strcpy(vjs.jagBootPath, generalTab->edit1->text().toAscii().data());
-//	strcpy(vjs.CDBootPath,  generalTab->edit2->text().toAscii().data());
-	strcpy(vjs.EEPROMPath,  CheckForTrailingSlash(
-		generalTab->edit3->text()).toUtf8().data());
-	strcpy(vjs.ROMPath,     CheckForTrailingSlash(
-		generalTab->edit4->text()).toUtf8().data());
-
-	vjs.useJaguarBIOS  = generalTab->useBIOS->isChecked();
-	vjs.GPUEnabled     = generalTab->useGPU->isChecked();
-	vjs.DSPEnabled     = generalTab->useDSP->isChecked();
-	vjs.fullscreen     = generalTab->useFullScreen->isChecked();
-//	vjs.audioEnabled   = generalTab->useHostAudio->isChecked();
-	vjs.useFastBlitter = generalTab->useFastBlitter->isChecked();
+	generalTab->SetSettings();
+	keybindingsTab->SetSettings();
 
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
-		strcpy(vjs.alpineROMPath, alpineTab->edit1->text().toUtf8().data());
-		strcpy(vjs.absROMPath,    alpineTab->edit2->text().toUtf8().data());
-		vjs.refresh = alpineTab->edit3->text().toUInt(&ok, 10);
-		vjs.allowWritesToROM = alpineTab->writeROM->isChecked();
+		alpineTab->SetSettings();
 	}
 
 	if (vjs.softTypeDebugger)
 	{
-		//strcpy(vjs.debuggerROMPath, debuggerTab->edit1->text().toUtf8().data());
-		//strcpy(vjs.absROMPath, debuggerTab->edit2->text().toUtf8().data());
-		vjs.nbrdisasmlines = debuggerTab->edit3->text().toUInt(&ok, 10);
-		//vjs.allowWritesToROM = debuggerTab->writeROM->isChecked();
-		vjs.displayHWlabels = debuggerTab->displayHWlabels->isChecked();
-		vjs.disasmopcodes = debuggerTab->disasmopcodes->isChecked();
-		vjs.displayFullSourceFilename = debuggerTab->displayFullSourceFilename->isChecked();
+		debuggerTab->SetSettings();
 	}
 
 #ifdef _MSC_VER
@@ -180,11 +146,3 @@ void ConfigDialog::UpdateVJSettings(void)
 #endif
 }
 
-
-QString ConfigDialog::CheckForTrailingSlash(QString s)
-{
-	if (!s.endsWith('/') && !s.endsWith('\\'))
-		s.append('/');
-
-	return s;
-}

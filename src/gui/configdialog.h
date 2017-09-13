@@ -20,6 +20,7 @@ class GeneralTab;
 class ControllerTab;
 class AlpineTab;
 class DebuggerTab;
+class KeyBindingsTab;
 
 class ConfigDialog: public QDialog
 {
@@ -42,6 +43,7 @@ class ConfigDialog: public QDialog
 		GeneralTab * generalTab;
 		ControllerTab * controllerTab1;
 //		ControllerTab * controllerTab2;
+		KeyBindingsTab *keybindingsTab;
 		AlpineTab * alpineTab;
 		DebuggerTab * debuggerTab;
 };

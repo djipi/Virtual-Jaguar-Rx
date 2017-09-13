@@ -25,7 +25,7 @@
 // JPM  09/02/2017  Save size windows in the settings
 // JPM  09/05/2017  Added Exception Vector Table window
 // JPM  09/06/2017  Added the 'Rx' word to the emulator window name
-
+// JPM  09/12/2017  Added the keybindings in the settings
 //
 
 // FIXED:
@@ -57,6 +57,7 @@
 #include "about.h"
 #include "configdialog.h"
 #include "controllertab.h"
+#include "keybindingstab.h"
 #include "filepicker.h"
 #include "gamepad.h"
 #include "generaltab.h"
@@ -229,7 +230,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	quitAppAct = new QAction(tr("E&xit"), this);
 //	quitAppAct->setShortcuts(QKeySequence::Quit);
 //	quitAppAct->setShortcut(QKeySequence(tr("Alt+x")));
-	quitAppAct->setShortcut(QKeySequence(tr("Ctrl+q")));
+	//quitAppAct->setShortcut(QKeySequence(tr("Ctrl+q")));
+	quitAppAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBQUIT].KBSettingValue)));
 	quitAppAct->setShortcutContext(Qt::ApplicationShortcut);
 	quitAppAct->setStatusTip(tr("Quit Virtual Jaguar"));
 	connect(quitAppAct, SIGNAL(triggered()), this, SLOT(close()));
@@ -252,7 +254,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	pauseAct->setStatusTip(tr("Toggles the running state"));
 	pauseAct->setCheckable(true);
 	pauseAct->setDisabled(true);
-	pauseAct->setShortcut(QKeySequence(tr("Esc")));
+	//pauseAct->setShortcut(QKeySequence(tr("Esc")));
+	pauseAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBPAUSE].KBSettingValue)));
 	pauseAct->setShortcutContext(Qt::ApplicationShortcut);
 	connect(pauseAct, SIGNAL(triggered()), this, SLOT(ToggleRunState()));
 
@@ -311,19 +314,22 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		filePickAct = new QAction(QIcon(":/res/software.png"), tr("&Insert executable file..."), this);
 		filePickAct->setStatusTip(tr("Insert an executable into Virtual Jaguar"));
 	}
-	filePickAct->setShortcut(QKeySequence(tr("Ctrl+i")));
+	//filePickAct->setShortcut(QKeySequence(tr("Ctrl+i")));
+	filePickAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBPICKFILE].KBSettingValue)));
 	filePickAct->setShortcutContext(Qt::ApplicationShortcut);
 	connect(filePickAct, SIGNAL(triggered()), this, SLOT(InsertCart()));
 
 	configAct = new QAction(QIcon(":/res/wrench.png"), tr("&Configure"), this);
 	configAct->setStatusTip(tr("Configure options for Virtual Jaguar"));
-	configAct->setShortcut(QKeySequence(tr("Ctrl+c")));
+	//configAct->setShortcut(QKeySequence(tr("Ctrl+c")));
+	configAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBCONFIGURE].KBSettingValue)));
 	configAct->setShortcutContext(Qt::ApplicationShortcut);
 	connect(configAct, SIGNAL(triggered()), this, SLOT(Configure()));
 
 	emustatusAct = new QAction(QIcon(""), tr("&Status"), this);
 	emustatusAct->setStatusTip(tr("Emulator status"));
-	emustatusAct->setShortcut(QKeySequence(tr("Ctrl+s")));
+	//emustatusAct->setShortcut(QKeySequence(tr("Ctrl+s")));
+	emustatusAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBEMUSTATUS].KBSettingValue)));
 	emustatusAct->setShortcutContext(Qt::ApplicationShortcut);
 	connect(emustatusAct, SIGNAL(triggered()), this, SLOT(ShowEmuStatusWin()));
 
@@ -334,7 +340,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	connect(useCDAct, SIGNAL(triggered()), this, SLOT(ToggleCDUsage()));
 
 	frameAdvanceAct = new QAction(QIcon(":/res/frame-advance.png"), tr("&Frame Advance"), this);
-	frameAdvanceAct->setShortcut(QKeySequence(tr("F7")));
+	//frameAdvanceAct->setShortcut(QKeySequence(tr("F7")));
+	frameAdvanceAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBFRAMEADVANCE].KBSettingValue)));
 	frameAdvanceAct->setShortcutContext(Qt::ApplicationShortcut);
 	frameAdvanceAct->setDisabled(true);
 	connect(frameAdvanceAct, SIGNAL(triggered()), this, SLOT(FrameAdvance()));
@@ -342,21 +349,24 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	if (vjs.softTypeDebugger)
 	{
 		restartAct = new QAction(QIcon(":/res/Restart.png"), tr("&Restart"), this);
-		restartAct->setShortcut(QKeySequence(tr("Ctrl+Shift+F5")));
+		//restartAct->setShortcut(QKeySequence(tr("Ctrl+Shift+F5")));
+		restartAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBRESTART].KBSettingValue)));
 		restartAct->setShortcutContext(Qt::ApplicationShortcut);
 		restartAct->setCheckable(false);
 		restartAct->setDisabled(true);
 		connect(restartAct, SIGNAL(triggered()), this, SLOT(Restart()));
 
 		traceStepOverAct = new QAction(QIcon(":/res/StepOver.png"), tr("&Step Over"), this);
-		traceStepOverAct->setShortcut(QKeySequence(tr("F10")));
+		//traceStepOverAct->setShortcut(QKeySequence(tr("F10")));
+		traceStepOverAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBSTEPOVER].KBSettingValue)));
 		traceStepOverAct->setShortcutContext(Qt::ApplicationShortcut);
 		traceStepOverAct->setCheckable(false);
 		traceStepOverAct->setDisabled(true);
 		connect(traceStepOverAct, SIGNAL(triggered()), this, SLOT(TraceStepOver()));
 
 		traceStepIntoAct = new QAction(QIcon(":/res/StepInto.png"), tr("&Step Into"), this);
-		traceStepIntoAct->setShortcut(QKeySequence(tr("F11")));
+		//traceStepIntoAct->setShortcut(QKeySequence(tr("F11")));
+		traceStepIntoAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBSTEPINTO].KBSettingValue)));
 		traceStepIntoAct->setShortcutContext(Qt::ApplicationShortcut);
 		traceStepIntoAct->setCheckable(false);
 		traceStepIntoAct->setDisabled(true);
@@ -368,7 +378,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	}
 
 	fullScreenAct = new QAction(QIcon(":/res/fullscreen.png"), tr("F&ull Screen"), this);
-	fullScreenAct->setShortcut(QKeySequence(tr("F9")));
+	//fullScreenAct->setShortcut(QKeySequence(tr("F9")));
+	fullScreenAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBFULLSCREEN].KBSettingValue)));
 	fullScreenAct->setShortcutContext(Qt::ApplicationShortcut);
 	fullScreenAct->setCheckable(true);
 	connect(fullScreenAct, SIGNAL(triggered()), this, SLOT(ToggleFullScreen()));
@@ -1623,6 +1634,8 @@ void MainWin::ResizeMainWindow(void)
 // Read settings
 void MainWin::ReadSettings(void)
 {
+	size_t i;
+
 	QSettings settings("Underground Software", "Virtual Jaguar");
 
 	zoomLevel = settings.value("zoom", 2).toInt();
@@ -1663,6 +1676,14 @@ void MainWin::ReadSettings(void)
 	strcpy(vjs.absROMPath, settings.value("DefaultABS", "").toString().toUtf8().data());
 	vjs.refresh = settings.value("refresh", 60).toUInt();
 	vjs.allowWritesToROM = settings.value("writeROM", false).toBool();
+	settings.endGroup();
+
+	// Read settings from the Keybindings
+	settings.beginGroup("keybindings");
+	for (i = 0; i < KB_END; i++)
+	{
+		strcpy(vjs.KBContent[i].KBSettingValue, settings.value(KeyBindingsTable[i].KBNameSetting, KeyBindingsTable[i].KBDefaultValue).toString().toUtf8().data());
+	}
 	settings.endGroup();
 
 	// Write important settings to the log file
@@ -1752,7 +1773,7 @@ void MainWin::ReadUISettings(void)
 	pos = settings.value("cartLoadPos", QPoint(200, 200)).toPoint();
 	filePickWin->move(pos);
 
-	// Alpine debug UI information
+	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
 		// CPU registers UI information
@@ -1850,10 +1871,12 @@ void MainWin::ReadUISettings(void)
 	settings.endGroup();
 }
 
- 
+
 // Save the settings
 void MainWin::WriteSettings(void)
 {
+	size_t i;
+
 	// Point on the emulator settings
 	QSettings settings("Underground Software", "Virtual Jaguar");
 	//settings.setValue("pos", pos());
@@ -1884,7 +1907,7 @@ void MainWin::WriteSettings(void)
 	settings.setValue("EEPROMs", vjs.EEPROMPath);
 	settings.setValue("ROMs", vjs.ROMPath);
 
-	// Read settings from the Alpine mode
+	// Write settings from the Alpine mode
 	settings.beginGroup("alpine");
 	settings.setValue("refresh", vjs.refresh);
 	settings.setValue("DefaultROM", vjs.alpineROMPath);
@@ -1892,7 +1915,7 @@ void MainWin::WriteSettings(void)
 	settings.setValue("writeROM", vjs.allowWritesToROM);
 	settings.endGroup();
 
-	// Read settings from the Debugger mode
+	// Write settings from the Debugger mode
 	settings.beginGroup("debugger");
 	settings.setValue("DisplayHWLabels", vjs.displayHWlabels);
 	settings.setValue("NbrDisasmLines", vjs.nbrdisasmlines);
@@ -1900,7 +1923,14 @@ void MainWin::WriteSettings(void)
 	settings.setValue("displayFullSourceFilename", vjs.displayFullSourceFilename);
 	settings.setValue("NbrMemory1BrowserWindow", (unsigned int)vjs.nbrmemory1browserwindow);
 	settings.setValue("DefaultROM", vjs.debuggerROMPath);
+	settings.endGroup();
 
+	// Write settings from the Keybindings
+	settings.beginGroup("keybindings");
+	for (i = 0; i < KB_END; i++)
+	{
+		settings.setValue(KeyBindingsTable[i].KBNameSetting, vjs.KBContent[i].KBSettingValue);
+	}
 	settings.endGroup();
 
 #if 0
@@ -1969,7 +1999,7 @@ void MainWin::WriteUISettings(void)
 	settings.setValue("cartLoadPos", filePickWin->pos());
 	settings.setValue("zoom", zoomLevel);
 
-	// Alpine debug UI information
+	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
 		settings.setValue("cpuBrowseWinPos", cpuBrowseWin->pos());

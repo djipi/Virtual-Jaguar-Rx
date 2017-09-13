@@ -28,7 +28,7 @@
 
 
 // List the erase settings possibilities
-typedef enum
+enum
 {
 	SETTINGS_NONE = 0,
 	SETTINGS_ALL,
@@ -36,6 +36,15 @@ typedef enum
 	SETTINGS_ALPINE,
 	SETTINGS_DEBUGGER,
 	SETTINGS_END
+};
+
+
+// Key bindings settings structure
+struct KBSettings
+{
+	//char KBSettingName[100];
+	char KBSettingValue[100];
+	//char KBSettingDefaultValue[100];
 };
 
 
@@ -54,7 +63,7 @@ struct VJSettings
 	bool DSPEnabled;
 	bool usePipelinedDSP;
 	bool fullscreen;
-	bool useOpenGL;
+	bool useOpenGL;												// OpenGL support (always 'true')
 	uint32_t glFilter;
 	bool hardwareTypeAlpine;									// Alpine mode
 	bool softTypeDebugger;										// Soft type debugger mode
@@ -73,12 +82,13 @@ struct VJSettings
 	size_t DRAM_size;											// DRAM size
 
 	// Keybindings in order of U, D, L, R, C, B, A, Op, Pa, 0-9, #, *
-
 	uint32_t p1KeyBindings[21];
 	uint32_t p2KeyBindings[21];
 
-	// Paths
+	// Keybindings
+	KBSettings KBContent[100];
 
+	// Paths
 	char ROMPath[MAX_PATH];
 	char jagBootPath[MAX_PATH];
 	char CDBootPath[MAX_PATH];
@@ -89,15 +99,12 @@ struct VJSettings
 };
 
 // Render types
-
 enum { RT_NORMAL = 0, RT_TV = 1 };
 
 // BIOS types
-
 enum { BT_K_SERIES, BT_M_SERIES, BT_STUBULATOR_1, BT_STUBULATOR_2 };
 
 // Exported variables
-
 extern VJSettings vjs;
 
 #endif	// __SETTINGS_H__

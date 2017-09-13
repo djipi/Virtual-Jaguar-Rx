@@ -11,6 +11,7 @@
 // JPM  06/19/2016  Soft debugger support
 
 #include "debuggertab.h"
+#include "settings.h"
 
 
 DebuggerTab::DebuggerTab(QWidget * parent/*= 0*/): QWidget(parent)
@@ -50,3 +51,33 @@ DebuggerTab::DebuggerTab(QWidget * parent/*= 0*/): QWidget(parent)
 DebuggerTab::~DebuggerTab()
 {
 }
+
+
+// Save / Update the settings from the tabs dialog
+void DebuggerTab::SetSettings(void)
+{
+	bool ok;
+
+	//strcpy(vjs.debuggerROMPath, debuggerTab->edit1->text().toUtf8().data());
+	//strcpy(vjs.absROMPath, debuggerTab->edit2->text().toUtf8().data());
+	vjs.nbrdisasmlines = edit3->text().toUInt(&ok, 10);
+	//vjs.allowWritesToROM = debuggerTab->writeROM->isChecked();
+	vjs.displayHWlabels = displayHWlabels->isChecked();
+	vjs.disasmopcodes = disasmopcodes->isChecked();
+	vjs.displayFullSourceFilename = displayFullSourceFilename->isChecked();
+}
+
+
+// Load / Update the tabs dialog from the settings
+void DebuggerTab::GetSettings(void)
+{
+	QVariant v(vjs.nbrdisasmlines);
+	//debuggerTab->edit1->setText(vjs.debuggerROMPath);
+	//debuggerTab->edit2->setText(vjs.absROMPath);
+	edit3->setText(v.toString());
+	//debuggerTab->writeROM->setChecked(vjs.allowWritesToROM
+	displayHWlabels->setChecked(vjs.displayHWlabels);
+	disasmopcodes->setChecked(vjs.disasmopcodes);
+	displayFullSourceFilename->setChecked(vjs.displayFullSourceFilename);
+}
+

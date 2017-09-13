@@ -10,20 +10,25 @@ class GeneralTab: public QWidget
 	public:
 		GeneralTab(QWidget * parent = 0);
 		~GeneralTab();
+		void SetSettings(void);
+		void GetSettings(void);
+
+	private:
+		QString CheckForTrailingSlash(QString s);
 
 	public:
-		QLineEdit * edit1;
-		QLineEdit * edit2;
-		QLineEdit * edit3;
-		QLineEdit * edit4;
+		QLineEdit *edit1;
+		QLineEdit *edit2;
+		QLineEdit *edit3;
+		QLineEdit *edit4;
 
-		QCheckBox * useBIOS;
-		QCheckBox * useGPU;
-		QCheckBox * useDSP;
-//		QCheckBox * useHostAudio;
-		QCheckBox * useFullScreen;
-		QCheckBox * useUnknownSoftware;
-		QCheckBox * useFastBlitter;
+		QCheckBox *useBIOS;
+		QCheckBox *useGPU;
+		QCheckBox *useDSP;
+//		QCheckBox *useHostAudio;
+		QCheckBox *useFullScreen;
+		QCheckBox *useUnknownSoftware;
+		QCheckBox *useFastBlitter;
 };
 
 #endif	// __GENERALTAB_H__

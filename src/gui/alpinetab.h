@@ -10,6 +10,8 @@ class AlpineTab: public QWidget
 	public:
 		AlpineTab(QWidget * parent = 0);
 		~AlpineTab();
+		void SetSettings(void);
+		void GetSettings(void);
 
 	public:
 		QLineEdit * edit1;

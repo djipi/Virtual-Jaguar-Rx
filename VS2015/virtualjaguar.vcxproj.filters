@@ -44,9 +44,6 @@
     <Filter Include="Header Files\gui">
       <UniqueIdentifier>{ef2acb57-2659-4a8d-b5ac-6a671756338f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Files\gui\debug">
-      <UniqueIdentifier>{e2a60de6-6624-4029-bf3f-988316b9dc91}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\gui">
       <UniqueIdentifier>{80c96e24-c02d-4a78-abbf-c0ea5d732f87}</UniqueIdentifier>
     </Filter>
@@ -55,6 +52,15 @@
     </Filter>
     <Filter Include="Source Files\alpine">
       <UniqueIdentifier>{6d036353-43b6-415d-a763-9927565b7ee9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\alpine">
+      <UniqueIdentifier>{e2a60de6-6624-4029-bf3f-988316b9dc91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\tab">
+      <UniqueIdentifier>{2be9bcdd-ba58-41e1-a099-1408a4c36524}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\tab">
+      <UniqueIdentifier>{3764368c-2eb6-49e9-a11a-a49b210d6297}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -109,9 +115,6 @@
     <ClCompile Include="obj\moc_debuggertab.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\debugger\debuggertab.cpp">
-      <Filter>Source Files\debugger</Filter>
-    </ClCompile>
     <ClCompile Include="obj\moc_VideoWin.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -157,13 +160,7 @@
     <ClCompile Include="..\src\gui\about.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gui\alpinetab.cpp">
-      <Filter>Source Files\gui</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\gui\configdialog.cpp">
-      <Filter>Source Files\gui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\gui\controllertab.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\controllerwidget.cpp">
@@ -179,9 +176,6 @@
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\gamepad.cpp">
-      <Filter>Source Files\gui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\gui\generaltab.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\glwidget.cpp">
@@ -277,6 +271,24 @@
     <ClCompile Include="..\src\settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\gui\alpinetab.cpp">
+      <Filter>Source Files\gui\tab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\controllertab.cpp">
+      <Filter>Source Files\gui\tab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\generaltab.cpp">
+      <Filter>Source Files\gui\tab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\debuggertab.cpp">
+      <Filter>Source Files\gui\tab</Filter>
+    </ClCompile>
+    <ClCompile Include="obj\moc_keybindingstab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\keybindingstab.cpp">
+      <Filter>Source Files\gui\tab</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -288,13 +300,7 @@
     <CustomBuild Include="..\src\gui\configdialog.h">
       <Filter>Header Files\gui</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\src\gui\controllertab.h">
-      <Filter>Header Files\gui</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\src\gui\filepicker.h">
-      <Filter>Header Files\gui</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\gui\generaltab.h">
       <Filter>Header Files\gui</Filter>
     </CustomBuild>
     <ClInclude Include="..\src\gui\help.h">
@@ -493,9 +499,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="..\src\debugger\debuggertab.h">
-      <Filter>Header Files\debugger</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\src\debugger\VideoWin.h">
       <Filter>Header Files\debugger</Filter>
     </CustomBuild>
@@ -506,22 +509,19 @@
       <Filter>Header Files\debugger</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\gui\debug\cpubrowser.h">
-      <Filter>Header Files\gui\debug</Filter>
+      <Filter>Header Files\alpine</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\gui\debug\m68kdasmbrowser.h">
-      <Filter>Header Files\gui\debug</Filter>
+      <Filter>Header Files\alpine</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\gui\debug\memorybrowser.h">
-      <Filter>Header Files\gui\debug</Filter>
+      <Filter>Header Files\alpine</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\gui\debug\opbrowser.h">
-      <Filter>Header Files\gui\debug</Filter>
+      <Filter>Header Files\alpine</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\gui\debug\riscdasmbrowser.h">
-      <Filter>Header Files\gui\debug</Filter>
-    </CustomBuild>
-    <CustomBuild Include="..\src\gui\alpinetab.h">
-      <Filter>Header Files\gui</Filter>
+      <Filter>Header Files\alpine</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\gui\controllerwidget.h">
       <Filter>Header Files\gui</Filter>
@@ -536,7 +536,7 @@
       <Filter>Header Files\gui</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\gui\debug\stackbrowser.h">
-      <Filter>Header Files\gui\debug</Filter>
+      <Filter>Header Files\alpine</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\debugger\GPUDasmWin.h">
       <Filter>Header Files\debugger</Filter>
@@ -561,6 +561,21 @@
     </CustomBuild>
     <CustomBuild Include="..\src\debugger\exceptionvectortablebrowser.h">
       <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\controllertab.h">
+      <Filter>Header Files\gui\tab</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\generaltab.h">
+      <Filter>Header Files\gui\tab</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\alpinetab.h">
+      <Filter>Header Files\gui\tab</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\debuggertab.h">
+      <Filter>Header Files\gui\tab</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\keybindingstab.h">
+      <Filter>Header Files\gui\tab</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

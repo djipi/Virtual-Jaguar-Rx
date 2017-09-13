@@ -19,6 +19,8 @@ class DebuggerTab: public QWidget
 	public:
 		DebuggerTab(QWidget * parent = 0);
 		~DebuggerTab();
+		void SetSettings(void);
+		void GetSettings(void);
 
 	public:
 		QLineEdit *edit3;
