@@ -5,7 +5,6 @@ obj/
 release/
 Screenshots/
 software/
-src/version.h
 src/*~
 src/*/*.bak
 src/m68000/obj/
