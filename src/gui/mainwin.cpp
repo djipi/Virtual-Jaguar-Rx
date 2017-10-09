@@ -603,8 +603,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	//	Create status bar
 	statusBar()->showMessage(tr("Ready"));
 	ReadUISettings();
-	// Do this in case original size isn't correct (mostly for the first-run
-	// case)
+	// Do this in case original size isn't correct (mostly for the first-run case)
 	ResizeMainWindow();
 
 	// Create our test pattern bitmaps

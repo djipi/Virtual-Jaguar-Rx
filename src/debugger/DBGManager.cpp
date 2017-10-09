@@ -46,7 +46,7 @@ struct Value
 
 
 // Common debugger variables
-int	DBGType;
+size_t	DBGType;
 char value[1000];
 
 
@@ -72,12 +72,13 @@ void DBGManager_Reset(void)
 		ELFManager_Reset();
 	}
 
-	DBGType = vjs.displayHWlabels ? DBG_HWLABEL : DBG_NO_TYPE;
+	//DBGType = vjs.displayHWlabels ? DBG_HWLABEL : DBG_NO_TYPE;
+	DBGType = DBG_NO_TYPE;
 }
 
 
 // Common debugger set
-void DBGManager_SetType(int DBGTypeSet)
+void DBGManager_SetType(size_t DBGTypeSet)
 {
 	DBGType |= DBGTypeSet;
 }
@@ -406,12 +407,22 @@ size_t DBGManager_GetNumLineFromAdr(size_t Adr, size_t Tag)
 // Return NULL if no symbol name has been found
 char *DBGManager_GetSymbolnameFromAdr(size_t Adr)
 {
-	char *Symbolname = NULL;
+	char *Symbolname;
 
-	if ((DBGType & DBG_HWLABEL) || vjs.displayHWlabels)
+	//if ((DBGType & DBG_HWLABEL) || vjs.displayHWlabels)
+	if (vjs.displayHWlabels)
 	{
 		Symbolname = HWLABELManager_GetSymbolnameFromAdr(Adr);
 	}
+	else
+	{
+		Symbolname = NULL;
+	}
+#ifdef _MSC_VER
+#pragma message("Warning: !!! Need to set the DBG_HWLABEL in DBGType instead to use the setting value !!!")
+#else
+	#warning "!!! Need to set the DBG_HWLABEL in DBGType instead to use the setting value !!!"
+#endif // _MSC_VER
 
 	if (Symbolname == NULL)
 	{

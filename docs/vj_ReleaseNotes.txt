@@ -1,6 +1,6 @@
 Release 3 (TBC)
 ---------------
-0) Fixed the windows respawning in the next emulator launch without --alpine or --debugger options
+0) Fixed the windows respawning in the next emulator launch within --alpine or --debugger options
 1) Added an Exception Vector Table browser window
 2) Modified the About window to update the credits list in a more appropriate way
 -- Updated the emulator application credits line
@@ -11,6 +11,9 @@ Release 3 (TBC)
 7) Added the --es-all, --es-ui, --es-alpine & --es-debugger options to erase specific settings
 8) Added a keybindings tab and adapted the configuration dialog tabs
 -- User can modify the keybindings where appropriate
+9) Fixed a crash, in Release mode, when the HW labels setting is turn on
+10) Solved an interference between the HW labels setting and the one used by the debugger
+-- The setting is now only the reference used
 
 Release 2 (3rd September 2017)
 ------------------------------
@@ -96,6 +99,7 @@ Legacy issues/hints
 ===================
 1) Emulator seems to have easter egg(s)
 -- The option --yarrr displays a single message and end the application
+-- Pressing F8, while in the main window, will create an extra message in the log file
 2) The --alpine option force the log file but it can be override if --no-log option is set after the --alpine option
 
 Project information

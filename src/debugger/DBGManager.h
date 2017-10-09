@@ -49,7 +49,7 @@ typedef enum {
 
 //
 extern void	DBGManager_Init(void);
-extern void	DBGManager_SetType(int DBGTypeSet);
+extern void	DBGManager_SetType(size_t DBGTypeSet);
 extern void	DBGManager_Reset(void);
 extern void	DBGManager_Close(void);
 

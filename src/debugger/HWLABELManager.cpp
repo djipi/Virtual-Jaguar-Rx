@@ -27,14 +27,12 @@ typedef enum {
 	HWLABEL_64BITS = 8
 }HWLABELSIZE;
 
-
 typedef enum {
 	HWLABEL_NO_ACCESS = 0,
 	HWLABEL_R = 0x1,
 	HWLABEL_W = 0x2,
 	HWLABEL_O = 0x4
 }HWLABELACCESS;
-
 
 typedef struct {
 	size_t HWLABELAdr;
@@ -43,6 +41,8 @@ typedef struct {
 	size_t HWLABELSize;
 	size_t HWLABELAccess;
 }HWLABELTab;
+
+#define NBHWLABELS (sizeof(HWLABELTabSectionType) / sizeof(HWLABELTab))
 
 
 // Memory map list based on the scans from the Version 2.4 - June 7, 1995
@@ -185,15 +185,29 @@ HWLABELTab	HWLABELTabSectionType[] =	{
 	{	0xF1A11C, "D_DIVCTRL", "Divide unit Control", HWLABEL_32BITS, (HWLABEL_W | HWLABEL_O) },
 	{	0xF1A120, "D_MACHI", "Multiply & Acccumulate High Bits", HWLABEL_32BITS, (HWLABEL_R | HWLABEL_O) },
 // End of the Memory map list
-	{	(size_t)-1, NULL, NULL, HWLABEL_NO_SIZE, HWLABEL_NO_ACCESS }
+//	{	(size_t)-1, NULL, NULL, HWLABEL_NO_SIZE, HWLABEL_NO_ACCESS }
 };
 
 
 // Get Symbol name from his address
 char *HWLABELManager_GetSymbolnameFromAdr(size_t Adr)
 {
-	int i = 0;
-	while ((HWLABELTabSectionType[i].HWLABELAdr != Adr) && (HWLABELTabSectionType[i++].HWLABELAdr != (size_t)-1));
-	return (char *)HWLABELTabSectionType[i].HWLABELSymbolName;
+	size_t i;
+
+	if ((Adr >= 0xF00000) && (Adr < 0xF1A124))
+	{
+		for (i = 0; i < NBHWLABELS; i++)
+		{
+			if ((HWLABELTabSectionType[i].HWLABELAdr == Adr))
+			{
+				return (char *)HWLABELTabSectionType[i].HWLABELSymbolName;
+			}
+		}
+	}
+
+	return NULL;
+
+	//while ((HWLABELTabSectionType[i].HWLABELAdr != Adr) && (HWLABELTabSectionType[i++].HWLABELAdr != (size_t)-1));
+	//return (char *)HWLABELTabSectionType[i].HWLABELSymbolName;
 }
 
