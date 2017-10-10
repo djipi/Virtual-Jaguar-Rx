@@ -20,6 +20,10 @@
 #include "settings.h"
 
 
+//#define DEBUG_SPDISPLAY 26			// To fill up to 256 bytes with values from 0 to $FF below the SP pointer
+
+
+//
 StackBrowserWindow::StackBrowserWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dialog),
 //	layout(new QVBoxLayout), text(new QTextBrowser),
 	layout(new QVBoxLayout),
@@ -74,6 +78,16 @@ void StackBrowserWindow::RefreshContents(void)
 	{
 		memBase = m68k_get_reg(NULL, M68K_REG_SP);
 
+#ifdef DEBUG_SPDISPLAY
+#if DEBUG_SPDISPLAY < 257
+		memBase -= DEBUG_SPDISPLAY;
+		for (i = 0; i < DEBUG_SPDISPLAY; i++)
+		{
+			jaguarMainRAM[memBase + i] = (uint8_t)i;
+		}
+#endif
+#endif
+
 		for (i = 0; i < 480; i += 16)
 		{
 			if ((memBase + i) < vjs.DRAM_size)
@@ -122,17 +136,18 @@ void StackBrowserWindow::RefreshContents(void)
 						//}
 						//else
 						{
-							if ((c <= 0x20) || (c > 0x7E))
+							//if (c < 0x20)
+							if ((c < 0x20) || (c > 0x7E))
 							{
-								//sprintf(buf, ".");
-								buf[0] = '.';
+								sprintf(buf, ".");
+								//buf[0] = '.';
 							}
 							else
 							{
-								//sprintf(buf, "&#%i;", c);
-								buf[0] = c;
+								sprintf(buf, "&#%i;", c);
+								//buf[0] = c;
 							}
-							buf[1] = 0;
+							//buf[1] = 0;
 						}
 
 						strcat(string, buf);

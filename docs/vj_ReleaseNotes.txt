@@ -1,4 +1,4 @@
-Release 3 (TBC)
+Release 3 (WiP)
 ---------------
 0) Fixed the windows respawning in the next emulator launch within --alpine or --debugger options
 1) Added an Exception Vector Table browser window
@@ -14,6 +14,7 @@ Release 3 (TBC)
 9) Fixed a crash, in Release mode, when the HW labels setting is turn on
 10) Solved an interference between the HW labels setting and the one used by the debugger
 -- The setting is now only the reference used
+11) Fixed the SP (Stack) window UI potential missing data
 
 Release 2 (3rd September 2017)
 ------------------------------
@@ -76,7 +77,7 @@ Release 0 (5th January 2017)
 
 Known issues
 ============
-1) Video output is not displayed due to OpenGL / QT5 integration problems with VS 2015
+1) Video output is not displayed due to my OpenGL / QT5 integration with VS 2015
 2) The BPM (Breapoint) remains stuck on his address when user wants to continue the code execution
 -- Need to trace over the BPM or unset the BPM
 3) To handle DWARF 2 issues with GCC, the code must be compiled with the -gdwarf-2 option
@@ -87,6 +88,8 @@ Known issues
 -- The application needs to set the SP (Stack) in accordance
 7) The Exception Vector Table broswer window displays only 65 vectors
 -- Missing vectors may be added in future release
+8) User needs to manualy check if the Atari Jaguar executable match his source code files
+-- Otherwise, source code and assembly may not match or leads to instabilities
 
 Cosmetic / UX issues
 ====================
