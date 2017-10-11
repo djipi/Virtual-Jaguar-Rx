@@ -27,6 +27,9 @@
     <ClInclude Include="..\..\src\m68000\sysdeps.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\m68000\obj\cputbl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\m68000\obj\cpudefs.c">

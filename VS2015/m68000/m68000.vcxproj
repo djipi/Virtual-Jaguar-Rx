@@ -149,6 +149,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\m68000\cpudefs.h" />
     <ClInclude Include="..\..\src\m68000\m68kinterface.h" />
+    <ClInclude Include="..\..\src\m68000\obj\cputbl.h" />
     <ClInclude Include="..\..\src\m68000\sysdeps.h" />
   </ItemGroup>
   <ItemGroup>

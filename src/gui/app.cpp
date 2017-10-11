@@ -61,8 +61,7 @@ int main(int argc, char * argv[])
 #if defined (__GCCWIN32__) || defined (_MSC_VER)
 	BOOL(WINAPI * AttachConsole)(DWORD dwProcessId);
 
-	AttachConsole = (BOOL (WINAPI *)(DWORD))
-		GetProcAddress(LoadLibraryA("kernel32.dll"), "AttachConsole");
+	AttachConsole = (BOOL (WINAPI *)(DWORD))GetProcAddress(LoadLibraryA("kernel32.dll"), "AttachConsole");
 
 	if (AttachConsole != NULL && AttachConsole(((DWORD)-1)))
 	{
