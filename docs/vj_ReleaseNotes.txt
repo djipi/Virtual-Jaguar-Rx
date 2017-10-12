@@ -15,6 +15,7 @@ Release 3 (WiP)
 10) Solved an interference between the HW labels setting and the one used by the debugger
 -- The setting is now only the reference used
 11) Fixed the SP (Stack) window UI potential missing data
+12) Create a directory for EEPROMs (based on the EEPROMs setting) if it doesn't already exist
 
 Release 2 (3rd September 2017)
 ------------------------------

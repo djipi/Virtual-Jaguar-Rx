@@ -3,8 +3,6 @@ Stuff to add/fix for the next release of Virtual Jaguar
 
 - Fix VC behavior to match what a real Jaguar does. Still not sure just what
   the heck is going on there. [Shamus]
-- Create an EEPROMs directory (or whatever is in EEPROMPath[]) if it doesn't
-  already exist. [Shamus]
 - It would be nice to have the emulator pick up where you last left off, or at
   least give you the option of continuing from your last session. This would
   require save states, 'natch. ;-) [Shamus]
@@ -30,6 +28,8 @@ Stuff to add/fix for the next release of Virtual Jaguar
 Stuff that was added/fixed
 --------------------------
 
+- Create an EEPROMs directory (or whatever is in EEPROMPath[]) if it doesn't
+  already exist. [Shamus] [DONE--Flynn]
 - Controller handling. [Shamus] [DONE--Shamus]
 - Full screen option. [Shamus] [DONE--Shamus]
 - Command line switches for frontends. [Shamus] [DONE-Shamus]
