@@ -28,6 +28,7 @@
 #include "settings.h"
 
 
+// 
 m68KDasmWindow::m68KDasmWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dialog),
 	layout(new QVBoxLayout), text(new QTextBrowser),
 //	layout(new QTabWidget), text(new QLabel),
@@ -37,6 +38,7 @@ m68KDasmWindow::m68KDasmWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dia
 	go(new QPushButton(tr("Go"))),
 #endif
 //	memBase(0x4000)
+	//sb(new QScrollBar),
 	memBase(0)
 {
 //	m68kDasmWindow *m68kDasmWin = new m68kDasmWindow();
@@ -61,6 +63,7 @@ m68KDasmWindow::m68KDasmWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dia
 	fixedFont.setStyleHint(QFont::Monospace);   //TypeWriter
 	fixedFont.setLetterSpacing(QFont::PercentageSpacing, 100);
 	text->setFont(fixedFont);
+//	sb = layout->text->verticalScrollBar();
 //	text->setStyleSheet("background-color: DeepSkyBlue;");
 ////	layout->setSizeConstraint(QLayout::SetFixedSize);
 	setLayout(layout);
@@ -86,6 +89,7 @@ void m68KDasmWindow::RefreshContents(void)
 	char buffer[1024], string[1024], adresse[16];
 	size_t pc = memBase, oldpc;
 	size_t m68kPC = m68k_get_reg(NULL, M68K_REG_PC);
+	size_t m68KPCNbrDisasmLines = 0;
 	char *Symbol = NULL, *LineSrc, *CurrentLineSrc = NULL;
 	bool m68kPCShow = false;
 	bool constant, adr, equal, Error;
@@ -97,10 +101,18 @@ void m68KDasmWindow::RefreshContents(void)
 	size_t CurrentNumLine;
 	char singleCharString[2] = { 0, 0 };
 
-	text->clear();
+	//text->clear();
 
 	for (i = 0; i < nbr; i++)
 	{
+		//sb->setValue(sb->maximum());
+		//j = text->verticalScrollBar()->maximum();
+		//text->verticalScrollBar()->setValue(text->verticalScrollBar()->maximum());
+		//if (text->verticalScrollBar()->value())
+		//{
+		//	j = 1;
+		//}
+
 		oldpc = pc;
 //		WriteLog("%06X: %s\n", oldpc, buffer);
 		adr = constant = equal = false;
@@ -175,6 +187,7 @@ void m68KDasmWindow::RefreshContents(void)
 				{
 					sprintf(string, "-> %06X: %s<br>", (unsigned int)oldpc, buffer);
 					m68kPCShow = true;
+					m68KPCNbrDisasmLines = i;
 				}
 				else
 				{
@@ -250,8 +263,8 @@ void m68KDasmWindow::RefreshContents(void)
 		}
 	}
 
-//	text->clear();
-
+	// Display generated text
+	text->clear();
 	if (m68kPCShow)
 	{
 		text->setText(s);
@@ -262,11 +275,22 @@ void m68KDasmWindow::RefreshContents(void)
 		RefreshContents();
 	}
 
+	// Set the scrollbar position in accordance of the M68K PC pointer 
+	if (m68KPCNbrDisasmLines > (nbr / 2))
+	{
+		text->verticalScrollBar()->setValue(text->verticalScrollBar()->maximum());
+	}
+	else
+	{
+		text->verticalScrollBar()->setValue(text->verticalScrollBar()->minimum());
+	}
+
 	free(CurrentPtrFullSource);
 }
 
 
 #if 0
+// 
 void m68KDasmWindow::keyPressEvent(QKeyEvent * e)
 {
 //	if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Return)
@@ -328,8 +352,8 @@ void m68KDasmWindow::SetAddress(int address)
 }
 
 
-// Set mem base PC address based on user interaction
 #if 0
+// Set mem base PC address based on user interaction
 void m68KDasmWindow::GoToAddress(void)
 {
 	bool ok;

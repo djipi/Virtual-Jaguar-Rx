@@ -16,6 +16,8 @@ Release 3 (WiP)
 -- The setting is now only the reference used
 11) Fixed the SP (Stack) window UI potential missing data
 12) Create a directory for EEPROMs (based on the EEPROMs setting) if it doesn't already exist
+13) Keep the scrollbar position in accordance of the M68K PC pointer
+-- User will be able to see the source without the need to move down/up the scrollbar
 
 Release 2 (3rd September 2017)
 ------------------------------
@@ -91,6 +93,7 @@ Known issues
 -- Missing vectors may be added in future release
 8) User needs to manualy check if the Atari Jaguar executable match his source code files
 -- Otherwise, source code and assembly may not match or leads to instabilities
+9) Application needs to be restarted in case of keybindings changes
 
 Cosmetic / UX issues
 ====================

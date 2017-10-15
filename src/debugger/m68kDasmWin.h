@@ -36,8 +36,9 @@ class m68KDasmWindow: public QWidget
 #endif
 
 	private:
-		QVBoxLayout * layout;
-		QTextBrowser * text;
+		QVBoxLayout *layout;
+		QTextBrowser *text;
+//		QScrollBar *sb;
 //		QLabel * text;
 #if 0
 		QPushButton * refresh;
