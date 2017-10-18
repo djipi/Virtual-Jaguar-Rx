@@ -263,6 +263,9 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 											case ELF_debug_loc_TYPE:
 												break;
 
+											case ELF_heap_TYPE:
+												break;
+
 											case ELF_comment_TYPE:
 												break;
 

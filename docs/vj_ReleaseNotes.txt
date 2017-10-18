@@ -20,6 +20,8 @@ Release 3 (WiP)
 -- UI displays the source without the need to move down/up the scrollbar
 14) Fixed a crash when DWARF report a source line number exceeding the number of lines present in the source file
 -- This may come from the linker vlink
+15) Improved the .heap section detection to avoid a detection error
+-- Depend vlink version, .heap section may have an Alloc flag
 
 Release 2 (3rd September 2017)
 ------------------------------
