@@ -17,7 +17,9 @@ Release 3 (WiP)
 11) Fixed the SP (Stack) window UI potential missing data
 12) Create a directory for EEPROMs (based on the EEPROMs setting) if it doesn't already exist
 13) Keep the scrollbar position in accordance of the M68K PC pointer
--- User will be able to see the source without the need to move down/up the scrollbar
+-- UI displays the source without the need to move down/up the scrollbar
+14) Fixed a crash when DWARF report a source line number exceeding the number of lines present in the source file
+-- This may come from the linker vlink
 
 Release 2 (3rd September 2017)
 ------------------------------
