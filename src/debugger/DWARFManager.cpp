@@ -20,7 +20,7 @@
 
 
 //
-//#define DEBUG_NumCU 0x42						// CU number to debug or undefine it
+//#define DEBUG_NumCU 0x6						// CU number to debug or undefine it
 
 
 // Source line internal structure
@@ -663,6 +663,24 @@ void DWARFManager_InitDMI(void)
 								PtrCU[NbCU].PtrLinesLoadSrc[j] = (char *)realloc(PtrCU[NbCU].PtrLinesLoadSrc[j], i + 1);
 							}
 						}
+
+						// Init lines source information based on each source code line numbers
+						for (j = 0; j < PtrCU[NbCU].NbSubProgs; j++)
+						{
+							// Check if the subprog / function's line exists in the source code
+							if (PtrCU[NbCU].PtrSubProgs[j].NumLineSrc <= PtrCU[NbCU].NbLinesLoadSrc)
+							{
+								PtrCU[NbCU].PtrSubProgs[j].PtrLineSrc = PtrCU[NbCU].PtrLinesLoadSrc[PtrCU[NbCU].PtrSubProgs[j].NumLineSrc - 1];
+							}
+
+							for (k = 0; k < PtrCU[NbCU].PtrSubProgs[j].NbLinesSrc; k++)
+							{
+								if (PtrCU[NbCU].PtrSubProgs[j].PtrLinesSrc[k].NumLineSrc <= PtrCU[NbCU].NbLinesLoadSrc)
+								{
+									PtrCU[NbCU].PtrSubProgs[j].PtrLinesSrc[k].PtrLineSrc = PtrCU[NbCU].PtrLinesLoadSrc[PtrCU[NbCU].PtrSubProgs[j].PtrLinesSrc[k].NumLineSrc - 1];
+								}
+							}
+						}
 					}
 				}
 				else
@@ -670,29 +688,18 @@ void DWARFManager_InitDMI(void)
 					// Set each source lines pointer to NULL
 					if (PtrCU[NbCU].NbSubProgs)
 					{
-						i = PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].NbLinesSrc - 1].NumLineSrc;
-						if (PtrCU[NbCU].PtrLinesLoadSrc = (char **)calloc(i, sizeof(char *)))
+						// Check the presence of source lines dedicated to the sub progs
+						if (PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].NbLinesSrc)
 						{
-							for (j = 0; j < i; j++)
+							i = PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].NbLinesSrc - 1].NumLineSrc;
+							if (PtrCU[NbCU].PtrLinesLoadSrc = (char **)calloc(i, sizeof(char *)))
 							{
-								PtrCU[NbCU].PtrLinesLoadSrc[j] = NULL;
+								for (j = 0; j < i; j++)
+								{
+									PtrCU[NbCU].PtrLinesLoadSrc[j] = NULL;
+								}
 							}
 						}
-					}
-				}
-
-				// Init lines source information based on each source code line numbers
-				for (j = 0; j < PtrCU[NbCU].NbSubProgs; j++)
-				{
-					// Check if the subprog / function's line exists in the source code
-					if (PtrCU[NbCU].PtrSubProgs[j].NumLineSrc <= PtrCU[NbCU].NbLinesLoadSrc)
-					{
-						PtrCU[NbCU].PtrSubProgs[j].PtrLineSrc = PtrCU[NbCU].PtrLinesLoadSrc[PtrCU[NbCU].PtrSubProgs[j].NumLineSrc - 1];
-					}
-
-					for (k = 0; k < PtrCU[NbCU].PtrSubProgs[j].NbLinesSrc; k++)
-					{
-						PtrCU[NbCU].PtrSubProgs[j].PtrLinesSrc[k].PtrLineSrc = PtrCU[NbCU].PtrLinesLoadSrc[PtrCU[NbCU].PtrSubProgs[j].PtrLinesSrc[k].NumLineSrc - 1];
 					}
 				}
 

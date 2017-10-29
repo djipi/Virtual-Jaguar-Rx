@@ -18,10 +18,11 @@ Release 3 (WiP)
 12) Create a directory for EEPROMs (based on the EEPROMs setting) if it doesn't already exist
 13) Keep the scrollbar position in accordance of the M68K PC pointer
 -- UI displays the source without the need to move down/up the scrollbar
-14) Fixed a crash when DWARF report a source line number exceeding the number of lines present in the source file
+14) Fixed a crash when DWARF information report a source line number exceeding the number of lines present in a source file
 -- This may come from the linker vlink
 15) Improved the .heap section detection to avoid a detection error
 -- Depend vlink version, .heap section may have an Alloc flag
+16) Fixed a crash when DWARF information does references to missing source code files
 
 Release 2 (3rd September 2017)
 ------------------------------
