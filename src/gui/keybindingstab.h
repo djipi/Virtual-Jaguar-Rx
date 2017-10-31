@@ -7,6 +7,7 @@
 //
 struct KeyBindings
 {
+	size_t KBType;
 	const char *KBNameSetting;
 	const char *KBNameLabel;
 	const char *KBPlaceholderText;
@@ -17,6 +18,14 @@ struct KeyBindings
 
 
 // 
+enum
+{
+	KB_TYPEGENERAL = 0,
+	KB_TYPEDEBUGGER = 1,
+	KB_TYPEALPINE = 2
+};
+
+// List the keybindings used for the settings
 enum
 {
 	KB_START = 0,

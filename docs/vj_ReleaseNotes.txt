@@ -11,6 +11,7 @@ Release 3 (WiP)
 7) Added the --es-all, --es-ui, --es-alpine & --es-debugger options to erase specific settings
 8) Added a keybindings tab and adapted the configuration dialog tabs
 -- User can modify the keybindings where appropriate
+-- Keybindings UI is displayed based on the option used (--debugger, -- alpine)
 9) Fixed a crash, in Release mode, when the HW labels setting is turn on
 10) Solved an interference between the HW labels setting and the one used by the debugger
 -- The setting is now only the reference used

@@ -15,16 +15,16 @@
 
 //
 KeyBindings KeyBindingsTable[KB_END] =	{
-											{	"KB_Quit", "Quit", "Quit keybinding", "Ctrl+Q", NULL, NULL	},
-											{	"KB_PickFile", "Pick file", "Pick file keybinding", "Ctrl+I", NULL, NULL	},
-											{	"KB_Configure", "Configure", "Configure keybinding", "Ctrl+C", NULL, NULL	},
-											{	"KB_EmuStatus", "Emulator Status", "Emulator status keybinding", "Ctrl+S", NULL, NULL	},
-											{	"KB_Pause", "Pause", "Pause keybinding", "Esc", NULL, NULL	},
-											{	"KB_FrameAdvance", "Frame Advance", "Frame advance keybinding", "F7", NULL, NULL	},
-											{	"KB_Restart", "Restart", "Restart keybinding", "Ctrl+Shift+F5", NULL, NULL	},
-											{	"KB_StepInto", "Step Into", "Step into keybinding", "F11", NULL, NULL	},
-											{	"KB_StepOver", "Step Over", "Step over kebinding", "F10", NULL, NULL	},
-											{	"KB_FullScreen", "Full Screen", "Full screen kebinding", "F9", NULL, NULL	}
+											{ KB_TYPEGENERAL, "KB_Quit", "Quit", "Quit keybinding", "Ctrl+Q", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_PickFile", "Pick file", "Pick file keybinding", "Ctrl+I", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_Configure", "Configure", "Configure keybinding", "Ctrl+C", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_EmuStatus", "Emulator Status", "Emulator status keybinding", "Ctrl+S", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_Pause", "Pause", "Pause keybinding", "Esc", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_FrameAdvance", "Frame Advance", "Frame advance keybinding", "F7", NULL, NULL },
+											{ KB_TYPEDEBUGGER, "KB_Restart", "Restart", "Restart keybinding", "Ctrl+Shift+F5", NULL, NULL	},
+											{ KB_TYPEDEBUGGER, "KB_StepInto", "Step Into", "Step into keybinding", "F11", NULL, NULL	},
+											{ KB_TYPEDEBUGGER, "KB_StepOver", "Step Over", "Step over kebinding", "F10", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_FullScreen", "Full Screen", "Full screen kebinding", "F9", NULL, NULL	}
 										};
 
 
@@ -43,10 +43,30 @@ KeyBindingsTab::KeyBindingsTab(QWidget * parent/*= 0*/): QWidget(parent)
 	// Initialisation for each layout line
 	for (i = 0; i < NBKEYBINDINGS; i++)
 	{
+		// Prepare the keybinding line
 		layout1->addWidget(KeyBindingsTable[i].KBLabel = new QLabel(KeyBindingsTable[i].KBNameLabel));
 		layout2->addWidget(KeyBindingsTable[i].KBLineEdit = new QLineEdit(""));
 		KeyBindingsTable[i].KBLineEdit->setMaxLength(30);
 		KeyBindingsTable[i].KBLineEdit->setPlaceholderText(KeyBindingsTable[i].KBPlaceholderText);
+
+		// Check if keybinding can be editable
+		if (KeyBindingsTable[i].KBType != KB_TYPEGENERAL)
+		{
+			if (vjs.hardwareTypeAlpine && (KeyBindingsTable[i].KBType & KB_TYPEALPINE))
+			{
+			}
+			else
+			{
+				if (vjs.softTypeDebugger && (KeyBindingsTable[i].KBType & KB_TYPEDEBUGGER))
+				{
+				}
+				else
+				{
+					KeyBindingsTable[i].KBLabel->hide();
+					KeyBindingsTable[i].KBLineEdit->hide();
+				}
+			}
+		}
 	}
 
 	// Layouts setup
