@@ -1,8 +1,7 @@
 //
-// allwatch.h: All Watch
+// allwatchbrowser.h: All Watch
 //
-// by James Hammons
-// (C) 2012 Underground Software
+// by Jean-Paul Mari
 //
 
 #ifndef __ALLWATCHBROWSER_H__

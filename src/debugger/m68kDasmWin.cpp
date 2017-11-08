@@ -172,7 +172,7 @@ void m68KDasmWindow::RefreshContents(void)
 		else
 		{
 			// Display symbol, or line source, based on the program address
-			if (!CurrentLineSrc && !Symbol && (Symbol = DBGManager_GetSymbolnameFromAdr(oldpc)))
+			if (!CurrentLineSrc && !Symbol && (Symbol = DBGManager_GetSymbolNameFromAdr(oldpc)))
 			{
 				sprintf(string, "%s:<br>", Symbol);
 				s += QString(string);
@@ -235,7 +235,7 @@ void m68KDasmWindow::RefreshContents(void)
 							} while ((string[(j + 1)] >= '0') && (string[(j + 1)] <= '9') || (string[(j + 1)] >= 'A') && (string[(j + 1)] <= 'F'));
 							adresse[l] = 0;
 
-							if (Symbol = DBGManager_GetSymbolnameFromAdr(strtoul(adresse, &p, 16)))
+							if (Symbol = DBGManager_GetSymbolNameFromAdr(strtoul(adresse, &p, 16)))
 							{
 								strcat(buffer, Symbol);
 							}

@@ -21,6 +21,7 @@
 
 //
 //#define DEBUG_NumCU 0x6						// CU number to debug or undefine it
+//#define DEBUG_VariableName "argc"				// Variable name to look for or undefine it
 
 
 // Source line internal structure
@@ -46,7 +47,12 @@ struct BaseTypeStruct
 // Variables internal structure
 struct VariablesStruct
 {
-	size_t Addr;							// Variable memory address
+	size_t Op;								// Variable's DW_OP
+	union
+	{
+		size_t Addr;						// Variable memory address
+		int Offset;							// Variable stack offset (signed)
+	};
 	char *PtrName;							// Variable's name
 	size_t TypeOffset;						// Offset pointing on the Variable's Type
 	size_t TypeByteSize;					// Variable's Type byte size
@@ -62,10 +68,13 @@ struct SubProgStruct
 	size_t NumLineSrc;
 	size_t StartPC;
 	size_t LowPC, HighPC;
+	size_t FrameBase;
 	char *PtrLineSrc;
-	char *PtrSubprogramName;
-	size_t NbLinesSrc;
-	DMIStruct_LineSrc *PtrLinesSrc;
+	char *PtrSubprogramName;						// Sub program name
+	size_t NbLinesSrc;								// Number of lines source used by the sub program
+	DMIStruct_LineSrc *PtrLinesSrc;					// Pointer of the lines source for the sub program
+	size_t NbVariables;								// Variables number
+	VariablesStruct *PtrVariables;					// Pointer to the local variables list information structure
 }S_SubProgStruct;
 
 // Compilation Unit internal structure
@@ -84,7 +93,7 @@ struct CUStruct
 	size_t NbTypes;
 	BaseTypeStruct *PtrTypes;
 	size_t NbVariables;								// Variables number
-	VariablesStruct *PtrVariables;					// Pointer to the variables list information structure
+	VariablesStruct *PtrVariables;					// Pointer to the global variables list information structure
 }S_CUStruct;
 
 
@@ -103,6 +112,7 @@ void DWARFManager_InitDMI(void);
 void DWARFManager_CloseDMI(void);
 bool DWARFManager_ElfClose(void);
 char *DWARFManager_GetLineSrcFromNumLine(char *PtrSrcFile, size_t NumLine);
+void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables);
 
 
 //
@@ -186,6 +196,13 @@ void DWARFManager_CloseDMI(void)
 
 		while (PtrCU[NbCU].NbSubProgs--)
 		{
+			while (PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables--)
+			{
+				free(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].PtrName);
+				free(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].PtrTypeName);
+			}
+			free(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables);
+
 			free(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc);
 			free(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrSubprogramName);
 		}
@@ -220,11 +237,11 @@ void DWARFManager_InitDMI(void)
 	Dwarf_Addr return_lowpc, return_highpc, return_lineaddr;
 	Dwarf_Block *return_block;
 	Dwarf_Signed atcnt, cnt;
-	Dwarf_Die return_sib, return_die;
+	Dwarf_Die return_sib, return_die, return_sub, return_subdie;
 	Dwarf_Off return_offset;
 	Dwarf_Line *linebuf;
 	FILE *SrcFile;
-	size_t i, j, k, TypeOffset;
+	size_t i, j, k;
 	char *return_string;
 	char *Ptr;
 	char *SourceFilename = NULL;
@@ -380,6 +397,7 @@ void DWARFManager_InitDMI(void)
 					{
 					}
 
+					// Check if the CU has child
 					if (dwarf_child(return_sib, &return_die, &error) == DW_DLV_OK)
 					{
 						do
@@ -409,9 +427,16 @@ void DWARFManager_InitDMI(void)
 													case	DW_AT_location:
 														if (dwarf_formblock(return_attr1, &return_block, &error) == DW_DLV_OK)
 														{
-															if (return_block->bl_len == 5)
+															PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].Op = (*((unsigned char *)(return_block->bl_data)));
+
+															switch (return_block->bl_len)
 															{
+															case 5:
 																PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].Addr = (*((unsigned char *)(return_block->bl_data) + 1) << 24) + (*((unsigned char *)(return_block->bl_data) + 2) << 16) + (*((unsigned char *)(return_block->bl_data) + 3) << 8) + (*((unsigned char *)(return_block->bl_data) + 4));
+																break;
+
+															default:
+																break;
 															}
 															dwarf_dealloc(dbg, return_block, DW_DLA_BLOCK);
 														}
@@ -427,9 +452,14 @@ void DWARFManager_InitDMI(void)
 													case	DW_AT_name:
 														if (dwarf_formstring(return_attr1, &return_string, &error) == DW_DLV_OK)
 														{
-															PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].PtrName = (char *)calloc(strlen(return_string) + 1, 1);
-															strcpy(PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].PtrName, return_string);
-															dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
+#ifdef DEBUG_VariableName
+															if (!strcmp(return_string, DEBUG_VariableName))
+#endif
+															{
+																PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].PtrName = (char *)calloc(strlen(return_string) + 1, 1);
+																strcpy(PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].PtrName, return_string);
+																dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
+															}
 														}
 														break;
 
@@ -535,7 +565,7 @@ void DWARFManager_InitDMI(void)
 												{
 													switch (return_attr)
 													{
-													case	DW_AT_low_pc:
+													case DW_AT_low_pc:
 														if (dwarf_lowpc(return_die, &return_lowpc, &error) == DW_DLV_OK)
 														{
 															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].StartPC = return_lowpc;
@@ -543,21 +573,28 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
-													case	DW_AT_high_pc:
+													case DW_AT_high_pc:
 														if (dwarf_highpc(return_die, &return_highpc, &error) == DW_DLV_OK)
 														{
 															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].HighPC = return_highpc;
 														}
 														break;
 
-													case	DW_AT_decl_line:
+													case DW_AT_decl_line:
 														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
 														{
 															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NumLineSrc = return_uvalue;
 														}
 														break;
 
-													case	DW_AT_name:
+													case DW_AT_frame_base:
+														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+														{
+															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].FrameBase = return_uvalue;
+														}
+														break;
+
+													case DW_AT_name:
 														if (dwarf_formstring(return_attr1, &return_string, &error) == DW_DLV_OK)
 														{
 															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrSubprogramName = (char *)calloc(strlen(return_string) + 1, 1);
@@ -593,6 +630,103 @@ void DWARFManager_InitDMI(void)
 											}
 										}
 
+										if (dwarf_child(return_die, &return_subdie, &error) == DW_DLV_OK)
+										{
+											do
+											{
+												return_sub = return_subdie;
+												if ((dwarf_tag(return_subdie, &return_tagval, &error) == DW_DLV_OK))
+												{
+													switch (return_tagval)
+													{
+													case DW_TAG_formal_parameter:
+													case DW_TAG_variable:
+														if (dwarf_attrlist(return_subdie, &atlist, &atcnt, &error) == DW_DLV_OK)
+														{
+															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables = (VariablesStruct *)realloc(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables, ((PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables + 1) * sizeof(VariablesStruct)));
+															memset(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables + PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables, 0, sizeof(VariablesStruct));
+
+															for (Dwarf_Signed i = 0; i < atcnt; ++i)
+															{
+																if (dwarf_whatattr(atlist[i], &return_attr, &error) == DW_DLV_OK)
+																{
+																	if (dwarf_attr(return_subdie, return_attr, &return_attr1, &error) == DW_DLV_OK)
+																	{
+																		switch (return_attr)
+																		{
+																		case	DW_AT_location:
+																			if (dwarf_formblock(return_attr1, &return_block, &error) == DW_DLV_OK)
+																			{
+																				PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Op = *((unsigned char *)(return_block->bl_data));
+
+																				switch (return_block->bl_len)
+																				{
+																				case 1:
+																					break;
+
+																				case 2:
+																					PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset = *((char *)(return_block->bl_data) + 1);
+
+																					if (return_tagval == DW_TAG_variable)
+																					{
+																						PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset -= 0x80;
+																					}
+																					break;
+
+																				default:
+																					break;
+																				}
+																				dwarf_dealloc(dbg, return_block, DW_DLA_BLOCK);
+																			}
+																			break;
+
+																		case	DW_AT_type:
+																			if (dwarf_global_formref(return_attr1, &return_offset, &error) == DW_DLV_OK)
+																			{
+																				PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].TypeOffset = return_offset;
+																			}
+																			break;
+
+																		case	DW_AT_name:
+																			if (dwarf_formstring(return_attr1, &return_string, &error) == DW_DLV_OK)
+																			{
+#ifdef DEBUG_VariableName
+																				if (!strcmp(return_string, DEBUG_VariableName))
+#endif
+																				{
+																					PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].PtrName = (char *)calloc(strlen(return_string) + 1, 1);
+																					strcpy(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].PtrName, return_string);
+																					dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
+																				}
+																			}
+																			break;
+
+																		default:
+																			break;
+																		}
+																	}
+																}
+
+																dwarf_dealloc(dbg, atlist[i], DW_DLA_ATTR);
+															}
+
+															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables++;
+
+															dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
+														}
+														break;
+
+													case DW_TAG_label:
+														break;
+
+													default:
+														break;
+													}
+												}
+											}
+											while (dwarf_siblingof(dbg, return_sub, &return_subdie, &error) == DW_DLV_OK);
+										}
+
 										PtrCU[NbCU].NbSubProgs++;
 									}
 									break;
@@ -601,7 +735,8 @@ void DWARFManager_InitDMI(void)
 									break;
 								}
 							}
-						} while (dwarf_siblingof(dbg, return_sib, &return_die, &error) == DW_DLV_OK);
+						}
+						while (dwarf_siblingof(dbg, return_sib, &return_die, &error) == DW_DLV_OK);
 					}
 
 					// Release the memory used by the source lines
@@ -703,98 +838,18 @@ void DWARFManager_InitDMI(void)
 					}
 				}
 
-				// Init variables information based on types information
+				// Init global variables information based on types information
 				for (i = 0; i < PtrCU[NbCU].NbVariables; i++)
 				{
-					PtrCU[NbCU].PtrVariables[i].PtrTypeName = (char *)calloc(1000, 1);
-					TypeOffset = PtrCU[NbCU].PtrVariables[i].TypeOffset;
+					DWARFManager_InitInfosVariable(PtrCU[NbCU].PtrVariables + i);
+				}
 
-					for (j = 0; j < PtrCU[NbCU].NbTypes; j++)
+				// Init local variables information based on types information
+				for (i = 0; i < PtrCU[NbCU].NbSubProgs; i++)
+				{
+					for (j = 0; j < PtrCU[NbCU].PtrSubProgs[i].NbVariables; j++)
 					{
-						if (TypeOffset == PtrCU[NbCU].PtrTypes[j].Offset)
-						{
-							switch (PtrCU[NbCU].PtrTypes[j].Tag)
-							{
-							case DW_TAG_structure_type:
-								PtrCU[NbCU].PtrVariables[i].TypeTag |= 0x1;
-								if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
-								{
-									j = -1;
-								}
-								else
-								{
-									if ((PtrCU[NbCU].PtrVariables[i].TypeTag & 0x2))
-									{
-										strcat(PtrCU[NbCU].PtrVariables[i].PtrTypeName, " *");
-									}
-								}
-								break;
-
-							case DW_TAG_pointer_type:
-								PtrCU[NbCU].PtrVariables[i].TypeTag |= 0x2;
-								PtrCU[NbCU].PtrVariables[i].TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
-								PtrCU[NbCU].PtrVariables[i].TypeEncoding = 0x10;
-								if (!(TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
-								{
-									strcat(PtrCU[NbCU].PtrVariables[i].PtrTypeName, "void *");
-								}
-								else
-								{
-									j = -1;
-								}
-								break;
-
-							case DW_TAG_typedef:
-								PtrCU[NbCU].PtrVariables[i].TypeTag |= 0x20;
-								strcat(PtrCU[NbCU].PtrVariables[i].PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
-								if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
-								{
-									j = -1;
-								}
-								break;
-
-							case DW_TAG_subrange_type:
-								PtrCU[NbCU].PtrVariables[i].TypeTag |= 0x4;
-								break;
-
-							case DW_TAG_array_type:
-								PtrCU[NbCU].PtrVariables[i].TypeTag |= 0x8;
-								if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
-								{
-									j = -1;
-								}
-								break;
-
-							case DW_TAG_const_type:
-								PtrCU[NbCU].PtrVariables[i].TypeTag |= 0x10;
-								strcat(PtrCU[NbCU].PtrVariables[i].PtrTypeName, "const ");
-								if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
-								{
-									j = -1;
-								}
-								break;
-
-							case DW_TAG_base_type:
-								strcat(PtrCU[NbCU].PtrVariables[i].PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
-								if ((PtrCU[NbCU].PtrVariables[i].TypeTag & 0x2))
-								{
-									strcat(PtrCU[NbCU].PtrVariables[i].PtrTypeName, " *");
-								}
-								else
-								{
-									PtrCU[NbCU].PtrVariables[i].TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
-									PtrCU[NbCU].PtrVariables[i].TypeEncoding = PtrCU[NbCU].PtrTypes[j].Encoding;
-								}
-								if ((PtrCU[NbCU].PtrVariables[i].TypeTag & 0x8))
-								{
-									strcat(PtrCU[NbCU].PtrVariables[i].PtrTypeName, "[]");
-								}
-								break;
-
-							default:
-								break;
-							}
-						}
+						DWARFManager_InitInfosVariable(PtrCU[NbCU].PtrSubProgs[i].PtrVariables + j);
 					}
 				}
 			}
@@ -806,6 +861,104 @@ void DWARFManager_InitDMI(void)
 	free(SourceFilename);
 	free(SourceFileDirectory);
 	free(SourceFullFilename);
+}
+
+
+// 
+void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
+{
+	size_t j, TypeOffset;
+
+	PtrVariables->PtrTypeName = (char *)calloc(1000, 1);
+	TypeOffset = PtrVariables->TypeOffset;
+
+	for (j = 0; j < PtrCU[NbCU].NbTypes; j++)
+	{
+		if (TypeOffset == PtrCU[NbCU].PtrTypes[j].Offset)
+		{
+			switch (PtrCU[NbCU].PtrTypes[j].Tag)
+			{
+			case DW_TAG_structure_type:
+				PtrVariables->TypeTag |= 0x1;
+				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
+				{
+					j = -1;
+				}
+				else
+				{
+					if ((PtrVariables->TypeTag & 0x2))
+					{
+						strcat(PtrVariables->PtrTypeName, " *");
+					}
+				}
+				break;
+
+			case DW_TAG_pointer_type:
+				PtrVariables->TypeTag |= 0x2;
+				PtrVariables->TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
+				PtrVariables->TypeEncoding = 0x10;
+				if (!(TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
+				{
+					strcat(PtrVariables->PtrTypeName, "void *");
+				}
+				else
+				{
+					j = -1;
+				}
+				break;
+
+			case DW_TAG_typedef:
+				PtrVariables->TypeTag |= 0x20;
+				strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
+				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
+				{
+					j = -1;
+				}
+				break;
+
+			case DW_TAG_subrange_type:
+				PtrVariables->TypeTag |= 0x4;
+				break;
+
+			case DW_TAG_array_type:
+				PtrVariables->TypeTag |= 0x8;
+				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
+				{
+					j = -1;
+				}
+				break;
+
+			case DW_TAG_const_type:
+				PtrVariables->TypeTag |= 0x10;
+				strcat(PtrVariables->PtrTypeName, "const ");
+				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
+				{
+					j = -1;
+				}
+				break;
+
+			case DW_TAG_base_type:
+				strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
+				if ((PtrVariables->TypeTag & 0x2))
+				{
+					strcat(PtrVariables->PtrTypeName, " *");
+				}
+				else
+				{
+					PtrVariables->TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
+					PtrVariables->TypeEncoding = PtrCU[NbCU].PtrTypes[j].Encoding;
+				}
+				if ((PtrVariables->TypeTag & 0x8))
+				{
+					strcat(PtrVariables->PtrTypeName, "[]");
+				}
+				break;
+
+			default:
+				break;
+			}
+		}
+	}
 }
 
 
@@ -874,9 +1027,204 @@ char *DWARFManager_GetLineSrcFromNumLine(char *PtrSrcFile, size_t NumLine)
 }
 
 
-// Get Compilation Unit / External variables numbers
+// Get number of variables referenced by the function range address
+size_t DWARFManager_GetNbLocalVariables(size_t Adr)
+{
+	size_t i, j;
+
+	for (i = 0; i < NbCU; i++)
+	{
+		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
+		{
+			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			{
+				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
+				{
+					return PtrCU[i].PtrSubProgs[j].NbVariables;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+// Get local variable name based on his index (starting by 1)
+// Return name's pointer text found
+// Return NULL if not found
+char *DWARFManager_GetLocalVariableName(size_t Adr, size_t Index)
+{
+	size_t i, j;
+
+	for (i = 0; i < NbCU; i++)
+	{
+		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
+		{
+			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			{
+				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
+				{
+					return PtrCU[i].PtrSubProgs[j].PtrVariables[Index - 1].PtrName;
+				}
+			}
+		}
+	}
+
+	return NULL;
+}
+
+
+// Get local variable's type tag based on his index (starting by 1)
+// Return 0 if not found
+size_t DWARFManager_GetLocalVariableTypeTag(size_t Adr, size_t Index)
+{
+	size_t i, j;
+
+	for (i = 0; i < NbCU; i++)
+	{
+		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
+		{
+			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			{
+				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
+				{
+					return PtrCU[i].PtrSubProgs[j].PtrVariables[Index - 1].TypeTag;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+//
+int DWARFManager_GetLocalVariableOffset(size_t Adr, size_t Index)
+{
+	size_t i, j;
+
+	for (i = 0; i < NbCU; i++)
+	{
+		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
+		{
+			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			{
+				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
+				{
+					return PtrCU[i].PtrSubProgs[j].PtrVariables[Index - 1].Offset;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+// Get local variable Type Byte Size based on his address and index (starting by 1)
+// Return 0 if not found
+// May return 0 if there is no Type Byte Size linked to the variable's address and index
+size_t DWARFManager_GetLocalVariableTypeByteSize(size_t Adr, size_t Index)
+{
+	size_t i, j;
+
+	for (i = 0; i < NbCU; i++)
+	{
+		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
+		{
+			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			{
+				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
+				{
+					return PtrCU[i].PtrSubProgs[j].PtrVariables[Index - 1].TypeByteSize;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+// Get local variable Type Encoding based on his address and index (starting by 1)
+// Return 0 if not found
+// May return 0 if there is no Type Encoding linked to the variable's address and index
+size_t DWARFManager_GetLocalVariableTypeEncoding(size_t Adr, size_t Index)
+{
+	size_t i, j;
+
+	for (i = 0; i < NbCU; i++)
+	{
+		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
+		{
+			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			{
+				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
+				{
+					return PtrCU[i].PtrSubProgs[j].PtrVariables[Index - 1].TypeEncoding;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+// Get local variable Op based on his address and index (starting by 1)
+// Return 0 if not found
+// May return 0 if there isn't Op linked to the variable's index
+size_t DWARFManager_GetLocalVariableOp(size_t Adr, size_t Index)
+{
+	size_t i, j;
+
+	for (i = 0; i < NbCU; i++)
+	{
+		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
+		{
+			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			{
+				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
+				{
+					return PtrCU[i].PtrSubProgs[j].PtrVariables[Index - 1].Op;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+// Get local variable type name based on his index (starting by 1)
+// Return NULL if not found
+// May return NULL if there is not type linked to the variable's index
+char *DWARFManager_GetLocalVariableTypeName(size_t Adr, size_t Index)
+{
+	size_t i, j;
+
+	for (i = 0; i < NbCU; i++)
+	{
+		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
+		{
+			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			{
+				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
+				{
+					return PtrCU[i].PtrSubProgs[j].PtrVariables[Index - 1].PtrTypeName;
+				}
+			}
+		}
+	}
+
+	return NULL;
+}
+
+
+// Get Compilation Unit / global variables numbers
 // Return variables number
-size_t DWARFManager_GetNbExternalVariables(void)
+size_t DWARFManager_GetNbGlobalVariables(void)
 {
 	size_t NbVariables = 0, i;
 
@@ -889,10 +1237,10 @@ size_t DWARFManager_GetNbExternalVariables(void)
 }
 
 
-// Get external variable type name based on his index (starting by 1)
+// Get global variable type name based on his index (starting by 1)
 // Return NULL if not found
 // May return NULL if there is not type linked to the variable's index
-char *DWARFManager_GetExternalVariableTypeName(size_t Index)
+char *DWARFManager_GetGlobalVariableTypeName(size_t Index)
 {
 	size_t i;
 
@@ -915,9 +1263,9 @@ char *DWARFManager_GetExternalVariableTypeName(size_t Index)
 }
 
 
-// Get external variable's type tag based on his index (starting by 1)
+// Get global variable's type tag based on his index (starting by 1)
 // Return 0 if not found
-size_t DWARFManager_GetExternalVariableTypeTag(size_t Index)
+size_t DWARFManager_GetGlobalVariableTypeTag(size_t Index)
 {
 	size_t i;
 
@@ -940,9 +1288,9 @@ size_t DWARFManager_GetExternalVariableTypeTag(size_t Index)
 }
 
 
-// Get external variable byte size based on his index (starting by 1)
+// Get global variable byte size based on his index (starting by 1)
 // Return 0 if not found
-size_t DWARFManager_GetExternalVariableTypeByteSize(size_t Index)
+size_t DWARFManager_GetGlobalVariableTypeByteSize(size_t Index)
 {
 	size_t i;
 
@@ -965,9 +1313,9 @@ size_t DWARFManager_GetExternalVariableTypeByteSize(size_t Index)
 }
 
 
-// Get external variable encoding based on his index (starting by 1)
+// Get global variable encoding based on his index (starting by 1)
 // Return 0 if not found
-size_t DWARFManager_GetExternalVariableTypeEncoding(size_t Index)
+size_t DWARFManager_GetGlobalVariableTypeEncoding(size_t Index)
 {
 	size_t i;
 
@@ -990,9 +1338,9 @@ size_t DWARFManager_GetExternalVariableTypeEncoding(size_t Index)
 }
 
 
-// Get external variable address based on his index (starting by 1)
+// Get global variable address based on his index (starting by 1)
 // Return 0 if not found
-size_t DWARFManager_GetExternalVariableAdr(size_t Index)
+size_t DWARFManager_GetGlobalVariableAdr(size_t Index)
 {
 	size_t i;
 
@@ -1015,10 +1363,10 @@ size_t DWARFManager_GetExternalVariableAdr(size_t Index)
 }
 
 
-// Get external variable memory address based on his name
+// Get global variable memory address based on his name
 // Return 0 if not found
 // Note: Return the first occurence found
-size_t DWARFManager_GetExternalVariableAdrFromName(char *VariableName)
+size_t DWARFManager_GetGlobalVariableAdrFromName(char *VariableName)
 {
 	size_t i, j;
 
@@ -1040,10 +1388,10 @@ size_t DWARFManager_GetExternalVariableAdrFromName(char *VariableName)
 }
 
 
-// Get external variable name based on his index (starting by 1)
+// Get global variable name based on his index (starting by 1)
 // Return name's pointer text found
 // Return NULL if not found
-char *DWARFManager_GetExternalVariableName(size_t Index)
+char *DWARFManager_GetGlobalVariableName(size_t Index)
 {
 	size_t i;
 
@@ -1143,6 +1491,30 @@ size_t DWARFManager_GetNumLineFromAdr(size_t Adr, size_t Tag)
 	}
 
 	return	0;
+}
+
+
+// Get function name based on address and his range
+// Return NULL if no function name has been found
+char *DWARFManager_GetFunctionName(size_t Adr)
+{
+	size_t i, j;
+
+	for (i = 0; i < NbCU; i++)
+	{
+		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
+		{
+			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			{
+				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
+				{
+					return PtrCU[i].PtrSubProgs[j].PtrSubprogramName;
+				}
+			}
+		}
+	}
+
+	return NULL;
 }
 
 

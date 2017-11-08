@@ -289,6 +289,12 @@
     <ClCompile Include="..\src\gui\keybindingstab.cpp">
       <Filter>Source Files\gui\tab</Filter>
     </ClCompile>
+    <ClCompile Include="obj\moc_localbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\localbrowser.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -497,6 +503,9 @@
     <None Include="..\docs\LICENSE">
       <Filter>Docs</Filter>
     </None>
+    <None Include="..\res\Local.png">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\debugger\VideoWin.h">
@@ -576,6 +585,9 @@
     </CustomBuild>
     <CustomBuild Include="..\src\gui\keybindingstab.h">
       <Filter>Header Files\gui\tab</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\localbrowser.h">
+      <Filter>Header Files\debugger</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

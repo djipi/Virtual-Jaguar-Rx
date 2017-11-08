@@ -114,6 +114,7 @@ HEADERS = \
 	src/debugger/VideoWin.h \
 	src/debugger/ELFManager.h \
 	src/debugger/allwatchbrowser.h \
+	src/debugger/localbrowser.h \
 	src/debugger/DWARFManager.h \
 	src/debugger/memory1browser.h \
 	src/debugger/heapallocatorbrowser.h \
@@ -161,6 +162,7 @@ SOURCES = \
 	src/debugger/VideoWin.cpp \
 	src/debugger/ELFManager.cpp \
 	src/debugger/allwatchbrowser.cpp \
+	src/debugger/localbrowser.cpp \
 	src/debugger/DWARFManager.cpp \
 	src/debugger/memory1browser.cpp \
 	src/debugger/heapallocatorbrowser.cpp \

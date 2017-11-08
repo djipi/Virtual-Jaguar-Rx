@@ -1,5 +1,5 @@
 //
-// allwatch.cpp - All Watch
+// allwatchbrowser.cpp - All Watch
 //
 // by Jean-Paul Mari
 //
@@ -74,7 +74,7 @@ void AllWatchBrowserWindow::RefreshContents(void)
 	{
 		if (!NbWatch)
 		{
-			if (NbWatch = DBGManager_GetNbExternalVariables())
+			if (NbWatch = DBGManager_GetNbGlobalVariables())
 			{
 				PtrWatchInfo = (WatchInfo *)calloc(NbWatch, sizeof(WatchInfo));
 #ifdef _MSC_VER
@@ -85,10 +85,10 @@ void AllWatchBrowserWindow::RefreshContents(void)
 					
 				for (uint32_t i = 0; i < NbWatch; i++)
 				{
-					PtrWatchInfo[i].PtrVariableName = DBGManager_GetExternalVariableName(i + 1);
-					PtrWatchInfo[i].addr = DBGManager_GetExternalVariableAdr(i + 1);
-					PtrWatchInfo[i].TypeTag = DBGManager_GetExternalVariableTypeTag(i + 1);
-					if (!strlen(PtrWatchInfo[i].PtrVariableBaseTypeName = DBGManager_GetExternalVariableTypeName(i + 1)))
+					PtrWatchInfo[i].PtrVariableName = DBGManager_GetGlobalVariableName(i + 1);
+					PtrWatchInfo[i].addr = DBGManager_GetGlobalVariableAdr(i + 1);
+					PtrWatchInfo[i].TypeTag = DBGManager_GetGlobalVariableTypeTag(i + 1);
+					if (!strlen(PtrWatchInfo[i].PtrVariableBaseTypeName = DBGManager_GetGlobalVariableTypeName(i + 1)))
 					{
 						PtrWatchInfo[i].PtrVariableBaseTypeName = (char *)"<font color='#ff0000'>N/A</font>";
 					}
@@ -100,7 +100,7 @@ void AllWatchBrowserWindow::RefreshContents(void)
 		{
 			if (PtrWatchInfo[i].PtrVariableName && PtrWatchInfo[i].PtrVariableBaseTypeName)
 			{
-				sprintf(string, "%i : %s | %s | 0x%06X | %s", (i + 1), PtrWatchInfo[i].PtrVariableBaseTypeName, PtrWatchInfo[i].PtrVariableName, (unsigned int)PtrWatchInfo[i].addr, (PtrWatchInfo[i].TypeTag & 0x8) ? "" : DBGManager_GetExternalVariableValue(i + 1));
+				sprintf(string, "%i : %s | %s | 0x%06X | %s", (i + 1), PtrWatchInfo[i].PtrVariableBaseTypeName, PtrWatchInfo[i].PtrVariableName, (unsigned int)PtrWatchInfo[i].addr, (PtrWatchInfo[i].TypeTag & 0x8) ? "" : DBGManager_GetGlobalVariableValue(i + 1));
 				WatchAll += QString(string);
 				sprintf(string, "<br>");
 				WatchAll += QString(string);

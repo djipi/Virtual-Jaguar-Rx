@@ -80,7 +80,7 @@ void BrkWindow::RefreshContents(void)
 	{
 		if (!NbWatch)
 		{
-			if (NbWatch = DBGManager_GetNbExternalVariables())
+			if (NbWatch = DBGManager_GetNbGlobalVariables())
 			{
 				PtrWatchInfo = (WatchInfo *)calloc(NbWatch, sizeof(WatchInfo));
 #ifdef _MSC_VER
@@ -91,10 +91,10 @@ void BrkWindow::RefreshContents(void)
 					
 				for (uint32_t i = 0; i < NbWatch; i++)
 				{
-					PtrWatchInfo[i].PtrVariableName = DBGManager_GetExternalVariableName(i + 1);
+					PtrWatchInfo[i].PtrVariableName = DBGManager_GetGlobalVariableName(i + 1);
 					PtrWatchInfo[i].addr = DBGManager_GetExternalVariableAdr(i + 1);
 					PtrWatchInfo[i].TypeTag = DBGManager_GetExternalVariableTypeTag(i + 1);
-					if (!strlen(PtrWatchInfo[i].PtrVariableBaseTypeName = DBGManager_GetExternalVariableTypeName(i + 1)))
+					if (!strlen(PtrWatchInfo[i].PtrVariableBaseTypeName = DBGManager_GetGlobalVariableTypeName(i + 1)))
 					{
 						PtrWatchInfo[i].PtrVariableBaseTypeName = (char *)"<font color='#ff0000'>N/A</font>";
 					}

@@ -25,10 +25,6 @@
 #include "memory.h"
 
 
-// 
-char *DBGManager_GetVariableValueFromAdr(uint32_t Adr, uint32_t TypeEncoding, uint32_t TypeByteSize);
-
-
 //
 struct Value
 {
@@ -114,13 +110,28 @@ char *DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error)
 }
 
 
-// Get number of external variables
+// Get number of local variables
 // Return 0 if none has been found
-size_t DBGManager_GetNbExternalVariables(void)
+size_t DBGManager_GetNbLocalVariables(size_t Adr)
 {
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetNbExternalVariables();
+		return DWARFManager_GetNbLocalVariables(Adr);
+	}
+	else
+	{
+		return	0;
+	}
+}
+
+
+// Get number of global variables
+// Return 0 if none has been found
+size_t DBGManager_GetNbGlobalVariables(void)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetNbGlobalVariables();
 	}
 	else
 	{
@@ -143,14 +154,14 @@ size_t DBGManager_GetAdrFromSymbolName(char *SymbolName)
 }
 
 
-// Get external variable's Address based on his Name
+// Get global variable's Address based on his Name
 // Return found Address
 // Return NULL if no Address has been found
-size_t DBGManager_GetExternalVariableAdrFromName(char *VariableName)
+size_t DBGManager_GetGlobalVariableAdrFromName(char *VariableName)
 {
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetExternalVariableAdrFromName(VariableName);
+		return DWARFManager_GetGlobalVariableAdrFromName(VariableName);
 	}
 	else
 	{
@@ -159,12 +170,14 @@ size_t DBGManager_GetExternalVariableAdrFromName(char *VariableName)
 }
 
 
-//
-size_t DBGManager_GetExternalVariableTypeTag(size_t Index)
+// Get local variable's type encoding based on his address and Index
+// Return the type encoding found
+// Return 0 if no type encoding has been found
+size_t DBGManager_GetLocalVariableTypeEncoding(size_t Adr, size_t Index)
 {
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetExternalVariableTypeTag(Index);
+		return DWARFManager_GetLocalVariableTypeEncoding(Adr, Index);
 	}
 	else
 	{
@@ -173,14 +186,72 @@ size_t DBGManager_GetExternalVariableTypeTag(size_t Index)
 }
 
 
-// Get external variable's type name based on his Index
-// Return type name's text pointer found
-// Return NULL if no type name has been found
-char *DBGManager_GetExternalVariableTypeName(size_t Index)
+//
+int DBGManager_GetLocalVariableOffset(size_t Adr, size_t Index)
 {
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetExternalVariableTypeName(Index);
+		return DWARFManager_GetLocalVariableOffset(Adr, Index);
+	}
+	else
+	{
+		return	0;
+	}
+}
+
+
+// Get local variable's type byte size based on his address and Index
+// Return the type's byte size found
+// Return 0 if no type's byte size has been found
+size_t DBGManager_GetLocalVariableTypeByteSize(size_t Adr, size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetLocalVariableTypeByteSize(Adr, Index);
+	}
+	else
+	{
+		return	0;
+	}
+}
+
+
+//
+size_t DBGManager_GetLocalVariableTypeTag(size_t Adr, size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetLocalVariableTypeTag(Adr, Index);
+	}
+	else
+	{
+		return	0;
+	}
+}
+
+
+//
+size_t DBGManager_GetGlobalVariableTypeTag(size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetGlobalVariableTypeTag(Index);
+	}
+	else
+	{
+		return	0;
+	}
+}
+
+
+// Get global variable's type name based on his Index
+// Return type name's text pointer found
+// Return NULL if no type name has been found
+char *DBGManager_GetGlobalVariableTypeName(size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetGlobalVariableTypeName(Index);
 	}
 	else
 	{
@@ -189,14 +260,14 @@ char *DBGManager_GetExternalVariableTypeName(size_t Index)
 }
 
 
-// Get external variable's Address based on his Index
+// Get global variable's Address based on his Index
 // Return the Address found
 // Return 0 if no Address has been found
-size_t DBGManager_GetExternalVariableAdr(size_t Index)
+size_t DBGManager_GetGlobalVariableAdr(size_t Index)
 {
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetExternalVariableAdr(Index);
+		return DWARFManager_GetGlobalVariableAdr(Index);
 	}
 	else
 	{
@@ -205,14 +276,14 @@ size_t DBGManager_GetExternalVariableAdr(size_t Index)
 }
 
 
-// Get external variable's type byte size based on his Index
+// Get global variable's type byte size based on his Index
 // Return the type's byte size found
 // Return 0 if no type's byte size has been found
-size_t DBGManager_GetExternalVariableTypeByteSize(size_t Index)
+size_t DBGManager_GetGlobalVariableTypeByteSize(size_t Index)
 {
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetExternalVariableTypeByteSize(Index);
+		return DWARFManager_GetGlobalVariableTypeByteSize(Index);
 	}
 	else
 	{
@@ -221,14 +292,14 @@ size_t DBGManager_GetExternalVariableTypeByteSize(size_t Index)
 }
 
 
-// Get external variable's type encoding based on his Index
+// Get global variable's type encoding based on his Index
 // Return the type encoding found
 // Return 0 if no type encoding has been found
-size_t DBGManager_GetExternalVariableTypeEncoding(size_t Index)
+size_t DBGManager_GetGlobalVariableTypeEncoding(size_t Index)
 {
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetExternalVariableTypeEncoding(Index);
+		return DWARFManager_GetGlobalVariableTypeEncoding(Index);
 	}
 	else
 	{
@@ -237,20 +308,20 @@ size_t DBGManager_GetExternalVariableTypeEncoding(size_t Index)
 }
 
 
-// Get external variable value based on his Index
+// Get global variable value based on his Index
 // Return value as a text pointer
 // Note: Pointer may point on a 0 lenght text
-char *DBGManager_GetExternalVariableValue(size_t Index)
+char *DBGManager_GetGlobalVariableValue(size_t Index)
 {
-	uint32_t Adr = 0;
-	uint32_t TypeEncoding = DBG_NO_TYPEENCODING;
-	uint32_t TypeByteSize = 0;
+	size_t Adr = 0;
+	size_t TypeEncoding = DBG_NO_TYPEENCODING;
+	size_t TypeByteSize = 0;
 
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		Adr = DWARFManager_GetExternalVariableAdr(Index);
-		TypeEncoding = DWARFManager_GetExternalVariableTypeEncoding(Index);
-		TypeByteSize = DWARFManager_GetExternalVariableTypeByteSize(Index);
+		Adr = DWARFManager_GetGlobalVariableAdr(Index);
+		TypeEncoding = DWARFManager_GetGlobalVariableTypeEncoding(Index);
+		TypeByteSize = DWARFManager_GetGlobalVariableTypeByteSize(Index);
 	}
 
 	return DBGManager_GetVariableValueFromAdr(Adr, TypeEncoding, TypeByteSize);
@@ -260,7 +331,7 @@ char *DBGManager_GetExternalVariableValue(size_t Index)
 // Get variable value based on his Adresse, Encoding Type and Size
 // Return value as a text pointer
 // Note: Pointer may point on a 0 lenght text if Adress is NULL
-char *DBGManager_GetVariableValueFromAdr(uint32_t Adr, uint32_t TypeEncoding, uint32_t TypeByteSize)
+char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t TypeByteSize)
 {
 	Value V;
 	char *Ptrvalue = value;
@@ -277,7 +348,7 @@ char *DBGManager_GetVariableValueFromAdr(uint32_t Adr, uint32_t TypeEncoding, ui
 		jaguarMainRAM[Adr + TypeByteSize - 1] = 0x10;
 #endif
 #if 1
-		for (uint32_t i = 0, j = TypeByteSize; i < TypeByteSize; i++, j--)
+		for (size_t i = 0, j = TypeByteSize; i < TypeByteSize; i++, j--)
 		{
 			V.C[i] = jaguarMainRAM[Adr + j - 1];
 		}
@@ -370,14 +441,78 @@ char *DBGManager_GetVariableValueFromAdr(uint32_t Adr, uint32_t TypeEncoding, ui
 }
 
 
-// Get external variable name based on his Index
-// Return variable name's text pointer found
-// Return NULL if no variable name has been found
-char *DBGManager_GetExternalVariableName(size_t Index)
+// Get local variable's type name based on his Index
+// Return type name's text pointer found
+// Return NULL if no type name has been found
+char *DBGManager_GetLocalVariableTypeName(size_t Adr, size_t Index)
 {
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetExternalVariableName(Index);
+		return DWARFManager_GetLocalVariableTypeName(Adr, Index);
+	}
+	else
+	{
+		return	NULL;
+	}
+}
+
+
+// Get local variable Op based on his Index
+// Return variable Op's found
+// Return 0 if no variable Op has been found
+size_t DBGManager_GetLocalVariableOp(size_t Adr, size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetLocalVariableOp(Adr, Index);
+	}
+	else
+	{
+		return	0;
+	}
+}
+
+
+// Get local variable name based on his Index
+// Return variable name's text pointer found
+// Return NULL if no variable name has been found
+char *DBGManager_GetLocalVariableName(size_t Adr, size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetLocalVariableName(Adr, Index);
+	}
+	else
+	{
+		return	NULL;
+	}
+}
+
+
+// Get global variable name based on his Index
+// Return variable name's text pointer found
+// Return NULL if no variable name has been found
+char *DBGManager_GetGlobalVariableName(size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetGlobalVariableName(Index);
+	}
+	else
+	{
+		return	NULL;
+	}
+}
+
+
+// Get function name from address
+// Return function name found
+// Return NULL if no function name has been found
+char *DBGManager_GetFunctionName(size_t Adr)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetFunctionName(Adr);
 	}
 	else
 	{
@@ -405,7 +540,7 @@ size_t DBGManager_GetNumLineFromAdr(size_t Adr, size_t Tag)
 // Get symbol name from address
 // Return text pointer on the symbol name found
 // Return NULL if no symbol name has been found
-char *DBGManager_GetSymbolnameFromAdr(size_t Adr)
+char *DBGManager_GetSymbolNameFromAdr(size_t Adr)
 {
 	char *Symbolname;
 

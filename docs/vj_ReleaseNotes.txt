@@ -24,6 +24,7 @@ Release 3 (WiP)
 15) Improved the .heap section detection to avoid a detection error
 -- Depend vlink version, .heap section may have an Alloc flag
 16) Fixed a crash when DWARF information does references to missing source code files
+17) Added a Local browser window for local variables
 
 Release 2 (3rd September 2017)
 ------------------------------
@@ -90,7 +91,7 @@ Known issues
 2) The BPM (Breapoint) remains stuck on his address when user wants to continue the code execution
 -- Need to trace over the BPM or unset the BPM
 3) To handle DWARF 2 issues with GCC, the code must be compiled with the -gdwarf-2 option
-4) The Watch variables list may display not available (N/A) type information
+4) The Local & Watch variables list may display not available (N/A) type information
 -- Such missing information may be included in future release
 5) The 2MB mirroring is no longer applied in case of --dram-max option usage
 6) Stack must reflect the --dram-max option usage otherwise the stack may be corrupted

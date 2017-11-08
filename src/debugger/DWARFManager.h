@@ -17,16 +17,27 @@ extern char	*DWARFManager_GetSymbolnameFromAdr(size_t Adr);
 extern char *DWARFManager_GetLineSrcFromAdr(size_t Adr, size_t Tag);
 extern char *DWARFManager_GetLineSrcFromAdrNumLine(size_t Adr, size_t NumLine);
 extern char *DWARFManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine);
+extern char *DWARFManager_GetFunctionName(size_t Adr);
 
-// External variables manager
-extern size_t DWARFManager_GetNbExternalVariables(void);
-extern char *DWARFManager_GetExternalVariableName(size_t Index);
-extern size_t DWARFManager_GetExternalVariableTypeEncoding(size_t Index);
-extern char *DWARFManager_GetExternalVariableTypeName(size_t Index);
-extern size_t DWARFManager_GetExternalVariableTypeByteSize(size_t Index);
-extern size_t DWARFManager_GetExternalVariableAdr(size_t Index);
-extern size_t DWARFManager_GetExternalVariableAdrFromName(char *VariableName);
-extern size_t DWARFManager_GetExternalVariableTypeTag(size_t Index);
+// Global variables manager
+extern size_t DWARFManager_GetNbGlobalVariables(void);
+extern char *DWARFManager_GetGlobalVariableName(size_t Index);
+extern size_t DWARFManager_GetGlobalVariableTypeEncoding(size_t Index);
+extern char *DWARFManager_GetGlobalVariableTypeName(size_t Index);
+extern size_t DWARFManager_GetGlobalVariableTypeByteSize(size_t Index);
+extern size_t DWARFManager_GetGlobalVariableAdr(size_t Index);
+extern size_t DWARFManager_GetGlobalVariableAdrFromName(char *VariableName);
+extern size_t DWARFManager_GetGlobalVariableTypeTag(size_t Index);
+
+// Local variables manager
+extern size_t DWARFManager_GetNbLocalVariables(size_t Adr);
+extern char *DWARFManager_GetLocalVariableName(size_t Adr, size_t Index);
+extern size_t DWARFManager_GetLocalVariableTypeEncoding(size_t Adr, size_t Index);
+extern char *DWARFManager_GetLocalVariableTypeName(size_t Adr, size_t Index);
+extern size_t DWARFManager_GetLocalVariableTypeByteSize(size_t Adr, size_t Index);
+extern size_t DWARFManager_GetLocalVariableTypeTag(size_t Adr, size_t Index);
+extern size_t DWARFManager_GetLocalVariableOp(size_t Adr, size_t Index);
+extern int DWARFManager_GetLocalVariableOffset(size_t Adr, size_t Index);
 
 
 #endif	// __DWARFMANAGER_H__

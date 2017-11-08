@@ -33,6 +33,7 @@ class GPUDasmWindow;
 class DSPDasmWindow;
 class EmuStatusWindow;
 class AllWatchBrowserWindow;
+class LocalBrowserWindow;
 class HeapAllocatorBrowserWindow;
 class Memory1BrowserWindow;
 class BrkWindow;
@@ -90,6 +91,7 @@ class MainWin: public QMainWindow
 		void ShowDasmWin(void);
 		void ShowEmuStatusWin(void);
 		void ShowAllWatchBrowserWin(void);
+		void ShowLocalBrowserWin(void);
 		void ShowHeapAllocatorBrowserWin(void);
 		void ShowMemory1BrowserWin(int NumWin);
 		void ShowExceptionVectorTableBrowserWin(void);
@@ -120,6 +122,7 @@ class MainWin: public QMainWindow
 		RISCDasmBrowserWindow * riscDasmBrowseWin;
 		VideoOutputWindow * VideoOutputWin;
 		AllWatchBrowserWindow * allWatchBrowseWin;
+		LocalBrowserWindow * LocalBrowseWin;
 		ExceptionVectorTableBrowserWindow *exceptionvectortableBrowseWin;
 		HeapAllocatorBrowserWindow *heapallocatorBrowseWin;
 		Memory1BrowserWindow ** mem1BrowseWin;
@@ -196,6 +199,7 @@ class MainWin: public QMainWindow
 		QAction *DasmAct;
 		QAction *heapallocatorBrowseAct;
 		QAction *allWatchBrowseAct;
+		QAction *LocalBrowseAct;
 		QAction **mem1BrowseAct;
 		QAction *newBreakpointFunctionAct;
 		QAction *exceptionVectorTableBrowseAct;

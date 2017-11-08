@@ -26,6 +26,7 @@
 // JPM  09/05/2017  Added Exception Vector Table window
 // JPM  09/06/2017  Added the 'Rx' word to the emulator window name
 // JPM  09/12/2017  Added the keybindings in the settings
+// JPM  11/04/2017  Added the local browser window
 //
 
 // FIXED:
@@ -75,6 +76,7 @@
 #include "debug/riscdasmbrowser.h"
 
 #include "debugger/allwatchbrowser.h"
+#include "debugger/localbrowser.h"
 #include "debugger/heapallocatorbrowser.h"
 
 #include "dac.h"
@@ -187,6 +189,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		//DasmWin = new DasmWindow();
 		DasmWin = new DasmWindow(this);
 		allWatchBrowseWin = new AllWatchBrowserWindow(this);
+		LocalBrowseWin = new LocalBrowserWindow(this);
 		heapallocatorBrowseWin = new HeapAllocatorBrowserWindow(this);
 		brkWin = new BrkWindow(this);
 		exceptionvectortableBrowseWin = new ExceptionVectorTableBrowserWindow(this);
@@ -395,6 +398,10 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		allWatchBrowseAct->setStatusTip(tr("Shows all Watch browser window"));
 		connect(allWatchBrowseAct, SIGNAL(triggered()), this, SLOT(ShowAllWatchBrowserWin()));
 
+		LocalBrowseAct = new QAction(QIcon(":/res/Local.png"), tr("Local"), this);
+		LocalBrowseAct->setStatusTip(tr("Shows Local browser window"));
+		connect(LocalBrowseAct, SIGNAL(triggered()), this, SLOT(ShowLocalBrowserWin()));
+
 		heapallocatorBrowseAct = new QAction(QIcon(""), tr("Heap allocator"), this);
 		heapallocatorBrowseAct->setStatusTip(tr("Shows the heap allocator browser window"));
 		connect(heapallocatorBrowseAct, SIGNAL(triggered()), this, SLOT(ShowHeapAllocatorBrowserWin()));
@@ -498,6 +505,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 #endif
 			debugWindowsWatchMenu = debugWindowsMenu->addMenu(tr("&Watch"));
 			debugWindowsWatchMenu->addAction(allWatchBrowseAct);
+			debugWindowsMenu->addAction(LocalBrowseAct);
 			debugWindowsMenu->addSeparator();
 			debugWindowsMemoryMenu = debugWindowsMenu->addMenu(tr("&Memory"));
 			debugWindowsMemoryMenu->addAction(heapallocatorBrowseAct);
@@ -1016,8 +1024,7 @@ static uint32_t ntscTickCount;
 				{
 					for (uint32_t y = 0; y < videoWidget->rasterHeight; y++)
 					{
-						videoWidget->buffer[(y * videoWidget->textureWidth) + x]
-							= (rand() & 0xFF) << 8 | (rand() & 0xFF) << 16 | (rand() & 0xFF) << 24;
+						videoWidget->buffer[(y * videoWidget->textureWidth) + x] = (rand() & 0xFF) << 8 | (rand() & 0xFF) << 16 | (rand() & 0xFF) << 24;
 					}
 				}
 			}
@@ -1515,6 +1522,13 @@ void MainWin::ShowExceptionVectorTableBrowserWin(void)
 }
 
 
+void MainWin::ShowLocalBrowserWin(void)
+{
+	LocalBrowseWin->show();
+	LocalBrowseWin->RefreshContents();
+}
+
+
 void MainWin::ShowAllWatchBrowserWin(void)
 {
 	allWatchBrowseWin->show();
@@ -1839,6 +1853,13 @@ void MainWin::ReadUISettings(void)
 		size = settings.value("allWatchBrowseWinSize", QSize(400, 400)).toSize();
 		allWatchBrowseWin->resize(size);
 
+		// Local browser UI information
+		pos = settings.value("LocalBrowseWinPos", QPoint(200, 200)).toPoint();
+		LocalBrowseWin->move(pos);
+		settings.value("LocalBrowseWinIsVisible", false).toBool() ? ShowLocalBrowserWin() : void();
+		size = settings.value("LocalBrowseWinSize", QSize(400, 400)).toSize();
+		LocalBrowseWin->resize(size);
+
 		// Heap memory allocation browser UI information
 		pos = settings.value("heapallocatorBrowseWinPos", QPoint(200, 200)).toPoint();
 		heapallocatorBrowseWin->move(pos);
@@ -2031,6 +2052,9 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("allWatchBrowseWinPos", allWatchBrowseWin->pos());
 		settings.setValue("allWatchBrowseWinIsVisible", allWatchBrowseWin->isVisible());
 		settings.setValue("allWatchBrowseWinSize", allWatchBrowseWin->size());
+		settings.setValue("LocalBrowseWinPos", LocalBrowseWin->pos());
+		settings.setValue("LocalBrowseWinIsVisible", LocalBrowseWin->isVisible());
+		settings.setValue("LocalBrowseWinSize", LocalBrowseWin->size());
 		settings.setValue("heapallocatorBrowseWinPos", heapallocatorBrowseWin->pos());
 		settings.setValue("heapallocatorBrowseWinIsVisible", heapallocatorBrowseWin->isVisible());
 		settings.setValue("heapallocatorBrowseWinSize", heapallocatorBrowseWin->size());
@@ -2076,6 +2100,7 @@ void	MainWin::RefreshDebuggerWindows(void)
 		GPUDasmWin->RefreshContents();
 		DSPDasmWin->RefreshContents();
 		allWatchBrowseWin->RefreshContents();
+		LocalBrowseWin->RefreshContents();
 		heapallocatorBrowseWin->RefreshContents();
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{

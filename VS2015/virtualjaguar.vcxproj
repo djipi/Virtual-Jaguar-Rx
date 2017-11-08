@@ -280,6 +280,7 @@
     <ClCompile Include="..\src\crc32.cpp" />
     <ClCompile Include="..\src\debugger\brkWin.cpp" />
     <ClCompile Include="..\src\debugger\exceptionvectortablebrowser.cpp" />
+    <ClCompile Include="..\src\debugger\localbrowser.cpp" />
     <ClCompile Include="..\src\file.cpp" />
     <ClCompile Include="..\src\gui\keybindingstab.cpp" />
     <ClCompile Include="..\src\log.cpp" />
@@ -315,6 +316,7 @@
     <ClCompile Include="obj\moc_heapallocatorbrowser.cpp" />
     <ClCompile Include="obj\moc_keybindingstab.cpp" />
     <ClCompile Include="obj\moc_keygrabber.cpp" />
+    <ClCompile Include="obj\moc_localbrowser.cpp" />
     <ClCompile Include="obj\moc_m68kdasmbrowser.cpp" />
     <ClCompile Include="obj\moc_m68kDasmWin.cpp" />
     <ClCompile Include="obj\moc_mainwin.cpp" />
@@ -400,6 +402,24 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\obj\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_NO_DEBUG -DQT_OPENGL_LIB -DNDEBUG -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D_UNICODE  "-I." "-I.\..\src" "-I.\..\src\gui" "-I.\obj" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtOpenGL" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtWidgets" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtGui" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtANGLE" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtCore" "-Ic:\Qt\Qt5.5.1\msvc2015_64\mkspecs\win32-msvc2015" "-IC:\SDK\OpenGL\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-VS2015\include" "-IC:\SDK\Elf\libelf-0.8.13-VS2015\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-IC:\SDK\zlib\zlib-1.2.8-VS2015\include"</Command>
     </CustomBuild>
     <ClInclude Include="..\src\crc32.h" />
+    <CustomBuild Include="..\src\debugger\localbrowser.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing localbrowser.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\obj\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\obj\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB "-I." "-I.\..\src" "-I.\..\src\gui" "-I.\obj" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtOpenGL" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtWidgets" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtGui" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtANGLE" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtCore" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\mkspecs\win32-msvc2015" "-IC:\SDK\SDL-1.2.15\include" "-IC:\SDK\mesa-11.2.0-rc4\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing localbrowser.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\obj\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\obj\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_LIB -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D_UNICODE "-I." "-I.\..\src" "-I.\..\src\gui" "-I.\obj" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtOpenGL" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtWidgets" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtGui" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtANGLE" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtCore" "-Ic:\Qt\Qt5.5.1\msvc2015_64\mkspecs\win32-msvc2015" "-IC:\SDK\OpenGL\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-VS2015\include" "-IC:\SDK\Elf\libelf-0.8.13-VS2015\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-IC:\SDK\zlib\zlib-1.2.8-VS2015\include"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing localbrowser.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\obj\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\obj\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_NO_DEBUG -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DNDEBUG -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB "-I." "-I.\..\src" "-I.\..\src\gui" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtOpenGL" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtWidgets" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtGui" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtANGLE" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtCore" "-I.\obj" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\mkspecs\win32-msvc2015" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing localbrowser.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\obj\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\obj\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_NO_DEBUG -DQT_OPENGL_LIB -DNDEBUG -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D_UNICODE "-I." "-I.\..\src" "-I.\..\src\gui" "-I.\obj" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtOpenGL" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtWidgets" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtGui" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtANGLE" "-Ic:\Qt\Qt5.5.1\msvc2015_64\include\QtCore" "-Ic:\Qt\Qt5.5.1\msvc2015_64\mkspecs\win32-msvc2015" "-IC:\SDK\OpenGL\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-VS2015\include" "-IC:\SDK\Elf\libelf-0.8.13-VS2015\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-IC:\SDK\zlib\zlib-1.2.8-VS2015\include"</Command>
+    </CustomBuild>
     <ClInclude Include="..\src\file.h" />
     <CustomBuild Include="..\src\gui\keybindingstab.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -1316,6 +1336,11 @@ endlocal
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\Watch.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\res\Local.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </None>
   </ItemGroup>

@@ -136,7 +136,7 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 		{
 			if (Adr = DBGManager_GetAdrFromSymbolName((char *)"__HeapBase"))
 			{
-				if (Adr68K = DBGManager_GetExternalVariableAdrFromName((char *)"alloc"))
+				if (Adr68K = DBGManager_GetGlobalVariableAdrFromName((char *)"alloc"))
 				{
 					if (!(Adr68K = (jaguarMainRAM[Adr68K] << 24) + (jaguarMainRAM[Adr68K + 1] << 16) + (jaguarMainRAM[Adr68K + 2] << 8) + (jaguarMainRAM[Adr68K + 3])) || ((Adr68K < 0x4000) || (Adr68K >= 0x200000)))
 					{

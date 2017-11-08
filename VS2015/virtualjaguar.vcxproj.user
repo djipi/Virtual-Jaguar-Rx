@@ -7,7 +7,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerEnvironment>PATH=$(QTDIR)\bin%3b$(PATH)</LocalDebuggerEnvironment>
     <QTDIR>C:\Qt\Qt5.5.1\msvc2015_64</QTDIR>
-    <LocalDebuggerCommandArguments>C:\Projects\quake2\JagCake\Debug\JagCake_Debug.elf</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>C:\Projects\Lib-M68K\Lib-Test-M68K\Debug\LibTestM68K_Debug.elf --debugger</LocalDebuggerCommandArguments>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
