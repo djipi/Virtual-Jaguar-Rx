@@ -1,0 +1,702 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
+    </Filter>
+    <Filter Include="Generated Files">
+      <UniqueIdentifier>{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;moc;h;def;odl;idl;res;</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}</UniqueIdentifier>
+      <Extensions>qrc;*</Extensions>
+      <ParseFiles>false</ParseFiles>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files\debugger">
+      <UniqueIdentifier>{1065d0a4-28c2-4c76-9931-c57ba7b116c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\debugger">
+      <UniqueIdentifier>{56db1eb5-57d2-4048-8c8d-93bb75c84ce0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui">
+      <UniqueIdentifier>{ef2acb57-2659-4a8d-b5ac-6a671756338f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui">
+      <UniqueIdentifier>{80c96e24-c02d-4a78-abbf-c0ea5d732f87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Docs">
+      <UniqueIdentifier>{087bea28-2669-4bd0-b281-0cceb50774c6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\alpine">
+      <UniqueIdentifier>{6d036353-43b6-415d-a763-9927565b7ee9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\alpine">
+      <UniqueIdentifier>{e2a60de6-6624-4029-bf3f-988316b9dc91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\gui\tab">
+      <UniqueIdentifier>{2be9bcdd-ba58-41e1-a099-1408a4c36524}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gui\tab">
+      <UniqueIdentifier>{3764368c-2eb6-49e9-a11a-a49b210d6297}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="GeneratedFiles\qrc_virtualjaguar.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\VideoWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\DasmWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\m68kDasmWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\DWARFManager.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\ELFManager.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\debug\cpubrowser.cpp">
+      <Filter>Source Files\alpine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\debug\memorybrowser.cpp">
+      <Filter>Source Files\alpine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\debug\opbrowser.cpp">
+      <Filter>Source Files\alpine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\debug\m68kdasmbrowser.cpp">
+      <Filter>Source Files\alpine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\debug\riscdasmbrowser.cpp">
+      <Filter>Source Files\alpine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\about.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\configdialog.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\controllerwidget.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\filelistmodel.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\filepicker.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\filethread.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\gamepad.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\glwidget.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\help.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\imagedelegate.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\keygrabber.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\mainwin.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\profile.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\debug\stackbrowser.cpp">
+      <Filter>Source Files\alpine</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\GPUDasmWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\DSPDasmWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\emustatus.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\HWLABELManager.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\allwatchbrowser.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\heapallocatorbrowser.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\memory1browser.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\DBGManager.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\brkWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\exceptionvectortablebrowser.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\log.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\app.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\unzip.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\crc32.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\file.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\alpinetab.cpp">
+      <Filter>Source Files\gui\tab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\controllertab.cpp">
+      <Filter>Source Files\gui\tab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\generaltab.cpp">
+      <Filter>Source Files\gui\tab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\debuggertab.cpp">
+      <Filter>Source Files\gui\tab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\keybindingstab.cpp">
+      <Filter>Source Files\gui\tab</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\localbrowser.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_VideoWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_VideoWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_stackbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_stackbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_riscdasmbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_riscdasmbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_opbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_opbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_memorybrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_memorybrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_memory1browser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_memory1browser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_mainwin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_mainwin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_m68kDasmWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_m68kDasmWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_m68kdasmbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_m68kdasmbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_localbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_localbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_keygrabber.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_keygrabber.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_keybindingstab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_keybindingstab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_heapallocatorbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_heapallocatorbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_GPUDasmWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_GPUDasmWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_glwidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_glwidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_generaltab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_generaltab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_filethread.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_filethread.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_filepicker.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_filepicker.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_exceptionvectortablebrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_exceptionvectortablebrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_emustatus.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_emustatus.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_DSPDasmWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_DSPDasmWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_debuggertab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_debuggertab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_DasmWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_DasmWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_cpubrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_cpubrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_controllerwidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_controllerwidget.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_controllertab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_controllertab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_configdialog.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_configdialog.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_brkWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_brkWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_alpinetab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_alpinetab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_allwatchbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_allwatchbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\debugger\DWARFManager.h">
+      <Filter>Header Files\debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\ELFManager.h">
+      <Filter>Header Files\debugger</Filter>
+    </ClInclude>
+    <CustomBuild Include="..\src\gui\configdialog.h">
+      <Filter>Header Files\gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\filepicker.h">
+      <Filter>Header Files\gui</Filter>
+    </CustomBuild>
+    <ClInclude Include="..\src\gui\help.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <CustomBuild Include="..\src\gui\keygrabber.h">
+      <Filter>Header Files\gui</Filter>
+    </CustomBuild>
+    <ClInclude Include="..\src\gui\profile.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\HWLABELManager.h">
+      <Filter>Header Files\debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\DBGManager.h">
+      <Filter>Header Files\debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\log.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gui\app.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\unzip.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\crc32.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\file.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\res\alpine-file.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\blur-off.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\blur-on.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\cart-blank.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\compact-disc.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\controller.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\frame-advance.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\fullscreen.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\generic.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\help.html">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\homebrew-file.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\insert.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\label-blank.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\ntsc.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\pal.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\pause-off.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\pause-on.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\power-off.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\power-on-green.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\power-on-red.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\skunkboard-file.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\software.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\test-pattern-pal.jpg">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\test-pattern.jpg">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\tool-68k-dis.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\tool-cpu.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\tool-memory.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\tool-op.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\tool-risc-dis.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\unknown-file.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\upper-left.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\upper-right.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <CustomBuild Include="..\src\gui\virtualjaguar.qrc">
+      <Filter>Resource Files</Filter>
+    </CustomBuild>
+    <None Include="..\res\vj-icon.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\vj_title_small.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\wrench.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\zoom100.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\zoom200.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\zoom300.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\ELF-file.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\StepOver.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\StepInto.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\tool-stack.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\docs\README">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="..\docs\TODO">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="..\docs\virtualjaguar.1">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="..\docs\WHATSNEW">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="..\docs\INSTALL">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="..\res\Restart.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\Watch.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\docs\vj_ReleaseNotes.txt">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="..\docs\LICENSE">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="..\res\Local.png">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\src\debugger\VideoWin.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\DasmWin.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\m68kDasmWin.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\debug\cpubrowser.h">
+      <Filter>Header Files\alpine</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\debug\m68kdasmbrowser.h">
+      <Filter>Header Files\alpine</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\debug\memorybrowser.h">
+      <Filter>Header Files\alpine</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\debug\opbrowser.h">
+      <Filter>Header Files\alpine</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\debug\riscdasmbrowser.h">
+      <Filter>Header Files\alpine</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\controllerwidget.h">
+      <Filter>Header Files\gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\filethread.h">
+      <Filter>Header Files\gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\glwidget.h">
+      <Filter>Header Files\gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\mainwin.h">
+      <Filter>Header Files\gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\debug\stackbrowser.h">
+      <Filter>Header Files\alpine</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\GPUDasmWin.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\DSPDasmWin.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\emustatus.h">
+      <Filter>Header Files\gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\allwatchbrowser.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\heapallocatorbrowser.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\memory1browser.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\brkWin.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\exceptionvectortablebrowser.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\controllertab.h">
+      <Filter>Header Files\gui\tab</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\generaltab.h">
+      <Filter>Header Files\gui\tab</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\alpinetab.h">
+      <Filter>Header Files\gui\tab</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\debuggertab.h">
+      <Filter>Header Files\gui\tab</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\keybindingstab.h">
+      <Filter>Header Files\gui\tab</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\localbrowser.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\res\vj.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\gui\about.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gui\filelistmodel.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gui\gamepad.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\gui\imagedelegate.h">
+      <Filter>Header Files\gui</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

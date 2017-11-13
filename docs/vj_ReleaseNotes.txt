@@ -25,6 +25,7 @@ Release 3 (WiP)
 -- Depend vlink version, .heap section may have an Alloc flag
 16) Fixed a crash when DWARF information does references to missing source code files
 17) Added a Local browser window for local variables
+18) Project has switched to Visual Studio 2017 and QT 5.9.1 library
 
 Release 2 (3rd September 2017)
 ------------------------------
@@ -87,7 +88,7 @@ Release 0 (5th January 2017)
 
 Known issues
 ============
-1) Video output is not displayed due to my OpenGL / QT5 integration with VS 2015
+1) Video output is not displayed due to my OpenGL / QT5 5.5.1 integration with VS 2015 but solved when using the QT 5.9.1 package for VS 2017
 2) The BPM (Breapoint) remains stuck on his address when user wants to continue the code execution
 -- Need to trace over the BPM or unset the BPM
 3) To handle DWARF 2 issues with GCC, the code must be compiled with the -gdwarf-2 option
@@ -119,16 +120,17 @@ Legacy issues/hints
 Project information
 ===================
 1) Code based on the Shamus Hammons source code available via Gethub by the 12th September 2017 (2.1.3 Final)
-2) Visual Studio 2015 project support for 64 bits
-3) libelf 0.8.13 library 64bits for VS 2015
-4) libdwarf 1.41 library 64bits for VS 2015, cygwin64 & Msys2/MinGW64
+2) Visual Studio 2015/2017 project support for 64 bits
+3) libelf 0.8.13 library 64bits for VS 2015/2017
+4) libdwarf 1.41 library 64bits for VS 2015/2017, cygwin64 & Msys2/MinGW64
 5) QT 5.5.1 library 64bits for VS 2015
-6) Zlib 1.2.8 library 64bits for VS 2015
-7) SDL 1.2.15 library 64bits for VS 2015
-8) The original make files have been modified to follow the requirements and modifications
-9) The 'Rx' word has been added to the emulator name to make distinction with the official version
-10) The project source is set at https://github.com/djipi/Virtual-Jaguar-Rx
-11) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
+6) QT 5.9.1 library 64bits for VS 2017
+7) Zlib 1.2.8 library 64bits for VS 2015/2017
+8) SDL 1.2.15 library 64bits for VS 2015
+9) The original make files have been modified to follow the requirements and modifications
+10) The 'Rx' word has been added to the emulator name to make distinction with the official version
+11) The project source is set at https://github.com/djipi/Virtual-Jaguar-Rx
+12) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
 -- Text / License terms are the same
 
 
