@@ -47,7 +47,7 @@ AboutWindow::AboutWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dialog)
 		"<br><br>"
 		"<i>Rx version:<i>"
 		"<br>"
-		"<b>Flynn</b> for the debugger integration, ELF/DWARF format, Win64 & Visual Studio 2015 support"
+		"<b>Flynn</b> for the debugger integration, ELF/DWARF format, Win64 & Visual Studio 2015/2017 support"
 		"<br><br>"
 		"<i>The Virtual Jaguar team would like to express their gratitude to:</i>"
 		"<br><br>"

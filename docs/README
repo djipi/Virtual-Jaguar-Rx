@@ -94,7 +94,7 @@ but has also been extended and rewritten so that we can enjoy Atari Jaguar
 emulation on every platform that has a GCC compiler and a port of Qt.
 
 Currently Virtual Jaguar GCC/Qt Rx compiles on WIN64 using msys2/MinGW64,
-and Visual Studio 2015. Compiles also on cygwin64 but no tests have been done.
+and Visual Studio 2015/2017. Compiles also on cygwin64 but no tests have been done.
 It has previously compiled on WIN32 using mingw, and several UN*X based systems
 (BeOS, Linux, FreeBSD and MacOS). It may run on other
 systems as well but we can not guarantee that.

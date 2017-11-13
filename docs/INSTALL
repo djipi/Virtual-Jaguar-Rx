@@ -16,7 +16,7 @@ The minimum requirements for compiling Virtual Jaguar from source are:
  o  libcdio v0.90 or higher (optional, for Jaguar CD support)
  o  OpenGL libraries
  o  Qt 5.5.1 or higher
- o  Visual Studio 2015 (if any of interest)
+ o  Visual Studio 2015 or 2017 (if any of interest)
  o  supported OS (WIN64 through msys2/MinGW64, Windows 64 bits); other
     OSs may work to but you may need to change some items in the Makefile or adapt the Visual Studio project.
  o  cygwin64 support is done but no test has been completed
@@ -82,10 +82,10 @@ cp -r ~/location-where-you-built-qt/src/gui/mac/qt_menu.nib virtualjaguar.app/Co
 Have fun!
 
 
-NOTES FOR COMPILING UNDER VISUAL STUDIO 2015:
----------------------------------------------
+NOTES FOR COMPILING UNDER VISUAL STUDIO 2015 / 2017:
+----------------------------------------------------
 
-VS2015 sub-directory contains the projects and solution files
+Win-VS2015 & Win-VS2017 sub-directories contain the projects and solution files
 You may have to adapt such files to handle your own development environement,
 usualy to put the right include and library paths will be enough assuming you have all the requirements properly set.
 

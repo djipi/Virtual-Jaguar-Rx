@@ -1,8 +1,71 @@
-Virtual Jaguar v2.1.3 Rx GCC/Qt
+Virtual Jaguar v2.1.3 R3 GCC/Qt
 -------------------------------
 
-* For an accurate update, please read the vj_ReleaseNotes.txt
+* Added an Exception Vector Table browser window
+* Modified the About window to update the credits list in a more appropriate way
+* Fixed a crash when reading the DWARF information in the case of the DWARF2 format has not been used
+* Added ui, alpine & debugger groups in the settings
+* Added the possibility to erase settings
+* Added the --es-all, --es-ui, --es-alpine & --es-debugger options to erase specific settings
+* Added a keybindings tab and adapted the configuration dialog tabs
+* Fixed a crash, in Release mode, when the HW labels setting is turn on
+* Fixed the SP (Stack) window UI potential missing data
+* Create a directory for EEPROMs (based on the EEPROMs setting) if it doesn't already exist
+* Keep the scrollbar position in accordance of the M68K PC pointer
+* Fixed a crash when DWARF information report a source line number exceeding the number of lines present in a source file
+* Improved the .heap section detection to avoid a detection error
+* Fixed a crash when DWARF information does references to missing source code files
+* Added a Local browser window for local variables
 
+
+Virtual Jaguar v2.1.3 R2 GCC/Qt
+-------------------------------
+
+* Added some error detections when reading the ELF executable file
+* Added all hardware labels (based on the document scans from the Version 2.4 - June 7, 1995)
+* "Step Over" code function for BSR/JSR functions
+* Added the .debug_ranges detection to avoid a detection error
+* DWARF format support
+* Added an All Watch browser window for non-local variables
+* Added a heap allocator browser window based on my own memory allocation functions
+* Added additional 4 memory browser windows with address input based on hexa, decimal or symbol name
+* Windows refreshing executed only if windows is visible
+* Added a restart function
+* Updated the About window to update the credits list
+* Fixed (hacking) the display of the SP (Stack) memory browser
+* Set the emulator in Halt mode when launched in alpine debug mode without a loaded rom
+* Added some information in the --help/-h/-? option
+* --debugger option no longer force the log file
+* Added a --dram-max option to extend the DRAM size to 8MB
+* Added the "enter" key support when setting the BPM (Breapoint)
+* Save the windows positions, size and visibilities (show or hide) status
+
+
+Virtual Jaguar v2.1.3 R1 GCC/Qt
+-------------------------------
+
+* BPM (Breapoint) now stop at the designated address and no longer stop after executing the code
+* Added SP (Stack) memory browser
+* User can change now the number of lines of disassembly displayed in the tracing window
+* User can turn on/off the op-codes associated in the disassembly lines displayed in the M68K tracing window
+* Added an emulator status window (GPU status, M68K debugger & tracking status)
+* Added a GPU disassembly tracing window - Display the current PC pointer
+* Added a DSP disassembly tracing window - Display the current PC pointer
+* Added possibility to change refresh rate of browser windows when emulation is launched
+* Display partial hardware labels (Internal Memory & Graphics sub-system address space) in the disassembly lines displayed in the M68K tracing window
+* User can turn on/off the hardware labels associated in the disassembly lines displayed in the M68K tracing window
+
+
+Virtual Jaguar v2.1.3 R0 GCC/Qt
+-------------------------------
+
+* New option --debugger
+* ELF format support
+* ELF debug symbol support
+* "Step Into" code function
+* Menus layout dedicated to the debugger
+* Added a dedicated main window for tracing (M68K)
+* Added a Debugger tab in the config tab
 
 
 Virtual Jaguar v2.1.3 GCC/Qt

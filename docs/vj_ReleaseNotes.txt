@@ -1,5 +1,5 @@
-Release 3 (WiP)
----------------
+Release 3 (13th November 2017)
+------------------------------
 0) Fixed the windows respawning in the next emulator launch within --alpine or --debugger options
 1) Added an Exception Vector Table browser window
 2) Modified the About window to update the credits list in a more appropriate way
