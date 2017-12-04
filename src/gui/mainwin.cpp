@@ -1651,7 +1651,7 @@ void MainWin::ReadSettings(void)
 
 	QSettings settings("Underground Software", "Virtual Jaguar");
 
-	zoomLevel = settings.value("zoom", 2).toInt();
+	//zoomLevel = settings.value("zoom", 2).toInt();
 	allowUnknownSoftware = settings.value("showUnknownSoftware", false).toBool();
 	lastEditedProfile = settings.value("lastEditedProfile", 0).toInt();
 
@@ -1786,6 +1786,9 @@ void MainWin::ReadUISettings(void)
 	pos = settings.value("cartLoadPos", QPoint(200, 200)).toPoint();
 	filePickWin->move(pos);
 
+	// Video output information
+	zoomLevel = settings.value("zoom", 2).toInt();
+
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
@@ -1903,7 +1906,7 @@ void MainWin::WriteSettings(void)
 	//settings.setValue("size", size());
 	//settings.setValue("cartLoadPos", filePickWin->pos());
 
-	settings.setValue("zoom", zoomLevel);
+	//settings.setValue("zoom", zoomLevel);
 	settings.setValue("showUnknownSoftware", allowUnknownSoftware);
 	settings.setValue("lastEditedProfile", lastEditedProfile);
 
@@ -2017,6 +2020,8 @@ void MainWin::WriteUISettings(void)
 	settings.setValue("pos", pos());
 	settings.setValue("size", size());
 	settings.setValue("cartLoadPos", filePickWin->pos());
+
+	// Video output information
 	settings.setValue("zoom", zoomLevel);
 
 	// Alpine debug UI information (also needed by the Debugger)
