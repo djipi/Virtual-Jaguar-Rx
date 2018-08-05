@@ -1,6 +1,7 @@
 Release 4 (TBD)
 ---------------
 0) The zoom value setting has been fixed in the registry
+1) Debugger mode shares the same alpine rom path setting
 
 Release 3 (13th November 2017)
 ------------------------------

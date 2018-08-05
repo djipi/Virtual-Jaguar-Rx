@@ -59,6 +59,7 @@ void DebuggerTab::SetSettings(void)
 	bool ok;
 
 	//strcpy(vjs.debuggerROMPath, debuggerTab->edit1->text().toUtf8().data());
+	strcpy(vjs.debuggerROMPath, vjs.alpineROMPath);
 	//strcpy(vjs.absROMPath, debuggerTab->edit2->text().toUtf8().data());
 	vjs.nbrdisasmlines = edit3->text().toUInt(&ok, 10);
 	//vjs.allowWritesToROM = debuggerTab->writeROM->isChecked();
