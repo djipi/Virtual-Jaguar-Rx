@@ -27,6 +27,7 @@ class LocalBrowserWindow: public QWidget
 		size_t TypeByteSize;
 		char *PtrVariableName;
 		char *PtrVariableBaseTypeName;
+		char *PtrCPURegisterName;
 	}S_WatchInfo;
 
 	public:

@@ -88,6 +88,7 @@ bool LocalBrowserWindow::UpdateInfos(void)
 					{
 						LocalInfo[i].Op = DBGManager_GetLocalVariableOp(Adr, i + 1);
 						LocalInfo[i].Adr = NULL;
+						LocalInfo[i].PtrCPURegisterName = NULL;
 						LocalInfo[i].TypeTag = DBGManager_GetLocalVariableTypeTag(Adr, i + 1);
 						LocalInfo[i].PtrVariableBaseTypeName = DBGManager_GetLocalVariableTypeName(Adr, i + 1);
 						LocalInfo[i].TypeEncoding = DBGManager_GetLocalVariableTypeEncoding(Adr, i + 1);
@@ -117,6 +118,8 @@ void LocalBrowserWindow::RefreshContents(void)
 	char *PtrValue;
 //	size_t NbWatch, Adr;
 //	WatchInfo PtrLocalInfo;
+
+	const char *CPURegName[] = { "D0", "D1", "D2", "D3", "D4", "D5", "D6", "D7", "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7" };
 
 	if (isVisible())
 	{
@@ -152,8 +155,10 @@ void LocalBrowserWindow::RefreshContents(void)
 					}
 					else
 					{
+						// Value from CPU register
 						if ((LocalInfo[i].Op >= DBG_OP_reg0) && (LocalInfo[i].Op <= DBG_OP_reg31))
 						{
+							LocalInfo[i].PtrCPURegisterName = (char *)CPURegName[(LocalInfo[i].Op - DBG_OP_reg0)];
 							PtrValue = itoa(m68k_get_reg(NULL, (m68k_register_t)((size_t)M68K_REG_D0 + (LocalInfo[i].Op - DBG_OP_reg0))), Value, 10);
 						}
 						else
@@ -170,7 +175,14 @@ void LocalBrowserWindow::RefreshContents(void)
 					}
 					else
 					{
-						sprintf(string, "%s", (char *)"<font color='#ff0000'>N/A</font>");
+						if (LocalInfo[i].PtrCPURegisterName)
+						{
+							sprintf(string, "<font color='#0000FF'>%s</font>", LocalInfo[i].PtrCPURegisterName);
+						}
+						else
+						{
+							sprintf(string, "%s", (char *)"<font color='#ff0000'>N/A</font>");
+						}						
 					}
 					Local += QString(string);
 					sprintf(string, " | %s", (!PtrValue ? (char *)"<font color='#ff0000'>N/A</font>" : PtrValue));

@@ -1,7 +1,9 @@
 Release 4 (TBD)
 ---------------
 0) The zoom value setting has been fixed in the registry
-1) Debugger mode shares the same alpine rom path setting
+1) Debugger mode now shares the same alpine rom path setting
+2) Local browser window displays register name used for local variables
+3) Switch to Zlib 1.2.11 library 64bits for VS 2017
 
 Release 3 (13th November 2017)
 ------------------------------
@@ -127,10 +129,11 @@ Project information
 1) Code based on the Shamus Hammons source code available via Gethub by the 12th September 2017 (2.1.3 Final)
 2) Visual Studio 2015/2017 project support for 64 bits
 3) libelf 0.8.13 library 64bits for VS 2015/2017
-4) libdwarf 1.41 library 64bits for VS 2015/2017, cygwin64 & Msys2/MinGW64
+4) libdwarf 1.41 library 64bits for VS 2015, cygwin64 & Msys2/MinGW64
 5) QT 5.5.1 library 64bits for VS 2015
 6) QT 5.9.1 library 64bits for VS 2017
-7) Zlib 1.2.8 library 64bits for VS 2015/2017
+7) Zlib 1.2.8 library 64bits for VS 2015
+7) Zlib 1.2.11 library 64bits for VS 2017
 8) SDL 1.2.15 library 64bits for VS 2015
 9) The original make files have been modified to follow the requirements and modifications
 10) The 'Rx' word has been added to the emulator name to make distinction with the official version
@@ -144,3 +147,4 @@ Download statistics
 jaguar64eu : 15 downloads for the Release 0 on the 12th Feb, 2017
 jaguar64eu : 18 downloads for the Release 1 on the 21st May, 2017
 No downloads statistics available for the Release 2
+No downloads statistics available for the Release 3
