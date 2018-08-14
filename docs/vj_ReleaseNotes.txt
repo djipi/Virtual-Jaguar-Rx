@@ -2,10 +2,11 @@ Release 4 (TBD)
 ---------------
 0) The zoom value setting has been fixed in the registry
 1) Debugger mode now shares the same alpine rom path setting
-2) Local browser window displays register name used for local variables
+2) Local variables window displays register name now
 3) Switch to Zlib 1.2.11 library 64bits for VS 2017
 4) Switch to SDL 1.2.15 static library 64bits for VS 2017
-5) Local browser window displays variables values from parameters
+5) Local variables window displays values from function's parameters
+6) Fixed the typedef's name display in Local and Watch variables window
 
 Release 3 (13th November 2017)
 ------------------------------
@@ -15,9 +16,9 @@ Release 3 (13th November 2017)
 -- Updated the emulator application credits line
 3) Added 'Rx' word to the emulator name
 4) Fixed a crash when reading the DWARF information in the case of the DWARF2 format has not been used
-5) Added ui, alpine & debugger groups in the settings
+5) Added ui, alpine and debugger groups in the settings
 6) Added the possibility to erase settings
-7) Added the --es-all, --es-ui, --es-alpine & --es-debugger options to erase specific settings
+7) Added the --es-all, --es-ui, --es-alpine and --es-debugger options to erase specific settings
 8) Added a keybindings tab and adapted the configuration dialog tabs
 -- User can modify the keybindings where appropriate
 -- Keybindings UI is displayed based on the option used (--debugger, -- alpine)
@@ -71,11 +72,11 @@ Release 1 (12th February 2017)
 2) Added SP (Stack) memory browser
 3) User can change now the number of lines of disassembly displayed in the tracing window
 4) User can turn on/off the op-codes associated in the disassembly lines displayed in the M68K tracing window
-5) Added an emulator status window (GPU status, M68K debugger & tracking status)
+5) Added an emulator status window (GPU status, M68K debugger and tracking status)
 6) Added a GPU disassembly tracing window - Display the current PC pointer
 7) Added a DSP disassembly tracing window - Display the current PC pointer
 8) Added possibility to change refresh rate of browser windows when emulation is launched
-9) Display partial hardware labels (Internal Memory & Graphics sub-system address space) in the disassembly lines displayed in the M68K tracing window
+9) Display partial hardware labels (Internal Memory and Graphics sub-system address space) in the disassembly lines displayed in the M68K tracing window
 -- Display first the hardware labels (based from the Jag V8 dev. PDF) and then the ones possibly found in the ELF debug symbol
 10) Minor U.I cosmetic changes
 11) User can turn on/off the hardware labels associated in the disassembly lines displayed in the M68K tracing window
@@ -101,7 +102,7 @@ Known issues
 2) The BPM (Breapoint) remains stuck on his address when user wants to continue the code execution
 -- Need to trace over the BPM or unset the BPM
 3) To handle DWARF 2 issues with GCC, the code must be compiled with the -gdwarf-2 option
-4) The Local & Watch variables list may display not available (N/A) type information
+4) The Local and Watch variables list may display not available (N/A) type information
 -- Such missing information may be included in future release
 5) The 2MB mirroring is no longer applied in case of --dram-max option usage
 6) Stack must reflect the --dram-max option usage otherwise the stack may be corrupted
@@ -131,7 +132,7 @@ Project information
 1) Code based on the Shamus Hammons source code available via Gethub by the 12th September 2017 (2.1.3 Final)
 2) Visual Studio 2015/2017 project support for 64 bits
 3) libelf 0.8.13 library 64bits for VS 2015/2017
-4) libdwarf 1.41 library 64bits for VS 2015, cygwin64 & Msys2/MinGW64
+4) libdwarf 1.41 library 64bits for VS 2015, cygwin64 and Msys2/MinGW64
 5) QT 5.5.1 library 64bits for VS 2015
 6) QT 5.9.1 library 64bits for VS 2017
 7) Zlib 1.2.8 library 64bits for VS 2015

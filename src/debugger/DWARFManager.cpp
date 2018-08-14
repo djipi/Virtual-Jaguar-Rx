@@ -44,6 +44,14 @@ struct BaseTypeStruct
 	char *PtrName;							// Type's name
 }S_BaseTypeStruct;
 
+// Definitions for the variables's typetag
+#define	TypeTag_structure	0x01			// structure
+#define	TypeTag_pointer		0x02			// pointer
+#define	TypeTag_0x04		0x04
+#define	TypeTag_arraytype	0x08			// array type
+#define	TypeTag_consttype	0x10			// const type
+#define	TypeTag_typedef		0x20			// typedef
+
 // Variables internal structure
 struct VariablesStruct
 {
@@ -908,8 +916,11 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 				break;
 
 			case DW_TAG_typedef:
-				PtrVariables->TypeTag |= 0x20;
-				strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
+				if (!(PtrVariables->TypeTag & 0x20))
+				{
+					PtrVariables->TypeTag |= 0x20;
+					strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
+				}
 				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
 				{
 					j = -1;
@@ -938,7 +949,10 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 				break;
 
 			case DW_TAG_base_type:
-				strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
+				if (!(PtrVariables->TypeTag & 0x20))
+				{
+					strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
+				}
 				if ((PtrVariables->TypeTag & 0x2))
 				{
 					strcat(PtrVariables->PtrTypeName, " *");
