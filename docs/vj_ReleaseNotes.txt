@@ -4,6 +4,8 @@ Release 4 (TBD)
 1) Debugger mode now shares the same alpine rom path setting
 2) Local browser window displays register name used for local variables
 3) Switch to Zlib 1.2.11 library 64bits for VS 2017
+4) Switch to SDL 1.2.15 static library 64bits for VS 2017
+5) Local browser window displays variables values from parameters
 
 Release 3 (13th November 2017)
 ------------------------------
@@ -134,7 +136,7 @@ Project information
 6) QT 5.9.1 library 64bits for VS 2017
 7) Zlib 1.2.8 library 64bits for VS 2015
 7) Zlib 1.2.11 library 64bits for VS 2017
-8) SDL 1.2.15 library 64bits for VS 2015
+8) SDL 1.2.15 library 64bits for VS 2015/2017
 9) The original make files have been modified to follow the requirements and modifications
 10) The 'Rx' word has been added to the emulator name to make distinction with the official version
 11) The project source is set at https://github.com/djipi/Virtual-Jaguar-Rx

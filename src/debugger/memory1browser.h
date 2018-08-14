@@ -29,7 +29,7 @@ class Memory1BrowserWindow: public QWidget
 
 	private:
 		QVBoxLayout * layout;
-//		QTextBrowser * text;
+		//		QTextBrowser * text;
 		QLabel * text;
 		QPushButton * refresh;
 		QLineEdit * address;

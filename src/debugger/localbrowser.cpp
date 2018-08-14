@@ -84,6 +84,7 @@ bool LocalBrowserWindow::UpdateInfos(void)
 				LocalInfo = (WatchInfo *)realloc(LocalInfo, (sizeof(WatchInfo) * NbLocal));
 				for (size_t i = 0; i < NbLocal; i++)
 				{
+					// Get local variable name and his information
 					if (LocalInfo[i].PtrVariableName = DBGManager_GetLocalVariableName(Adr, i + 1))
 					{
 						LocalInfo[i].Op = DBGManager_GetLocalVariableOp(Adr, i + 1);
@@ -140,9 +141,15 @@ void LocalBrowserWindow::RefreshContents(void)
 			{
 				if (LocalInfo[i].PtrVariableName)
 				{
-					if (((LocalInfo[i].Op >= DBG_OP_breg0) && (LocalInfo[i].Op <= DBG_OP_breg31)))
+					// Local or parameters variables
+					if (((LocalInfo[i].Op >= DBG_OP_breg0) && (LocalInfo[i].Op <= DBG_OP_breg31)) || (LocalInfo[i].Op == DBG_OP_fbreg))
 					{
 						LocalInfo[i].Adr = m68k_get_reg(NULL, M68K_REG_A6) + LocalInfo[i].Offset;
+
+						if ((LocalInfo[i].Op == DBG_OP_fbreg))
+						{
+							LocalInfo[i].Adr += 8;
+						}
 
 						if ((LocalInfo[i].Adr >= 0) && (LocalInfo[i].Adr < vjs.DRAM_size))
 						{

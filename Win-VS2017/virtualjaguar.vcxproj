@@ -121,8 +121,8 @@
       <MinimalRebuild>false</MinimalRebuild>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>qtmain.lib;Qt5OpenGL.lib;shell32.lib;jaguarcore.lib;zlib-1.2.11_vs2017_x64.lib;m68000.lib;gdi32.lib;user32.lib;sdl.lib;libelf-0.8.13_vs2017_x64.lib;legacy_stdio_definitions.lib;OpenGL32.lib;libdwarf_x64.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;opengl32.lib;glu32.lib;Ws2_32.lib;imm32.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\src\m68000\obj;C:\SDK\zlib\zlib-1.2.11\lib;C:\SDK\SDL\SDL-1.2.15-VS2015\SDL-x64-shared-release\lib;C:\SDK\Elf\libelf-0.8.13\lib;m68000\x64\Release;jaguarcore\x64\Release;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib\x64;C:\SDK\DWARF\libdwarf-VS2015\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>qtmain.lib;Qt5OpenGL.lib;shell32.lib;jaguarcore.lib;zlib-1.2.11_vs2017_x64.lib;m68000.lib;gdi32.lib;user32.lib;SDL-1.2.15_vs2017_x64.lib;libelf-0.8.13_vs2017_x64.lib;legacy_stdio_definitions.lib;OpenGL32.lib;libdwarf_x64.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;opengl32.lib;glu32.lib;Ws2_32.lib;imm32.lib;winmm.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\src\m68000\obj;C:\SDK\zlib\zlib-1.2.11\lib;C:\SDK\SDL\SDL-1.2.15\lib\x64\static;C:\SDK\Elf\libelf-0.8.13\lib;m68000\x64\Release;jaguarcore\x64\Release;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib\x64;C:\SDK\DWARF\libdwarf-VS2015\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -209,8 +209,8 @@
       <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Qt5PlatformCompositorSupportd.lib;qtmaind.lib;Qt5OpenGLd.lib;shell32.lib;zlib-1.2.8_vs2017_x64d.lib;SDLd.lib;OpenGL32.lib;gdi32.lib;user32.lib;legacy_stdio_definitions.lib;libelf-0.8.13_vs2017_x64d.lib;m68000.lib;jaguarcore.lib;libdwarf_x64d.lib;Ws2_32.lib;imm32.lib;winmm.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\..\src\m68000\obj;C:\SDK\zlib\zlib-1.2.8\lib;C:\SDK\SDL\SDL-1.2.15-VS2015\SDL-x64-shared-debug\lib;C:\SDK\Elf\libelf-0.8.13\lib;m68000\x64\Debug;jaguarcore\x64\Debug;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib\x64;C:\SDK\DWARF\libdwarf-VS2015\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Qt5PlatformCompositorSupportd.lib;qtmaind.lib;Qt5OpenGLd.lib;shell32.lib;zlib-1.2.8_vs2017_x64d.lib;SDL-1.2.15_vs2017_x64d.lib;OpenGL32.lib;gdi32.lib;user32.lib;legacy_stdio_definitions.lib;libelf-0.8.13_vs2017_x64d.lib;m68000.lib;jaguarcore.lib;libdwarf_x64d.lib;Ws2_32.lib;imm32.lib;winmm.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opengl32.lib;glu32.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\..\src\m68000\obj;C:\SDK\zlib\zlib-1.2.8\lib;C:\SDK\SDL\SDL-1.2.15\lib\x64\static;C:\SDK\Elf\libelf-0.8.13\lib;m68000\x64\Debug;jaguarcore\x64\Debug;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib\x64;C:\SDK\DWARF\libdwarf-VS2015\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
