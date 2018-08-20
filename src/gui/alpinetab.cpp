@@ -61,7 +61,7 @@ AlpineTab::AlpineTab(QWidget * parent/*= 0*/): QWidget(parent)
 //	useHostAudio       = new QCheckBox(tr("Enable audio playback"));
 //	useUnknownSoftware = new QCheckBox(tr("Allow unknown software in file chooser"));
 // Currently, this is unused, so let's signal this to the user:
-	writeROM->setDisabled(true);
+	//writeROM->setDisabled(true);
 
 	layout4->addWidget(writeROM);
 //	layout4->addWidget(useDSP);

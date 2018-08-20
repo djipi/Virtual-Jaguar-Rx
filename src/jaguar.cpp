@@ -16,7 +16,8 @@
 
 
 #include "jaguar.h"
-
+#include <QApplication>
+#include <QMessageBox>
 #include <time.h>
 #include <SDL.h>
 #include "SDL_opengl.h"
@@ -1256,12 +1257,60 @@ unsigned int m68k_read_memory_32(unsigned int address)
 }
 
 
+// 
+void m68k_write_memory_alert(unsigned int address, char *bits, unsigned int value)
+{
+	QString msg;
+	msg.sprintf("ROM cartridge writing detection, from $%06x, at $%06x with a (%s) value of $%0x", m68k_get_reg(NULL, M68K_REG_PC), address, bits, value);
+#if 1
+	QMessageBox msgBox;
+	msgBox.setText(msg);
+
+	if (!M68KDebugHaltStatus() && !strstr(bits, "32"))
+	{
+		msgBox.setInformativeText("Do you want to continue?");
+		msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+		msgBox.setDefaultButton(QMessageBox::Cancel);
+	}
+	else
+	{
+		msgBox.setStandardButtons(QMessageBox::Cancel);
+		msgBox.setDefaultButton(QMessageBox::Cancel);
+	}
+
+	int retVal = msgBox.exec();
+#endif
+#if 0
+	QMessageBox::StandardButton retVal = QMessageBox::question(this, tr("Remove Mapping"), msg, QMessageBox::No | QMessageBox::Yes, QMessageBox::No);
+#endif
+
+	if (retVal == QMessageBox::Ok)
+	{
+		return;
+	}
+	else
+	{
+		M68KDebugHalt();
+	}
+}
+
+
 void m68k_write_memory_8(unsigned int address, unsigned int value)
 {
 #ifdef ALPINE_FUNCTIONS
 	// Check if breakpoint on memory is active, and deal with it
-	if (bpmActive && address == bpmAddress1)
+	if (bpmActive && (address == bpmAddress1))
+	{
 		M68KDebugHalt();
+	}
+	else
+	{
+		// Rom writing authorisation detection
+		if (!vjs.allowWritesToROM && ((address >= 0x800000) && (address < 0xe00000)))
+		{
+			m68k_write_memory_alert(address, "8 bits", value);
+		}
+	}
 #endif
 
 	// Musashi does this automagically for you, UAE core does not :-P
@@ -1318,7 +1367,20 @@ void m68k_write_memory_16(unsigned int address, unsigned int value)
 #ifdef ALPINE_FUNCTIONS
 	// Check if breakpoint on memory is active, and deal with it
 	if (bpmActive && address == bpmAddress1)
+	{
 		M68KDebugHalt();
+	}
+	else
+	{
+		// Rom writing authorisation detection
+		if (!vjs.allowWritesToROM && ((address >= 0x800000) && (address < 0xe00000)))
+		{
+			if (!M68KDebugHaltStatus())
+			{
+				m68k_write_memory_alert(address, "16 bits", value);
+			}
+		}
+	}
 #endif
 
 	// Musashi does this automagically for you, UAE core does not :-P
@@ -1419,7 +1481,17 @@ void m68k_write_memory_32(unsigned int address, unsigned int value)
 #ifdef ALPINE_FUNCTIONS
 	// Check if breakpoint on memory is active, and deal with it
 	if (bpmActive && address == bpmAddress1)
+	{
 		M68KDebugHalt();
+	}
+	else
+	{
+		// Rom writing authorisation detection
+		if (!vjs.allowWritesToROM && ((address >= 0x800000) && (address < 0xe00000)))
+		{
+			m68k_write_memory_alert(address, "32 bits", value);
+		}
+	}
 #endif
 
 	// Musashi does this automagically for you, UAE core does not :-P

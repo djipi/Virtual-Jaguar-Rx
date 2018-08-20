@@ -7,6 +7,9 @@ Release 4 (TBD)
 4) Switch to SDL 1.2.15 static library 64bits for VS 2017
 5) Local variables window displays values from function's parameters
 6) Fixed the typedef's name display in Local and Watch variables window
+7) ROM cartridge writing detection follow the alpine "allow writes to cartridge rom"'s flag check
+-- Breakpoint can now occur in the case of a ROM cartridge writing
+-- Alert box will display a message with possibility to pass or not the breakpoint only if this is related to a 8 or 16 bits ROM access
 
 Release 3 (13th November 2017)
 ------------------------------
@@ -101,7 +104,8 @@ Known issues
 1) Video output is not displayed due to my OpenGL / QT5 5.5.1 integration with VS 2015 but solved when using the QT 5.9.1 package for VS 2017
 2) The BPM (Breapoint) remains stuck on his address when user wants to continue the code execution
 -- Need to trace over the BPM or unset the BPM
-3) To handle DWARF 2 issues with GCC, the code must be compiled with the -gdwarf-2 option
+-- The issue can be prevented if the code doesn't set IRQ, otherwise the IRQ will need to be traced to get back control
+3) To support DWARF 2 with GCC, the code must be compiled with the -gdwarf-2 option
 4) The Local and Watch variables list may display not available (N/A) type information
 -- Such missing information may be included in future release
 5) The 2MB mirroring is no longer applied in case of --dram-max option usage
@@ -111,7 +115,8 @@ Known issues
 -- Missing vectors may be added in future release
 8) User needs to manualy check if the Atari Jaguar executable match his source code files
 -- Otherwise, source code and assembly may not match or leads to instabilities
-9) Application needs to be restarted in case of keybindings changes
+9) The emulator needs to be restarted in case of keybindings changes
+10) In the case of a ROM cartridge writing, and an occuring breakpoint, the PC pointer will point at the next instruction and not at the instruction causing the breakpoint
 
 Cosmetic / UX issues
 ====================
