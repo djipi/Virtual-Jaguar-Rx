@@ -675,11 +675,18 @@ void DWARFManager_InitDMI(void)
 																				case 2:
 																					PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset = *((char *)(return_block->bl_data) + 1);
 
-																					if (return_tagval == DW_TAG_variable)
+																					switch (return_tagval)
 																					{
+																					case	DW_TAG_variable:
 																						PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset -= 0x80;
+																						break;
+
+																					case	DW_TAG_formal_parameter:
+																						break;
+
+																					default:
+																						break;
 																					}
-																					break;
 
 																				default:
 																					break;
@@ -707,6 +714,12 @@ void DWARFManager_InitDMI(void)
 																					dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
 																				}
 																			}
+																			break;
+
+																		case	DW_AT_decl_file:
+																			break;
+
+																		case	DW_AT_decl_line:
 																			break;
 
 																		default:
@@ -749,7 +762,9 @@ void DWARFManager_InitDMI(void)
 
 					// Release the memory used by the source lines
 					for (i = 0; i < (size_t)cnt; ++i)
+					{
 						dwarf_dealloc(dbg, linebuf[i], DW_DLA_LINE);
+					}
 					dwarf_dealloc(dbg, linebuf, DW_DLA_LIST);
 				}
 

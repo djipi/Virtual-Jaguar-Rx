@@ -10,6 +10,7 @@ Release 4 (TBD)
 7) ROM cartridge writing detection follow the alpine "allow writes to cartridge rom"'s flag check
 -- Breakpoint can now occur in the case of a ROM cartridge writing
 -- Alert box will display a message with possibility to pass or not the breakpoint only if this is related to a 8 or 16 bits ROM access
+8) Local variables window detects now if a variable is used or not by the code
 
 Release 3 (13th November 2017)
 ------------------------------

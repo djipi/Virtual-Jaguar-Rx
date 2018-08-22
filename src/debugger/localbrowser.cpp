@@ -78,23 +78,27 @@ bool LocalBrowserWindow::UpdateInfos(void)
 		{
 			if (strcmp(FuncName, Ptr))
 			{
-				FuncName = (char *)realloc(FuncName, strlen(Ptr) + 1);
-				strcpy(FuncName, Ptr);
-
-				LocalInfo = (WatchInfo *)realloc(LocalInfo, (sizeof(WatchInfo) * NbLocal));
-				for (size_t i = 0; i < NbLocal; i++)
+				if (FuncName = (char *)realloc(FuncName, strlen(Ptr) + 1))
 				{
-					// Get local variable name and his information
-					if (LocalInfo[i].PtrVariableName = DBGManager_GetLocalVariableName(Adr, i + 1))
+					strcpy(FuncName, Ptr);
+
+					if (LocalInfo = (WatchInfo *)realloc(LocalInfo, (sizeof(WatchInfo) * NbLocal)))
 					{
-						LocalInfo[i].Op = DBGManager_GetLocalVariableOp(Adr, i + 1);
-						LocalInfo[i].Adr = NULL;
-						LocalInfo[i].PtrCPURegisterName = NULL;
-						LocalInfo[i].TypeTag = DBGManager_GetLocalVariableTypeTag(Adr, i + 1);
-						LocalInfo[i].PtrVariableBaseTypeName = DBGManager_GetLocalVariableTypeName(Adr, i + 1);
-						LocalInfo[i].TypeEncoding = DBGManager_GetLocalVariableTypeEncoding(Adr, i + 1);
-						LocalInfo[i].TypeByteSize = DBGManager_GetLocalVariableTypeByteSize(Adr, i + 1);
-						LocalInfo[i].Offset = DBGManager_GetLocalVariableOffset(Adr, i + 1);
+						for (size_t i = 0; i < NbLocal; i++)
+						{
+							// Get local variable name and his information
+							if (LocalInfo[i].PtrVariableName = DBGManager_GetLocalVariableName(Adr, i + 1))
+							{
+								LocalInfo[i].Op = DBGManager_GetLocalVariableOp(Adr, i + 1);
+								LocalInfo[i].Adr = NULL;
+								LocalInfo[i].PtrCPURegisterName = NULL;
+								LocalInfo[i].TypeTag = DBGManager_GetLocalVariableTypeTag(Adr, i + 1);
+								LocalInfo[i].PtrVariableBaseTypeName = DBGManager_GetLocalVariableTypeName(Adr, i + 1);
+								LocalInfo[i].TypeEncoding = DBGManager_GetLocalVariableTypeEncoding(Adr, i + 1);
+								LocalInfo[i].TypeByteSize = DBGManager_GetLocalVariableTypeByteSize(Adr, i + 1);
+								LocalInfo[i].Offset = DBGManager_GetLocalVariableOffset(Adr, i + 1);
+							}
+						}
 					}
 				}
 			}
@@ -174,25 +178,32 @@ void LocalBrowserWindow::RefreshContents(void)
 						}
 					}
 
-					sprintf(string, "%i : %s | %s | ", (i + 1), (LocalInfo[i].PtrVariableBaseTypeName ? LocalInfo[i].PtrVariableBaseTypeName : (char *)"<font color='#ff0000'>N/A</font>"), LocalInfo[i].PtrVariableName);
-					Local += QString(string);
-					if ((unsigned int)LocalInfo[i].Adr)
+					if (!LocalInfo[i].Op)
 					{
-						sprintf(string, "0x%06X", (unsigned int)LocalInfo[i].Adr);
+						sprintf(string, "<font color='#A52A2A'>%i : %s | %s | [Not used]</font>", (i + 1), (LocalInfo[i].PtrVariableBaseTypeName ? LocalInfo[i].PtrVariableBaseTypeName : (char *)"<font color='#ff0000'>N/A</font>"), LocalInfo[i].PtrVariableName);
 					}
 					else
 					{
-						if (LocalInfo[i].PtrCPURegisterName)
+						sprintf(string, "%i : %s | %s | ", (i + 1), (LocalInfo[i].PtrVariableBaseTypeName ? LocalInfo[i].PtrVariableBaseTypeName : (char *)"<font color='#ff0000'>N/A</font>"), LocalInfo[i].PtrVariableName);
+						Local += QString(string);
+						if ((unsigned int)LocalInfo[i].Adr)
 						{
-							sprintf(string, "<font color='#0000FF'>%s</font>", LocalInfo[i].PtrCPURegisterName);
+							sprintf(string, "0x%06X", (unsigned int)LocalInfo[i].Adr);
 						}
 						else
 						{
-							sprintf(string, "%s", (char *)"<font color='#ff0000'>N/A</font>");
-						}						
+							if (LocalInfo[i].PtrCPURegisterName)
+							{
+								sprintf(string, "<font color='#0000FF'>%s</font>", LocalInfo[i].PtrCPURegisterName);
+							}
+							else
+							{
+								sprintf(string, "%s", (char *)"<font color='#ff0000'>N/A</font>");
+							}
+						}
+						Local += QString(string);
+						sprintf(string, " | %s", (!PtrValue ? (char *)"<font color='#ff0000'>N/A</font>" : PtrValue));
 					}
-					Local += QString(string);
-					sprintf(string, " | %s", (!PtrValue ? (char *)"<font color='#ff0000'>N/A</font>" : PtrValue));
 					Local += QString(string);
 					sprintf(string, "<br>");
 					Local += QString(string);
