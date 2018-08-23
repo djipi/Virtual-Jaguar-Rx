@@ -16,6 +16,7 @@
 #include "memory1browser.h"
 #include "memory.h"
 #include "debugger/DBGManager.h"
+#include "settings.h"
 
 
 //
@@ -63,9 +64,8 @@ void Memory1BrowserWindow::RefreshContents(size_t NumWin)
 
 	if (isVisible())
 	{
-		sprintf(string, "Memory %i - %06X", (unsigned int)((NumWinOrigin = NumWin) + 1), (unsigned int)memOrigin);
+		sprintf(string, "Memory %i - 0x%06X", (unsigned int)((NumWinOrigin = NumWin) + 1), (unsigned int)memOrigin);
 		setWindowTitle(tr(string));
-
 		RefreshContentsWindow();
 	}
 }
@@ -128,7 +128,9 @@ void Memory1BrowserWindow::keyPressEvent(QKeyEvent * e)
 			memBase -= 480;
 
 			if (memBase < 0)
+			{
 				memBase = 0;
+			}
 
 			RefreshContentsWindow();
 		}
@@ -138,8 +140,10 @@ void Memory1BrowserWindow::keyPressEvent(QKeyEvent * e)
 			{
 				memBase += 480;
 
-				if (memBase > (0x200000 - 480))
-					memBase = 0x200000 - 480;
+				if (memBase > (vjs.DRAM_size - 480))
+				{
+					memBase = vjs.DRAM_size - 480;
+				}
 
 				RefreshContentsWindow();
 			}
@@ -150,7 +154,9 @@ void Memory1BrowserWindow::keyPressEvent(QKeyEvent * e)
 					memBase -= 16;
 
 					if (memBase < 0)
+					{
 						memBase = 0;
+					}
 
 					RefreshContentsWindow();
 				}
@@ -160,8 +166,10 @@ void Memory1BrowserWindow::keyPressEvent(QKeyEvent * e)
 					{
 						memBase += 16;
 
-						if (memBase > (0x200000 - 480))
-							memBase = 0x200000 - 480;
+						if (memBase > (vjs.DRAM_size - 480))
+						{
+							memBase = vjs.DRAM_size - 480;
+						}
 
 						RefreshContentsWindow();
 					}
@@ -185,21 +193,39 @@ void Memory1BrowserWindow::GoToAddress(void)
 {
 	bool ok;
 	QString newAddress;
+	size_t newmemBase;
 
+	QPalette p = address->palette();
 	newAddress = address->text();
 
-	if (( newAddress.at(0) == QChar('0')) && (newAddress.at(1) == QChar('x')))
+	if (newAddress.size())
 	{
-		memBase = newAddress.toUInt(&ok, 16);
-	}
-	else
-	{
-		if (!(memBase = DBGManager_GetAdrFromSymbolName(newAddress.toLatin1().data())))
+		if ((newAddress.at(0) == QChar('0')) && (newAddress.at(1) == QChar('x')))
 		{
-			memBase = newAddress.toUInt(&ok, 10);
+			newmemBase = newAddress.toUInt(&ok, 16);
 		}
-	}
+		else
+		{
+			if (!(newmemBase = DBGManager_GetAdrFromSymbolName(newAddress.toLatin1().data())))
+			{
+				newmemBase = newAddress.toUInt(&ok, 10);
+			}
+			else
+			{
+				ok = true;
+			}
+		}
 
-	memOrigin = memBase;
-	RefreshContents(NumWinOrigin);
+		if (!ok || (newmemBase < 0) || (newmemBase > vjs.DRAM_size))
+		{
+			p.setColor(QPalette::Text, Qt::red);
+		}
+		else
+		{
+			p.setColor(QPalette::Text, Qt::black);
+			memOrigin = (memBase = newmemBase);
+			RefreshContents(NumWinOrigin);
+		}
+		address->setPalette(p);
+	}
 }

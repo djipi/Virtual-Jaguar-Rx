@@ -11,11 +11,13 @@ Release 4 (TBD)
 -- Breakpoint can now occur in the case of a ROM cartridge writing
 -- Alert box will display a message with possibility to pass or not the breakpoint only if this is related to a 8 or 16 bits ROM access
 8) Local variables window detects now if a variable is used or not by the code
+9) The address provided in the memory window is now verified to prevent crash
+-- Wrong provided address will be displayed in red
 
 Release 3 (13th November 2017)
 ------------------------------
 0) Fixed the windows respawning in the next emulator launch within --alpine or --debugger options
-1) Added an Exception Vector Table browser window
+1) Added an Exception Vector Table window
 2) Modified the About window to update the credits list in a more appropriate way
 -- Updated the emulator application credits line
 3) Added 'Rx' word to the emulator name
@@ -38,7 +40,7 @@ Release 3 (13th November 2017)
 15) Improved the .heap section detection to avoid a detection error
 -- Depend vlink version, .heap section may have an Alloc flag
 16) Fixed a crash when DWARF information does references to missing source code files
-17) Added a Local browser window for local variables
+17) Added a local variables window
 18) Project has switched to Visual Studio 2017 and QT 5.9.1 library
 
 Release 2 (3rd September 2017)
@@ -50,9 +52,9 @@ Release 2 (3rd September 2017)
 4) DWARF support
 -- TAG: Compilation Unit, Subprogram, Variables, Types
 -- Line numbers, symbols, functions
-5) Added an All Watch browser window for non-local variables
-6) Added a heap allocator browser window based on my own memory allocation functions
-7) Added additional 4 memory browser windows with address input based on hexa, decimal or symbol name
+5) Added an All Watch window for non-local variables
+6) Added a heap allocator window based on my own memory allocation functions
+7) Added additional 4 memory windows with address input based on hexa, decimal or symbol name
 8) Windows refreshing executed only if windows is visible
 9) Added a restart function
 -- Restart only the 68000 program counter to his original set
@@ -118,6 +120,7 @@ Known issues
 -- Otherwise, source code and assembly may not match or leads to instabilities
 9) The emulator needs to be restarted in case of keybindings changes
 10) In the case of a ROM cartridge writing, and an occuring breakpoint, the PC pointer will point at the next instruction and not at the instruction causing the breakpoint
+11) Emulator will crash in case of wrong value provided in the memory browser window
 
 Cosmetic / UX issues
 ====================
