@@ -22,10 +22,11 @@ class StackBrowserWindow: public QWidget
 	public slots:
 //		void DefineAllKeys(void);
 		void RefreshContents(void);
+		void RefreshContentsWindow(void);
 		//void GoToAddress(void);
 
 	protected:
-		//void keyPressEvent(QKeyEvent *);
+		void keyPressEvent(QKeyEvent *);
 
 	private:
 		QVBoxLayout * layout;
@@ -35,7 +36,7 @@ class StackBrowserWindow: public QWidget
 		//QLineEdit * address;
 		//QPushButton * go;
 
-		size_t memBase;
+		size_t stackBase;
 };
 
 #endif	// __STACKBROWSER_H__

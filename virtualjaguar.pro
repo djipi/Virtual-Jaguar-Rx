@@ -111,7 +111,6 @@ HEADERS = \
 	src/debugger/DSPDasmWin.h \
 	src/debugger/GPUDasmWin.h \
 	src/debugger/HWLABELManager.h \
-	src/debugger/VideoWin.h \
 	src/debugger/ELFManager.h \
 	src/debugger/allwatchbrowser.h \
 	src/debugger/localbrowser.h \
@@ -119,6 +118,7 @@ HEADERS = \
 	src/debugger/memory1browser.h \
 	src/debugger/heapallocatorbrowser.h \
 	src/debugger/brkWin.h \
+	src/debugger/VideoWin.h \
 	src/debugger/exceptionvectortablebrowser.h \
 	src/log.h \
 	src/unzip.h \
@@ -159,7 +159,6 @@ SOURCES = \
 	src/debugger/DSPDasmWin.cpp \
 	src/debugger/GPUDasmWin.cpp \
 	src/debugger/HWLABELManager.cpp \
-	src/debugger/VideoWin.cpp \
 	src/debugger/ELFManager.cpp \
 	src/debugger/allwatchbrowser.cpp \
 	src/debugger/localbrowser.cpp \
@@ -167,6 +166,7 @@ SOURCES = \
 	src/debugger/memory1browser.cpp \
 	src/debugger/heapallocatorbrowser.cpp \
 	src/debugger/brkWin.cpp \
+	src/debugger/VideoWin.cpp \
 	src/debugger/exceptionvectortablebrowser.cpp \
 	src/log.cpp \
 	src/unzip.cpp \

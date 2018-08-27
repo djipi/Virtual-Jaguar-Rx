@@ -90,7 +90,7 @@
 #include "joystick.h"
 #include "m68000/m68kinterface.h"
 
-#include "debugger/VideoWin.h"
+//#include "debugger/VideoWin.h"
 #include "debugger/DasmWin.h"
 #include "debugger/m68KDasmWin.h"
 #include "debugger/GPUDasmWin.h"
@@ -184,7 +184,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	riscDasmBrowseWin = new RISCDasmBrowserWindow(this);
 	if (vjs.softTypeDebugger)
 	{
-		VideoOutputWin = new VideoOutputWindow(this);
+		//VideoOutputWin = new VideoOutputWindow(this);
 		//VideoOutputWin->setCentralWidget()
 		//DasmWin = new DasmWindow();
 		DasmWin = new DasmWindow(this);
@@ -230,7 +230,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 	// Create actions
 
-	quitAppAct = new QAction(tr("E&xit"), this);
+	quitAppAct = new QAction(QIcon(":/res/exit.png"), tr("E&xit"), this);
 //	quitAppAct->setShortcuts(QKeySequence::Quit);
 //	quitAppAct->setShortcut(QKeySequence(tr("Alt+x")));
 	//quitAppAct->setShortcut(QKeySequence(tr("Ctrl+q")));
@@ -329,7 +329,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	configAct->setShortcutContext(Qt::ApplicationShortcut);
 	connect(configAct, SIGNAL(triggered()), this, SLOT(Configure()));
 
-	emustatusAct = new QAction(QIcon(""), tr("&Status"), this);
+	emustatusAct = new QAction(QIcon(":/res/status.png"), tr("&Status"), this);
 	emustatusAct->setStatusTip(tr("Emulator status"));
 	//emustatusAct->setShortcut(QKeySequence(tr("Ctrl+s")));
 	emustatusAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBEMUSTATUS].KBSettingValue)));
@@ -1321,10 +1321,14 @@ void MainWin::LoadSoftware(QString file)
 	uint8_t * biosPointer = jaguarBootROM;
 
 	if (vjs.hardwareTypeAlpine)
+	{
 		biosPointer = jaguarDevBootROM2;
+	}
 
 	if (vjs.softTypeDebugger)
+	{
 		biosPointer = jaguarDevBootROM2;
+	}
 
 	memcpy(jagMemSpace + 0xE00000, biosPointer, 0x20000);
 
@@ -1340,7 +1344,9 @@ void MainWin::LoadSoftware(QString file)
 	// This is icky because we've already done it
 // it gets worse :-P
 	if (!vjs.useJaguarBIOS)
+	{
 		SET32(jaguarMainRAM, 4, jaguarRunAddress);
+	}
 
 	m68k_pulse_reset();
 
@@ -1363,8 +1369,7 @@ void MainWin::LoadSoftware(QString file)
 
 	if ((!vjs.hardwareTypeAlpine || !vjs.softTypeDebugger) && !loadAndGo && jaguarRunAddress)
 	{
-		QString newTitle = QString("Virtual Jaguar " VJ_RELEASE_VERSION " Rx - Now playing: %1")
-			.arg(filePickWin->GetSelectedPrettyName());
+		QString newTitle = QString("Virtual Jaguar " VJ_RELEASE_VERSION " Rx - Now playing: %1").arg(filePickWin->GetSelectedPrettyName());
 		setWindowTitle(newTitle);
 	}
 }
@@ -1408,7 +1413,9 @@ void MainWin::TraceStepInto(void)
 void MainWin::Restart(void)
 {
 	m68k_set_reg(M68K_REG_PC, jaguarRunAddress);
+	m68k_set_reg(M68K_REG_SP, vjs.DRAM_size);
 	//m68kDasmWin->SetAddress(jaguarRunAddress);
+	ResetDebuggerWindows();
 	RefreshDebuggerWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Restart function !!!")
@@ -1615,7 +1622,7 @@ void MainWin::ShowVideoOutputWin(void)
 	//VideoOutputWindowCentrale->setWindowTitle(QString(tr("Video output")));
 	//VideoOutputWindowCentrale->show();
 	//memBrowseWin->show();
-	VideoOutputWin->show();
+	//VideoOutputWin->show();
 	//VideoOutputWin->RefreshContents(videoWidget);
 }
 
@@ -2094,8 +2101,20 @@ void	MainWin::RefreshAlpineWindows(void)
 }
 
 
+// Reset soft debugger & alpine debug windows
+void MainWin::ResetDebuggerWindows(void)
+{
+	if (vjs.softTypeDebugger)
+	{
+		heapallocatorBrowseWin->Reset();
+	}
+
+	//ResetAlpineWindows();
+}
+
+
 // Refresh soft debugger & alpine debug windows
-void	MainWin::RefreshDebuggerWindows(void)
+void MainWin::RefreshDebuggerWindows(void)
 {
 	size_t i;
 

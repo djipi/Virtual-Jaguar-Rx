@@ -41,7 +41,7 @@ class LocalBrowserWindow: public QWidget
 //		void GoToAddress(void);
 
 	protected:
-//		void keyPressEvent(QKeyEvent *);
+		void keyPressEvent(QKeyEvent *);
 
 	private:
 		QVBoxLayout *layout;

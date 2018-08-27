@@ -45,5 +45,7 @@
 	<file>../../res/test-pattern.jpg</file>
 	<file>../../res/test-pattern-pal.jpg</file>
 	<file>../../res/help.html</file>
+	<file>../../res/exit.png</file>
+	<file>../../res/status.png</file>
 </qresource>
 </RCC>

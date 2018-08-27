@@ -185,7 +185,7 @@ void m68KDasmWindow::RefreshContents(void)
 
 				if (m68kPC == oldpc)
 				{
-					sprintf(string, "-> %06X: %s<br>", (unsigned int)oldpc, buffer);
+					sprintf(string, "-> <u>%06X: %s</u><br>", (unsigned int)oldpc, buffer);
 					m68kPCShow = true;
 					m68KPCNbrDisasmLines = i;
 				}

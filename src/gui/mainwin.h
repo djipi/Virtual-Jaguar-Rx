@@ -26,7 +26,7 @@ class CPUBrowserWindow;
 class OPBrowserWindow;
 class M68KDasmBrowserWindow;
 class RISCDasmBrowserWindow;
-class VideoOutputWindow;
+//class VideoOutputWindow;
 class DasmWindow;
 class m68KDasmWindow;
 class GPUDasmWindow;
@@ -50,6 +50,7 @@ class MainWin: public QMainWindow
 		void LoadFile(QString);
 		void SyncUI(void);
 		void	RefreshDebuggerWindows(void);
+		void	ResetDebuggerWindows(void);
 		void	RefreshAlpineWindows(void);
 
 	protected:
@@ -120,7 +121,7 @@ class MainWin: public QMainWindow
 		OPBrowserWindow * opBrowseWin;
 		M68KDasmBrowserWindow * m68kDasmBrowseWin;
 		RISCDasmBrowserWindow * riscDasmBrowseWin;
-		VideoOutputWindow * VideoOutputWin;
+		//VideoOutputWindow * VideoOutputWin;
 		AllWatchBrowserWindow * allWatchBrowseWin;
 		LocalBrowserWindow * LocalBrowseWin;
 		ExceptionVectorTableBrowserWindow *exceptionvectortableBrowseWin;

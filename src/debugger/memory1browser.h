@@ -35,7 +35,7 @@ class Memory1BrowserWindow: public QWidget
 		QLineEdit * address;
 		QPushButton * go;
 
-		size_t memBase;
+		int memBase;
 		size_t memOrigin;
 		size_t NumWinOrigin;
 };

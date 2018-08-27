@@ -32,10 +32,11 @@ class HeapAllocatorBrowserWindow: public QWidget
 	public slots:
 //		void DefineAllKeys(void);
 		void RefreshContents(void);
+		void Reset(void);
 //		void GoToAddress(void);
 
 	protected:
-//		void keyPressEvent(QKeyEvent *);
+		void keyPressEvent(QKeyEvent *);
 
 	private:
 		QVBoxLayout *layout;

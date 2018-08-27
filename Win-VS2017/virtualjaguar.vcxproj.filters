@@ -67,9 +67,6 @@
     <ClCompile Include="GeneratedFiles\qrc_virtualjaguar.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\debugger\VideoWin.cpp">
-      <Filter>Source Files\debugger</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\debugger\DasmWin.cpp">
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
@@ -206,9 +203,6 @@
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_VideoWin.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_VideoWin.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_stackbrowser.cpp">
@@ -384,6 +378,9 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_allwatchbrowser.cpp">
       <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\VideoWin.cpp">
+      <Filter>Source Files\debugger</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -563,9 +560,6 @@
     <None Include="..\res\StepInto.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\res\tool-stack.png">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\docs\README">
       <Filter>Docs</Filter>
     </None>
@@ -594,6 +588,9 @@
       <Filter>Docs</Filter>
     </None>
     <None Include="..\res\Local.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\tool-stack.png">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -698,5 +695,13 @@
     <ClInclude Include="..\src\gui\imagedelegate.h">
       <Filter>Header Files\gui</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\res\Exit.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\status.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

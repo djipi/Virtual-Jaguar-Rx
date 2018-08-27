@@ -209,7 +209,7 @@
       <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Qt5PlatformCompositorSupportd.lib;qtmaind.lib;Qt5OpenGLd.lib;shell32.lib;zlib-1.2.8_vs2017_x64d.lib;SDL-1.2.15_vs2017_x64d.lib;OpenGL32.lib;gdi32.lib;user32.lib;legacy_stdio_definitions.lib;libelf-0.8.13_vs2017_x64d.lib;m68000.lib;jaguarcore.lib;libdwarf_x64d.lib;Ws2_32.lib;imm32.lib;winmm.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opengl32.lib;glu32.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Qt5PlatformCompositorSupportd.lib;qtmaind.lib;Qt5OpenGLd.lib;shell32.lib;zlib-1.2.8_vs2017_x64d.lib;SDL-1.2.15_vs2017_x64d.lib;OpenGL32.lib;gdi32.lib;user32.lib;legacy_stdio_definitions.lib;libelf-0.8.13_vs2017_x64d.lib;m68000d.lib;jaguarcored.lib;libdwarf_x64d.lib;Ws2_32.lib;imm32.lib;winmm.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opengl32.lib;glu32.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\..\src\m68000\obj;C:\SDK\zlib\zlib-1.2.8\lib;C:\SDK\SDL\SDL-1.2.15\lib\x64\static;C:\SDK\Elf\libelf-0.8.13\lib;m68000\x64\Debug;jaguarcore\x64\Debug;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib\x64;C:\SDK\DWARF\libdwarf-VS2015\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
@@ -281,6 +281,7 @@
     <ClCompile Include="..\src\debugger\brkWin.cpp" />
     <ClCompile Include="..\src\debugger\exceptionvectortablebrowser.cpp" />
     <ClCompile Include="..\src\debugger\localbrowser.cpp" />
+    <ClCompile Include="..\src\debugger\VideoWin.cpp" />
     <ClCompile Include="..\src\file.cpp" />
     <ClCompile Include="..\src\gui\keybindingstab.cpp" />
     <ClCompile Include="..\src\log.cpp" />
@@ -404,7 +405,7 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_VideoWin.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_virtualjaguar.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -427,7 +428,6 @@
     <ClCompile Include="..\src\debugger\m68kDasmWin.cpp" />
     <ClCompile Include="..\src\debugger\heapallocatorbrowser.cpp" />
     <ClCompile Include="..\src\debugger\memory1browser.cpp" />
-    <ClCompile Include="..\src\debugger\VideoWin.cpp" />
     <ClCompile Include="..\src\gui\about.cpp" />
     <ClCompile Include="..\src\gui\alpinetab.cpp" />
     <ClCompile Include="..\src\gui\app.cpp" />
@@ -563,10 +563,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_stackbrowser.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_VideoWin.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -1144,15 +1140,15 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </None>
     <None Include="..\res\blur-off.png">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </None>
     <None Include="..\res\blur-on.png">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </None>
     <None Include="..\res\cart-blank.png">
@@ -1264,9 +1260,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </None>
     <None Include="..\res\software.png">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
     </None>
     <None Include="..\res\test-pattern-pal.jpg">
@@ -1407,7 +1403,8 @@
   <ItemGroup>
     <None Include="..\res\tool-stack.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -1423,13 +1420,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\Watch.png">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\Local.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\res\Exit.png" />
+    <Image Include="..\res\status.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </Image>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

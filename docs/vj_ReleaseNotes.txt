@@ -3,7 +3,7 @@ Release 4 (TBD)
 0) The zoom value setting has been fixed in the registry
 1) Debugger mode now shares the same alpine rom path setting
 2) Local variables window displays register name now
-3) Switch to Zlib 1.2.11 library 64bits for VS 2017
+3) Switch to Zlib 1.2.11 static library 64bits for VS 2017
 4) Switch to SDL 1.2.15 static library 64bits for VS 2017
 5) Local variables window displays values from function's parameters
 6) Fixed the typedef's name display in Local and Watch variables window
@@ -12,10 +12,20 @@ Release 4 (TBD)
 -- Alert box will display a message with possibility to pass or not the breakpoint only if this is related to a 8 or 16 bits ROM access
 8) Local variables window detects now if a variable is used or not by the code
 9) The address provided in the memory window is now verified to prevent crash
--- Wrong provided address will be displayed in red
+-- Wrong address will be displayed in red
+10) Cosmetic changes on UI
+-- Added new icons for the exit and status features
+-- Modified icons for the SP (Stack) browser
+-- Unified icons sizes depend on their usage (drop down menu and main menu)
+-- Underline the active M68K line in the disassembly window
+-- Allow the up/down navigation on the SP (Stack) browser
+-- Restart function cleans-up the SP (Stack) browser and the heap allocator system
+11) Fixed the up navigation on the memory window
 
 Release 3 (13th November 2017)
 ------------------------------
+Git commit: b1b673a3b0d19e3c2c45b6590b773b11e45bced7
+-
 0) Fixed the windows respawning in the next emulator launch within --alpine or --debugger options
 1) Added an Exception Vector Table window
 2) Modified the About window to update the credits list in a more appropriate way
@@ -31,7 +41,7 @@ Release 3 (13th November 2017)
 9) Fixed a crash, in Release mode, when the HW labels setting is turn on
 10) Solved an interference between the HW labels setting and the one used by the debugger
 -- The setting is now only the reference used
-11) Fixed the SP (Stack) window UI potential missing data
+11) Fixed the SP (Stack) browser UI potential missing data
 12) Create a directory for EEPROMs (based on the EEPROMs setting) if it doesn't already exist
 13) Keep the scrollbar position in accordance of the M68K PC pointer
 -- UI displays the source without the need to move down/up the scrollbar
@@ -61,7 +71,7 @@ Release 2 (3rd September 2017)
 10) Modified the icons color backgound for the "Step In" and "Step Over" functions
 11) Updated the About window to update the credits list
 12) 64 bits Release executable
-13) Fixed (hacking) the display of the SP (Stack) memory browser
+13) Fixed (hacking) the display of the SP (Stack) browser
 14) Set the emulator in Halt mode when launched in alpine debug mode without a loaded rom
 -- Otherwise the 68000 program counter will have a 0 value and will execute the code at this address
 15) Added some information in the --help/-h/-? option
@@ -75,13 +85,13 @@ Release 1 (12th February 2017)
 ------------------------------
 0) BPM (Breapoint) now stop at the designated address and no longer stop after executing the code
 1) Clean-up the tracing / no-tracing flags for better U.I understanding
-2) Added SP (Stack) memory browser
+2) Added SP (Stack) browser
 3) User can change now the number of lines of disassembly displayed in the tracing window
 4) User can turn on/off the op-codes associated in the disassembly lines displayed in the M68K tracing window
 5) Added an emulator status window (GPU status, M68K debugger and tracking status)
 6) Added a GPU disassembly tracing window - Display the current PC pointer
 7) Added a DSP disassembly tracing window - Display the current PC pointer
-8) Added possibility to change refresh rate of browser windows when emulation is launched
+8) Added possibility to change refresh rate of browsers when emulation is launched
 9) Display partial hardware labels (Internal Memory and Graphics sub-system address space) in the disassembly lines displayed in the M68K tracing window
 -- Display first the hardware labels (based from the Jag V8 dev. PDF) and then the ones possibly found in the ELF debug symbol
 10) Minor U.I cosmetic changes
@@ -109,25 +119,24 @@ Known issues
 -- Need to trace over the BPM or unset the BPM
 -- The issue can be prevented if the code doesn't set IRQ, otherwise the IRQ will need to be traced to get back control
 3) To support DWARF 2 with GCC, the code must be compiled with the -gdwarf-2 option
-4) The Local and Watch variables list may display not available (N/A) type information
+4) The Local and Watch variables window  may display not available (N/A) type information
 -- Such missing information may be included in future release
 5) The 2MB mirroring is no longer applied in case of --dram-max option usage
 6) Stack must reflect the --dram-max option usage otherwise the stack may be corrupted
 -- The application needs to set the SP (Stack) in accordance
-7) The Exception Vector Table broswer window displays only 65 vectors
+7) The Exception Vector Table window displays only 65 vectors
 -- Missing vectors may be added in future release
 8) User needs to manualy check if the Atari Jaguar executable match his source code files
 -- Otherwise, source code and assembly may not match or leads to instabilities
 9) The emulator needs to be restarted in case of keybindings changes
-10) In the case of a ROM cartridge writing, and an occuring breakpoint, the PC pointer will point at the next instruction and not at the instruction causing the breakpoint
-11) Emulator will crash in case of wrong value provided in the memory browser window
+10) In the case of a ROM cartridge writing, and with occuring breakpoint, the PC pointer will point at the next instruction and not at the instruction causing the breakpoint
+11) Emulator will crash in case of wrong address value provided in the memory browser
 
 Cosmetic / UX issues
 ====================
 1) The SP (Stack) icon color backgound doesn't look similar with the other ones
-2) The emulator status option has no icon
-3) The SP (Stack) window size always open at a forced size no matter if the size has been changed
-4) Not every features have associated keybindings
+2) The SP (Stack) browser size always open at a forced size no matter if the size has been changed
+3) Not every features have associated keybindings
 
 Legacy issues/hints
 ===================

@@ -169,11 +169,30 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 }
 
 
-#if 0
+// 
+void HeapAllocatorBrowserWindow::Reset(void)
+{
+	size_t Adr68K;
+
+	if (DBGManager_GetAdrFromSymbolName((char *)"__HeapBase"))
+	{
+		if (Adr68K = DBGManager_GetGlobalVariableAdrFromName((char *)"alloc"))
+		{
+			jaguarMainRAM[Adr68K] = jaguarMainRAM[Adr68K + 1] = jaguarMainRAM[Adr68K + 2] = jaguarMainRAM[Adr68K + 3] = 0;
+			Adr = 0;
+		}
+	}
+}
+
+
+// 
 void HeapAllocatorBrowserWindow::keyPressEvent(QKeyEvent * e)
 {
 	if (e->key() == Qt::Key_Escape)
+	{
 		hide();
+	}
+#if 0
 	else if (e->key() == Qt::Key_PageUp)
 	{
 		memBase -= 480;
@@ -210,8 +229,8 @@ void HeapAllocatorBrowserWindow::keyPressEvent(QKeyEvent * e)
 
 		RefreshContents();
 	}
-}
 #endif
+}
 
 
 #if 0

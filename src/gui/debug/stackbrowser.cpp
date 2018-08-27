@@ -20,7 +20,7 @@
 #include "settings.h"
 
 
-//#define DEBUG_SPDISPLAY 26			// To fill up to 256 bytes with values from 0 to $FF below the SP pointer
+//#define DEBUG_SPDISPLAY 1000		// To fill up to 256 bytes with values from 0 to $FF below the SP pointer any above are random values
 
 
 //
@@ -31,10 +31,8 @@ StackBrowserWindow::StackBrowserWindow(QWidget * parent/*= 0*/): QWidget(parent,
 	//refresh(new QPushButton(tr("Refresh"))),
 	//address(new QLineEdit),
 	//go(new QPushButton(tr("Go"))),
-	memBase(m68k_get_reg(NULL, M68K_REG_SP))
+	stackBase(m68k_get_reg(NULL, M68K_REG_SP))
 {
-	setWindowTitle(tr("Stack Browser"));
-
 /*
 	address->setInputMask("hhhhhh");
 	QHBoxLayout * hbox1 = new QHBoxLayout;
@@ -69,36 +67,60 @@ StackBrowserWindow::StackBrowserWindow(QWidget * parent/*= 0*/): QWidget(parent,
 // 
 void StackBrowserWindow::RefreshContents(void)
 {
-	char string[1024], buf[64];
+	char string[1024];
+
+	if (isVisible())
+	{
+#ifdef DEBUG_SPDISPLAY
+		m68k_set_reg(M68K_REG_SP, (vjs.DRAM_size - DEBUG_SPDISPLAY));
+#endif
+		if ((stackBase = m68k_get_reg(NULL, M68K_REG_SP)) && (stackBase < vjs.DRAM_size))
+		{
+
+#ifdef DEBUG_SPDISPLAY
+			for (int i = 0; i < DEBUG_SPDISPLAY; i++)
+			{
+#if DEBUG_SPDISPLAY < 257
+				jaguarMainRAM[stackBase + i] = (uint8_t)i;
+#else
+				jaguarMainRAM[stackBase + i] = (uint8_t)rand();
+#endif
+			}
+#endif
+			sprintf(string, "Stack Browser - 0x%06X", (unsigned int)(stackBase, (unsigned int)stackBase));
+		}
+		else
+		{
+			sprintf(string, "Stack Browser");
+		}
+
+		setWindowTitle(tr(string));
+		RefreshContentsWindow();
+	}
+}
+
+
+// Refresh / Display the window contents
+void StackBrowserWindow::RefreshContentsWindow(void)
+{
+	char string[2048], buf[64];
 	QString memDump;
 	size_t i, j;
 	uint8_t c;
 
-	if (isVisible())
+	if (stackBase < vjs.DRAM_size)
 	{
-		memBase = m68k_get_reg(NULL, M68K_REG_SP);
-
-#ifdef DEBUG_SPDISPLAY
-#if DEBUG_SPDISPLAY < 257
-		memBase -= DEBUG_SPDISPLAY;
-		for (i = 0; i < DEBUG_SPDISPLAY; i++)
-		{
-			jaguarMainRAM[memBase + i] = (uint8_t)i;
-		}
-#endif
-#endif
-
 		for (i = 0; i < 480; i += 16)
 		{
-			if ((memBase + i) < vjs.DRAM_size)
+			if ((stackBase + i) < vjs.DRAM_size)
 			{
-				sprintf(string, "%s%06X: ", (i ? "<br>" : ""), (unsigned int)(memBase + i));
+				sprintf(string, "%s%06X: ", (i ? "<br>" : ""), (unsigned int)(stackBase + i));
 
 				for (j = 0; j < 16; j++)
 				{
-					if ((memBase + i + j) < vjs.DRAM_size)
+					if ((stackBase + i + j) < vjs.DRAM_size)
 					{
-						sprintf(buf, "%02X ", jaguarMainRAM[memBase + i + j]);
+						sprintf(buf, "%02X ", jaguarMainRAM[stackBase + i + j]);
 					}
 					else
 					{
@@ -113,7 +135,7 @@ void StackBrowserWindow::RefreshContents(void)
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to dig the reason(s) why the 2nd line needs to use the &nbsp; instead of space !!!")
 #else
-#warning "!!! Need to dig the reason(s) why the 2nd line needs to use the &nbsp; instead of space !!!"
+						#warning "!!! Need to dig the reason(s) why the 2nd line needs to use the &nbsp; instead of space !!!"
 #endif // _MSC_VER
 					}
 					strcat(string, buf);
@@ -125,9 +147,9 @@ void StackBrowserWindow::RefreshContents(void)
 
 				for (j = 0; j < 16; j++)
 				{
-					if ((memBase + i + j) < vjs.DRAM_size)
+					if ((stackBase + i + j) < vjs.DRAM_size)
 					{
-						c = jaguarMainRAM[memBase + i + j];
+						c = jaguarMainRAM[stackBase + i + j];
 						//sprintf(buf, "&#%i;", c);
 
 						//if (c == 0x20)
@@ -157,56 +179,88 @@ void StackBrowserWindow::RefreshContents(void)
 				memDump += QString(string);
 			}
 		}
-
-		text->clear();
-		text->setText(memDump);
 	}
+	else
+	{
+		memDump += QString("");
+	}
+
+	text->clear();
+	text->setText(memDump);
 }
 
 
-/*
+// 
 void StackBrowserWindow::keyPressEvent(QKeyEvent * e)
 {
+	size_t offset;
+
+	// Escape key to hide the window
 	if (e->key() == Qt::Key_Escape)
+	{
 		hide();
-	else if (e->key() == Qt::Key_PageUp)
-	{
-		memBase -= 480;
-
-		if (memBase < 0)
-			memBase = 0;
-
-		RefreshContents();
 	}
-	else if (e->key() == Qt::Key_PageDown)
+	else
 	{
-		memBase += 480;
+		if (stackBase < vjs.DRAM_size)
+		{
+			if (e->key() == Qt::Key_PageUp)
+			{
+				offset = -480;
+			}
+			else
+			{
+				if (e->key() == Qt::Key_PageDown)
+				{
+					offset = 480;
+				}
+				else
+				{
+					if (e->key() == Qt::Key_Up || e->key() == Qt::Key_Minus)
+					{
+						offset = -16;
+					}
+					else
+					{
+						if (e->key() == Qt::Key_Down || e->key() == Qt::Key_Plus)
+						{
+							offset = 16;
+						}
+						else
+						{
+							offset = 0;
+						}
+					}
+				}
+			}
 
-		if (memBase > (0x200000 - 480))
-			memBase = 0x200000 - 480;
+			if (offset)
+			{
+				if (offset < 0)
+				{
+					if ((stackBase += offset) < m68k_get_reg(NULL, M68K_REG_SP))
+					{
+						stackBase = m68k_get_reg(NULL, M68K_REG_SP);
+					}
+				}
+				else
+				{
+					if ((stackBase += offset) > (vjs.DRAM_size - 480))
+					{
+						stackBase = vjs.DRAM_size - 480;
+					}
 
-		RefreshContents();
-	}
-	else if (e->key() == Qt::Key_Up || e->key() == Qt::Key_Minus)
-	{
-		memBase -= 16;
+					if (stackBase < m68k_get_reg(NULL, M68K_REG_SP))
+					{
+						stackBase = m68k_get_reg(NULL, M68K_REG_SP);
+					}
+				}
 
-		if (memBase < 0)
-			memBase = 0;
-
-		RefreshContents();
-	}
-	else if (e->key() == Qt::Key_Down || e->key() == Qt::Key_Equal)
-	{
-		memBase += 16;
-
-		if (memBase > (0x200000 - 480))
-			memBase = 0x200000 - 480;
-
-		RefreshContents();
+				RefreshContentsWindow();
+			}
+		}
 	}
 }
-*/
 
 
 /*
@@ -214,7 +268,7 @@ void StackBrowserWindow::GoToAddress(void)
 {
 	bool ok;
 	QString newAddress = address->text();
-	memBase = newAddress.toUInt(&ok, 16);
+	stackBase = newAddress.toUInt(&ok, 16);
 	RefreshContents();
 }
 */

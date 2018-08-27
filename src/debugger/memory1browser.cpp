@@ -125,9 +125,7 @@ void Memory1BrowserWindow::keyPressEvent(QKeyEvent * e)
 	{
 		if (e->key() == Qt::Key_PageUp)
 		{
-			memBase -= 480;
-
-			if (memBase < 0)
+			if ((memBase -= 480) < 0)
 			{
 				memBase = 0;
 			}
@@ -138,9 +136,7 @@ void Memory1BrowserWindow::keyPressEvent(QKeyEvent * e)
 		{
 			if (e->key() == Qt::Key_PageDown)
 			{
-				memBase += 480;
-
-				if (memBase > (vjs.DRAM_size - 480))
+				if ((memBase += 480) > (vjs.DRAM_size - 480))
 				{
 					memBase = vjs.DRAM_size - 480;
 				}
@@ -151,9 +147,7 @@ void Memory1BrowserWindow::keyPressEvent(QKeyEvent * e)
 			{
 				if (e->key() == Qt::Key_Up || e->key() == Qt::Key_Minus)
 				{
-					memBase -= 16;
-
-					if (memBase < 0)
+					if ((memBase -= 16) < 0)
 					{
 						memBase = 0;
 					}
@@ -164,9 +158,7 @@ void Memory1BrowserWindow::keyPressEvent(QKeyEvent * e)
 				{
 					if (e->key() == Qt::Key_Down || e->key() == Qt::Key_Equal)
 					{
-						memBase += 16;
-
-						if (memBase > (vjs.DRAM_size - 480))
+						if ((memBase += 16) > (vjs.DRAM_size - 480))
 						{
 							memBase = vjs.DRAM_size - 480;
 						}
@@ -192,15 +184,16 @@ void Memory1BrowserWindow::keyPressEvent(QKeyEvent * e)
 void Memory1BrowserWindow::GoToAddress(void)
 {
 	bool ok;
+	size_t len;
 	QString newAddress;
 	size_t newmemBase;
 
 	QPalette p = address->palette();
 	newAddress = address->text();
 
-	if (newAddress.size())
+	if ((len = newAddress.size()))
 	{
-		if ((newAddress.at(0) == QChar('0')) && (newAddress.at(1) == QChar('x')))
+		if ((len > 1) && (newAddress.at(0) == QChar('0')) && (newAddress.at(1) == QChar('x')))
 		{
 			newmemBase = newAddress.toUInt(&ok, 16);
 		}

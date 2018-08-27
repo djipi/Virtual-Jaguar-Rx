@@ -221,11 +221,14 @@ void LocalBrowserWindow::RefreshContents(void)
 }
 
 
-#if 0
+// 
 void LocalBrowserWindow::keyPressEvent(QKeyEvent * e)
 {
 	if (e->key() == Qt::Key_Escape)
+	{
 		hide();
+	}
+#if 0
 	else if (e->key() == Qt::Key_PageUp)
 	{
 		memBase -= 480;
@@ -262,8 +265,8 @@ void LocalBrowserWindow::keyPressEvent(QKeyEvent * e)
 
 		RefreshContents();
 	}
-}
 #endif
+}
 
 
 #if 0
