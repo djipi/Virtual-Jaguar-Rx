@@ -141,9 +141,9 @@ int M68KDebugHaltStatus(void)
 
 
 // Halt M68k
-void M68KDebugHalt(void)
+int M68KDebugHalt(void)
 {
-	regs.spcflags |= SPCFLAG_DEBUGGER;
+	return (regs.spcflags |= SPCFLAG_DEBUGGER);
 }
 
 

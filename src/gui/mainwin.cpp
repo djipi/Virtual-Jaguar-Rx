@@ -145,6 +145,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	//	setCentralWidget(mainWindowCentrale);
 	//}
 
+	WriteLog("Window creation start\n");
+
 	// video output
 	videoWidget = new GLWidget(this);
 	videoWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -251,8 +253,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	connect(powerAct, SIGNAL(triggered()), this, SLOT(TogglePowerState()));
 
 	QIcon pauseIcon;
-	pauseIcon.addFile(":/res/pause-off", QSize(), QIcon::Normal, QIcon::Off);
-	pauseIcon.addFile(":/res/pause-on", QSize(), QIcon::Normal, QIcon::On);
+	pauseIcon.addFile(":/res/pause-off.png", QSize(), QIcon::Normal, QIcon::Off);
+	pauseIcon.addFile(":/res/pause-on.png", QSize(), QIcon::Normal, QIcon::On);
 	pauseAct = new QAction(pauseIcon, tr("Pause"), this);
 	pauseAct->setStatusTip(tr("Toggles the running state"));
 	pauseAct->setCheckable(true);
@@ -614,7 +616,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	// Do this in case original size isn't correct (mostly for the first-run case)
 	ResizeMainWindow();
 
-	// Create our test pattern bitmaps
+	WriteLog("Window creation done\n");
+
+	// Create our test pattern NTSC bitmap
+	WriteLog("Test pattern 1 bitmap\n");
+
 	QImage tempImg(":/res/test-pattern.jpg");
 	QImage tempImgScaled = tempImg.scaled(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT_PAL, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
@@ -629,7 +635,10 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		}
 	}
 
-	QImage tempImg2(":/res/test-pattern-pal");
+	// Create our test pattern PAL bitmap
+	WriteLog("Test pattern 2 bitmap\n");
+
+	QImage tempImg2(":/res/test-pattern-pal.jpg");
 	QImage tempImgScaled2 = tempImg2.scaled(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT_PAL, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
 	for(uint32_t y=0; y<VIRTUAL_SCREEN_HEIGHT_PAL; y++)
@@ -1762,6 +1771,8 @@ void MainWin::ReadSettings(void)
 	vjs.p2KeyBindings[BUTTON_s] = settings.value("p2k_star", Qt::Key_Asterisk).toInt();
 #endif
 
+	WriteLog("Read setting = Done\n");
+
 	ReadProfiles(&settings);
 }
 
@@ -1899,6 +1910,8 @@ void MainWin::ReadUISettings(void)
 	}
 
 	settings.endGroup();
+
+	WriteLog("Read UI setting = Done\n");
 }
 
 

@@ -102,7 +102,7 @@ int M68KGetCurrentOpcodeFamily(void);
 
 
 // Functions to allow debugging
-void M68KDebugHalt(void);
+int M68KDebugHalt(void);
 void M68KDebugResume(void);
 int M68KDebugHaltStatus(void);
 

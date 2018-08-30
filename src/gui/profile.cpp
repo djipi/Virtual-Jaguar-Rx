@@ -147,6 +147,8 @@ printf("Setting up default profile...\n");
 		for(int i=0; i<21; i++)
 			profile[0].map[i] = defaultMap[i];
 	}
+
+	WriteLog("Read profiles = Done\n");
 }
 
 
