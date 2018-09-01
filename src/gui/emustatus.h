@@ -2,7 +2,6 @@
 // emustatus.h: Jaguar emulator status
 //
 // by Jean-Paul Mari
-// (C) 2012 Underground Software
 //
 
 #ifndef __EMUSTATUS_H__
@@ -18,23 +17,15 @@ class EmuStatusWindow : public QWidget
 	public:
 		EmuStatusWindow(QWidget * parent = 0);
 
-
 	public slots:
-//		void DefineAllKeys(void);
 		void RefreshContents(void);
-		//void GoToAddress(void);
 
 	protected:
-		//void keyPressEvent(QKeyEvent *);
+		void keyPressEvent(QKeyEvent *);
 
 	private:
 		QVBoxLayout * layout;
-//		QTextBrowser * text;
 		QLabel * text;
-		//QPushButton * refresh;
-		//QLineEdit * address;
-		//QPushButton * go;
-
 		bool	GPURunning;
 		bool	M68000DebugHaltStatus;
 };
