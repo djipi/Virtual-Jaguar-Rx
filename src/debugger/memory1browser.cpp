@@ -21,16 +21,12 @@
 
 //
 Memory1BrowserWindow::Memory1BrowserWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dialog),
-//	layout(new QVBoxLayout), text(new QTextBrowser),
 	layout(new QVBoxLayout), text(new QLabel),
 	refresh(new QPushButton(tr("Refresh"))),
 	address(new QLineEdit),
 	go(new QPushButton(tr("Go"))),
 	memBase(0), memOrigin(0), NumWinOrigin(0)
 {
-	//setWindowTitle(tr("Memory 1 Browser"));
-
-	//address->setInputMask("hhhhhh");
 	address->setPlaceholderText("0x<value>, decimal value or symbol name");
 
 	QHBoxLayout * hbox1 = new QHBoxLayout;
@@ -38,18 +34,12 @@ Memory1BrowserWindow::Memory1BrowserWindow(QWidget * parent/*= 0*/): QWidget(par
 	hbox1->addWidget(address);
 	hbox1->addWidget(go);
 
-	// Need to set the size as well...
-//	resize(560, 480);
-
 	QFont fixedFont("Lucida Console", 8, QFont::Normal);
-//	QFont fixedFont("", 8, QFont::Normal);
 	fixedFont.setStyleHint(QFont::TypeWriter);
 	text->setFont(fixedFont);
-////	layout->setSizeConstraint(QLayout::SetFixedSize);
 	setLayout(layout);
 
 	layout->addWidget(text);
-	//layout->addWidget(refresh);
 	layout->addLayout(hbox1);
 
 	connect(refresh, SIGNAL(clicked()), this, SLOT(RefreshContentsWindow()));

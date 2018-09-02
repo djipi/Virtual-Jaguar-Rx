@@ -1,8 +1,7 @@
 //
-// memoryheapallocatorbrowser.h: All Watch
+// heapallocatorbrowser.h: Memory heap allocation
 //
-// by James Hammons
-// (C) 2012 Underground Software
+// by Jean-Paul Mari
 //
 
 #ifndef __HEAPALLOCATORBROWSER_H__
@@ -15,13 +14,10 @@ class HeapAllocatorBrowserWindow: public QWidget
 {
 	Q_OBJECT
 
-	struct HeapAllocation
+	typedef struct HeapAllocation
 	{
-		//UINT32 nextalloc;
 		uint32_t nextalloc;
-		//UINT32 size;
 		uint32_t size;
-		//UINT16 used;
 		uint16_t used;
 	}S_HeapAllocation;
 
@@ -30,27 +26,16 @@ class HeapAllocatorBrowserWindow: public QWidget
 		~HeapAllocatorBrowserWindow(void);
 
 	public slots:
-//		void DefineAllKeys(void);
 		void RefreshContents(void);
 		void Reset(void);
-//		void GoToAddress(void);
 
 	protected:
 		void keyPressEvent(QKeyEvent *);
 
 	private:
 		QVBoxLayout *layout;
-//		QTextBrowser * text;
-//		QLabel *text;
 		QTextBrowser *text;
-//		QPushButton *refresh;
-//		QLineEdit *address;
-//		QPushButton *go;
-//		WatchInfo *PtrWatchInfo;
-//		int32_t memBase;
-//		int32_t NbWatch;
 		size_t Adr;
-//		HeapAllocation HeapAllocation;
 };
 
 #endif	// __HEAPALLOCATORBROWSER_H__

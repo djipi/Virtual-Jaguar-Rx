@@ -22,29 +22,15 @@ class m68KDasmWindow: public QWidget
 		m68KDasmWindow(QWidget * parent = 0);
 
 	public slots:
-//		void	DefineAllKeys(void);
 		void	RefreshContents(void);
-#if 0
-		void	GoToAddress(void);
-#endif
 		void	SetAddress(int address);
 		void	Use68KPCAddress(void);
 
 	protected:
-#if 0
-		void	keyPressEvent(QKeyEvent *);
-#endif
 
 	private:
 		QVBoxLayout *layout;
 		QTextBrowser *text;
-//		QScrollBar *sb;
-//		QLabel * text;
-#if 0
-		QPushButton * refresh;
-		QLineEdit * address;
-		QPushButton * go;
-#endif
 		size_t memBase;
 };
 

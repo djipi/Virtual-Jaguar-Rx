@@ -281,7 +281,7 @@ bool ParseCommandLine(int argc, char * argv[])
 		// DRAM size max
 		if (strcmp(argv[i], "--dram-max") == 0)
 		{
-			printf("DRAM size set at 8 Mbytes.\n");
+			printf("DRAM size set at 8 MBytes.\n");
 			vjs.DRAM_size = 0x800000;
 		}
 

@@ -1,8 +1,7 @@
 //
 // memory1browser.h: Jaguar memory window 1 browser
 //
-// by James Hammons
-// (C) 2012 Underground Software
+// by Jean-Paul Mari
 //
 
 #ifndef __MEMORY1BROWSER_H__
@@ -19,7 +18,6 @@ class Memory1BrowserWindow: public QWidget
 		Memory1BrowserWindow(QWidget * parent = 0);
 
 	public slots:
-//		void DefineAllKeys(void);
 		void RefreshContents(size_t NumWin);
 		void RefreshContentsWindow(void);
 		void GoToAddress(void);
@@ -29,12 +27,10 @@ class Memory1BrowserWindow: public QWidget
 
 	private:
 		QVBoxLayout * layout;
-		//		QTextBrowser * text;
 		QLabel * text;
 		QPushButton * refresh;
 		QLineEdit * address;
 		QPushButton * go;
-
 		int memBase;
 		size_t memOrigin;
 		size_t NumWinOrigin;

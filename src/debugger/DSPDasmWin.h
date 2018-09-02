@@ -21,27 +21,15 @@ class DSPDasmWindow: public QWidget
 	public:
 		DSPDasmWindow(QWidget * parent = 0);
 
-
 	public slots:
-//		void DefineAllKeys(void);
 		void RefreshContents(void);
-		//void GoToAddress(void);
 		void	UseDSPPCAddress(void);
-		//void	SetAddress(int address);
 
 	protected:
-		//void keyPressEvent(QKeyEvent *);
 
 	private:
 		QVBoxLayout * layout;
-//		QTextBrowser * text;
 		QLabel * text;
-		//QPushButton * refresh;
-		//QPushButton * go;
-		//QLineEdit * address;
-		//QRadioButton * gpu;
-		//QRadioButton * dsp;
-
 		int32_t memBase;
 };
 

@@ -1,5 +1,5 @@
 //
-// localbrowser.h: All Watch
+// localbrowser.h: Local variables
 //
 // by Jean-Paul Mari
 //
@@ -15,10 +15,8 @@ class LocalBrowserWindow: public QWidget
 	Q_OBJECT
 
 	//
-	struct WatchInfo
+	typedef struct WatchInfo
 	{
-		//size_t TypeEncoding;
-		//size_t TypeByteSize;
 		size_t Op;
 		size_t Adr;
 		int Offset;
@@ -35,24 +33,16 @@ class LocalBrowserWindow: public QWidget
 		~LocalBrowserWindow(void);
 
 	public slots:
-//		void DefineAllKeys(void);
 		void RefreshContents(void);
 		bool UpdateInfos(void);
-//		void GoToAddress(void);
 
 	protected:
 		void keyPressEvent(QKeyEvent *);
 
 	private:
 		QVBoxLayout *layout;
-//		QTextBrowser * text;
-//		QLabel *text;
 		QTextBrowser *text;
-//		QPushButton *refresh;
-//		QLineEdit *address;
-//		QPushButton *go;
 		WatchInfo *LocalInfo;
-//		int32_t memBase;
 		size_t NbLocal;
 		char *FuncName;
 };
