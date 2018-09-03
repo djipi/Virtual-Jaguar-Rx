@@ -382,6 +382,15 @@
     <ClCompile Include="..\src\debugger\VideoWin.cpp">
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_callstackbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_callstackbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\callstackbrowser.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -554,12 +563,6 @@
     <None Include="..\res\ELF-file.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\res\StepOver.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\res\StepInto.png">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\docs\README">
       <Filter>Docs</Filter>
     </None>
@@ -575,22 +578,28 @@
     <None Include="..\docs\INSTALL">
       <Filter>Docs</Filter>
     </None>
-    <None Include="..\res\Restart.png">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="..\res\Watch.png">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\docs\vj_ReleaseNotes.txt">
       <Filter>Docs</Filter>
     </None>
     <None Include="..\docs\LICENSE">
       <Filter>Docs</Filter>
     </None>
-    <None Include="..\res\Local.png">
+    <None Include="..\res\tool-stack.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\res\tool-stack.png">
+    <None Include="..\res\debug-watch.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\debug-stepInto.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\debug-stepover.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\debug-restart.png">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\res\debug-local.png">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -676,6 +685,9 @@
     <CustomBuild Include="..\src\debugger\localbrowser.h">
       <Filter>Header Files\debugger</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\src\debugger\callstackbrowser.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\res\vj.rc">
@@ -701,6 +713,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\res\status.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\debug-callstack.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\debug-memory.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

@@ -13,7 +13,7 @@ Release 4 (TBD)
 8) Local variables window detects now if a variable is used or not by the code
 9) The address provided in the memory window is now verified to prevent crash
 -- Wrong address will be displayed in red
-10) Cosmetic changes on UI
+10) UI cosmetic changes 
 -- Added new icons for the exit and status features
 -- Modified icons for the SP (Stack) browser
 -- Unified icons sizes depend on their usage (drop down menu and main menu)
@@ -24,6 +24,17 @@ Release 4 (TBD)
 12) Added some log information for the emulator initialisations
 13) Breakpoint will happen in case of writing at unknown memory location
 -- Alert box will display a message and then code will stop
+14) Added the DRAM size in the emulator status window
+15) Debugger sources code clean-up
+16) Added a call stack feature
+17) Prevent source file reading issue on no-Windows system 
+18) UI modifications
+-- Modified icon for the memory window to make a distinction with the memory browser
+-- The all watch, and Exception Vector Table windows, can be closed using keyboard
+-- Renamed the debugger dedicated icons to make a distinction
+-- Added the call stack window
+19) Fixed a crash in the all watch window after loading a new binary without ELF/DWARF information
+-- Previously used ELF/DWARF information was still accessible
 
 Release 3 (13th November 2017)
 ------------------------------

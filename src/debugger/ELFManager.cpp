@@ -218,7 +218,7 @@ size_t ELFManager_GetAdrFromSymbolName(char *SymbolName)
 	size_t Adr = 0;
 	GElf_Sym *PtrST, ST;
 
-	if (ELFtab != NULL)
+	if (ELFtab && SymbolName)
 	{
 		for (size_t i = 0; i < NbELFtabStruct; i++)
 		{

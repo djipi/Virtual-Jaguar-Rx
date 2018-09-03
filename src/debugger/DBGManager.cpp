@@ -73,6 +73,13 @@ void DBGManager_Reset(void)
 }
 
 
+// Get debugger type
+size_t DBGManager_GetType(void)
+{
+	return DBGType;
+}
+
+
 // Common debugger set
 void DBGManager_SetType(size_t DBGTypeSet)
 {
@@ -140,17 +147,20 @@ size_t DBGManager_GetNbGlobalVariables(void)
 }
 
 
-//
+// Get address from symbol name
+// Return found address
+// Return NULL if no symbol has been found
 size_t DBGManager_GetAdrFromSymbolName(char *SymbolName)
 {
-	if ((DBGType & DBG_ELF))
+	if (SymbolName)
 	{
-		return ELFManager_GetAdrFromSymbolName(SymbolName);
+		if ((DBGType & DBG_ELF))
+		{
+			return ELFManager_GetAdrFromSymbolName(SymbolName);
+		}
 	}
-	else
-	{
-		return 0;
-	}
+
+	return 0;
 }
 
 

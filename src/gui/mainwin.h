@@ -14,30 +14,36 @@
 
 #define RING_BUFFER_SIZE 32
 
-// Forward declarations
+// Main windows
 class GLWidget;
 class VideoWindow;
 class AboutWindow;
 class HelpWindow;
 class FilePickerWindow;
-class MemoryBrowserWindow;
-class StackBrowserWindow;
-class CPUBrowserWindow;
-class OPBrowserWindow;
-class M68KDasmBrowserWindow;
-class RISCDasmBrowserWindow;
 //class VideoOutputWindow;
 class DasmWindow;
 class m68KDasmWindow;
 class GPUDasmWindow;
 class DSPDasmWindow;
 class EmuStatusWindow;
+
+// Alpine
+class MemoryBrowserWindow;
+class StackBrowserWindow;
+class CPUBrowserWindow;
+class OPBrowserWindow;
+class M68KDasmBrowserWindow;
+class RISCDasmBrowserWindow;
+
+// Debugger
 class AllWatchBrowserWindow;
 class LocalBrowserWindow;
+class CallStackBrowserWindow;
 class HeapAllocatorBrowserWindow;
 class Memory1BrowserWindow;
 class BrkWindow;
 class ExceptionVectorTableBrowserWindow;
+
 
 class MainWin: public QMainWindow
 {
@@ -49,8 +55,8 @@ class MainWin: public QMainWindow
 		MainWin(bool);
 		void LoadFile(QString);
 		void SyncUI(void);
-		void	RefreshDebuggerWindows(void);
-		void	ResetDebuggerWindows(void);
+		void	DebuggerRefreshWindows(void);
+		void	DebuggerResetWindows(void);
 		void	RefreshAlpineWindows(void);
 
 	protected:
@@ -77,25 +83,28 @@ class MainWin: public QMainWindow
 		void LoadSoftware(QString);
 		void ToggleCDUsage(void);
 		void FrameAdvance(void);
-		void TraceStepOver(void);
-		void TraceStepInto(void);
 		void ToggleFullScreen(void);
-		void Restart(void);
+		void ShowEmuStatusWin(void);
+		// Debugger
+		void DebuggerTraceStepOver(void);
+		void DebuggerTraceStepInto(void);
+		void DebuggerRestart(void);
+		void ShowAllWatchBrowserWin(void);
+		void ShowLocalBrowserWin(void);
+		void ShowCallStackBrowserWin(void);
+		void ShowHeapAllocatorBrowserWin(void);
+		void ShowMemory1BrowserWin(int NumWin);
+		void ShowExceptionVectorTableBrowserWin(void);
 		void NewBreakpointFunction(void);
+		void ShowVideoOutputWin(void);
+		void ShowDasmWin(void);
+		// Alpine
 		void ShowMemoryBrowserWin(void);
 		void ShowStackBrowserWin(void);
 		void ShowCPUBrowserWin(void);
 		void ShowOPBrowserWin(void);
 		void ShowM68KDasmBrowserWin(void);
 		void ShowRISCDasmBrowserWin(void);
-		void ShowVideoOutputWin(void);
-		void ShowDasmWin(void);
-		void ShowEmuStatusWin(void);
-		void ShowAllWatchBrowserWin(void);
-		void ShowLocalBrowserWin(void);
-		void ShowHeapAllocatorBrowserWin(void);
-		void ShowMemory1BrowserWin(int NumWin);
-		void ShowExceptionVectorTableBrowserWin(void);
 
 	private:
 		void HandleKeys(QKeyEvent *, bool);
@@ -107,7 +116,7 @@ class MainWin: public QMainWindow
 		void WriteSettings(void);
 		void WriteUISettings(void);
 
-//	public:
+	private:
 		GLWidget * videoWidget;
 		QMdiArea *mainWindowCentrale;
 		QMdiSubWindow *VideoOutputWindowCentrale;
@@ -122,11 +131,12 @@ class MainWin: public QMainWindow
 		M68KDasmBrowserWindow * m68kDasmBrowseWin;
 		RISCDasmBrowserWindow * riscDasmBrowseWin;
 		//VideoOutputWindow * VideoOutputWin;
-		AllWatchBrowserWindow * allWatchBrowseWin;
-		LocalBrowserWindow * LocalBrowseWin;
+		AllWatchBrowserWindow *allWatchBrowseWin;
+		LocalBrowserWindow *LocalBrowseWin;
+		CallStackBrowserWindow *CallStackBrowseWin;
 		ExceptionVectorTableBrowserWindow *exceptionvectortableBrowseWin;
 		HeapAllocatorBrowserWindow *heapallocatorBrowseWin;
-		Memory1BrowserWindow ** mem1BrowseWin;
+		Memory1BrowserWindow **mem1BrowseWin;
 		DasmWindow * DasmWin;
 		QTabWidget *dasmtabWidget;
 		//QDockWidget *dasmtabWidget;
@@ -139,8 +149,10 @@ class MainWin: public QMainWindow
 		int zoomLevel;
 		bool powerButtonOn;
 		bool showUntunedTankCircuit;
+
 	public:
 		bool cartridgeLoaded;
+
 	private:
 		bool allowUnknownSoftware;
 		bool CDActive;
@@ -150,11 +162,13 @@ class MainWin: public QMainWindow
 		bool keyHeld[8];
 		bool fullScreen;
 		bool scannedSoftwareFolder;
+
 	public:
 		bool plzDontKillMyComputer;
 		uint32_t oldTimestamp;
 		uint32_t ringBufferPointer;
 		uint32_t ringBuffer[RING_BUFFER_SIZE];
+
 	private:
 		QPoint mainWinPosition;
 //		QSize mainWinSize;
@@ -189,18 +203,22 @@ class MainWin: public QMainWindow
 		QAction *traceStepIntoAct;
 		QAction *restartAct;
 		QAction * fullScreenAct;
+		QAction *DasmAct;
 
+		// Alpine
 		QAction *memBrowseAct;
 		QAction *stackBrowseAct;
 		QAction *cpuBrowseAct;
 		QAction *opBrowseAct;
 		QAction *m68kDasmBrowseAct;
 		QAction *riscDasmBrowseAct;
+
+		// Debugger
 		QAction *VideoOutputAct;
-		QAction *DasmAct;
 		QAction *heapallocatorBrowseAct;
 		QAction *allWatchBrowseAct;
 		QAction *LocalBrowseAct;
+		QAction *CallStackBrowseAct;
 		QAction **mem1BrowseAct;
 		QAction *newBreakpointFunctionAct;
 		QAction *exceptionVectorTableBrowseAct;

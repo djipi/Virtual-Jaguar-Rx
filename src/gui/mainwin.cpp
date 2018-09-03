@@ -16,17 +16,18 @@
 // JPM  01/11/2017  Added stack browser
 // JPM  01/02/2017  Added GPU disassembly
 // JPM  02/02/2017  Added DSP disassembly
-// JPM  07/12/2017  Added all Watch browser window
-// JPM  08/01/2017  Added heap allocator browser window
-// JPM  08/07/2017  Added memories window browser
+// JPM  07/12/2017  Added all Watch window
+// JPM  08/01/2017  Added heap allocator window
+// JPM  08/07/2017  Added memories window
 // JPM  08/10/2017  Added a restart feature
-// JPM  08/31/2017  Added breakpoints winndow
+// JPM  08/31/2017  Added breakpoints window [Not Supported]
 // JPM  09/01/2017  Save position & visibility windows status in the settings
 // JPM  09/02/2017  Save size windows in the settings
 // JPM  09/05/2017  Added Exception Vector Table window
 // JPM  09/06/2017  Added the 'Rx' word to the emulator window name
 // JPM  09/12/2017  Added the keybindings in the settings
-// JPM  11/04/2017  Added the local browser window
+// JPM  11/04/2017  Added the local window
+// JPM  08/31/2018  Added the call stack window
 //
 
 // FIXED:
@@ -75,10 +76,6 @@
 #include "debug/opbrowser.h"
 #include "debug/riscdasmbrowser.h"
 
-#include "debugger/allwatchbrowser.h"
-#include "debugger/localbrowser.h"
-#include "debugger/heapallocatorbrowser.h"
-
 #include "dac.h"
 #include "jaguar.h"
 #include "log.h"
@@ -98,6 +95,11 @@
 #include "debugger/memory1browser.h"
 #include "debugger/brkWin.h"
 #include "debugger/exceptionvectortablebrowser.h"
+#include "debugger/allwatchbrowser.h"
+#include "debugger/localbrowser.h"
+#include "debugger/heapallocatorbrowser.h"
+#include "debugger/callstackbrowser.h"
+
 
 // According to SebRmv, this header isn't seen on Arch Linux either... :-/
 //#ifdef __GCCWIN32__
@@ -195,6 +197,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		heapallocatorBrowseWin = new HeapAllocatorBrowserWindow(this);
 		brkWin = new BrkWindow(this);
 		exceptionvectortableBrowseWin = new ExceptionVectorTableBrowserWindow(this);
+		CallStackBrowseWin = new CallStackBrowserWindow(this);
 
 		mem1BrowseWin = (Memory1BrowserWindow **)calloc(vjs.nbrmemory1browserwindow, sizeof(Memory1BrowserWindow));
 #ifdef _MSC_VER
@@ -353,29 +356,29 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 	if (vjs.softTypeDebugger)
 	{
-		restartAct = new QAction(QIcon(":/res/Restart.png"), tr("&Restart"), this);
+		restartAct = new QAction(QIcon(":/res/debug-restart.png"), tr("&Restart"), this);
 		//restartAct->setShortcut(QKeySequence(tr("Ctrl+Shift+F5")));
 		restartAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBRESTART].KBSettingValue)));
 		restartAct->setShortcutContext(Qt::ApplicationShortcut);
 		restartAct->setCheckable(false);
 		restartAct->setDisabled(true);
-		connect(restartAct, SIGNAL(triggered()), this, SLOT(Restart()));
+		connect(restartAct, SIGNAL(triggered()), this, SLOT(DebuggerRestart()));
 
-		traceStepOverAct = new QAction(QIcon(":/res/StepOver.png"), tr("&Step Over"), this);
+		traceStepOverAct = new QAction(QIcon(":/res/debug-stepover.png"), tr("&Step Over"), this);
 		//traceStepOverAct->setShortcut(QKeySequence(tr("F10")));
 		traceStepOverAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBSTEPOVER].KBSettingValue)));
 		traceStepOverAct->setShortcutContext(Qt::ApplicationShortcut);
 		traceStepOverAct->setCheckable(false);
 		traceStepOverAct->setDisabled(true);
-		connect(traceStepOverAct, SIGNAL(triggered()), this, SLOT(TraceStepOver()));
+		connect(traceStepOverAct, SIGNAL(triggered()), this, SLOT(DebuggerTraceStepOver()));
 
-		traceStepIntoAct = new QAction(QIcon(":/res/StepInto.png"), tr("&Step Into"), this);
+		traceStepIntoAct = new QAction(QIcon(":/res/debug-stepinto.png"), tr("&Step Into"), this);
 		//traceStepIntoAct->setShortcut(QKeySequence(tr("F11")));
 		traceStepIntoAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBSTEPINTO].KBSettingValue)));
 		traceStepIntoAct->setShortcutContext(Qt::ApplicationShortcut);
 		traceStepIntoAct->setCheckable(false);
 		traceStepIntoAct->setDisabled(true);
-		connect(traceStepIntoAct, SIGNAL(triggered()), this, SLOT(TraceStepInto()));
+		connect(traceStepIntoAct, SIGNAL(triggered()), this, SLOT(DebuggerTraceStepInto()));
 
 		newBreakpointFunctionAct = new QAction(QIcon(""), tr("&Function Breakpoint"), this);
 		newBreakpointFunctionAct->setShortcut(QKeySequence(tr("Ctrl+B")));
@@ -396,17 +399,21 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		exceptionVectorTableBrowseAct->setStatusTip(tr("Shows all Exception Vector Table browser window"));
 		connect(exceptionVectorTableBrowseAct, SIGNAL(triggered()), this, SLOT(ShowExceptionVectorTableBrowserWin()));
 
-		allWatchBrowseAct = new QAction(QIcon(":/res/Watch.png"), tr("All Watch"), this);
+		allWatchBrowseAct = new QAction(QIcon(":/res/debug-watch.png"), tr("All Watch"), this);
 		allWatchBrowseAct->setStatusTip(tr("Shows all Watch browser window"));
 		connect(allWatchBrowseAct, SIGNAL(triggered()), this, SLOT(ShowAllWatchBrowserWin()));
 
-		LocalBrowseAct = new QAction(QIcon(":/res/Local.png"), tr("Local"), this);
+		LocalBrowseAct = new QAction(QIcon(":/res/debug-local.png"), tr("Local"), this);
 		LocalBrowseAct->setStatusTip(tr("Shows Local browser window"));
 		connect(LocalBrowseAct, SIGNAL(triggered()), this, SLOT(ShowLocalBrowserWin()));
 
 		heapallocatorBrowseAct = new QAction(QIcon(""), tr("Heap allocator"), this);
 		heapallocatorBrowseAct->setStatusTip(tr("Shows the heap allocator browser window"));
 		connect(heapallocatorBrowseAct, SIGNAL(triggered()), this, SLOT(ShowHeapAllocatorBrowserWin()));
+
+		CallStackBrowseAct = new QAction(QIcon(":/res/debug-callstack.png"), tr("Call Stack"), this);
+		CallStackBrowseAct->setStatusTip(tr("Shows Call Stack browser window"));
+		connect(CallStackBrowseAct, SIGNAL(triggered()), this, SLOT(ShowCallStackBrowserWin()));
 
 		mem1BrowseAct = (QAction **)calloc(vjs.nbrmemory1browserwindow, sizeof(QAction));
 		QSignalMapper *signalMapper = new QSignalMapper(this);
@@ -419,7 +426,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		{
 			char MB[100];
 			sprintf(MB, "Memory %i", (unsigned int)(i+1));
-			mem1BrowseAct[i] = new QAction(QIcon(":/res/tool-memory.png"), tr(MB), this);
+			mem1BrowseAct[i] = new QAction(QIcon(":/res/debug-memory.png"), tr(MB), this);
 			mem1BrowseAct[i]->setStatusTip(tr("Shows a Jaguar memory browser window"));
 			//mem1BrowseAct[i]->
 			//connect(mem1BrowseAct[0], SIGNAL(triggered()), this, SLOT(ShowMemory1BrowserWin(size_t(0))));
@@ -508,6 +515,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugWindowsWatchMenu = debugWindowsMenu->addMenu(tr("&Watch"));
 			debugWindowsWatchMenu->addAction(allWatchBrowseAct);
 			debugWindowsMenu->addAction(LocalBrowseAct);
+			debugWindowsMenu->addSeparator();
+			debugWindowsMenu->addAction(CallStackBrowseAct);
 			debugWindowsMenu->addSeparator();
 			debugWindowsMemoryMenu = debugWindowsMenu->addMenu(tr("&Memory"));
 			debugWindowsMemoryMenu->addAction(heapallocatorBrowseAct);
@@ -998,7 +1007,7 @@ void MainWin::Configure(void)
 	// Just in case we crash before a clean exit...
 	WriteSettings();
 
-	RefreshDebuggerWindows();
+	DebuggerRefreshWindows();
 }
 
 
@@ -1154,12 +1163,12 @@ void MainWin::TogglePowerState(void)
 // does the expected thing. Otherwise, if we use the file picker to insert a
 // cart, we expect to run the cart! Maybe have a RemoveCart function that only
 // works if the CD unit is active?
-			setWindowTitle(QString("Virtual Jaguar " VJ_RELEASE_VERSION
-				" Rx - Now playing: Jaguar CD"));
+			setWindowTitle(QString("Virtual Jaguar " VJ_RELEASE_VERSION	" Rx - Now playing: Jaguar CD"));
 		}
 
 		WriteLog("GUI: Resetting Jaguar...\n");
 		JaguarReset();
+		DebuggerResetWindows();
 		DACPauseAudioThread(false);
 	}
 }
@@ -1203,7 +1212,7 @@ void MainWin::ToggleRunState(void)
 
 			cpuBrowseWin->HoldBPM();
 			cpuBrowseWin->HandleBPMContinue();
-			RefreshDebuggerWindows();
+			DebuggerRefreshWindows();
 		}
 	}
 	else
@@ -1322,6 +1331,7 @@ void MainWin::Unpause(void)
 }
 
 
+// Jaguar initialisation and load software file
 void MainWin::LoadSoftware(QString file)
 {
 	running = false;							// Prevent bad things(TM) from happening...
@@ -1329,12 +1339,7 @@ void MainWin::LoadSoftware(QString file)
 
 	uint8_t * biosPointer = jaguarBootROM;
 
-	if (vjs.hardwareTypeAlpine)
-	{
-		biosPointer = jaguarDevBootROM2;
-	}
-
-	if (vjs.softTypeDebugger)
+	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
 		biosPointer = jaguarDevBootROM2;
 	}
@@ -1362,6 +1367,7 @@ void MainWin::LoadSoftware(QString file)
 // set the M68K in halt mode in case of a debug mode is used, so control is at user side
 	if (vjs.softTypeDebugger)
 	{
+		m68k_set_reg(M68K_REG_A6, 0);
 		m68kDasmWin->SetAddress(jaguarRunAddress);
 		//pauseAct->setDisabled(false);
 		//pauseAct->setChecked(true);
@@ -1405,11 +1411,11 @@ void MainWin::NewBreakpointFunction(void)
 
 
 // Step Into trace
-void MainWin::TraceStepInto(void)
+void MainWin::DebuggerTraceStepInto(void)
 {
 	JaguarStepInto();
 	videoWidget->updateGL();
-	RefreshDebuggerWindows();
+	DebuggerRefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Step Into function !!!")
 #else
@@ -1419,13 +1425,18 @@ void MainWin::TraceStepInto(void)
 
 
 // Restart
-void MainWin::Restart(void)
+void MainWin::DebuggerRestart(void)
 {
+#if 1
+	m68k_pulse_reset();
+#else
 	m68k_set_reg(M68K_REG_PC, jaguarRunAddress);
 	m68k_set_reg(M68K_REG_SP, vjs.DRAM_size);
-	//m68kDasmWin->SetAddress(jaguarRunAddress);
-	ResetDebuggerWindows();
-	RefreshDebuggerWindows();
+#endif
+	m68k_set_reg(M68K_REG_A6, 0);
+
+	DebuggerResetWindows();
+	DebuggerRefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Restart function !!!")
 #else
@@ -1435,11 +1446,11 @@ void MainWin::Restart(void)
 
 
 // Step Over trace
-void MainWin::TraceStepOver(void)
+void MainWin::DebuggerTraceStepOver(void)
 {
 	JaguarStepOver(0);
 	videoWidget->updateGL();
-	RefreshDebuggerWindows();
+	DebuggerRefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Step Over function !!!")
 #else
@@ -1531,6 +1542,7 @@ void MainWin::ToggleFullScreen(void)
 }
 
 
+// 
 void MainWin::ShowExceptionVectorTableBrowserWin(void)
 {
 	exceptionvectortableBrowseWin->show();
@@ -1538,10 +1550,19 @@ void MainWin::ShowExceptionVectorTableBrowserWin(void)
 }
 
 
+// 
 void MainWin::ShowLocalBrowserWin(void)
 {
 	LocalBrowseWin->show();
 	LocalBrowseWin->RefreshContents();
+}
+
+
+// 
+void MainWin::ShowCallStackBrowserWin(void)
+{
+	CallStackBrowseWin->show();
+	CallStackBrowseWin->RefreshContents();
 }
 
 
@@ -1895,6 +1916,13 @@ void MainWin::ReadUISettings(void)
 		size = settings.value("exceptionVectorTableBrowseWinSize", QSize(400, 400)).toSize();
 		exceptionvectortableBrowseWin->resize(size);
 
+		// Call Stack browser UI information
+		pos = settings.value("CallStackBrowseWinPos", QPoint(200, 200)).toPoint();
+		CallStackBrowseWin->move(pos);
+		settings.value("CallStackBrowseWinIsVisible", false).toBool() ? ShowCallStackBrowserWin() : void();
+		size = settings.value("CallStackBrowseWinSize", QSize(400, 400)).toSize();
+		CallStackBrowseWin->resize(size);
+
 		// Memories browser UI information
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
@@ -2086,6 +2114,9 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("exceptionVectorTableBrowseWinPos", exceptionvectortableBrowseWin->pos());
 		settings.setValue("exceptionVectorTableBrowseWinIsVisible", exceptionvectortableBrowseWin->isVisible());
 		settings.setValue("exceptionVectorTableBrowseWinSize", exceptionvectortableBrowseWin->size());
+		settings.setValue("CallStackBrowseWinPos", CallStackBrowseWin->pos());
+		settings.setValue("CallStackBrowseWinIsVisible", CallStackBrowseWin->isVisible());
+		settings.setValue("CallStackBrowseWinSize", CallStackBrowseWin->size());
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
 			sprintf(mem1Name, "mem1BrowseWinPos[%i]", (unsigned int)i);
@@ -2114,20 +2145,21 @@ void	MainWin::RefreshAlpineWindows(void)
 }
 
 
-// Reset soft debugger & alpine debug windows
-void MainWin::ResetDebuggerWindows(void)
+// Reset soft debugger windows
+void MainWin::DebuggerResetWindows(void)
 {
 	if (vjs.softTypeDebugger)
 	{
+		allWatchBrowseWin->Reset();
 		heapallocatorBrowseWin->Reset();
-	}
 
-	//ResetAlpineWindows();
+		//ResetAlpineWindows();
+	}
 }
 
 
 // Refresh soft debugger & alpine debug windows
-void MainWin::RefreshDebuggerWindows(void)
+void MainWin::DebuggerRefreshWindows(void)
 {
 	size_t i;
 
@@ -2138,6 +2170,7 @@ void MainWin::RefreshDebuggerWindows(void)
 		DSPDasmWin->RefreshContents();
 		allWatchBrowseWin->RefreshContents();
 		LocalBrowseWin->RefreshContents();
+		CallStackBrowseWin->RefreshContents();
 		heapallocatorBrowseWin->RefreshContents();
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{

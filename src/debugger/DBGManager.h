@@ -218,13 +218,14 @@ typedef enum {
 DBGOP;
 
 
-//
+// Internal manager
 extern void	DBGManager_Init(void);
 extern void	DBGManager_SetType(size_t DBGTypeSet);
+extern size_t DBGManager_GetType(void);
 extern void	DBGManager_Reset(void);
 extern void	DBGManager_Close(void);
 
-//
+// General manager
 extern char	*DBGManager_GetSymbolNameFromAdr(size_t Adr);
 extern char	*DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error);
 extern size_t DBGManager_GetNumLineFromAdr(size_t Adr, size_t Tag);

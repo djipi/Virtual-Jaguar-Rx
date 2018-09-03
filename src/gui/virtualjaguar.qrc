@@ -7,17 +7,17 @@
 	<file>../../res/pause-off.png</file>
 	<file>../../res/pause-on.png</file>
 	<file>../../res/frame-advance.png</file>
-	<file>../../res/StepOver.png</file>
-	<file>../../res/StepInto.png</file>
-	<file>../../res/Restart.png</file>
+	<file>../../res/debug-stepover.png</file>
+	<file>../../res/debug-stepinto.png</file>
+	<file>../../res/debug-restart.png</file>
 	<file>../../res/zoom100.png</file>
 	<file>../../res/zoom200.png</file>
 	<file>../../res/zoom300.png</file>
 	<file>../../res/blur-off.png</file>
 	<file>../../res/blur-on.png</file>
 	<file>../../res/fullscreen.png</file>
-	<file>../../res/Watch.png</file>
-	<file>../../res/Local.png</file>
+	<file>../../res/debug-watch.png</file>
+	<file>../../res/debug-local.png</file>
 	<file>../../res/tool-memory.png</file>
 	<file>../../res/tool-stack.png</file>
 	<file>../../res/tool-cpu.png</file>
@@ -47,5 +47,7 @@
 	<file>../../res/help.html</file>
 	<file>../../res/exit.png</file>
 	<file>../../res/status.png</file>
+	<file>../../res/debug-callstack.png</file>	
+	<file>../../res/debug-memory.png</file>
 </qresource>
 </RCC>
