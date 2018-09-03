@@ -119,6 +119,7 @@ HEADERS = \
 	src/debugger/heapallocatorbrowser.h \
 	src/debugger/brkWin.h \
 	src/debugger/VideoWin.h \
+	src/debugger/callstackbrowser.h \
 	src/debugger/exceptionvectortablebrowser.h \
 	src/log.h \
 	src/unzip.h \
@@ -168,6 +169,7 @@ SOURCES = \
 	src/debugger/brkWin.cpp \
 	src/debugger/VideoWin.cpp \
 	src/debugger/exceptionvectortablebrowser.cpp \
+	src/debugger/callstackbrowser.cpp \
 	src/log.cpp \
 	src/unzip.cpp \
 	src/crc32.cpp \
