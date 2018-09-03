@@ -102,6 +102,7 @@ struct CUStruct
 	BaseTypeStruct *PtrTypes;
 	size_t NbVariables;								// Variables number
 	VariablesStruct *PtrVariables;					// Pointer to the global variables list information structure
+	size_t NbFrames;								// Frames number
 }S_CUStruct;
 
 
@@ -286,7 +287,7 @@ void DWARFManager_InitDMI(void)
 						// Die type detection
 						switch (return_tagval)
 						{
-						case	DW_TAG_compile_unit:
+						case DW_TAG_compile_unit:
 							if (dwarf_attrlist(return_sib, &atlist, &atcnt, &error) == DW_DLV_OK)
 							{
 								for (Dwarf_Signed i = 0; i < atcnt; ++i)
@@ -295,21 +296,24 @@ void DWARFManager_InitDMI(void)
 									{
 										switch (return_attr)
 										{
-										case	DW_AT_low_pc:
+											// Start address
+										case DW_AT_low_pc:
 											if (dwarf_lowpc(return_sib, &return_lowpc, &error) == DW_DLV_OK)
 											{
 												PtrCU[NbCU].LowPC = return_lowpc;
 											}
 											break;
 
-										case	DW_AT_high_pc:
+											// End address
+										case DW_AT_high_pc:
 											if (dwarf_highpc(return_sib, &return_highpc, &error) == DW_DLV_OK)
 											{
 												PtrCU[NbCU].HighPC = return_highpc;
 											}
 											break;
 
-										case	DW_AT_producer:
+											// compilation information
+										case DW_AT_producer:
 											if (dwarf_formstring(atlist[i], &return_string, &error) == DW_DLV_OK)
 											{
 												PtrCU[NbCU].PtrProducer = (char *)calloc(strlen(return_string) + 1, 1);
@@ -318,7 +322,8 @@ void DWARFManager_InitDMI(void)
 											}
 											break;
 
-										case	DW_AT_name:
+											// Filename
+										case DW_AT_name:
 											if (dwarf_formstring(atlist[i], &return_string, &error) == DW_DLV_OK)
 											{
 												SourceFilename = (char *)realloc(SourceFilename, strlen(return_string) + 1);
@@ -327,7 +332,8 @@ void DWARFManager_InitDMI(void)
 											}
 											break;
 
-										case	DW_AT_comp_dir:
+											// Directory name
+										case DW_AT_comp_dir:
 											if (dwarf_formstring(atlist[i], &return_string, &error) == DW_DLV_OK)
 											{
 												SourceFileDirectory = (char *)realloc(SourceFileDirectory, strlen(return_string) + 1);
@@ -346,13 +352,24 @@ void DWARFManager_InitDMI(void)
 							}
 
 							Ptr = SourceFullFilename = (char *)realloc(SourceFullFilename, strlen(SourceFilename) + strlen(SourceFileDirectory) + 2);
+#if defined(_WIN32)
 							sprintf(SourceFullFilename, "%s\\%s", SourceFileDirectory, SourceFilename);
+#else
+							sprintf(SourceFullFilename, "%s/%s", SourceFileDirectory, SourceFilename);
+#endif
 							while (*Ptr)
 							{
+#if defined(_WIN32)
 								if (*Ptr == '/')
 								{
 									*Ptr = '\\';
 								}
+#else
+								if (*Ptr == '\\')
+								{
+									*Ptr = '/';
+								}
+#endif
 								Ptr++;
 							}
 							PtrCU[NbCU].PtrFullFilename = (char *)calloc(strlen(SourceFullFilename) + 1, 1);
@@ -415,10 +432,10 @@ void DWARFManager_InitDMI(void)
 							{
 								switch (return_tagval)
 								{
-								case	DW_TAG_lexical_block:
+								case DW_TAG_lexical_block:
 									break;
 
-								case	DW_TAG_variable:
+								case DW_TAG_variable:
 									if (dwarf_attrlist(return_die, &atlist, &atcnt, &error) == DW_DLV_OK)
 									{
 										PtrCU[NbCU].PtrVariables = (VariablesStruct *)realloc(PtrCU[NbCU].PtrVariables, ((PtrCU[NbCU].NbVariables + 1) * sizeof(VariablesStruct)));
@@ -432,7 +449,7 @@ void DWARFManager_InitDMI(void)
 												{
 													switch (return_attr)
 													{
-													case	DW_AT_location:
+													case DW_AT_location:
 														if (dwarf_formblock(return_attr1, &return_block, &error) == DW_DLV_OK)
 														{
 															PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].Op = (*((unsigned char *)(return_block->bl_data)));
@@ -450,14 +467,15 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
-													case	DW_AT_type:
+													case DW_AT_type:
 														if (dwarf_global_formref(return_attr1, &return_offset, &error) == DW_DLV_OK)
 														{
 															PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].TypeOffset = return_offset;
 														}
 														break;
 
-													case	DW_AT_name:
+														// Variable name
+													case DW_AT_name:
 														if (dwarf_formstring(return_attr1, &return_string, &error) == DW_DLV_OK)
 														{
 #ifdef DEBUG_VariableName
@@ -471,7 +489,7 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
-													default:
+														default:
 														break;
 													}
 												}
@@ -486,14 +504,14 @@ void DWARFManager_InitDMI(void)
 									}
 									break;
 
-								case	DW_TAG_base_type:
-								case	DW_TAG_typedef:
-								case	DW_TAG_structure_type:
-								case	DW_TAG_pointer_type:
-								case	DW_TAG_const_type:
-								case	DW_TAG_array_type:
-								case	DW_TAG_subrange_type:
-								case	DW_TAG_subroutine_type:
+								case DW_TAG_base_type:
+								case DW_TAG_typedef:
+								case DW_TAG_structure_type:
+								case DW_TAG_pointer_type:
+								case DW_TAG_const_type:
+								case DW_TAG_array_type:
+								case DW_TAG_subrange_type:
+								case DW_TAG_subroutine_type:
 									if (dwarf_attrlist(return_die, &atlist, &atcnt, &error) == DW_DLV_OK)
 									{
 										PtrCU[NbCU].PtrTypes = (BaseTypeStruct *)realloc(PtrCU[NbCU].PtrTypes, ((PtrCU[NbCU].NbTypes + 1) * sizeof(BaseTypeStruct)));
@@ -513,28 +531,28 @@ void DWARFManager_InitDMI(void)
 												{
 													switch (return_attr)
 													{
-													case	DW_AT_type:
+													case DW_AT_type:
 														if (dwarf_global_formref(return_attr1, &return_offset, &error) == DW_DLV_OK)
 														{
 															PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].TypeOffset = return_offset;
 														}
 														break;
 
-													case	DW_AT_byte_size:
+													case DW_AT_byte_size:
 														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
 														{
 															PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].ByteSize = return_uvalue;
 														}
 														break;
 
-													case	DW_AT_encoding:
+													case DW_AT_encoding:
 														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
 														{
 															PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].Encoding = return_uvalue;
 														}
 														break;
 
-													case	DW_AT_name:
+													case DW_AT_name:
 														if (dwarf_formstring(return_attr1, &return_string, &error) == DW_DLV_OK)
 														{
 															PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrName = (char *)calloc(strlen(return_string) + 1, 1);
@@ -543,7 +561,7 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
-													default:
+														default:
 														break;
 													}
 												}
@@ -558,7 +576,7 @@ void DWARFManager_InitDMI(void)
 									}
 									break;
 
-								case	DW_TAG_subprogram:
+								case DW_TAG_subprogram:
 									if (dwarf_attrlist(return_die, &atlist, &atcnt, &error) == DW_DLV_OK)
 									{
 										PtrCU[NbCU].PtrSubProgs = (SubProgStruct *)realloc(PtrCU[NbCU].PtrSubProgs, ((PtrCU[NbCU].NbSubProgs + 1) * sizeof(SubProgStruct)));
@@ -573,6 +591,7 @@ void DWARFManager_InitDMI(void)
 												{
 													switch (return_attr)
 													{
+														// start address
 													case DW_AT_low_pc:
 														if (dwarf_lowpc(return_die, &return_lowpc, &error) == DW_DLV_OK)
 														{
@@ -581,6 +600,7 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
+														// end address
 													case DW_AT_high_pc:
 														if (dwarf_highpc(return_die, &return_highpc, &error) == DW_DLV_OK)
 														{
@@ -588,6 +608,7 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
+														// Line number
 													case DW_AT_decl_line:
 														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
 														{
@@ -595,13 +616,16 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
+														// Frame
 													case DW_AT_frame_base:
 														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
 														{
 															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].FrameBase = return_uvalue;
+															PtrCU[NbCU].NbFrames++;
 														}
 														break;
 
+														// function name
 													case DW_AT_name:
 														if (dwarf_formstring(return_attr1, &return_string, &error) == DW_DLV_OK)
 														{
@@ -609,6 +633,25 @@ void DWARFManager_InitDMI(void)
 															strcpy(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrSubprogramName, return_string);
 															dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
 														}
+														break;
+
+													case DW_AT_sibling:
+														break;
+
+													case DW_AT_GNU_all_tail_call_sites:
+														break;
+
+													case DW_AT_type:
+														break;
+
+													case DW_AT_prototyped:
+														break;
+
+														// File number
+													case DW_AT_decl_file:
+														break;
+
+													case DW_AT_external:
 														break;
 
 													default:
@@ -662,7 +705,7 @@ void DWARFManager_InitDMI(void)
 																	{
 																		switch (return_attr)
 																		{
-																		case	DW_AT_location:
+																		case DW_AT_location:
 																			if (dwarf_formblock(return_attr1, &return_block, &error) == DW_DLV_OK)
 																			{
 																				PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Op = *((unsigned char *)(return_block->bl_data));
@@ -677,11 +720,11 @@ void DWARFManager_InitDMI(void)
 
 																					switch (return_tagval)
 																					{
-																					case	DW_TAG_variable:
+																					case DW_TAG_variable:
 																						PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset -= 0x80;
 																						break;
 
-																					case	DW_TAG_formal_parameter:
+																					case DW_TAG_formal_parameter:
 																						break;
 
 																					default:
@@ -695,14 +738,14 @@ void DWARFManager_InitDMI(void)
 																			}
 																			break;
 
-																		case	DW_AT_type:
+																		case DW_AT_type:
 																			if (dwarf_global_formref(return_attr1, &return_offset, &error) == DW_DLV_OK)
 																			{
 																				PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].TypeOffset = return_offset;
 																			}
 																			break;
 
-																		case	DW_AT_name:
+																		case DW_AT_name:
 																			if (dwarf_formstring(return_attr1, &return_string, &error) == DW_DLV_OK)
 																			{
 #ifdef DEBUG_VariableName
@@ -716,10 +759,10 @@ void DWARFManager_InitDMI(void)
 																			}
 																			break;
 
-																		case	DW_AT_decl_file:
+																		case DW_AT_decl_file:
 																			break;
 
-																		case	DW_AT_decl_line:
+																		case DW_AT_decl_line:
 																			break;
 
 																		default:
@@ -887,7 +930,7 @@ void DWARFManager_InitDMI(void)
 }
 
 
-// 
+// Variables information initialisation
 void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 {
 	size_t j, TypeOffset;
@@ -901,23 +944,25 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 		{
 			switch (PtrCU[NbCU].PtrTypes[j].Tag)
 			{
+				// Structure type tag
 			case DW_TAG_structure_type:
-				PtrVariables->TypeTag |= 0x1;
+				PtrVariables->TypeTag |= TypeTag_structure;
 				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
 				{
 					j = -1;
 				}
 				else
 				{
-					if ((PtrVariables->TypeTag & 0x2))
+					if ((PtrVariables->TypeTag & TypeTag_pointer))
 					{
 						strcat(PtrVariables->PtrTypeName, " *");
 					}
 				}
 				break;
 
+				// Pointer type tag
 			case DW_TAG_pointer_type:
-				PtrVariables->TypeTag |= 0x2;
+				PtrVariables->TypeTag |= TypeTag_pointer;
 				PtrVariables->TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
 				PtrVariables->TypeEncoding = 0x10;
 				if (!(TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
@@ -930,10 +975,11 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 				}
 				break;
 
+				// Typedef type tag
 			case DW_TAG_typedef:
-				if (!(PtrVariables->TypeTag & 0x20))
+				if (!(PtrVariables->TypeTag & TypeTag_typedef))
 				{
-					PtrVariables->TypeTag |= 0x20;
+					PtrVariables->TypeTag |= TypeTag_typedef;
 					strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
 				}
 				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
@@ -942,20 +988,23 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 				}
 				break;
 
+				// ? type tag
 			case DW_TAG_subrange_type:
-				PtrVariables->TypeTag |= 0x4;
+				PtrVariables->TypeTag |= TypeTag_0x04;
 				break;
 
+				// Array type tag
 			case DW_TAG_array_type:
-				PtrVariables->TypeTag |= 0x8;
+				PtrVariables->TypeTag |= TypeTag_arraytype;
 				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
 				{
 					j = -1;
 				}
 				break;
 
+				// Const type tag
 			case DW_TAG_const_type:
-				PtrVariables->TypeTag |= 0x10;
+				PtrVariables->TypeTag |= TypeTag_consttype;
 				strcat(PtrVariables->PtrTypeName, "const ");
 				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
 				{
@@ -963,12 +1012,13 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 				}
 				break;
 
+				// Base type tag
 			case DW_TAG_base_type:
-				if (!(PtrVariables->TypeTag & 0x20))
+				if (!(PtrVariables->TypeTag & TypeTag_typedef))
 				{
 					strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
 				}
-				if ((PtrVariables->TypeTag & 0x2))
+				if ((PtrVariables->TypeTag & TypeTag_pointer))
 				{
 					strcat(PtrVariables->PtrTypeName, " *");
 				}
@@ -977,7 +1027,7 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 					PtrVariables->TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
 					PtrVariables->TypeEncoding = PtrCU[NbCU].PtrTypes[j].Encoding;
 				}
-				if ((PtrVariables->TypeTag & 0x8))
+				if ((PtrVariables->TypeTag & TypeTag_arraytype))
 				{
 					strcat(PtrVariables->PtrTypeName, "[]");
 				}
