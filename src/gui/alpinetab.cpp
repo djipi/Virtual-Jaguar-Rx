@@ -6,10 +6,13 @@
 // See the README and GPLv3 files for licensing and warranty information
 //
 // JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
 // JLH  07/15/2011  Created this file
+// JPM  09/03/2018  Depend the platform transform slashes or backslashes
+//
 
 #include "alpinetab.h"
 #include "settings.h"
@@ -94,9 +97,20 @@ void AlpineTab::SetSettings(void)
 {
 	bool ok;
 
-	strcpy(vjs.alpineROMPath, edit1->text().toUtf8().data());
-	strcpy(vjs.absROMPath, edit2->text().toUtf8().data());
+	strcpy(vjs.alpineROMPath, CheckForSlashes(edit1->text()).toUtf8().data());
+	strcpy(vjs.absROMPath, CheckForSlashes(edit2->text()).toUtf8().data());
 	vjs.refresh = edit3->text().toUInt(&ok, 10);
 	vjs.allowWritesToROM = writeROM->isChecked();
 }
 
+
+// Depend the platform transform slashes or backslashes
+QString AlpineTab::CheckForSlashes(QString s)
+{
+#ifdef _WIN32
+	s.replace(QString("/"), QString("\\"));
+#else
+	s.replace(QString("\\"), QString("/"));
+#endif
+	return s;
+}

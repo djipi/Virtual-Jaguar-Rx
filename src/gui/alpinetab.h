@@ -13,13 +13,15 @@ class AlpineTab: public QWidget
 		void SetSettings(void);
 		void GetSettings(void);
 
+	private:
+		QString CheckForSlashes(QString);
+
 	public:
 		QLineEdit * edit1;
 		QLineEdit * edit2;
 		QLineEdit * edit3;
 //		QLineEdit * edit3;
 //		QLineEdit * edit4;
-
 		QCheckBox * writeROM;
 //		QCheckBox * useDSP;
 //		QCheckBox * useHostAudio;
