@@ -14,7 +14,8 @@
 // JLH  10/14/2011  Fixed possibly missing final slash in paths
 // JPM  06/06/2016  Visual Studio support
 // JPM  06/19/2016  Soft debugger support
-// JPM  09/  /2017  Added the Keybindings tab
+// JPM  09/  /2017  Added a Keybindings tab
+// JPM  09/03/2018  Added a Models & Bios tab
 //
 
 #include "configdialog.h"
@@ -23,6 +24,7 @@
 #include "controllertab.h"
 #include "controllerwidget.h"
 #include "generaltab.h"
+#include "modelsbiostab.h"
 #include "KeyBindingsTab.h"
 #include "settings.h"
 
@@ -30,6 +32,9 @@
 ConfigDialog::ConfigDialog(QWidget * parent/*= 0*/) : QDialog(parent),
 tabWidget(new QTabWidget),
 generalTab(new GeneralTab(this)),
+#ifdef NEWMODELSBIOSHANDLER
+modelsbiosTab(new ModelsBiosTab),
+#endif
 controllerTab1(new ControllerTab(this)),
 keybindingsTab(new KeyBindingsTab(this))
 {
@@ -42,6 +47,9 @@ keybindingsTab(new KeyBindingsTab(this))
 //		alpineTab = new AlpineTab(this);
 
 	tabWidget->addTab(generalTab, tr("General"));
+#ifdef NEWMODELSBIOSHANDLER
+	tabWidget->addTab(modelsbiosTab, tr("Models and Bios"));
+#endif
 	tabWidget->addTab(controllerTab1, tr("Controllers"));
 //	tabWidget->addTab(controllerTab2, tr("Controller #2"));
 	tabWidget->addTab(keybindingsTab, tr("Keybindings"));
@@ -78,12 +86,15 @@ ConfigDialog::~ConfigDialog()
 }
 
 
-// Load / Update the tabs dialog from the settings
+// Load & Update the tabs dialog from the settings
 void ConfigDialog::LoadDialogFromSettings(void)
 {
 	// General & Keybindings tab settings
 	generalTab->GetSettings();
 	keybindingsTab->GetSettings();
+#ifdef NEWMODELSBIOSHANDLER
+	modelsbiosTab->GetSettings();
+#endif
 
 	// Alpine tab settings (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
@@ -114,11 +125,14 @@ void ConfigDialog::LoadDialogFromSettings(void)
 }
 
 
-// Save / Update the settings from the tabs dialog
+// Save & Update the settings from the tabs dialog
 void ConfigDialog::UpdateVJSettings(void)
 {
 	generalTab->SetSettings();
 	keybindingsTab->SetSettings();
+#ifdef NEWMODELSBIOSHANDLER
+	modelsbiosTab->SetSettings();
+#endif
 
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{

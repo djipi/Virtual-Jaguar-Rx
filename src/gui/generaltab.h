@@ -21,8 +21,9 @@ class GeneralTab: public QWidget
 		QLineEdit *edit2;
 		QLineEdit *edit3;
 		QLineEdit *edit4;
-
+#ifndef NEWMODELSBIOSHANDLER
 		QCheckBox *useBIOS;
+#endif
 		QCheckBox *useGPU;
 		QCheckBox *useDSP;
 //		QCheckBox *useHostAudio;

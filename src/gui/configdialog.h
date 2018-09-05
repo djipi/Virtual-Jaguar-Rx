@@ -9,18 +9,25 @@
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
 // JPM  06/19/2016  Soft debugger support
+// JPM  09/03/2018  Added a Models & Bios tab
 //
 
 #ifndef __CONFIGDIALOG_H__
 #define __CONFIGDIALOG_H__
 
+#define	NEWMODELSBIOSHANDLER				// New Jaguar models and bios usage handler
+
 #include <QtWidgets>
 
 class GeneralTab;
+#ifdef NEWMODELSBIOSHANDLER
+class ModelsBiosTab;
+#endif
 class ControllerTab;
 class AlpineTab;
 class DebuggerTab;
 class KeyBindingsTab;
+
 
 class ConfigDialog: public QDialog
 {
@@ -33,19 +40,21 @@ class ConfigDialog: public QDialog
 
 	private:
 		void LoadDialogFromSettings(void);
-		QString CheckForTrailingSlash(QString);
 
 	private:
-		QTabWidget * tabWidget;
-		QDialogButtonBox * buttonBox;
+		QTabWidget *tabWidget;
+		QDialogButtonBox *buttonBox;
 
 	public:
-		GeneralTab * generalTab;
-		ControllerTab * controllerTab1;
-//		ControllerTab * controllerTab2;
+		GeneralTab *generalTab;
+#ifdef NEWMODELSBIOSHANDLER
+		ModelsBiosTab *modelsbiosTab;
+#endif
+		ControllerTab *controllerTab1;
+//		ControllerTab *controllerTab2;
 		KeyBindingsTab *keybindingsTab;
-		AlpineTab * alpineTab;
-		DebuggerTab * debuggerTab;
+		AlpineTab *alpineTab;
+		DebuggerTab *debuggerTab;
 };
 
 #endif	// __CONFIGDIALOG_H__

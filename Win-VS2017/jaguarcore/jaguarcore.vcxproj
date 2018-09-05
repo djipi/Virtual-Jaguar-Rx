@@ -175,6 +175,7 @@
     <ClInclude Include="..\..\src\memory.h" />
     <ClInclude Include="..\..\src\memtrack.h" />
     <ClInclude Include="..\..\src\mmu.h" />
+    <ClInclude Include="..\..\src\modelsBIOS.h" />
     <ClInclude Include="..\..\src\op.h" />
     <ClInclude Include="..\..\src\state.h" />
     <ClInclude Include="..\..\src\tom.h" />
@@ -210,6 +211,7 @@
     <ClCompile Include="..\..\src\memory.cpp" />
     <ClCompile Include="..\..\src\memtrack.cpp" />
     <ClCompile Include="..\..\src\mmu.cpp" />
+    <ClCompile Include="..\..\src\modelsBIOS.cpp" />
     <ClCompile Include="..\..\src\op.cpp" />
     <ClCompile Include="..\..\src\state.cpp" />
     <ClCompile Include="..\..\src\tom.cpp" />

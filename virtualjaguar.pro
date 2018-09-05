@@ -90,6 +90,7 @@ HEADERS = \
 	src/gui/filethread.h \
 	src/gui/gamepad.h \
 	src/gui/generaltab.h \
+	src/gui/modelsbiostab.h \	
 	src/gui/keybindingstab.h \
 	src/gui/glwidget.h \
 	src/gui/help.h \
@@ -125,6 +126,7 @@ HEADERS = \
 	src/unzip.h \
 	src/crc32.h \
 	src/settings.h \
+	src/modelsBIOS.h \
 	src/file.h
 
 SOURCES = \
@@ -139,6 +141,7 @@ SOURCES = \
 	src/gui/filethread.cpp \
 	src/gui/gamepad.cpp \
 	src/gui/generaltab.cpp \
+	src/gui/modelsbiostab.cpp \
 	src/gui/keybindingstab.cpp \
 	src/gui/glwidget.cpp \
 	src/gui/help.cpp \
@@ -174,5 +177,6 @@ SOURCES = \
 	src/unzip.cpp \
 	src/crc32.cpp \
 	src/settings.cpp \
+	src/modelsBIOS.cpp \	
 	src/file.cpp
 		

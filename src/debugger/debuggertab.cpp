@@ -9,6 +9,7 @@
 // ---  ----------  ------------------------------------------------------------
 // JPM  06/19/2016  Created this file
 // JPM  06/19/2016  Soft debugger support
+//
 
 #include "debuggertab.h"
 #include "settings.h"

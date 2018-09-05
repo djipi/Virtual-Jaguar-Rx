@@ -6,15 +6,21 @@
 // See the README and GPLv3 files for licensing and warranty information
 //
 // JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
 // JLH  06/23/2011  Created this file
+// JPM  09/03/2018  Added a Models & Bios tab
+// JPM  09/03/2018  Depend the platform transform slashes or backslashes
+//
 
+#include "configdialog.h"
 #include "generaltab.h"
 #include "settings.h"
 
 
+// 
 GeneralTab::GeneralTab(QWidget * parent/*= 0*/): QWidget(parent)
 {
 // I'm thinking we should scan the bios folder for the 5 known BIOSes, and
@@ -54,7 +60,9 @@ GeneralTab::GeneralTab(QWidget * parent/*= 0*/): QWidget(parent)
 	layout4->addLayout(layout3);
 
 	// Checkboxes...
+#ifndef NEWMODELSBIOSHANDLER
 	useBIOS            = new QCheckBox(tr("Enable Jaguar BIOS"));
+#endif
 	useGPU             = new QCheckBox(tr("Enable GPU"));
 	useDSP             = new QCheckBox(tr("Enable DSP"));
 	useFullScreen      = new QCheckBox(tr("Start Virtual Jaguar in full screen"));
@@ -62,7 +70,9 @@ GeneralTab::GeneralTab(QWidget * parent/*= 0*/): QWidget(parent)
 	useUnknownSoftware = new QCheckBox(tr("Show all files in file chooser"));
 	useFastBlitter     = new QCheckBox(tr("Use fast blitter"));
 
+#ifndef NEWMODELSBIOSHANDLER
 	layout4->addWidget(useBIOS);
+#endif
 	layout4->addWidget(useGPU);
 	layout4->addWidget(useDSP);
 	layout4->addWidget(useFullScreen);
@@ -74,6 +84,7 @@ GeneralTab::GeneralTab(QWidget * parent/*= 0*/): QWidget(parent)
 }
 
 
+// 
 GeneralTab::~GeneralTab()
 {
 }
@@ -86,7 +97,9 @@ void GeneralTab::GetSettings(void)
 	//	generalTab->edit2->setText(vjs.CDBootPath);
 	edit3->setText(vjs.EEPROMPath);
 	edit4->setText(vjs.ROMPath);
+#ifndef NEWMODELSBIOSHANDLER
 	useBIOS->setChecked(vjs.useJaguarBIOS);
+#endif
 	useGPU->setChecked(vjs.GPUEnabled);
 	useDSP->setChecked(vjs.DSPEnabled);
 	useFullScreen->setChecked(vjs.fullscreen);
@@ -95,7 +108,7 @@ void GeneralTab::GetSettings(void)
 }
 
 
-// Save / Update the settings from the tabs dialog
+// Save & Update the settings from the tabs dialog
 void GeneralTab::SetSettings(void)
 {
 	//	strcpy(vjs.jagBootPath, generalTab->edit1->text().toAscii().data());
@@ -103,7 +116,9 @@ void GeneralTab::SetSettings(void)
 	strcpy(vjs.EEPROMPath, CheckForTrailingSlash(edit3->text()).toUtf8().data());
 	strcpy(vjs.ROMPath, CheckForTrailingSlash(edit4->text()).toUtf8().data());
 
+#ifndef NEWMODELSBIOSHANDLER
 	vjs.useJaguarBIOS = useBIOS->isChecked();
+#endif
 	vjs.GPUEnabled = useGPU->isChecked();
 	vjs.DSPEnabled = useDSP->isChecked();
 	vjs.fullscreen = useFullScreen->isChecked();
@@ -113,11 +128,18 @@ void GeneralTab::SetSettings(void)
 
 
 // Append a slash or a backslash at the end of the string
+// Depend the platform transform slashes or backslashes
 QString GeneralTab::CheckForTrailingSlash(QString s)
 {
 	if (!s.endsWith('/') && !s.endsWith('\\'))
+	{
 		s.append('/');
-
+	}
+#ifdef _WIN32
+	s.replace(QString("/"), QString("\\"));
+#else
+	s.replace(QString("\\"), QString("/"));
+#endif
 	return s;
 }
 

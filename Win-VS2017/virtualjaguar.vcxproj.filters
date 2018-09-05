@@ -391,6 +391,15 @@
     <ClCompile Include="..\src\debugger\callstackbrowser.cpp">
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_modelsbiostab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_modelsbiostab.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\modelsbiostab.cpp">
+      <Filter>Source Files\gui\tab</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -687,6 +696,9 @@
     </CustomBuild>
     <CustomBuild Include="..\src\debugger\callstackbrowser.h">
       <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\modelsbiostab.h">
+      <Filter>Header Files\gui\tab</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

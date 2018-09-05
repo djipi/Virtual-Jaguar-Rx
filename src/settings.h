@@ -58,7 +58,9 @@ struct VJSettings
 	bool useJoystick;
 	int32_t joyport;											// Joystick port
 	bool hardwareTypeNTSC;										// Set to false for PAL, otherwise it is NTSC
-	bool useJaguarBIOS;
+	bool useJaguarBIOS;											// Use of any Jaguar BIOS
+	bool useRetailBIOS;											// Use of Retail BIOS
+	bool useDevBIOS;											// Use of Development BIOS
 	bool GPUEnabled;
 	bool DSPEnabled;
 	bool usePipelinedDSP;
@@ -72,7 +74,8 @@ struct VJSettings
 	uint32_t renderType;
 	uint32_t refresh;
 	bool allowWritesToROM;
-	uint32_t biosType;
+	uint32_t biosType;											// Bios type used
+	uint32_t jaguarModel;										// Jaguar model
 	size_t nbrdisasmlines;										// Number of lines to show in the M68K tracing window
 	bool disasmopcodes;
 	bool displayHWlabels;
@@ -101,8 +104,11 @@ struct VJSettings
 // Render types
 enum { RT_NORMAL = 0, RT_TV = 1 };
 
+// Jaguar models
+enum { JAG_NULL_SERIES, JAG_K_SERIES, JAG_M_SERIES };
+
 // BIOS types
-enum { BT_K_SERIES, BT_M_SERIES, BT_STUBULATOR_1, BT_STUBULATOR_2 };
+enum { BT_NULL, BT_K_SERIES, BT_M_SERIES, BT_STUBULATOR_1, BT_STUBULATOR_2 };
 
 // Exported variables
 extern VJSettings vjs;
