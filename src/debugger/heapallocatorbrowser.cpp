@@ -8,11 +8,16 @@
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JPM  01/08/2017  Created this file
+// JPM  09/05/2018  Support of the DRAM size limit option
+// JPM  09/05/2018  Use definitions for error instead of hard values
+// JPM  09/05/2018  Detect if heap allocation shares space with SP (Stack)
 //
 
 // STILL TO DO:
+// Better information display
 //
 
+#include "settings.h"
 #include "debugger/heapallocatorbrowser.h"
 #include "memory.h"
 #include "debugger/DBGManager.h"
@@ -46,7 +51,7 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 	char string[1024];
 	QString HA;
 	size_t Adr68K;
-	size_t Error = 0;
+	size_t Error = HA_NOERROR;
 	HeapAllocation HeapAllocation;
 
 	if (isVisible())
@@ -55,55 +60,64 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 		{
 			do
 			{
-				if ((Adr68K >= 0x4000) && (Adr68K < 0x200000))
+				if ((Adr68K >= 0x4000) && (Adr68K < vjs.DRAM_size))
 				{
-					memcpy(&HeapAllocation, &jaguarMainRAM[Adr68K], sizeof(HeapAllocation));
-
-					if (HeapAllocation.size = ((HeapAllocation.size & 0xff) << 24) + ((HeapAllocation.size & 0xff00) << 8) + ((HeapAllocation.size & 0xff0000) >> 8) + ((HeapAllocation.size & 0xff000000) >> 24))
+					if (Adr68K < m68k_get_reg(NULL, M68K_REG_SP))
 					{
-						if (HeapAllocation.size <= (0x200000 - 0x4000))
-						{
-							if ((HeapAllocation.used = ((HeapAllocation.used & 0xff) << 8) + ((HeapAllocation.used & 0xff00) >> 8)) <= 1)
-							{
-								HeapAllocation.nextalloc = ((HeapAllocation.nextalloc & 0xff) << 24) + ((HeapAllocation.nextalloc & 0xff00) << 8) + ((HeapAllocation.nextalloc & 0xff0000) >> 8) + ((HeapAllocation.nextalloc & 0xff000000) >> 24);
+						memcpy(&HeapAllocation, &jaguarMainRAM[Adr68K], sizeof(HeapAllocation));
 
-								if ((HeapAllocation.nextalloc >= 0x4000) && (HeapAllocation.nextalloc < 0x200000))
+						if (HeapAllocation.size = ((HeapAllocation.size & 0xff) << 24) + ((HeapAllocation.size & 0xff00) << 8) + ((HeapAllocation.size & 0xff0000) >> 8) + ((HeapAllocation.size & 0xff000000) >> 24))
+						{
+							if (HeapAllocation.size <= (vjs.DRAM_size - 0x4000))
+							{
+								if ((HeapAllocation.used = ((HeapAllocation.used & 0xff) << 8) + ((HeapAllocation.used & 0xff00) >> 8)) <= 1)
 								{
-									sprintf(string, "0x%06x | 0x%06x (%i) | %s | 0x%06x<br>", Adr68K, HeapAllocation.size - sizeof(HeapAllocation), HeapAllocation.size - sizeof(HeapAllocation), HeapAllocation.used ? "Allocated" : "Free", HeapAllocation.nextalloc);
-									Adr68K = HeapAllocation.nextalloc;
+									HeapAllocation.nextalloc = ((HeapAllocation.nextalloc & 0xff) << 24) + ((HeapAllocation.nextalloc & 0xff00) << 8) + ((HeapAllocation.nextalloc & 0xff0000) >> 8) + ((HeapAllocation.nextalloc & 0xff000000) >> 24);
+
+									if ((HeapAllocation.nextalloc >= 0x4000) && (HeapAllocation.nextalloc < vjs.DRAM_size))
+									{
+										sprintf(string, "0x%06x | 0x%06x (%zi) | %s | 0x%06x<br>", Adr68K, HeapAllocation.size - sizeof(HeapAllocation), HeapAllocation.size - sizeof(HeapAllocation), HeapAllocation.used ? "Allocated" : "Free", HeapAllocation.nextalloc);
+										Adr68K = HeapAllocation.nextalloc;
+									}
+									else
+									{
+										sprintf(string, "<br><font color='#ff0000'><b>Unable to determine the next memory allocation</b></font>");
+										Error = HA_UNABLENEXTMEMORYALLOC;
+									}
 								}
 								else
 								{
-									sprintf(string, "<br><font color='#ff0000'><b>Unable to determine the next memory allocation</b></font>");
-									Error = 1;
+									sprintf(string, "<br><font color='#ff0000'><b>Unable to determine if the allocated memory is used or not</b></font>");
+									Error = HA_UNABLEALLOCATEMEMORYUSAGE;
 								}
 							}
 							else
 							{
-								sprintf(string, "<br><font color='#ff0000'><b>Unable to determine if the allocated memory is used or not</b></font>");
-								Error = 2;
+								sprintf(string, "<br><font color='#ff0000'><b>Memory bloc size has a problem</b></font>");
+								Error = HA_MEMORYBLOCKSIZEPROBLEM;
 							}
 						}
 						else
 						{
-							sprintf(string, "<br><font color='#ff0000'><b>Memory bloc size has a problem</b></font>");
-							Error = 3;
+							sprintf(string, "<br><font color='#0000ff'><b>Memory allocations browsing successfully completed</b></font>");
 						}
 					}
 					else
 					{
-						sprintf(string, "<br><font color='#0000ff'><b>Memory allocations browsing successfully completed</b></font>");
+						sprintf(string, "<br><font color='#ff0000'><b>Memory allocations and Stack are sharing the same space</b></font>");
+						Error = HA_HAANDSPSHARESPACE;
 					}
 				}
 				else
 				{
 					sprintf(string, "<br><font color='#ff0000'><b>Memory allocations may have a problem</b></font>");
-					Error = 4;
+					Error = HA_MEMORYALLOCATIONPROBLEM;
 				}
 
 				HA += QString(string);
 
-			} while (HeapAllocation.size && !Error);
+			}
+			while (HeapAllocation.size && !Error);
 		}
 		else
 		{
