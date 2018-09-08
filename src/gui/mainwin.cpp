@@ -28,6 +28,7 @@
 // JPM  09/12/2017  Added the keybindings in the settings
 // JPM  11/04/2017  Added the local window
 // JPM  08/31/2018  Added the call stack window
+// JPM  09/04/2018  Added the new Models and BIOS handler
 //
 
 // FIXED:
@@ -80,10 +81,14 @@
 #include "jaguar.h"
 #include "log.h"
 #include "file.h"
+#ifndef NEWMODELSBIOSHANDLER
 #include "jagbios.h"
 #include "jagbios2.h"
-#include "jagcdbios.h"
 #include "jagstub2bios.h"
+#else
+#include "modelsBIOS.h"
+#endif
+#include "jagcdbios.h"
 #include "joystick.h"
 #include "m68000/m68kinterface.h"
 
@@ -678,8 +683,13 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	WriteLog("Virtual Jaguar %s Rx (Last full build was on %s %s)\n", VJ_RELEASE_VERSION, __DATE__, __TIME__);
 	WriteLog("VJ: Initializing jaguar subsystem...\n");
 	JaguarInit();
-//	memcpy(jagMemSpace + 0xE00000, jaguarBootROM, 0x20000);	// Use the stock BIOS
+
+#ifndef NEWMODELSBIOSHANDLER
+	//	memcpy(jagMemSpace + 0xE00000, jaguarBootROM, 0x20000);	// Use the stock BIOS
 	memcpy(jagMemSpace + 0xE00000, (vjs.biosType == BT_K_SERIES ? jaguarBootROM : jaguarBootROM2), 0x20000);	// Use the stock BIOS
+#else
+	SelectBIOS(vjs.biosType);
+#endif
 
 	// Prevent the file scanner from running if filename passed
 	// in on the command line...
@@ -703,7 +713,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 		// Attempt to load/run the ABS file...
 		LoadSoftware(vjs.absROMPath);
+#ifndef NEWMODELSBIOSHANDLER
 		memcpy(jagMemSpace + 0xE00000, jaguarDevBootROM2, 0x20000);	// Use the stub BIOS
+#else
+		SelectBIOS(vjs.biosType);
+#endif
 		// Prevent the scanner from running...
 		return;
 	}
@@ -725,8 +739,12 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 		// Attempt to load/run the ABS file...
 		LoadSoftware(vjs.absROMPath);
+#ifndef NEWMODELSBIOSHANDLER
 		memcpy(jagMemSpace + 0xE00000, jaguarDevBootROM2, 0x20000);	// Use the stub BIOS
 																	// Prevent the scanner from running...
+#else
+		SelectBIOS(vjs.biosType);
+#endif
 		return;
 	}
 
@@ -1337,6 +1355,7 @@ void MainWin::LoadSoftware(QString file)
 	running = false;							// Prevent bad things(TM) from happening...
 	pauseForFileSelector = false;				// Reset the file selector pause flag
 
+#ifndef NEWMODELSBIOSHANDLER
 	uint8_t * biosPointer = jaguarBootROM;
 
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
@@ -1345,6 +1364,9 @@ void MainWin::LoadSoftware(QString file)
 	}
 
 	memcpy(jagMemSpace + 0xE00000, biosPointer, 0x20000);
+#else
+	SelectBIOS(vjs.biosType);
+#endif
 
 	powerAct->setDisabled(false);
 	powerAct->setChecked(true);
@@ -1376,6 +1398,7 @@ void MainWin::LoadSoftware(QString file)
 	}
 	else
 	{
+		// Prevent the Alpine mode to crash in case of software without a start address
 		if (vjs.hardwareTypeAlpine && !jaguarRunAddress)
 		{
 			ToggleRunState();
@@ -1697,6 +1720,8 @@ void MainWin::ReadSettings(void)
 	vjs.hardwareTypeNTSC = settings.value("hardwareTypeNTSC", true).toBool();
 	vjs.frameSkip = settings.value("frameSkip", 0).toInt();
 	vjs.useJaguarBIOS = settings.value("useJaguarBIOS", false).toBool();
+	vjs.useRetailBIOS = settings.value("useRetailBIOS", false).toBool();
+	vjs.useDevBIOS = settings.value("useDevBIOS", false).toBool();
 	vjs.GPUEnabled = settings.value("GPUEnabled", true).toBool();
 	vjs.DSPEnabled = settings.value("DSPEnabled", true).toBool();
 	vjs.audioEnabled = settings.value("audioEnabled", true).toBool();
@@ -1706,6 +1731,7 @@ void MainWin::ReadSettings(void)
 	vjs.glFilter = settings.value("glFilterType", 1).toInt();
 	vjs.renderType = settings.value("renderType", 0).toInt();
 	vjs.biosType = settings.value("biosType", BT_M_SERIES).toInt();
+	vjs.jaguarModel = settings.value("jaguarModel", JAG_M_SERIES).toInt();
 	vjs.useFastBlitter = settings.value("useFastBlitter", false).toBool();
 	strcpy(vjs.EEPROMPath, settings.value("EEPROMs", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/eeproms/")).toString().toUtf8().data());
 	strcpy(vjs.ROMPath, settings.value("ROMs", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/software/")).toString().toUtf8().data());
@@ -1963,6 +1989,8 @@ void MainWin::WriteSettings(void)
 	settings.setValue("hardwareTypeNTSC", vjs.hardwareTypeNTSC);
 	settings.setValue("frameSkip", vjs.frameSkip);
 	settings.setValue("useJaguarBIOS", vjs.useJaguarBIOS);
+	settings.setValue("useRetailBIOS", vjs.useRetailBIOS);
+	settings.setValue("useDevBIOS", vjs.useDevBIOS);
 	settings.setValue("GPUEnabled", vjs.GPUEnabled);
 	settings.setValue("DSPEnabled", vjs.DSPEnabled);
 	settings.setValue("audioEnabled", vjs.audioEnabled);
@@ -1971,6 +1999,7 @@ void MainWin::WriteSettings(void)
 	settings.setValue("useOpenGL", vjs.useOpenGL);
 	settings.setValue("glFilterType", vjs.glFilter);
 	settings.setValue("renderType", vjs.renderType);
+	settings.setValue("jaguarModel", vjs.jaguarModel);
 	settings.setValue("biosType", vjs.biosType);
 	settings.setValue("useFastBlitter", vjs.useFastBlitter);
 	settings.setValue("JagBootROM", vjs.jagBootPath);

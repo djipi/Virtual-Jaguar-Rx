@@ -8,11 +8,16 @@
 //       the braindead way in which MAME handled memory when this was written. :-)
 //
 // JLH = James Hammons
+// JPM = Jean-Paul Mari
 //
 // WHO  WHEN        WHAT
 // ---  ----------  -----------------------------------------------------------
 // JLH  11/25/2009  Major rewrite of memory subsystem and handlers
+// JPM  09/04/2018  Added the new Models and BIOS handler
 //
+
+
+#define NEWMODELSBIOSHANDLER				// New Jaguar models and bios usage handler
 
 
 #include "jaguar.h"
@@ -39,7 +44,9 @@
 #include "settings.h"
 #include "tom.h"
 //#include "debugger/brkWin.h"
-
+#ifdef NEWMODELSBIOSHANDLER
+#include "modelsBIOS.h"
+#endif
 
 #define CPU_DEBUG
 //Do this in makefile??? Yes! Could, but it's easier to define here...
@@ -2216,8 +2223,10 @@ void JaguarReset(void)
 {
 	// Only problem with this approach: It wipes out RAM loaded files...!
 	// Contents of local RAM are quasi-stable; we simulate this by randomizing RAM contents
-	for(uint32_t i=8; i<vjs.DRAM_size; i+=4)
+	for (uint32_t i = 8; i < vjs.DRAM_size; i += 4)
+	{
 		*((uint32_t *)(&jaguarMainRAM[i])) = rand();
+	}
 
 	// New timer base code stuffola...
 	InitializeEventList();
@@ -2226,10 +2235,20 @@ void JaguarReset(void)
 //Also, have to change this here and in JaguarReadXX() currently
 	// Only use the system BIOS if it's available...! (it's always available now!)
 	// AND only if a jaguar cartridge has been inserted.
+#ifndef NEWMODELSBIOSHANDLER
 	if (vjs.useJaguarBIOS && jaguarCartInserted && !vjs.hardwareTypeAlpine && !vjs.softTypeDebugger)
+	{
 		memcpy(jaguarMainRAM, jagMemSpace + 0xE00000, 8);
+#else
+	if (vjs.useJaguarBIOS && jaguarCartInserted)
+	{
+		SetBIOS();
+#endif
+	}
 	else
+	{
 		SET32(jaguarMainRAM, 4, jaguarRunAddress);
+	}
 
 //	WriteLog("jaguar_reset():\n");
 	TOMReset();
