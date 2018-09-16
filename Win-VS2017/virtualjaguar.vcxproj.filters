@@ -400,6 +400,9 @@
     <ClCompile Include="..\src\gui\modelsbiostab.cpp">
       <Filter>Source Files\gui\tab</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\LEB128.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -448,6 +451,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\LEB128.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

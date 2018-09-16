@@ -127,7 +127,8 @@ HEADERS = \
 	src/crc32.h \
 	src/settings.h \
 	src/modelsBIOS.h \
-	src/file.h
+	src/file.h \
+	src/LEB128.h
 
 SOURCES = \
 	src/gui/about.cpp \
@@ -178,5 +179,6 @@ SOURCES = \
 	src/crc32.cpp \
 	src/settings.cpp \
 	src/modelsBIOS.cpp \	
-	src/file.cpp
+	src/file.cpp \
+	src/LEB128.cpp
 		
