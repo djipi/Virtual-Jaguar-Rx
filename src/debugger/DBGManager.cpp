@@ -10,6 +10,11 @@
 // JPM  12/21/2016  Created this file
 // JPM              Various efforts to set the ELF format support
 // JPM              Various efforts to set the DWARF format support
+// JPM  09/15/2018  Support the unsigned char 
+
+// To Do
+//
+
 
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +35,9 @@ struct Value
 {
 	union
 	{
-		char C[10];
+		char Ct[10];
+		char C;
+		bool B;
 		double D;
 		float F;
 		int32_t SI;
@@ -340,7 +347,7 @@ char *DBGManager_GetGlobalVariableValue(size_t Index)
 
 // Get variable value based on his Adresse, Encoding Type and Size
 // Return value as a text pointer
-// Note: Pointer may point on a 0 lenght text if Adress is NULL
+// Note: Pointer may point on a 0 length text
 char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t TypeByteSize)
 {
 	Value V;
@@ -348,7 +355,9 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 
 	value[0] = 0;
 
+#if 0
 	if (Adr)
+#endif
 	{
 		memset(&V, 0, sizeof(Value));
 #if 0
@@ -356,20 +365,19 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 			jaguarMainRAM[Adr + i] = 0;
 			//jaguarMainRAM[Adr + i] = rand();
 		jaguarMainRAM[Adr + TypeByteSize - 1] = 0x10;
-#endif
-#if 1
+#else
 		for (size_t i = 0, j = TypeByteSize; i < TypeByteSize; i++, j--)
 		{
-			V.C[i] = jaguarMainRAM[Adr + j - 1];
+			V.Ct[i] = jaguarMainRAM[Adr + j - 1];
 		}
 #endif
-
 		switch (TypeEncoding)
 		{
 		case DBG_ATE_address:
 			break;
 
 		case DBG_ATE_boolean:
+			sprintf(value, "%s", V.B ? "true" : "false");
 			break;
 
 		case DBG_ATE_complex_float:
@@ -429,6 +437,7 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 			break;
 
 		case DBG_ATE_unsigned_char:
+			sprintf(value, "%u", (unsigned int(V.C)));
 			break;
 
 		case DBG_ATE_ptr:

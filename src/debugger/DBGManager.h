@@ -25,12 +25,14 @@ typedef enum {
 
 //
 typedef enum {
-	DBG_TAG_TYPE_structure = 0x1,
-	DBG_TAG_TYPE_pointer = 0x2,
-	DBG_TAG_TYPE_subrange = 0x4,
-	DBG_TAG_TYPE_array = 0x8,
-	DBG_TAG_TYPE_const = 0x10,
-	DBG_TAG_TYPE_typedef = 0x20
+	DBG_TAG_TYPE_structure = 0x1,					// structure
+	DBG_TAG_TYPE_pointer = 0x2,						// pointer
+	DBG_TAG_TYPE_subrange = 0x4,					// (subrange_type?)
+	DBG_TAG_TYPE_array = 0x8,						// array type
+	DBG_TAG_TYPE_const = 0x10,						// const type
+	DBG_TAG_TYPE_typedef = 0x20,					// typedef
+	DBG_TAG_TYPE_enumeration_type =	0x40,			// enumeration
+	DBG_TAG_TYPE_subroutine_type = 0x80				// subroutine
 }DBGTAGTYPE;
 
 // Encoding based in the DW_ATE_... list from the dwarf.h

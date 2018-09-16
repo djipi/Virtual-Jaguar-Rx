@@ -9,6 +9,13 @@
 // ---  ----------  ------------------------------------------------------------
 // JPM  12/03/2016  Created this file
 // JPM  12/03/2016  DWARF format support
+// JPM  09/12/2018  Added LEB128 decoding features
+// JPM  09/14/2018  Improve the DWARF parsing information
+//
+
+// To Do
+// To use pointers instead of arrays usage
+// 
 
 
 #include <stdlib.h>
@@ -17,15 +24,19 @@
 #include <string.h>
 #include <libdwarf.h>
 #include <dwarf.h>
+#include "LEB128.h"
 
 
 //
-//#define DEBUG_NumCU 0x6						// CU number to debug or undefine it
-//#define DEBUG_VariableName "argc"				// Variable name to look for or undefine it
+//#define DEBUG_NumCU			0x9					// CU number to debug or undefine it
+//#define DEBUG_VariableName	"alloc"				// Variable name to look for or undefine it
+//#define DEBUG_TypeName		"Cbuf_Execute"			// Type name to look for or undefine it
+//#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for or undefine it (not supported)
+//#define DEBUG_Filename		"cmd.c"			// Filename to look for or undefine it
 
 
 // Source line internal structure
-struct DMIStruct_LineSrc
+typedef struct DMIStruct_LineSrc
 {
 	size_t Tag;
 	size_t StartPC;
@@ -33,27 +44,44 @@ struct DMIStruct_LineSrc
 	char *PtrLineSrc;
 }S_DMIStruct_LineSrc;
 
-// Base type internal structure
-struct BaseTypeStruct
+// Enumeration structure
+typedef struct EnumerationStruct
 {
-	size_t Tag;								// Type's Tag
-	size_t Offset;							// Type's offset
-	size_t TypeOffset;						// Type's offset on another type
-	size_t ByteSize;						// Type's Byte Size
-	size_t Encoding;						// Type's encoding
-	char *PtrName;							// Type's name
+	char *PtrName;							// Enumeration's name
+	size_t value;							// Enumeration's value
+}S_EnumerationStruct;
+
+// Structure members structure
+//typedef struct StructureMembersStruct
+//{
+//}S_StructureMembersStruct;
+
+// Base type internal structure
+typedef struct BaseTypeStruct
+{
+	size_t Tag;										// Type's Tag
+	size_t Offset;									// Type's offset
+	size_t TypeOffset;								// Type's offset on another type
+	size_t ByteSize;								// Type's Byte Size
+	size_t Encoding;								// Type's encoding
+	char *PtrName;									// Type's name
+	size_t NbEnumeration;							// Type's enumeration numbers
+	EnumerationStruct *PtrEnumeration;				// Type's enumeration
+//	StructureMembersStruct *PtrStructureMembers;	// Type's structure members
 }S_BaseTypeStruct;
 
 // Definitions for the variables's typetag
-#define	TypeTag_structure	0x01			// structure
-#define	TypeTag_pointer		0x02			// pointer
-#define	TypeTag_0x04		0x04
-#define	TypeTag_arraytype	0x08			// array type
-#define	TypeTag_consttype	0x10			// const type
-#define	TypeTag_typedef		0x20			// typedef
+#define	TypeTag_structure			0x01			// structure
+#define	TypeTag_pointer				0x02			// pointer
+#define	TypeTag_subrange			0x04			// (subrange_type?)
+#define	TypeTag_arraytype			0x08			// array type
+#define	TypeTag_consttype			0x10			// const type
+#define	TypeTag_typedef				0x20			// typedef
+#define TypeTag_enumeration_type	0x40			// enumeration
+#define TypeTag_subroutine_type		0x80			// subroutine
 
 // Variables internal structure
-struct VariablesStruct
+typedef struct VariablesStruct
 {
 	size_t Op;								// Variable's DW_OP
 	union
@@ -70,7 +98,7 @@ struct VariablesStruct
 }S_VariablesStruct;
 
 // Sub program internal structure
-struct SubProgStruct
+typedef struct SubProgStruct
 {
 	size_t Tag;
 	size_t NumLineSrc;
@@ -86,11 +114,13 @@ struct SubProgStruct
 }S_SubProgStruct;
 
 // Compilation Unit internal structure
-struct CUStruct
+typedef struct CUStruct
 {
 	size_t Tag;
 	size_t LowPC, HighPC;
-	char *PtrProducer;								// Pointer to the "Producer" information (compiler and compilation options used)
+	char *PtrProducer;								// Pointer to the "Producer" text information (mostly compiler and compilation options used)
+	char *PtrSourceFilename;						// Source file name
+	char *PtrSourceFileDirectory;					// Directory of the source file
 	char *PtrFullFilename;							// Pointer to full namefile (directory & filename)
 	size_t SizeLoadSrc;								// Source code size
 	char *PtrLoadSrc;								// Pointer to loaded source code
@@ -98,8 +128,8 @@ struct CUStruct
 	char **PtrLinesLoadSrc;							// Pointer lists to each source line put in QT html/text conformity
 	size_t NbSubProgs;								// Number of sub programs / routines
 	SubProgStruct *PtrSubProgs;						// Pointer to the sub programs / routines information structure
-	size_t NbTypes;
-	BaseTypeStruct *PtrTypes;
+	size_t NbTypes;									// Number of types
+	BaseTypeStruct *PtrTypes;						// Pointer to types
 	size_t NbVariables;								// Variables number
 	VariablesStruct *PtrVariables;					// Pointer to the global variables list information structure
 	size_t NbFrames;								// Frames number
@@ -196,6 +226,8 @@ void DWARFManager_CloseDMI(void)
 		free(PtrCU[NbCU].PtrFullFilename);
 		free(PtrCU[NbCU].PtrLoadSrc);
 		free(PtrCU[NbCU].PtrProducer);
+		free(PtrCU[NbCU].PtrSourceFilename);
+		free(PtrCU[NbCU].PtrSourceFileDirectory);
 
 		while (PtrCU[NbCU].NbLinesLoadSrc--)
 		{
@@ -253,9 +285,6 @@ void DWARFManager_InitDMI(void)
 	size_t i, j, k;
 	char *return_string;
 	char *Ptr;
-	char *SourceFilename = NULL;
-	char *SourceFileDirectory = NULL;
-	char *SourceFullFilename = NULL;
 
 	// Initialisation for the Compilation Units table
 	NbCU = 0;
@@ -326,8 +355,13 @@ void DWARFManager_InitDMI(void)
 										case DW_AT_name:
 											if (dwarf_formstring(atlist[i], &return_string, &error) == DW_DLV_OK)
 											{
-												SourceFilename = (char *)realloc(SourceFilename, strlen(return_string) + 1);
-												strcpy(SourceFilename, return_string);
+#ifdef DEBUG_Filename
+												if (strstr(return_string, DEBUG_Filename))
+#endif
+												{
+													PtrCU[NbCU].PtrSourceFilename = (char *)calloc((strlen(return_string) + 1), 1);
+													strcpy(PtrCU[NbCU].PtrSourceFilename, return_string);
+												}
 												dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
 											}
 											break;
@@ -336,8 +370,8 @@ void DWARFManager_InitDMI(void)
 										case DW_AT_comp_dir:
 											if (dwarf_formstring(atlist[i], &return_string, &error) == DW_DLV_OK)
 											{
-												SourceFileDirectory = (char *)realloc(SourceFileDirectory, strlen(return_string) + 1);
-												strcpy(SourceFileDirectory, return_string);
+												PtrCU[NbCU].PtrSourceFileDirectory = (char *)calloc((strlen(return_string) + 1), 1);
+												strcpy(PtrCU[NbCU].PtrSourceFileDirectory, return_string);
 												dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
 											}
 											break;
@@ -351,12 +385,24 @@ void DWARFManager_InitDMI(void)
 								dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
 							}
 
-							Ptr = SourceFullFilename = (char *)realloc(SourceFullFilename, strlen(SourceFilename) + strlen(SourceFileDirectory) + 2);
-#if defined(_WIN32)
-							sprintf(SourceFullFilename, "%s\\%s", SourceFileDirectory, SourceFilename);
-#else
-							sprintf(SourceFullFilename, "%s/%s", SourceFileDirectory, SourceFilename);
-#endif
+							// Check filename validity
+							if (!PtrCU[NbCU].PtrSourceFilename)
+							{
+								PtrCU[NbCU].PtrSourceFilename = (char *)calloc(1, 1);
+							}
+
+							// Check directory validity
+							if (!PtrCU[NbCU].PtrSourceFileDirectory)
+							{
+								PtrCU[NbCU].PtrSourceFileDirectory = (char *)calloc(2, 1);
+								PtrCU[NbCU].PtrSourceFileDirectory[0] = '.';
+							}
+
+							// Create full filename
+							Ptr = PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + strlen(PtrCU[NbCU].PtrSourceFileDirectory) + 2);
+							sprintf(PtrCU[NbCU].PtrFullFilename, "%s\\%s", PtrCU[NbCU].PtrSourceFileDirectory, PtrCU[NbCU].PtrSourceFilename);
+
+							// Conform slashes and backslashes
 							while (*Ptr)
 							{
 #if defined(_WIN32)
@@ -372,11 +418,10 @@ void DWARFManager_InitDMI(void)
 #endif
 								Ptr++;
 							}
-							PtrCU[NbCU].PtrFullFilename = (char *)calloc(strlen(SourceFullFilename) + 1, 1);
-							strcpy((char *)PtrCU[NbCU].PtrFullFilename, SourceFullFilename);
 
+							// Read the file as text
 #ifndef __CYGWIN__
-							if (!fopen_s(&SrcFile, SourceFullFilename, "rt"))
+							if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rt"))
 #else
 							if (!(SrcFile = fopen(SourceFullFilename, "rt")))
 #endif
@@ -484,8 +529,8 @@ void DWARFManager_InitDMI(void)
 															{
 																PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].PtrName = (char *)calloc(strlen(return_string) + 1, 1);
 																strcpy(PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].PtrName, return_string);
-																dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
 															}
+															dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
 														}
 														break;
 
@@ -512,8 +557,10 @@ void DWARFManager_InitDMI(void)
 								case DW_TAG_array_type:
 								case DW_TAG_subrange_type:
 								case DW_TAG_subroutine_type:
+								case DW_TAG_enumeration_type:
 									if (dwarf_attrlist(return_die, &atlist, &atcnt, &error) == DW_DLV_OK)
 									{
+										// Allocate memory for this type
 										PtrCU[NbCU].PtrTypes = (BaseTypeStruct *)realloc(PtrCU[NbCU].PtrTypes, ((PtrCU[NbCU].NbTypes + 1) * sizeof(BaseTypeStruct)));
 										memset(PtrCU[NbCU].PtrTypes + PtrCU[NbCU].NbTypes, 0, sizeof(BaseTypeStruct));
 										PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].Tag = return_tagval;
@@ -531,6 +578,11 @@ void DWARFManager_InitDMI(void)
 												{
 													switch (return_attr)
 													{
+														// 
+													case DW_AT_sibling:
+														break;
+
+														// Type's type offset
 													case DW_AT_type:
 														if (dwarf_global_formref(return_attr1, &return_offset, &error) == DW_DLV_OK)
 														{
@@ -538,6 +590,7 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
+														// Type's byte size
 													case DW_AT_byte_size:
 														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
 														{
@@ -545,6 +598,7 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
+														// Type's encoding
 													case DW_AT_encoding:
 														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
 														{
@@ -552,16 +606,30 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
+														// Type's name
 													case DW_AT_name:
 														if (dwarf_formstring(return_attr1, &return_string, &error) == DW_DLV_OK)
 														{
-															PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrName = (char *)calloc(strlen(return_string) + 1, 1);
-															strcpy(PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrName, return_string);
+#ifdef DEBUG_TypeName
+															if (!strcmp(return_string, DEBUG_TypeName))
+#endif
+															{
+																PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrName = (char *)calloc(strlen(return_string) + 1, 1);
+																strcpy(PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrName, return_string);
+															}
 															dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
 														}
 														break;
 
-														default:
+														// Type's file number
+													case DW_AT_decl_file:
+														break;
+
+														// Type's line number
+													case DW_AT_decl_line:
+														break;
+
+													default:
 														break;
 													}
 												}
@@ -663,6 +731,7 @@ void DWARFManager_InitDMI(void)
 										}
 										dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
 
+										// Get source line number and associated block of address
 										for (i = 0; i < (size_t)cnt; ++i)
 										{
 											if (dwarf_lineaddr(linebuf[i], &return_lineaddr, &error) == DW_DLV_OK)
@@ -716,20 +785,21 @@ void DWARFManager_InitDMI(void)
 																					break;
 
 																				case 2:
-																					PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset = *((char *)(return_block->bl_data) + 1);
-
+																				case 3:
 																					switch (return_tagval)
 																					{
 																					case DW_TAG_variable:
-																						PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset -= 0x80;
+																						PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset = ReadLEB128((char *)return_block->bl_data + 1);
 																						break;
 
 																					case DW_TAG_formal_parameter:
+																						PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset = ReadULEB128((char *)return_block->bl_data + 1);
 																						break;
 
 																					default:
 																						break;
 																					}
+																					break;
 
 																				default:
 																					break;
@@ -754,8 +824,8 @@ void DWARFManager_InitDMI(void)
 																				{
 																					PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].PtrName = (char *)calloc(strlen(return_string) + 1, 1);
 																					strcpy(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].PtrName, return_string);
-																					dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
 																				}
+																				dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
 																			}
 																			break;
 
@@ -923,10 +993,6 @@ void DWARFManager_InitDMI(void)
 			++NbCU;
 		}
 	} 
-
-	free(SourceFilename);
-	free(SourceFileDirectory);
-	free(SourceFullFilename);
 }
 
 
@@ -935,106 +1001,138 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 {
 	size_t j, TypeOffset;
 
-	PtrVariables->PtrTypeName = (char *)calloc(1000, 1);
-	TypeOffset = PtrVariables->TypeOffset;
-
-	for (j = 0; j < PtrCU[NbCU].NbTypes; j++)
+#ifdef DEBUG_VariableName
+	if (PtrVariables->PtrName && !strcmp(PtrVariables->PtrName, DEBUG_VariableName))
+#endif
 	{
-		if (TypeOffset == PtrCU[NbCU].PtrTypes[j].Offset)
+		PtrVariables->PtrTypeName = (char *)calloc(1000, 1);
+		TypeOffset = PtrVariables->TypeOffset;
+
+		for (j = 0; j < PtrCU[NbCU].NbTypes; j++)
 		{
-			switch (PtrCU[NbCU].PtrTypes[j].Tag)
+			if (TypeOffset == PtrCU[NbCU].PtrTypes[j].Offset)
 			{
-				// Structure type tag
-			case DW_TAG_structure_type:
-				PtrVariables->TypeTag |= TypeTag_structure;
-				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
+				switch (PtrCU[NbCU].PtrTypes[j].Tag)
 				{
-					j = -1;
-				}
-				else
-				{
+				case DW_TAG_subroutine_type:
+					PtrVariables->TypeTag |= TypeTag_subroutine_type;
+					strcat(PtrVariables->PtrTypeName, " (* ) ()");
+					break;
+
+					// Structure type tag
+				case DW_TAG_structure_type:
+					PtrVariables->TypeTag |= TypeTag_structure;
+					if (!(PtrVariables->TypeTag & TypeTag_typedef))
+					{
+						strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
+					}
+					if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
+					{
+						j = -1;
+					}
+					else
+					{
+						if ((PtrVariables->TypeTag & TypeTag_pointer))
+						{
+							strcat(PtrVariables->PtrTypeName, " *");
+						}
+					}
+					break;
+
+					// Pointer type tag
+				case DW_TAG_pointer_type:
+					PtrVariables->TypeTag |= TypeTag_pointer;
+					PtrVariables->TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
+					PtrVariables->TypeEncoding = 0x10;
+					if (!(TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
+					{
+						strcat(PtrVariables->PtrTypeName, "void *");
+					}
+					else
+					{
+						j = -1;
+					}
+					break;
+
+				case DW_TAG_enumeration_type:
+					PtrVariables->TypeTag |= TypeTag_enumeration_type;
+					PtrVariables->TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
+					if (!(PtrVariables->TypeEncoding = PtrCU[NbCU].PtrTypes[j].Encoding))
+					{
+						// Try to determine the possible size
+						switch (PtrVariables->TypeByteSize)
+						{
+						case 4:
+							PtrVariables->TypeEncoding = 0x7;
+							break;
+
+						default:
+							break;
+						}
+					}
+					break;
+
+					// Typedef type tag
+				case DW_TAG_typedef:
+					if (!(PtrVariables->TypeTag & TypeTag_typedef))
+					{
+						PtrVariables->TypeTag |= TypeTag_typedef;
+						strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
+					}
+					if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
+					{
+						j = -1;
+					}
+					break;
+
+					// ? type tag
+				case DW_TAG_subrange_type:
+					PtrVariables->TypeTag |= TypeTag_subrange;
+					break;
+
+					// Array type tag
+				case DW_TAG_array_type:
+					PtrVariables->TypeTag |= TypeTag_arraytype;
+					if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
+					{
+						j = -1;
+					}
+					break;
+
+					// Const type tag
+				case DW_TAG_const_type:
+					PtrVariables->TypeTag |= TypeTag_consttype;
+					strcat(PtrVariables->PtrTypeName, "const ");
+					if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
+					{
+						j = -1;
+					}
+					break;
+
+					// Base type tag
+				case DW_TAG_base_type:
+					if (!(PtrVariables->TypeTag & TypeTag_typedef))
+					{
+						strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
+					}
 					if ((PtrVariables->TypeTag & TypeTag_pointer))
 					{
 						strcat(PtrVariables->PtrTypeName, " *");
 					}
-				}
-				break;
+					else
+					{
+						PtrVariables->TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
+						PtrVariables->TypeEncoding = PtrCU[NbCU].PtrTypes[j].Encoding;
+					}
+					if ((PtrVariables->TypeTag & TypeTag_arraytype))
+					{
+						strcat(PtrVariables->PtrTypeName, "[]");
+					}
+					break;
 
-				// Pointer type tag
-			case DW_TAG_pointer_type:
-				PtrVariables->TypeTag |= TypeTag_pointer;
-				PtrVariables->TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
-				PtrVariables->TypeEncoding = 0x10;
-				if (!(TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
-				{
-					strcat(PtrVariables->PtrTypeName, "void *");
+				default:
+					break;
 				}
-				else
-				{
-					j = -1;
-				}
-				break;
-
-				// Typedef type tag
-			case DW_TAG_typedef:
-				if (!(PtrVariables->TypeTag & TypeTag_typedef))
-				{
-					PtrVariables->TypeTag |= TypeTag_typedef;
-					strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
-				}
-				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
-				{
-					j = -1;
-				}
-				break;
-
-				// ? type tag
-			case DW_TAG_subrange_type:
-				PtrVariables->TypeTag |= TypeTag_0x04;
-				break;
-
-				// Array type tag
-			case DW_TAG_array_type:
-				PtrVariables->TypeTag |= TypeTag_arraytype;
-				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
-				{
-					j = -1;
-				}
-				break;
-
-				// Const type tag
-			case DW_TAG_const_type:
-				PtrVariables->TypeTag |= TypeTag_consttype;
-				strcat(PtrVariables->PtrTypeName, "const ");
-				if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
-				{
-					j = -1;
-				}
-				break;
-
-				// Base type tag
-			case DW_TAG_base_type:
-				if (!(PtrVariables->TypeTag & TypeTag_typedef))
-				{
-					strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
-				}
-				if ((PtrVariables->TypeTag & TypeTag_pointer))
-				{
-					strcat(PtrVariables->PtrTypeName, " *");
-				}
-				else
-				{
-					PtrVariables->TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
-					PtrVariables->TypeEncoding = PtrCU[NbCU].PtrTypes[j].Encoding;
-				}
-				if ((PtrVariables->TypeTag & TypeTag_arraytype))
-				{
-					strcat(PtrVariables->PtrTypeName, "[]");
-				}
-				break;
-
-			default:
-				break;
 			}
 		}
 	}
@@ -1515,9 +1613,16 @@ char *DWARFManager_GetLineSrcFromAdr(size_t Adr, size_t Tag)
 					{
 						for (k = 0; k < PtrCU[i].PtrSubProgs[j].NbLinesSrc; k++)
 						{
-							if ((PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].StartPC == Adr) && (!Tag || (PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].Tag == Tag)))
+							if (PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].StartPC <= Adr)
 							{
-								return PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].PtrLineSrc;
+								if ((PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].StartPC == Adr) && (!Tag || (PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].Tag == Tag)))
+								{
+									return PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].PtrLineSrc;
+								}
+							}
+							else
+							{
+								return PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k - 1].PtrLineSrc;
 							}
 						}
 					}
