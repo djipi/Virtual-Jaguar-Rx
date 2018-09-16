@@ -11,11 +11,16 @@
 // JPM  09/05/2018  Support of the DRAM size limit option
 // JPM  09/05/2018  Use definitions for error instead of hard values
 // JPM  09/05/2018  Detect if heap allocation shares space with SP (Stack)
+// JPM  09/06/2018  Added a status bar and better status report
+// JPM  09/07/2018  Set information values in a tab
 //
 
 // STILL TO DO:
-// Better information display
+// To have filters
+// To set the information display at the right
+// Feature to list the pointer(s) in the code using the allocation
 //
+
 
 #include "settings.h"
 #include "debugger/heapallocatorbrowser.h"
@@ -24,18 +29,52 @@
 #include "m68000/m68kinterface.h"
 
 
+// 
 HeapAllocatorBrowserWindow::HeapAllocatorBrowserWindow(QWidget * parent/*= 0*/) : QWidget(parent, Qt::Dialog),
-layout(new QVBoxLayout), text(new QTextBrowser),
+layout(new QVBoxLayout),
+#ifdef HA_LAYOUTTEXTS
+text(new QTextBrowser),
+#else
+TableView(new QTableView),
+model(new QStandardItemModel),
+proxyModel(new QSortFilterProxyModel),
+#endif
+statusbar(new QStatusBar),
 Adr(0)
 {
 	setWindowTitle(tr("Heap Allocation"));
 
+	// Set the font
 	QFont fixedFont("Lucida Console", 8, QFont::Normal);
 	fixedFont.setStyleHint(QFont::TypeWriter);
-	text->setFont(fixedFont);
-	setLayout(layout);
 
+#ifdef HA_LAYOUTTEXTS
+	// Set original layout
+	text->setFont(fixedFont);
 	layout->addWidget(text);
+#else
+	// Set the new layout with proper identation and readibility
+	model->setColumnCount(3);
+	model->setHeaderData(0, Qt::Horizontal, QObject::tr("Pointer"));
+	model->setHeaderData(1, Qt::Horizontal, QObject::tr("Size"));
+	model->setHeaderData(2, Qt::Horizontal, QObject::tr("Use"));
+	// Information table
+	TableView->setModel(model);
+	TableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	TableView->setShowGrid(0);
+	TableView->setFont(fixedFont);
+	TableView->verticalHeader()->setDefaultSectionSize(TableView->verticalHeader()->minimumSectionSize());
+	TableView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
+	layout->addWidget(TableView);
+	// Set filter
+	proxyModel->setSourceModel(model);
+	QRegExp regExp("*", Qt::CaseInsensitive, QRegExp::Wildcard);
+	proxyModel->setFilterRegExp(regExp);
+#endif
+
+	// Status bar
+	layout->addWidget(statusbar);
+	setLayout(layout);
 }
 
 
@@ -48,16 +87,25 @@ HeapAllocatorBrowserWindow::~HeapAllocatorBrowserWindow(void)
 //
 void HeapAllocatorBrowserWindow::RefreshContents(void)
 {
-	char string[1024];
+#ifdef HA_LAYOUTTEXTS
+	char string[1024] = { 0 };
 	QString HA;
-	size_t Adr68K;
+#endif
+	char msg[1024];
+	QString MSG;
+	size_t Adr68K, Adr68KHigh;
 	size_t Error = HA_NOERROR;
+	size_t NbBlocks, TotalBytesUsed;
 	HeapAllocation HeapAllocation;
 
 	if (isVisible())
 	{
 		if (Adr68K = Adr)
 		{
+			Adr68KHigh = TotalBytesUsed = NbBlocks = 0;
+#ifndef HA_LAYOUTTEXTS
+			model->setRowCount(0);
+#endif
 			do
 			{
 				if ((Adr68K >= 0x4000) && (Adr68K < vjs.DRAM_size))
@@ -76,48 +124,64 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 
 									if ((HeapAllocation.nextalloc >= 0x4000) && (HeapAllocation.nextalloc < vjs.DRAM_size))
 									{
-										sprintf(string, "0x%06x | 0x%06x (%zi) | %s | 0x%06x<br>", Adr68K, HeapAllocation.size - sizeof(HeapAllocation), HeapAllocation.size - sizeof(HeapAllocation), HeapAllocation.used ? "Allocated" : "Free", HeapAllocation.nextalloc);
-										Adr68K = HeapAllocation.nextalloc;
+#ifdef HA_LAYOUTTEXTS
+										if (NbBlocks++)
+										{
+											HA += QString("<br>");
+										}
+										sprintf(string, "0x%06x | 0x%0x (%zi) | %s | 0x%06x", Adr68K, HeapAllocation.size - sizeof(HeapAllocation), HeapAllocation.size - sizeof(HeapAllocation), HeapAllocation.used ? "Allocated" : "Free", HeapAllocation.nextalloc);
+										HA += QString(string);
+#else
+										model->insertRow(NbBlocks);
+										model->setItem(NbBlocks, 0, new QStandardItem(QString("0x%1").arg(Adr68K, 6, 16, QChar('0'))));
+										model->setItem(NbBlocks, 1, new QStandardItem(QString("%1").arg((HeapAllocation.size - sizeof(HeapAllocation)))));
+										model->setItem(NbBlocks++, 2, new QStandardItem(QString("%1").arg(HeapAllocation.used ? "Allocated" : "Free")));
+#endif
+										TotalBytesUsed += HeapAllocation.size;
+
+										if ((Adr68K = HeapAllocation.nextalloc) > Adr68KHigh)
+										{
+											Adr68KHigh = Adr68K;
+										}
 									}
 									else
 									{
-										sprintf(string, "<br><font color='#ff0000'><b>Unable to determine the next memory allocation</b></font>");
+										sprintf(msg, "Unable to determine the next memory allocation");
 										Error = HA_UNABLENEXTMEMORYALLOC;
 									}
 								}
 								else
 								{
-									sprintf(string, "<br><font color='#ff0000'><b>Unable to determine if the allocated memory is used or not</b></font>");
+									sprintf(msg, "Unable to determine if the allocated memory is used or not");
 									Error = HA_UNABLEALLOCATEMEMORYUSAGE;
 								}
 							}
 							else
 							{
-								sprintf(string, "<br><font color='#ff0000'><b>Memory bloc size has a problem</b></font>");
+								sprintf(msg, "Memory bloc size has a problem");
 								Error = HA_MEMORYBLOCKSIZEPROBLEM;
 							}
 						}
 						else
 						{
-							sprintf(string, "<br><font color='#0000ff'><b>Memory allocations browsing successfully completed</b></font>");
+							sprintf(msg, "%i blocks | %i bytes in blocks | %i contiguous bytes free", NbBlocks, TotalBytesUsed, (m68k_get_reg(NULL, M68K_REG_SP) - Adr68KHigh));
 						}
 					}
 					else
 					{
-						sprintf(string, "<br><font color='#ff0000'><b>Memory allocations and Stack are sharing the same space</b></font>");
+						sprintf(msg, "Memory allocations and Stack have reached the same space");
 						Error = HA_HAANDSPSHARESPACE;
 					}
 				}
 				else
 				{
-					sprintf(string, "<br><font color='#ff0000'><b>Memory allocations may have a problem</b></font>");
+					sprintf(msg, "Memory allocations may have a problem");
 					Error = HA_MEMORYALLOCATIONPROBLEM;
 				}
-
-				HA += QString(string);
-
 			}
 			while (HeapAllocation.size && !Error);
+
+			MSG += QString(msg);
 		}
 		else
 		{
@@ -127,7 +191,8 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 				{
 					if (!(Adr68K = (jaguarMainRAM[Adr68K] << 24) + (jaguarMainRAM[Adr68K + 1] << 16) + (jaguarMainRAM[Adr68K + 2] << 8) + (jaguarMainRAM[Adr68K + 3])) || ((Adr68K < 0x4000) || (Adr68K >= 0x200000)))
 					{
-						sprintf(string, "<font color='#ff0000'><b>Memory allocator not yet initialised</b></font>");
+						sprintf(msg, "Memory allocator not yet initialised");
+						Error = HA_MEMORYALLOCATORNOTINITIALIZED;
 						Adr = 0;
 					}
 					else
@@ -137,20 +202,47 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 				}
 				else
 				{
-					sprintf(string, "<font color='#ff0000'><b>Memory allocator is not compatible</b></font>");
+					sprintf(msg, "Memory allocator is not compatible");
+					Error = HA_MEMORYALLOCATORNOTCOMPATIBLE;
 					Adr = 0;
 				}
 			}
 			else
 			{
-				sprintf(string, "<font color='#ff0000'><b>Memory allocator doesn't exist</b></font>");
+				sprintf(msg, "Memory allocator doesn't exist");
+				Error = HA_MEMORYALLOCATORNOTEXIST;
 			}
-
-			HA += QString(string);
+#ifdef HA_LAYOUTTEXTS
+			HA += QString("");
+#else
+			model->setRowCount(0);
+#endif
+			MSG += QString(msg);
 		}
 
+		// Display status bar
+		if (Error)
+		{
+			if ((Error & HA_WARNING))
+			{
+				statusbar->setStyleSheet("background-color: lightyellow; font: bold");
+			}
+			else
+			{
+				statusbar->setStyleSheet("background-color: tomato; font: bold");
+			}
+		}
+		else
+		{
+			statusbar->setStyleSheet("background-color: lightgreen; font: bold");
+		}
+		statusbar->showMessage(MSG);
+
+#ifdef HA_LAYOUTTEXTS
+		// Display values
 		text->clear();
 		text->setText(HA);
+#endif
 	}
 }
 

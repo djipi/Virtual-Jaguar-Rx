@@ -1,5 +1,7 @@
 Release 4 (TBD)
 ---------------
+Git commit: TBD
+-
 0) The zoom value setting has been fixed in the registry
 1) Debugger mode now shares the same alpine rom path setting
 2) Local variables window displays register name now
@@ -13,28 +15,43 @@ Release 4 (TBD)
 8) Local variables window detects now if a variable is used or not by the code
 9) The address provided in the memory window is now verified to prevent crash
 -- Wrong address will be displayed in red
-10) UI cosmetic changes 
+10) UI changes 
 -- Added new icons for the exit and status features
 -- Modified icons for the SP (Stack) browser
 -- Unified icons sizes depend on their usage (drop down menu and main menu)
 -- Underline the active M68K line in the disassembly window
 -- Allow the up/down navigation on the SP (Stack) browser
 -- Restart function cleans-up the SP (Stack) browser and the heap allocator system
-11) Fixed the up navigation on the memory window
-12) Added some log information for the emulator initialisations
-13) Breakpoint will happen in case of writing at unknown memory location
--- Alert box will display a message and then code will stop
-14) Added the DRAM size in the emulator status window
-15) Debugger sources code clean-up
-16) Added a call stack feature
-17) Prevent source file reading issue on no-Windows system 
-18) UI modifications
+-- Fixed the up navigation on the memory window
+11) Added some log information for the emulator initialisations
+12) Breakpoint will happen in case of writing at unknown memory location
+-- Alert box will display a message and then the code will stop
+13) Added the DRAM size in the emulator status window
+14) Debugger sources code clean-up
+15) Added a call stack feature
+16) Follow platform requirement to prevent source file reading issue
+17) UI modifications
 -- Modified icon for the memory window to make a distinction with the memory browser
 -- The all watch, and Exception Vector Table windows, can be closed using keyboard
 -- Renamed the debugger dedicated icons to make a distinction
 -- Added the call stack window
-19) Fixed a crash in the all watch window after loading a new binary without ELF/DWARF information
+18) Fixed a crash in the all watch window after loading a new binary without ELF/DWARF information
 -- Previously used ELF/DWARF information was still accessible
+19) Fixed slash/backslash issue, in the Alpine tab, to follow platform requirement
+20) Heap allocation window uses the DRAM size limit option and detect if heap allocation shares space with SP (Stack)
+21) Added a Jaguar model and BIOS configuration tab
+22) Jaguar model and BIOS configuration integration
+23) Added LEB128 decoding functions
+-- It is used for the DWARF decoding information
+24) Debugger support improvement
+-- DWARF support for the enum type (partial), and subroutine type
+-- Debugger can report variable's unsigned char value
+25) UI modifications
+-- Added a status bar, better status report & information display for the heap allocation window
+-- Added a status bar, better status report & information display for the local variables window
+-- Added better information display for the exception vectors table window, and added some missing vectors
+-- Added a status bar, better status report & information display for the call stack window
+-- Added a status bar, better status report & information display for the all watches window
 
 Release 3 (13th November 2017)
 ------------------------------
@@ -133,8 +150,9 @@ Known issues
 -- Need to trace over the BPM or unset the BPM
 -- The issue can be prevented if the code doesn't set IRQ, otherwise the IRQ will need to be traced to get back control
 3) To support DWARF 2 with GCC, the code must be compiled with the -gdwarf-2 option
-4) The Local and Watch variables window  may display not available (N/A) type information
+4) The Local and Watch variables window  may display not available type information or empty information
 -- Such missing information may be included in future release
+-- The 'const' type may not be reported correctly in the DWARF information 
 5) The 2MB mirroring is no longer applied in case of --dram-max option usage
 6) Stack must reflect the --dram-max option usage otherwise the stack may be corrupted
 -- The application needs to set the SP (Stack) in accordance
@@ -142,7 +160,9 @@ Known issues
 -- Missing vectors may be added in future release
 8) User needs to manualy check if the Atari Jaguar executable match his source code files
 -- Otherwise, source code and assembly may not match or leads to instabilities
-9) The emulator needs to be restarted in case of keybindings changes
+9) The emulator needs to be restarted in case of the following actions occur
+-- Keybindings changes
+-- BIOS selection changes and without new executable load
 10) In the case of a ROM cartridge writing, and with occuring breakpoint, the PC pointer will point at the next instruction and not at the instruction causing the breakpoint
 11) Emulator will crash in case of wrong address value provided in the memory browser
 12) The RAM access log is limited to the 2MB

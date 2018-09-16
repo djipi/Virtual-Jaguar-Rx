@@ -7,9 +7,21 @@
 #ifndef __ALLWATCHBROWSER_H__
 #define __ALLWATCHBROWSER_H__
 
+//#define AW_LAYOUTTEXTS						// Use a layout with just texts
+//#define AW_SUPPORTARRAY						// Support array
+//#define AW_SUPPORTSTRUCTURE					// Support structure
+
 #include <QtWidgets>
 #include <stdint.h>
 
+// Error code definitions
+#define	AW_NOERROR		0x00
+#define	AW_ERROR		0x80
+#define	AW_WARNING		0x40
+#define	AW_NOALLWATCH	(0x01 | AW_WARNING)
+
+
+// 
 class AllWatchBrowserWindow: public QWidget
 {
 	Q_OBJECT
@@ -17,7 +29,9 @@ class AllWatchBrowserWindow: public QWidget
 	//
 	typedef struct WatchInfo
 	{
+#ifdef AW_LAYOUTTEXTS
 		size_t addr;
+#endif
 		size_t TypeTag;
 		char *PtrVariableName;
 		char *PtrVariableBaseTypeName;
@@ -36,7 +50,13 @@ class AllWatchBrowserWindow: public QWidget
 
 	private:
 		QVBoxLayout *layout;
+#ifdef AW_LAYOUTTEXTS
 		QTextBrowser *text;
+#else
+		QTableView *TableView;
+		QStandardItemModel *model;
+#endif
+		QStatusBar *statusbar;
 		WatchInfo *PtrWatchInfo;
 		size_t NbWatch;
 };
