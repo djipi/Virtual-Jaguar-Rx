@@ -24,7 +24,8 @@ KeyBindings KeyBindingsTable[KB_END] =	{
 											{ KB_TYPEDEBUGGER, "KB_Restart", "Restart", "Restart keybinding", "Ctrl+Shift+F5", NULL, NULL	},
 											{ KB_TYPEDEBUGGER, "KB_StepInto", "Step Into", "Step into keybinding", "F11", NULL, NULL	},
 											{ KB_TYPEDEBUGGER, "KB_StepOver", "Step Over", "Step over kebinding", "F10", NULL, NULL	},
-											{ KB_TYPEGENERAL, "KB_FullScreen", "Full Screen", "Full screen kebinding", "F9", NULL, NULL	}
+											{ KB_TYPEGENERAL, "KB_FullScreen", "Full Screen", "Full screen kebinding", "F9", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_Screenshot", "Screenshot", "Screenshot kebinding", "F8", NULL, NULL	}
 										};
 
 

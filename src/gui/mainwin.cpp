@@ -29,6 +29,7 @@
 // JPM  11/04/2017  Added the local window
 // JPM  08/31/2018  Added the call stack window
 // JPM  09/04/2018  Added the new Models and BIOS handler
+// JPM  09/17/2018  Added a screenshot feature
 //
 
 // FIXED:
@@ -260,6 +261,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	powerAct->setChecked(false);
 	connect(powerAct, SIGNAL(triggered()), this, SLOT(TogglePowerState()));
 
+	// Pause feature
 	QIcon pauseIcon;
 	pauseIcon.addFile(":/res/pause-off.png", QSize(), QIcon::Normal, QIcon::Off);
 	pauseIcon.addFile(":/res/pause-on.png", QSize(), QIcon::Normal, QIcon::On);
@@ -271,6 +273,14 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	pauseAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBPAUSE].KBSettingValue)));
 	pauseAct->setShortcutContext(Qt::ApplicationShortcut);
 	connect(pauseAct, SIGNAL(triggered()), this, SLOT(ToggleRunState()));
+
+	// Screenshot feature
+	screenshotAct = new QAction(QIcon(":/res/screenshot.png"), tr("&Screenshot"), this);
+	screenshotAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBSCREENSHOT].KBSettingValue)));
+	screenshotAct->setShortcutContext(Qt::ApplicationShortcut);
+	screenshotAct->setCheckable(false);
+	screenshotAct->setDisabled(false);
+	connect(screenshotAct, SIGNAL(triggered()), this, SLOT(MakeScreenshot()));
 
 	zoomActs = new QActionGroup(this);
 
@@ -408,8 +418,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		allWatchBrowseAct->setStatusTip(tr("Shows all Watch browser window"));
 		connect(allWatchBrowseAct, SIGNAL(triggered()), this, SLOT(ShowAllWatchBrowserWin()));
 
-		LocalBrowseAct = new QAction(QIcon(":/res/debug-local.png"), tr("Local"), this);
-		LocalBrowseAct->setStatusTip(tr("Shows Local browser window"));
+		LocalBrowseAct = new QAction(QIcon(":/res/debug-local.png"), tr("Locals"), this);
+		LocalBrowseAct->setStatusTip(tr("Shows Locals browser window"));
 		connect(LocalBrowseAct, SIGNAL(triggered()), this, SLOT(ShowLocalBrowserWin()));
 
 		heapallocatorBrowseAct = new QAction(QIcon(""), tr("Heap allocator"), this);
@@ -582,6 +592,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	toolbar->addSeparator();
 	if (!vjs.softTypeDebugger)
 	{
+		toolbar->addAction(screenshotAct);
+		toolbar->addSeparator();
 		toolbar->addAction(x1Act);
 		toolbar->addAction(x2Act);
 		toolbar->addAction(x3Act);
@@ -1735,6 +1747,7 @@ void MainWin::ReadSettings(void)
 	vjs.useFastBlitter = settings.value("useFastBlitter", false).toBool();
 	strcpy(vjs.EEPROMPath, settings.value("EEPROMs", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/eeproms/")).toString().toUtf8().data());
 	strcpy(vjs.ROMPath, settings.value("ROMs", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/software/")).toString().toUtf8().data());
+	strcpy(vjs.screenshotPath, settings.value("Screenshots", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/screenshots/")).toString().toUtf8().data());
 
 	// Read settings from the Debugger mode
 	settings.beginGroup("debugger");
@@ -2006,6 +2019,7 @@ void MainWin::WriteSettings(void)
 	settings.setValue("CDBootROM", vjs.CDBootPath);
 	settings.setValue("EEPROMs", vjs.EEPROMPath);
 	settings.setValue("ROMs", vjs.ROMPath);
+	settings.setValue("Screenshots", vjs.screenshotPath);
 
 	// Write settings from the Alpine mode
 	settings.beginGroup("alpine");
@@ -2209,3 +2223,22 @@ void MainWin::DebuggerRefreshWindows(void)
 		RefreshAlpineWindows();
 	}
 }
+
+
+// Create and save screenshot
+void MainWin::MakeScreenshot(void)
+{
+	char Text[256];
+	QImage screenshot;
+	time_t now = time(0);
+	struct tm tstruct;
+
+	// Create filename
+	tstruct = *localtime(&now);
+	sprintf(Text, "%svj_%i%i%i_%i%i%i.jpg", vjs.screenshotPath, tstruct.tm_year, tstruct.tm_mon, tstruct.tm_mday, tstruct.tm_hour, tstruct.tm_min, tstruct.tm_sec);
+
+	// Create screenshot
+	screenshot = videoWidget->grabFrameBuffer();
+	screenshot.save(Text, "JPG", 100);
+}
+

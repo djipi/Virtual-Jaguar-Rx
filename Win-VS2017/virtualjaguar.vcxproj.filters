@@ -739,5 +739,8 @@
     <Image Include="..\res\debug-memory.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="..\res\screenshot.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

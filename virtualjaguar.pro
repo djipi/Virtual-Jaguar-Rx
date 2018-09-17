@@ -126,7 +126,6 @@ HEADERS = \
 	src/unzip.h \
 	src/crc32.h \
 	src/settings.h \
-	src/modelsBIOS.h \
 	src/file.h \
 	src/LEB128.h
 
@@ -178,7 +177,6 @@ SOURCES = \
 	src/unzip.cpp \
 	src/crc32.cpp \
 	src/settings.cpp \
-	src/modelsBIOS.cpp \	
 	src/file.cpp \
 	src/LEB128.cpp
 		

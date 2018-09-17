@@ -85,6 +85,7 @@ class MainWin: public QMainWindow
 		void FrameAdvance(void);
 		void ToggleFullScreen(void);
 		void ShowEmuStatusWin(void);
+		void MakeScreenshot(void);
 		// Debugger
 		void DebuggerTraceStepOver(void);
 		void DebuggerTraceStepInto(void);
@@ -117,7 +118,7 @@ class MainWin: public QMainWindow
 		void WriteUISettings(void);
 
 	private:
-		GLWidget * videoWidget;
+		GLWidget *videoWidget;
 		QMdiArea *mainWindowCentrale;
 		QMdiSubWindow *VideoOutputWindowCentrale;
 		AboutWindow * aboutWin;
@@ -204,6 +205,7 @@ class MainWin: public QMainWindow
 		QAction *restartAct;
 		QAction * fullScreenAct;
 		QAction *DasmAct;
+		QAction *screenshotAct;;
 
 		// Alpine
 		QAction *memBrowseAct;

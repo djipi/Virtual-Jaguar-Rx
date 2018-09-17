@@ -99,6 +99,7 @@ struct VJSettings
 	char alpineROMPath[MAX_PATH];
 	char debuggerROMPath[MAX_PATH];
 	char absROMPath[MAX_PATH];
+	char screenshotPath[MAX_PATH];
 };
 
 // Render types

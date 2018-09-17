@@ -1491,6 +1491,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </Image>
     <Image Include="..\res\Exit.png" />
+    <Image Include="..\res\screenshot.png" />
     <Image Include="..\res\status.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </Image>

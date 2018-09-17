@@ -71,6 +71,7 @@ OBJS := \
 	obj/memory.o       \
 	obj/memtrack.o     \
 	obj/mmu.o          \
+	obj/modelsBIOS.o   \
 	obj/op.o           \
 	obj/state.o        \
 	obj/tom.o          \

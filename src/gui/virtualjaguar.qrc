@@ -49,5 +49,6 @@
 	<file>../../res/status.png</file>
 	<file>../../res/debug-callstack.png</file>	
 	<file>../../res/debug-memory.png</file>
+	<file>../../res/screenshot.png</file>
 </qresource>
 </RCC>

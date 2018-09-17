@@ -13,6 +13,7 @@
 // JLH  06/23/2011  Created this file
 // JPM  09/03/2018  Added a Models & Bios tab
 // JPM  09/03/2018  Depend the platform transform slashes or backslashes
+// JPM  09/17/2018  Added a screenshot path
 //
 
 #include "configdialog.h"
@@ -30,27 +31,32 @@ GeneralTab::GeneralTab(QWidget * parent/*= 0*/): QWidget(parent)
 //	QLabel * label2 = new QLabel("CD Boot ROM:");
 	QLabel * label3 = new QLabel("EEPROMs:");
 	QLabel * label4 = new QLabel("Software:");
+	QLabel * label5 = new QLabel("Screenshots:");
 
 //	edit1 = new QLineEdit("");
 //	edit2 = new QLineEdit("");
 	edit3 = new QLineEdit("");
 	edit4 = new QLineEdit("");
+	edit5 = new QLineEdit("");
 //	edit1->setPlaceholderText("Boot ROM location");
 //	edit2->setPlaceholderText("CD Boot ROM location");
 	edit3->setPlaceholderText("EEPROM path");
 	edit4->setPlaceholderText("Software path");
+	edit5->setPlaceholderText("Screenshot path");
 
 	QVBoxLayout * layout1 = new QVBoxLayout;
 //	layout1->addWidget(label1);
 //	layout1->addWidget(label2);
 	layout1->addWidget(label3);
 	layout1->addWidget(label4);
+	layout1->addWidget(label5);
 
 	QVBoxLayout * layout2 = new QVBoxLayout;
 //	layout2->addWidget(edit1);
 //	layout2->addWidget(edit2);
 	layout2->addWidget(edit3);
 	layout2->addWidget(edit4);
+	layout2->addWidget(edit5);
 
 	QHBoxLayout * layout3 = new QHBoxLayout;
 	layout3->addLayout(layout1);
@@ -97,6 +103,7 @@ void GeneralTab::GetSettings(void)
 	//	generalTab->edit2->setText(vjs.CDBootPath);
 	edit3->setText(vjs.EEPROMPath);
 	edit4->setText(vjs.ROMPath);
+	edit5->setText(vjs.screenshotPath);
 #ifndef NEWMODELSBIOSHANDLER
 	useBIOS->setChecked(vjs.useJaguarBIOS);
 #endif
@@ -115,6 +122,7 @@ void GeneralTab::SetSettings(void)
 	//	strcpy(vjs.CDBootPath,  generalTab->edit2->text().toAscii().data());
 	strcpy(vjs.EEPROMPath, CheckForTrailingSlash(edit3->text()).toUtf8().data());
 	strcpy(vjs.ROMPath, CheckForTrailingSlash(edit4->text()).toUtf8().data());
+	strcpy(vjs.screenshotPath, CheckForTrailingSlash(edit5->text()).toUtf8().data());
 
 #ifndef NEWMODELSBIOSHANDLER
 	vjs.useJaguarBIOS = useBIOS->isChecked();
