@@ -48,11 +48,11 @@ keybindingsTab(new KeyBindingsTab(this))
 
 	tabWidget->addTab(generalTab, tr("General"));
 #ifdef NEWMODELSBIOSHANDLER
-	tabWidget->addTab(modelsbiosTab, tr("Models and Bios"));
+	tabWidget->addTab(modelsbiosTab, tr("Models and BIOS"));
 #endif
 	tabWidget->addTab(controllerTab1, tr("Controllers"));
 //	tabWidget->addTab(controllerTab2, tr("Controller #2"));
-	tabWidget->addTab(keybindingsTab, tr("Keybindings"));
+	tabWidget->addTab(keybindingsTab, tr("Key Bindings"));
 
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{

@@ -15,17 +15,17 @@
 
 //
 KeyBindings KeyBindingsTable[KB_END] =	{
-											{ KB_TYPEGENERAL, "KB_Quit", "Quit", "Quit keybinding", "Ctrl+Q", NULL, NULL	},
-											{ KB_TYPEGENERAL, "KB_PickFile", "Pick file", "Pick file keybinding", "Ctrl+I", NULL, NULL	},
-											{ KB_TYPEGENERAL, "KB_Configure", "Configure", "Configure keybinding", "Ctrl+C", NULL, NULL	},
-											{ KB_TYPEGENERAL, "KB_EmuStatus", "Emulator Status", "Emulator status keybinding", "Ctrl+S", NULL, NULL	},
-											{ KB_TYPEGENERAL, "KB_Pause", "Pause", "Pause keybinding", "Esc", NULL, NULL	},
-											{ KB_TYPEGENERAL, "KB_FrameAdvance", "Frame Advance", "Frame advance keybinding", "F7", NULL, NULL },
-											{ KB_TYPEDEBUGGER, "KB_Restart", "Restart", "Restart keybinding", "Ctrl+Shift+F5", NULL, NULL	},
-											{ KB_TYPEDEBUGGER, "KB_StepInto", "Step Into", "Step into keybinding", "F11", NULL, NULL	},
-											{ KB_TYPEDEBUGGER, "KB_StepOver", "Step Over", "Step over kebinding", "F10", NULL, NULL	},
-											{ KB_TYPEGENERAL, "KB_FullScreen", "Full Screen", "Full screen kebinding", "F9", NULL, NULL	},
-											{ KB_TYPEGENERAL, "KB_Screenshot", "Screenshot", "Screenshot kebinding", "F8", NULL, NULL	}
+											{ KB_TYPEGENERAL, "KB_Quit", "Quit", "Quit key binding", "Ctrl+Q", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_PickFile", "Pick file", "Pick file key binding", "Ctrl+I", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_Configure", "Configure", "Configure key binding", "Ctrl+C", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_EmuStatus", "Emulator Status", "Emulator status key binding", "Ctrl+S", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_Pause", "Pause", "Pause key binding", "Esc", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_FrameAdvance", "Frame Advance", "Frame advance key binding", "F7", NULL, NULL },
+											{ KB_TYPEGENERAL, "KB_FullScreen", "Full Screen", "Full screen key binding", "F9", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_Screenshot", "Screenshot", "Screenshot key binding", "F8", NULL, NULL	},
+											{ KB_TYPEDEBUGGER, "KB_Restart", "Restart", "Restart key binding", "Ctrl+Shift+F5", NULL, NULL	},
+											{ KB_TYPEDEBUGGER, "KB_StepInto", "Step Into", "Step into key binding", "F11", NULL, NULL	},
+											{ KB_TYPEDEBUGGER, "KB_StepOver", "Step Over", "Step over key binding", "F10", NULL, NULL	}
 										};
 
 
