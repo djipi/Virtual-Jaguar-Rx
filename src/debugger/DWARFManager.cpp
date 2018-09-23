@@ -284,7 +284,7 @@ void DWARFManager_InitDMI(void)
 	FILE *SrcFile;
 	size_t i, j, k;
 	char *return_string;
-	char *Ptr;
+	char *Ptr, *Ptr1;
 
 	// Initialisation for the Compilation Units table
 	NbCU = 0;
@@ -417,6 +417,21 @@ void DWARFManager_InitDMI(void)
 								}
 #endif
 								Ptr++;
+							}
+
+							// Directory path clean-up
+#if defined(_WIN32)
+							while ((Ptr1 = Ptr = strstr(PtrCU[NbCU].PtrFullFilename, "\\..\\")))
+#else
+							while ((Ptr1 = Ptr = strstr(PtrCU[NbCU].PtrFullFilename, "/../")))
+#endif
+							{
+#if defined(_WIN32)
+								while (*--Ptr1 != '\\');
+#else
+								while (*--Ptr1 != '/');
+#endif
+								strcpy((Ptr1 + 1), (Ptr + 4));
 							}
 
 							// Read the file as text
