@@ -640,3 +640,30 @@ char *DBGManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine)
 	return	Symbolname;
 }
 
+
+// Get number of source code filenames
+size_t DBGManager_GetNbFullSourceFilename(void)
+{
+	size_t Nbr = 0;
+
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		Nbr = DWARFManager_GetNbFullSourceFilename();
+	}
+
+	return Nbr;
+}
+
+
+// Get source code filename based on index
+char *DBGManager_GetNumFullSourceFilename(size_t Index)
+{
+	char *FullSourceFilename = NULL;
+
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		FullSourceFilename = DWARFManager_GetNumFullSourceFilename(Index);
+	}
+
+	return	FullSourceFilename;
+}

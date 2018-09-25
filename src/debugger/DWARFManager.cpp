@@ -9,8 +9,7 @@
 // ---  ----------  ------------------------------------------------------------
 // JPM  12/03/2016  Created this file
 // JPM  12/03/2016  DWARF format support
-// JPM  09/12/2018  Added LEB128 decoding features
-// JPM  09/14/2018  Improve the DWARF parsing information
+// JPM  Sept./2018  Added LEB128 decoding features, and improve the DWARF parsing information
 //
 
 // To Do
@@ -1776,5 +1775,19 @@ char *DWARFManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine)
 	}
 
 	return NULL;
+}
+
+
+// Get number of source code filenames
+size_t DWARFManager_GetNbFullSourceFilename(void)
+{
+	return NbCU;
+}
+
+
+// Get source code filename based on index
+char *DWARFManager_GetNumFullSourceFilename(size_t Index)
+{
+	return (PtrCU[Index].PtrFullFilename);
 }
 

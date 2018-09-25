@@ -11,25 +11,15 @@
 // JLH  12/23/2009  Created this file
 // JLH  12/20/2010  Added settings, menus & toolbars
 // JLH  07/05/2011  Added CD BIOS functionality to GUI
-// JPM  06/06/2016  Visual Studio support
-// JPM  06/19/2016  Soft debugger integration
+// JPM   June/2016  Visual Studio support & Soft debugger integration
 // JPM  01/11/2017  Added stack browser
-// JPM  01/02/2017  Added GPU disassembly
-// JPM  02/02/2017  Added DSP disassembly
+// JPM   Feb./2017  Added GPU/DSP disassembly
 // JPM  07/12/2017  Added all Watch window
-// JPM  08/01/2017  Added heap allocator window
-// JPM  08/07/2017  Added memories window
-// JPM  08/10/2017  Added a restart feature
-// JPM  08/31/2017  Added breakpoints window [Not Supported]
-// JPM  09/01/2017  Save position & visibility windows status in the settings
-// JPM  09/02/2017  Save size windows in the settings
-// JPM  09/05/2017  Added Exception Vector Table window
-// JPM  09/06/2017  Added the 'Rx' word to the emulator window name
-// JPM  09/12/2017  Added the keybindings in the settings
+// JPM   Aug./2017  Added heap allocator and memories window, a restart feature, and a [Not Supported] breakpoints window
+// JPM  Sept./2017  Save position, size & visibility windows status in the settings; added Exception Vector Table window, the 'Rx' word to the emulator window name, and the keybindings in the settings
 // JPM  11/04/2017  Added the local window
 // JPM  08/31/2018  Added the call stack window
-// JPM  09/04/2018  Added the new Models and BIOS handler
-// JPM  09/17/2018  Added a screenshot feature
+// JPM  Sept./2018  Added the new Models and BIOS handler, a screenshot feature and source code files browsing
 //
 
 // FIXED:
@@ -94,12 +84,13 @@
 #include "m68000/m68kinterface.h"
 
 //#include "debugger/VideoWin.h"
-#include "debugger/DasmWin.h"
+//#include "debugger/DasmWin.h"
 #include "debugger/m68KDasmWin.h"
 #include "debugger/GPUDasmWin.h"
 #include "debugger/DSPDasmWin.h"
 #include "debugger/memory1browser.h"
-#include "debugger/brkWin.h"
+//#include "debugger/brkWin.h"
+#include "debugger/FilesrcListWin.h"
 #include "debugger/exceptionvectortablebrowser.h"
 #include "debugger/allwatchbrowser.h"
 #include "debugger/localbrowser.h"
@@ -197,11 +188,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		//VideoOutputWin = new VideoOutputWindow(this);
 		//VideoOutputWin->setCentralWidget()
 		//DasmWin = new DasmWindow();
-		DasmWin = new DasmWindow(this);
+		//DasmWin = new DasmWindow(this);
 		allWatchBrowseWin = new AllWatchBrowserWindow(this);
 		LocalBrowseWin = new LocalBrowserWindow(this);
 		heapallocatorBrowseWin = new HeapAllocatorBrowserWindow(this);
-		brkWin = new BrkWindow(this);
+		//brkWin = new BrkWindow(this);
 		exceptionvectortableBrowseWin = new ExceptionVectorTableBrowserWindow(this);
 		CallStackBrowseWin = new CallStackBrowserWindow(this);
 
@@ -216,21 +207,30 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			mem1BrowseWin[i] = new Memory1BrowserWindow(this);
 		}
 
+		// Setup dock to display source code filenames tree
+		QDockWidget *dockFiles = new QDockWidget(tr("Files"), this);
+		dockFiles->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		dockFiles->hide();
+		addDockWidget(Qt::LeftDockWidgetArea, dockFiles);
+		mainWindowCentrale->addAction(dockFiles->toggleViewAction());
+		dockFiles->setWidget(FilesrcListWin = new FilesrcListWindow(this));
+#if 0
+		// Setup dock to display disassembly
+		QDockWidget *dockDisasm = new QDockWidget(tr("Disassembly"), this);
+		dockDisasm->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+		addDockWidget(Qt::RightDockWidgetArea, dockDisasm);
+		mainWindowCentrale->addAction(dockDisasm->toggleViewAction());
+		dockDisasm->setWidget(dasmtabWidget = new QTabWidget(this));
+#else
 		dasmtabWidget = new QTabWidget(this);
+#endif
+		// Setup disasm tabs
 		dasmtabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 		dasmtabWidget->addTab(m68kDasmWin = new m68KDasmWindow(this), tr("M68000"));
 		dasmtabWidget->addTab(GPUDasmWin = new GPUDasmWindow(this), tr("GPU"));
 		dasmtabWidget->addTab(DSPDasmWin = new DSPDasmWindow(this), tr("DSP"));
-		////dasmtabWidget->addTab(m68kDasmBrowseWin, tr("M68000"));
+#if 1
 		setCentralWidget(dasmtabWidget);
-
-#if 0
-		QDockWidget *shapesDockWidget = new QDockWidget(tr("Shapes"));
-		shapesDockWidget->setObjectName("shapesDockWidget");
-		shapesDockWidget->setWidget(m68kDasmWin);
-		//shapesDockWidget->setWidget(treeWidget);
-		shapesDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-		addDockWidget(Qt::LeftDockWidgetArea, shapesDockWidget);
 #endif
 	}
 
@@ -484,13 +484,13 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 	if (vjs.softTypeDebugger)
 	{
-		VideoOutputAct = new QAction(tr("Output Video"), this);
-		VideoOutputAct->setStatusTip(tr("Shows the output video window"));
-		connect(VideoOutputAct, SIGNAL(triggered()), this, SLOT(ShowVideoOutputWin()));
+		//VideoOutputAct = new QAction(tr("Output Video"), this);
+		//VideoOutputAct->setStatusTip(tr("Shows the output video window"));
+		//connect(VideoOutputAct, SIGNAL(triggered()), this, SLOT(ShowVideoOutputWin()));
 
-		DasmAct = new QAction(tr("Disassembly"), this);
-		DasmAct->setStatusTip(tr("Shows the disassembly window"));
-		connect(DasmAct, SIGNAL(triggered()), this, SLOT(ShowDasmWin()));
+		//DasmAct = new QAction(tr("Disassembly"), this);
+		//DasmAct->setStatusTip(tr("Shows the disassembly window"));
+		//connect(DasmAct, SIGNAL(triggered()), this, SLOT(ShowDasmWin()));
 	}
 
 	// Misc. connections...
@@ -580,7 +580,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 	// Create toolbars
 
-	toolbar = addToolBar(tr("Stuff"));
+	toolbar = addToolBar(tr("System"));
 	toolbar->addAction(powerAct);
 	if (!vjs.softTypeDebugger)
 	{
@@ -1093,7 +1093,7 @@ static uint32_t refresh = 0;
 		{
 			if (refresh == vjs.refresh)
 			{
-				RefreshAlpineWindows();
+				AlpineRefreshWindows();
 				//memBrowseWin->RefreshContents();
 				//cpuBrowseWin->RefreshContents();
 				refresh = 0;
@@ -1440,8 +1440,8 @@ void MainWin::ToggleCDUsage(void)
 //
 void MainWin::NewBreakpointFunction(void)
 {
-	brkWin->show();
-	brkWin->RefreshContents();
+	//brkWin->show();
+	//brkWin->RefreshContents();
 }
 
 
@@ -1674,13 +1674,18 @@ void MainWin::ShowRISCDasmBrowserWin(void)
 }
 
 
+//
+#if 0
 void	MainWin::ShowDasmWin(void)
 {
-	DasmWin->show();
+//	DasmWin->show();
 //	DasmWin->RefreshContents();
 }
+#endif
 
 
+// 
+#if 0
 void MainWin::ShowVideoOutputWin(void)
 {
 	//VideoOutputWindowCentrale = mainWindowCentrale->addSubWindow(videoWidget);
@@ -1690,6 +1695,7 @@ void MainWin::ShowVideoOutputWin(void)
 	//VideoOutputWin->show();
 	//VideoOutputWin->RefreshContents(videoWidget);
 }
+#endif
 
 
 void MainWin::ResizeMainWindow(void)
@@ -2176,7 +2182,7 @@ void MainWin::WriteUISettings(void)
 
 
 // Refresh alpine debug windows
-void	MainWin::RefreshAlpineWindows(void)
+void MainWin::AlpineRefreshWindows(void)
 {
 	cpuBrowseWin->RefreshContents();
 	memBrowseWin->RefreshContents();
@@ -2193,6 +2199,7 @@ void MainWin::DebuggerResetWindows(void)
 {
 	if (vjs.softTypeDebugger)
 	{
+		FilesrcListWin->Reset();
 		allWatchBrowseWin->Reset();
 		heapallocatorBrowseWin->Reset();
 
@@ -2208,6 +2215,7 @@ void MainWin::DebuggerRefreshWindows(void)
 
 	if (vjs.softTypeDebugger)
 	{
+		FilesrcListWin->RefreshContents();
 		m68kDasmWin->RefreshContents();
 		GPUDasmWin->RefreshContents();
 		DSPDasmWin->RefreshContents();
@@ -2220,7 +2228,7 @@ void MainWin::DebuggerRefreshWindows(void)
 			mem1BrowseWin[i]->RefreshContents(i);
 		}
 
-		RefreshAlpineWindows();
+		AlpineRefreshWindows();
 	}
 }
 

@@ -16,12 +16,12 @@
 
 // Main windows
 class GLWidget;
-class VideoWindow;
+//class VideoWindow;
 class AboutWindow;
 class HelpWindow;
 class FilePickerWindow;
 //class VideoOutputWindow;
-class DasmWindow;
+//class DasmWindow;
 class m68KDasmWindow;
 class GPUDasmWindow;
 class DSPDasmWindow;
@@ -41,10 +41,12 @@ class LocalBrowserWindow;
 class CallStackBrowserWindow;
 class HeapAllocatorBrowserWindow;
 class Memory1BrowserWindow;
-class BrkWindow;
+//class BrkWindow;
 class ExceptionVectorTableBrowserWindow;
+class FilesrcListWindow;
 
 
+// 
 class MainWin: public QMainWindow
 {
 	// All Qt apps require this macro for signal/slot functionality to work
@@ -55,9 +57,9 @@ class MainWin: public QMainWindow
 		MainWin(bool);
 		void LoadFile(QString);
 		void SyncUI(void);
-		void	DebuggerRefreshWindows(void);
-		void	DebuggerResetWindows(void);
-		void	RefreshAlpineWindows(void);
+		void DebuggerRefreshWindows(void);
+		void DebuggerResetWindows(void);
+		void AlpineRefreshWindows(void);
 
 	protected:
 		void closeEvent(QCloseEvent *);
@@ -97,8 +99,8 @@ class MainWin: public QMainWindow
 		void ShowMemory1BrowserWin(int NumWin);
 		void ShowExceptionVectorTableBrowserWin(void);
 		void NewBreakpointFunction(void);
-		void ShowVideoOutputWin(void);
-		void ShowDasmWin(void);
+		//void ShowVideoOutputWin(void);
+		//void ShowDasmWin(void);
 		// Alpine
 		void ShowMemoryBrowserWin(void);
 		void ShowStackBrowserWin(void);
@@ -121,31 +123,32 @@ class MainWin: public QMainWindow
 		GLWidget *videoWidget;
 		QMdiArea *mainWindowCentrale;
 		QMdiSubWindow *VideoOutputWindowCentrale;
-		AboutWindow * aboutWin;
-		HelpWindow * helpWin;
-		FilePickerWindow * filePickWin;
-		EmuStatusWindow * emuStatusWin;
-		MemoryBrowserWindow * memBrowseWin;
-		StackBrowserWindow * stackBrowseWin;
-		CPUBrowserWindow * cpuBrowseWin;
-		OPBrowserWindow * opBrowseWin;
-		M68KDasmBrowserWindow * m68kDasmBrowseWin;
-		RISCDasmBrowserWindow * riscDasmBrowseWin;
-		//VideoOutputWindow * VideoOutputWin;
+		AboutWindow *aboutWin;
+		HelpWindow *helpWin;
+		FilePickerWindow *filePickWin;
+		EmuStatusWindow *emuStatusWin;
+		MemoryBrowserWindow *memBrowseWin;
+		StackBrowserWindow *stackBrowseWin;
+		CPUBrowserWindow *cpuBrowseWin;
+		OPBrowserWindow *opBrowseWin;
+		M68KDasmBrowserWindow *m68kDasmBrowseWin;
+		RISCDasmBrowserWindow *riscDasmBrowseWin;
+		//VideoOutputWindow *VideoOutputWin;
 		AllWatchBrowserWindow *allWatchBrowseWin;
 		LocalBrowserWindow *LocalBrowseWin;
 		CallStackBrowserWindow *CallStackBrowseWin;
 		ExceptionVectorTableBrowserWindow *exceptionvectortableBrowseWin;
 		HeapAllocatorBrowserWindow *heapallocatorBrowseWin;
 		Memory1BrowserWindow **mem1BrowseWin;
-		DasmWindow * DasmWin;
+		//DasmWindow * DasmWin;
 		QTabWidget *dasmtabWidget;
 		//QDockWidget *dasmtabWidget;
 		m68KDasmWindow *m68kDasmWin;
 		GPUDasmWindow *GPUDasmWin;
 		DSPDasmWindow *DSPDasmWin;
-		BrkWindow *brkWin;
-		QTimer * timer;
+		FilesrcListWindow *FilesrcListWin;
+		//BrkWindow *brkWin;
+		QTimer *timer;
 		bool running;
 		int zoomLevel;
 		bool powerButtonOn;
@@ -204,7 +207,7 @@ class MainWin: public QMainWindow
 		QAction *traceStepIntoAct;
 		QAction *restartAct;
 		QAction * fullScreenAct;
-		QAction *DasmAct;
+		//QAction *DasmAct;
 		QAction *screenshotAct;;
 
 		// Alpine
@@ -216,7 +219,7 @@ class MainWin: public QMainWindow
 		QAction *riscDasmBrowseAct;
 
 		// Debugger
-		QAction *VideoOutputAct;
+		//QAction *VideoOutputAct;
 		QAction *heapallocatorBrowseAct;
 		QAction *allWatchBrowseAct;
 		QAction *LocalBrowseAct;

@@ -403,6 +403,15 @@
     <ClCompile Include="..\src\LEB128.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_FilesrcListWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_FilesrcListWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\FilesrcListWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -705,6 +714,9 @@
     </CustomBuild>
     <CustomBuild Include="..\src\gui\modelsbiostab.h">
       <Filter>Header Files\gui\tab</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\FilesrcListWin.h">
+      <Filter>Header Files\debugger</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
