@@ -50,5 +50,6 @@
 	<file>../../res/debug-callstack.png</file>	
 	<file>../../res/debug-memory.png</file>
 	<file>../../res/screenshot.png</file>
+	<file>../../res/savestate.png</file>
 </qresource>
 </RCC>

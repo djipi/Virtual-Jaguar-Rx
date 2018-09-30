@@ -4,6 +4,8 @@
 // by James Hammons
 // (C) 2010 Underground Software
 //
+// Modified by Jean-Paul Mari
+//
 
 #ifndef __MAINWIN_H__
 #define __MAINWIN_H__
@@ -88,6 +90,9 @@ class MainWin: public QMainWindow
 		void ToggleFullScreen(void);
 		void ShowEmuStatusWin(void);
 		void MakeScreenshot(void);
+		void SavestateSave(void);
+		void SavestateQuickSave(void);
+		void SavestateLoad(void);
 		// Debugger
 		void DebuggerTraceStepOver(void);
 		void DebuggerTraceStepInto(void);
@@ -177,9 +182,10 @@ class MainWin: public QMainWindow
 		QPoint mainWinPosition;
 //		QSize mainWinSize;
 		int lastEditedProfile;
-		QMenu * fileMenu;
-		QMenu * helpMenu;
-		QMenu * debugMenu, * debugWindowsMenu, *debugWindowsBrowsesMenu, *debugWindowsWatchMenu, *debugWindowOutputMenu, *debugWindowExceptionMenu, *debugWindowsMemoryMenu, *debugNewBreakpointMenu;
+		QMenu *fileMenu;
+		QMenu *savestateMenu;
+		QMenu *helpMenu;
+		QMenu *debugMenu, *debugWindowsMenu, *debugWindowsBrowsesMenu, *debugWindowsWatchMenu, *debugWindowOutputMenu, *debugWindowExceptionMenu, *debugWindowsMemoryMenu, *debugNewBreakpointMenu;
 		QToolBar * toolbar;
 		QToolBar * debugbar;
 		QToolBar * debuggerbar;
@@ -187,26 +193,27 @@ class MainWin: public QMainWindow
 		QActionGroup * zoomActs;
 		QActionGroup * tvTypeActs;
 
-		QAction * quitAppAct;
-		QAction * powerAct;
-		QAction * pauseAct;
-		QAction * x1Act;
-		QAction * x2Act;
-		QAction * x3Act;
-		QAction * ntscAct;
-		QAction * palAct;
-		QAction * blurAct;
-		QAction * aboutAct;
-		QAction * helpAct;
-		QAction * filePickAct;
-		QAction * configAct;
-		QAction * emustatusAct;
-		QAction * useCDAct;
-		QAction * frameAdvanceAct;
+		QAction *quitAppAct;
+		QAction *powerAct;
+		QAction *pauseAct;
+		QAction *x1Act;
+		QAction *x2Act;
+		QAction *x3Act;
+		QAction *ntscAct;
+		QAction *palAct;
+		QAction *blurAct;
+		QAction *aboutAct;
+		QAction *helpAct;
+		QAction *filePickAct;
+		QAction *savestateLoadAct, *savestateSaveAct, *savestateQuickSaveAct;
+		QAction *configAct;
+		QAction *emustatusAct;
+		QAction *useCDAct;
+		QAction *frameAdvanceAct;
 		QAction *traceStepOverAct;
 		QAction *traceStepIntoAct;
 		QAction *restartAct;
-		QAction * fullScreenAct;
+		QAction *fullScreenAct;
 		//QAction *DasmAct;
 		QAction *screenshotAct;;
 
@@ -225,7 +232,7 @@ class MainWin: public QMainWindow
 		QAction *LocalBrowseAct;
 		QAction *CallStackBrowseAct;
 		QAction **mem1BrowseAct;
-		QAction *newBreakpointFunctionAct;
+		//QAction *newBreakpointFunctionAct;
 		QAction *exceptionVectorTableBrowseAct;
 
 		QIcon powerGreen;

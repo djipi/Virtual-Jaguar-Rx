@@ -14,6 +14,7 @@
 // JLH  01/16/2010  Created this log ;-)
 // JLH  01/20/2011  Change rendering to RGBA, removed unnecessary code
 // JPM  06/06/2016  Visual Studio support
+// JPM  09/29/2018  Added savestate functions
 //
 // Note: TOM has only a 16K memory space
 //
@@ -252,6 +253,8 @@
 //	F02298            W   xxxxxxxx xxxxxxxx xxxxxxxx xxxxxxxx   B_Z0 - Z0
 //	------------------------------------------------------------
 
+
+#include <stdint.h>
 #include "tom.h"
 
 #include <string.h>								// For memset()
@@ -1757,3 +1760,54 @@ void TOMPITCallback(void)
 	TOMResetPIT();
 }
 
+
+// Read savestate data
+// Return the size of the savestate
+uint32_t TomReadSavestate(unsigned char *ptrsst)
+{
+	unsigned char *Origin = ptrsst;
+
+	// Struct and arrays
+	memcpy(tomRam8, ptrsst, sizeof(tomRam8));
+	ptrsst += sizeof(tomRam8);
+
+	// Variables
+	tomWidth = *((uint32_t *&)ptrsst)++;
+	tomHeight = *((uint32_t *&)ptrsst)++;
+	tom_jerry_int_pending = *((uint16_t *&)ptrsst)++;
+	tom_timer_int_pending = *((uint8_t *&)ptrsst)++;
+	tom_object_int_pending = *((uint16_t *&)ptrsst)++;
+	tom_gpu_int_pending = *((uint16_t *&)ptrsst)++;
+	tom_video_int_pending = *((uint16_t *&)ptrsst)++;
+	tomTimerPrescaler = *((uint32_t *&)ptrsst)++;
+	tomTimerDivider = *((uint32_t *&)ptrsst)++;
+	tomTimerCounter = *((int32_t *&)ptrsst)++;
+
+	return (ptrsst - Origin);
+}
+
+
+// Write savestate data
+// Return the size of the savestate
+uint32_t TomWriteSavestate(unsigned char *ptrsst)
+{
+	unsigned char *Origin = ptrsst;
+
+	// Struct and arrays
+	memcpy(ptrsst, tomRam8, sizeof(tomRam8));
+	ptrsst += sizeof(tomRam8);
+
+	// Variables
+	*((uint32_t *&)ptrsst)++ = tomWidth;
+	*((uint32_t *&)ptrsst)++ = tomHeight;
+	*((uint16_t *&)ptrsst)++ = tom_jerry_int_pending;
+	*((uint16_t *&)ptrsst)++ = tom_timer_int_pending;
+	*((uint16_t *&)ptrsst)++ = tom_object_int_pending;
+	*((uint16_t *&)ptrsst)++ = tom_gpu_int_pending;
+	*((uint16_t *&)ptrsst)++ = tom_video_int_pending;
+	*((uint32_t *&)ptrsst)++ = tomTimerPrescaler;
+	*((uint32_t *&)ptrsst)++ = tomTimerDivider;
+	*((int32_t *&)ptrsst)++ = tomTimerCounter;
+
+	return (ptrsst - Origin);
+}

@@ -8,21 +8,22 @@
 //#include "types.h"
 #include "memory.h"
 
+// General functions
 void JERRYInit(void);
 void JERRYReset(void);
 void JERRYDone(void);
-void JERRYDumpIORegistersToLog(void);
 
+// Jerry memory access
 uint8_t JERRYReadByte(uint32_t offset, uint32_t who = UNKNOWN);
 uint16_t JERRYReadWord(uint32_t offset, uint32_t who = UNKNOWN);
 void JERRYWriteByte(uint32_t offset, uint8_t data, uint32_t who = UNKNOWN);
 void JERRYWriteWord(uint32_t offset, uint16_t data, uint32_t who = UNKNOWN);
 
-void JERRYExecPIT(uint32_t cycles);
-void JERRYI2SExec(uint32_t cycles);
+//void JERRYExecPIT(uint32_t cycles);
+//void JERRYI2SExec(uint32_t cycles);
 
-int JERRYGetPIT1Frequency(void);
-int JERRYGetPIT2Frequency(void);
+//int JERRYGetPIT1Frequency(void);
+//int JERRYGetPIT2Frequency(void);
 
 // 68000 Interrupt bit positions (enabled at $F10020)
 
@@ -36,8 +37,7 @@ void JERRYSetPendingIRQ(int irq);
 // Need to set up an interface function so that this can go back
 void JERRYI2SCallback(void);
 
-// External variables
-
+// Variables
 //extern uint32_t JERRYI2SInterruptDivide;
 extern int32_t JERRYI2SInterruptTimer;
 

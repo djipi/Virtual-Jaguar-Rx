@@ -19,6 +19,11 @@ void GPUUpdateRegisterBanks(void);
 void GPUHandleIRQs(void);
 void GPUSetIRQLine(int irqline, int state);
 
+// Savestate functions
+extern uint32_t GPUReadSavestate(unsigned char *ptrsst);
+extern uint32_t GPUWriteSavestate(unsigned char *ptrsst);
+
+// GPU memory access
 uint8_t GPUReadByte(uint32_t offset, uint32_t who = UNKNOWN);
 uint16_t GPUReadWord(uint32_t offset, uint32_t who = UNKNOWN);
 uint32_t GPUReadLong(uint32_t offset, uint32_t who = UNKNOWN);
@@ -36,8 +41,7 @@ bool	GPUIsRunning(void);
 
 enum { GPUIRQ_CPU = 0, GPUIRQ_DSP, GPUIRQ_TIMER, GPUIRQ_OBJECT, GPUIRQ_BLITTER };
 
-// Exported vars
-
+// Exported variables
 extern uint32_t gpu_reg_bank_0[], gpu_reg_bank_1[];
 
 #endif	// __GPU_H__

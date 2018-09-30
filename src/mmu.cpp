@@ -15,6 +15,7 @@
 #include "mmu.h"
 
 #include <stdlib.h>								// For NULL definition
+#include "memory.h"
 #include "dac.h"
 //#include "jaguar.h"
 //#include "memory.h"

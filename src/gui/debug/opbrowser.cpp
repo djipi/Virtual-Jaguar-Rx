@@ -14,6 +14,8 @@
 // STILL TO DO:
 //
 
+
+#include <stdint.h>
 #include "opbrowser.h"
 #include "jaguar.h"
 #include "memory.h"

@@ -754,5 +754,8 @@
     <Image Include="..\res\screenshot.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="..\res\savestate.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

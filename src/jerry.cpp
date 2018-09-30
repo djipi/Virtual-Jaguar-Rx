@@ -219,6 +219,7 @@ void JERRYResetI2S(void);
 void JERRYPIT1Callback(void);
 void JERRYPIT2Callback(void);
 void JERRYI2SCallback(void);
+void JERRYDumpIORegistersToLog(void);
 
 
 void JERRYResetI2S(void)

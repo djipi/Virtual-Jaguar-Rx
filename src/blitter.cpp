@@ -11,6 +11,7 @@
 // ---  ----------  -----------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
 // JPM  06/06/2016  Visual Studio support
+// JPM  09/29/2018  Added savestate functions
 //
 
 //
@@ -22,7 +23,7 @@
 // Now how about those JERRY ASIC nets gentlemen...? [We have those now!] ;-)
 //
 
-#include "blitter.h"
+//#include "blitter.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -1550,15 +1551,15 @@ if (blit_start_log)
 *******************************************************************************/
 
 
-void BlitterInit(void)
-{
-	BlitterReset();
-}
-
-
 void BlitterReset(void)
 {
 	memset(blitter_ram, 0x00, 0xA0);
+}
+
+
+void BlitterInit(void)
+{
+	BlitterReset();
 }
 
 
@@ -6236,4 +6237,38 @@ if (logBlit)
 // !!! TESTING !!! TESTING !!! TESTING !!! TESTING !!! TESTING !!! TESTING !!! TESTING !!!
 
 #endif
+
+
+// Read savestate data
+// Return the size of the savestate
+uint32_t BlitterReadSavestate(unsigned char *ptrsst)
+{
+	unsigned char *Origin = ptrsst;
+
+	// Struct and arrays
+	memcpy(blitter_ram, ptrsst, sizeof(blitter_ram));
+	ptrsst += sizeof(blitter_ram);
+
+	// Variables
+	blitter_working = *((uint8_t *&)ptrsst)++;
+
+	return (ptrsst - Origin);
+}
+
+
+// Write savestate data
+// Return the size of the savestate
+uint32_t BlitterWriteSavestate(unsigned char *ptrsst)
+{
+	unsigned char *Origin = ptrsst;
+
+	// Struct and arrays
+	memcpy(ptrsst, blitter_ram, sizeof(blitter_ram));
+	ptrsst += sizeof(blitter_ram);
+
+	// Variables
+	*((uint8_t *&)ptrsst)++ = blitter_working;
+
+	return (ptrsst - Origin);
+}
 

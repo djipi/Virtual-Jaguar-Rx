@@ -16,6 +16,8 @@
 // JLH  01/16/2010  Created this log ;-)
 // JLH  11/26/2011  Added fixes for LOAD/STORE alignment issues
 // JPM  06/06/2016  Visual Studio support
+// JPM  09/28/2018  Added savestate functions
+//
 
 //
 // Note: Endian wrongness probably stems from the MAME origins of this emu and
@@ -2696,4 +2698,80 @@ int GPUCore(void * data)
 }
 
 #endif
+
+
+// Read savestate data
+// Return the size of the savestate
+uint32_t GPUReadSavestate(unsigned char *ptrsst)
+{
+	unsigned char *Origin = ptrsst;
+
+	// Struct and arrays
+	memcpy(gpu_reg_bank_0, ptrsst, sizeof(gpu_reg_bank_0));
+	ptrsst += sizeof(gpu_reg_bank_0);
+	memcpy(gpu_reg_bank_1, ptrsst, sizeof(gpu_reg_bank_1));
+	ptrsst += sizeof(gpu_reg_bank_1);
+	memcpy(gpu_ram_8, ptrsst, sizeof(gpu_ram_8));
+	ptrsst += sizeof(gpu_ram_8);
+	memcpy(gpu_opcode_use, ptrsst, sizeof(gpu_opcode_use));
+	ptrsst += sizeof(gpu_opcode_use);
+
+	// Variables
+	gpu_pc = *((uint32_t *&)ptrsst)++;
+	gpu_in_exec = *((uint32_t *&)ptrsst)++;
+	gpu_acc = *((uint32_t *&)ptrsst)++;
+	gpu_remain = *((uint32_t *&)ptrsst)++;
+	gpu_hidata = *((uint32_t *&)ptrsst)++;
+	gpu_flags = *((uint32_t *&)ptrsst)++;
+	gpu_data_organization = *((uint32_t *&)ptrsst)++;
+	gpu_control = *((uint32_t *&)ptrsst)++;
+	gpu_div_control = *((uint32_t *&)ptrsst)++;
+	gpu_flag_z = *((uint8_t *&)ptrsst)++;
+	gpu_flag_c = *((uint8_t *&)ptrsst)++;
+	gpu_flag_n = *((uint8_t *&)ptrsst)++;
+	gpu_matrix_control = *((uint32_t *&)ptrsst)++;
+	gpu_pointer_to_matrix = *((uint32_t *&)ptrsst)++;
+
+	// Pointers
+	gpu_reg = gpu_reg_bank_0;
+	gpu_alternate_reg = gpu_reg_bank_1;
+
+	return (ptrsst - Origin);
+}
+
+
+// Write savestate data
+// Return the size of the savestate
+uint32_t GPUWriteSavestate(unsigned char *ptrsst)
+{
+	unsigned char *Origin = ptrsst;
+
+	// Struct and arrays
+	memcpy(ptrsst, gpu_reg_bank_0, sizeof(gpu_reg_bank_0));
+	ptrsst += sizeof(gpu_reg_bank_0);
+	memcpy(ptrsst, gpu_reg_bank_1, sizeof(gpu_reg_bank_1));
+	ptrsst += sizeof(gpu_reg_bank_1);
+	memcpy(ptrsst, gpu_ram_8, sizeof(gpu_ram_8));
+	ptrsst += sizeof(gpu_ram_8);
+	memcpy(ptrsst, gpu_opcode_use, sizeof(gpu_opcode_use));
+	ptrsst += sizeof(gpu_opcode_use);
+
+	// variables
+	*((uint32_t *&)ptrsst)++ = gpu_pc;
+	*((uint32_t *&)ptrsst)++ = gpu_in_exec;
+	*((uint32_t *&)ptrsst)++ = gpu_acc;
+	*((uint32_t *&)ptrsst)++ = gpu_remain;
+	*((uint32_t *&)ptrsst)++ = gpu_hidata;
+	*((uint32_t *&)ptrsst)++ = gpu_flags;
+	*((uint32_t *&)ptrsst)++ = gpu_data_organization;
+	*((uint32_t *&)ptrsst)++ = gpu_control;
+	*((uint32_t *&)ptrsst)++ = gpu_div_control;
+	*((uint8_t *&)ptrsst)++ = gpu_flag_z;
+	*((uint8_t *&)ptrsst)++ = gpu_flag_c;
+	*((uint8_t *&)ptrsst)++ = gpu_flag_n;
+	*((uint32_t *&)ptrsst)++ = gpu_matrix_control;
+	*((uint32_t *&)ptrsst)++ = gpu_pointer_to_matrix;
+
+	return (ptrsst - Origin);
+}
 

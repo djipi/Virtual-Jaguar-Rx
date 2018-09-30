@@ -13,8 +13,11 @@
 // ---  ----------  -----------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
 // JPM  06/06/2016  Visual Studio support
+// JPM  09/29/2018  Added savestate functions
 //
 
+
+#include <stdint.h>
 #include "op.h"
 
 #include <stdlib.h>
@@ -61,6 +64,9 @@ void DumpScaledObject(uint64_t p0, uint64_t p1, uint64_t p2);
 void DumpFixedObject(uint64_t p0, uint64_t p1);
 void DumpBitmapCore(uint64_t p0, uint64_t p1);
 uint64_t OPLoadPhrase(uint32_t offset);
+void OPSetStatusRegister(uint32_t data);
+uint32_t OPGetStatusRegister(void);
+void OPSetCurrentObject(uint64_t object);
 
 // Local global variables
 
@@ -1924,3 +1930,42 @@ if (firstPix != 0)
 		}
 	}
 }
+
+
+// Read savestate data
+// Return the size of the savestate
+uint32_t OPReadSavestate(unsigned char *ptrsst)
+{
+	unsigned char *Origin = ptrsst;
+
+	// Struct and arrays
+	memcpy(object, ptrsst, sizeof(object));
+	ptrsst += sizeof(object);
+
+	// Variables
+	objectp_running = *((uint8_t *&)ptrsst)++;
+	op_pointer = *((uint32_t *&)ptrsst)++;
+	numberOfObjects = *((uint32_t *&)ptrsst)++;
+
+	return (ptrsst - Origin);
+}
+
+
+// Write savestate data
+// Return the size of the savestate
+uint32_t OPWriteSavestate(unsigned char *ptrsst)
+{
+	unsigned char *Origin = ptrsst;
+
+	// Struct and arrays
+	memcpy(ptrsst, object, sizeof(object));
+	ptrsst += sizeof(object);
+
+	// Variables
+	*((uint8_t *&)ptrsst)++ = objectp_running;
+	*((uint32_t *&)ptrsst)++ = op_pointer;
+	*((uint32_t *&)ptrsst)++ = numberOfObjects;
+
+	return (ptrsst - Origin);
+}
+

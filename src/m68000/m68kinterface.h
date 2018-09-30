@@ -4,6 +4,8 @@
 // by James Hammons
 // (C) 2011 Underground Software
 //
+// Modified by Jean-Paul Mari
+//
 // Most of these functions are in place to help make it easy to replace the
 // Musashi core with my bastardized UAE one. :-)
 //
@@ -73,6 +75,10 @@ void m68k_set_cpu_type(unsigned int);
 void m68k_pulse_reset(void);
 int m68k_execute(int num_cycles);
 void m68k_set_irq(unsigned int int_level);
+
+// Savestate functions
+extern unsigned int m68k_read_savestate(unsigned char *ptrsst);
+extern unsigned int m68k_write_savestate(unsigned char *ptrsst);
 
 // Functions that MUST be implemented by the user:
 

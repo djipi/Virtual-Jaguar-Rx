@@ -14,6 +14,7 @@
 // JLH  01/16/2010  Created this log ;-)
 // JLH  11/26/2011  Added fixes for LOAD/STORE alignment issues
 // JPM  06/06/2016  Visual Studio support
+// JPM  09/29/2018  Added savestate functions
 //
 
 #include "dsp.h"
@@ -436,7 +437,7 @@ static uint8_t dsp_ram_8[0x2000];
 static uint32_t dsp_in_exec = 0;
 static uint32_t dsp_releaseTimeSlice_flag = 0;
 
-FILE * dsp_fp;
+//FILE * dsp_fp;
 
 #ifdef DSP_DEBUG_CC
 // Comparison core vars (used only for core comparison! :-)
@@ -4808,3 +4809,97 @@ static void DSP_xor(void)
 		WriteLog("[NCZ:%u%u%u, R%02u=%08X, R%02u=%08X]\n", dsp_flag_n, dsp_flag_c, dsp_flag_z, PIMM1, PRM, PIMM2, PRES);
 #endif
 }
+
+
+// Read savestate data
+// Return the size of the savestate
+uint32_t DSPReadSavestate(unsigned char *ptrsst)
+{
+	unsigned char *Origin = ptrsst;
+
+	// Struct and arrays
+	memcpy(dsp_reg_bank_0, ptrsst, sizeof(dsp_reg_bank_0));
+	ptrsst += sizeof(dsp_reg_bank_0);
+	memcpy(dsp_reg_bank_1, ptrsst, sizeof(dsp_reg_bank_1));
+	ptrsst += sizeof(dsp_reg_bank_1);
+	memcpy(dsp_ram_8, ptrsst, sizeof(dsp_ram_8));
+	ptrsst += sizeof(dsp_ram_8);
+	memcpy(pipeline, ptrsst, sizeof(pipeline));
+	ptrsst += sizeof(pipeline);
+	memcpy(scoreboard, ptrsst, sizeof(scoreboard));
+	ptrsst += sizeof(scoreboard);
+	memcpy(dsp_opcode_use, ptrsst, sizeof(dsp_opcode_use));
+	ptrsst += sizeof(dsp_opcode_use);
+
+	// Variables
+	dsp_pc = *((uint32_t *&)ptrsst)++;
+	dsp_acc = *((uint64_t *&)ptrsst)++;
+	dsp_remain = *((uint32_t *&)ptrsst)++;
+	dsp_modulo = *((uint32_t *&)ptrsst)++;
+	dsp_flags = *((uint32_t *&)ptrsst)++;
+	dsp_matrix_control = *((uint32_t *&)ptrsst)++;
+	dsp_pointer_to_matrix = *((uint32_t *&)ptrsst)++;
+	dsp_data_organization = *((uint32_t *&)ptrsst)++;
+	dsp_control = *((uint32_t *&)ptrsst)++;
+	dsp_div_control = *((uint32_t *&)ptrsst)++;
+	dsp_in_exec = *((uint32_t *&)ptrsst)++;
+	dsp_flag_z = *((uint8_t *&)ptrsst)++;
+	dsp_flag_c = *((uint8_t *&)ptrsst)++;
+	dsp_flag_n = *((uint8_t *&)ptrsst)++;
+	IMASKCleared = *((bool *&)ptrsst)++;
+	plPtrFetch = *((uint8_t *&)ptrsst)++;
+	plPtrRead = *((uint8_t *&)ptrsst)++;
+	plPtrExec = *((uint8_t *&)ptrsst)++;
+	plPtrWrite = *((uint8_t *&)ptrsst)++;
+
+	dsp_reg = dsp_reg_bank_0;
+	dsp_alternate_reg = dsp_reg_bank_1;
+
+	return (ptrsst - Origin);
+}
+
+
+// Write savestate data
+// Return the size of the savestate
+uint32_t DSPWriteSavestate(unsigned char *ptrsst)
+{
+	unsigned char *Origin = ptrsst;
+
+	// Struct and arrays
+	memcpy(ptrsst, dsp_reg_bank_0, sizeof(dsp_reg_bank_0));
+	ptrsst += sizeof(dsp_reg_bank_0);
+	memcpy(ptrsst, dsp_reg_bank_1, sizeof(dsp_reg_bank_1));
+	ptrsst += sizeof(dsp_reg_bank_1);
+	memcpy(ptrsst, dsp_ram_8, sizeof(dsp_ram_8));
+	ptrsst += sizeof(dsp_ram_8);
+	memcpy(ptrsst, pipeline, sizeof(pipeline));
+	ptrsst += sizeof(pipeline);
+	memcpy(ptrsst, scoreboard, sizeof(scoreboard));
+	ptrsst += sizeof(scoreboard);
+	memcpy(ptrsst, dsp_opcode_use, sizeof(dsp_opcode_use));
+	ptrsst += sizeof(dsp_opcode_use);
+
+	// Variables
+	*((uint32_t *&)ptrsst)++ = dsp_pc;
+	*((uint64_t *&)ptrsst)++ = dsp_acc;
+	*((uint32_t *&)ptrsst)++ = dsp_remain;
+	*((uint32_t *&)ptrsst)++ = dsp_modulo;
+	*((uint32_t *&)ptrsst)++ = dsp_flags;
+	*((uint32_t *&)ptrsst)++ = dsp_matrix_control;
+	*((uint32_t *&)ptrsst)++ = dsp_pointer_to_matrix;
+	*((uint32_t *&)ptrsst)++ = dsp_data_organization;
+	*((uint32_t *&)ptrsst)++ = dsp_control;
+	*((uint32_t *&)ptrsst)++ = dsp_div_control;
+	*((uint32_t *&)ptrsst)++ = dsp_in_exec;
+	*((uint8_t *&)ptrsst)++ = dsp_flag_z;
+	*((uint8_t *&)ptrsst)++ = dsp_flag_c;
+	*((uint8_t *&)ptrsst)++ = dsp_flag_n;
+	*((bool *&)ptrsst)++ = IMASKCleared;
+	*((uint8_t *&)ptrsst)++ = plPtrFetch;
+	*((uint8_t *&)ptrsst)++ = plPtrRead;
+	*((uint8_t *&)ptrsst)++ = plPtrExec;
+	*((uint8_t *&)ptrsst)++ = plPtrWrite;
+
+	return (ptrsst - Origin);
+}
+

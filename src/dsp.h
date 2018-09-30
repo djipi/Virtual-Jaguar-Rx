@@ -15,18 +15,26 @@ void DSPReset(void);
 void DSPExec(int32_t);
 void DSPDone(void);
 void DSPUpdateRegisterBanks(void);
+
+// 
 void DSPHandleIRQs(void);
 void DSPSetIRQLine(int irqline, int state);
+void DSPReleaseTimeslice(void);
+bool DSPIsRunning(void);
+
+// DSP memory access
 uint8_t DSPReadByte(uint32_t offset, uint32_t who = UNKNOWN);
 uint16_t DSPReadWord(uint32_t offset, uint32_t who = UNKNOWN);
 uint32_t DSPReadLong(uint32_t offset, uint32_t who = UNKNOWN);
 void DSPWriteByte(uint32_t offset, uint8_t data, uint32_t who = UNKNOWN);
 void DSPWriteWord(uint32_t offset, uint16_t data, uint32_t who = UNKNOWN);
 void DSPWriteLong(uint32_t offset, uint32_t data, uint32_t who = UNKNOWN);
-void DSPReleaseTimeslice(void);
-bool DSPIsRunning(void);
 
-void DSPExecP(int32_t cycles);
+// Savestate functions
+extern uint32_t DSPReadSavestate(unsigned char *ptrsst);
+extern uint32_t DSPWriteSavestate(unsigned char *ptrsst);
+
+//void DSPExecP(int32_t cycles);
 void DSPExecP2(int32_t cycles);
 //void DSPExecP3(int32_t cycles);
 void DSPExecComp(int32_t cycles);

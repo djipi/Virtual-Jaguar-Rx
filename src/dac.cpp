@@ -7,11 +7,13 @@
 // (C) 2010 Underground Software
 //
 // JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
 // JLH  04/30/2012  Changed SDL audio handler to run JERRY
+// JPM  09/29/2018  Added savestate functions
 //
 
 // Need to set up defaults that the BIOS sets for the SSI here in DACInit()... !!! FIX !!!
@@ -40,8 +42,8 @@
 // can probably safely ignore any such ridiculously high audio rates. It won't
 // sound the same as on a real Jaguar, but who cares? :-)
 
+#include "memory.h"
 #include "dac.h"
-
 #include "SDL.h"
 #include "cdrom.h"
 #include "dsp.h"
@@ -50,7 +52,6 @@
 #include "jaguar.h"
 #include "log.h"
 #include "m68000/m68kinterface.h"
-//#include "memory.h"
 #include "settings.h"
 
 
@@ -79,11 +80,15 @@ static SDL_AudioSpec desired;
 static bool SDLSoundInitialized;
 //static uint8_t SCLKFrequencyDivider = 19;			// Default is roughly 22 KHz (20774 Hz in NTSC mode)
 // /*static*/ uint16_t serialMode = 0;
+static Uint8 *sampleBuffer;
+static int bufferIndex = 0;
+static int numberOfSamples = 0;
+static bool bufferDone = false;
 
 // Private function prototypes
-
 void SDLSoundCallback(void * userdata, Uint8 * buffer, int length);
 void DSPSampleCallback(void);
+int GetCalculatedFrequency(void);
 
 
 //
@@ -97,31 +102,34 @@ void DACInit(void)
 	if (!vjs.DSPEnabled)
 	{
 		WriteLog("DAC: DSP/host audio playback disabled.\n");
-		return;
 	}
-
-	desired.freq = DAC_AUDIO_RATE;
-	desired.format = AUDIO_S16SYS;
-	desired.channels = 2;
-	desired.samples = 2048;						// 2K buffer = audio delay of 42.67 ms (@ 48 KHz)
-	desired.callback = SDLSoundCallback;
-
-	if (SDL_OpenAudio(&desired, NULL) < 0)		// NULL means SDL guarantees what we want
-		WriteLog("DAC: Failed to initialize SDL sound...\n");
 	else
 	{
-		SDLSoundInitialized = true;
-		DACReset();
-		SDL_PauseAudio(false);					// Start playback!
-		WriteLog("DAC: Successfully initialized. Sample rate: %u\n", desired.freq);
+		desired.freq = DAC_AUDIO_RATE;
+		desired.format = AUDIO_S16SYS;
+		desired.channels = 2;
+		desired.samples = 2048;						// 2K buffer = audio delay of 42.67 ms (@ 48 KHz)
+		desired.callback = SDLSoundCallback;
+
+		if (SDL_OpenAudio(&desired, NULL) < 0)		// NULL means SDL guarantees what we want
+		{
+			WriteLog("DAC: Failed to initialize SDL sound...\n");
+		}
+		else
+		{
+			SDLSoundInitialized = true;
+			DACReset();
+			SDL_PauseAudio(false);					// Start playback!
+			WriteLog("DAC: Successfully initialized. Sample rate: %u\n", desired.freq);
+		}
+
+		ltxd = lrxd = desired.silence;
+		sclk = 19;									// Default is roughly 22 KHz
+
+		uint32_t riscClockRate = (vjs.hardwareTypeNTSC ? RISC_CLOCK_RATE_NTSC : RISC_CLOCK_RATE_PAL);
+		uint32_t cyclesPerSample = riscClockRate / DAC_AUDIO_RATE;
+		WriteLog("DAC: RISC clock = %u, cyclesPerSample = %u\n", riscClockRate, cyclesPerSample);
 	}
-
-	ltxd = lrxd = desired.silence;
-	sclk = 19;									// Default is roughly 22 KHz
-
-	uint32_t riscClockRate = (vjs.hardwareTypeNTSC ? RISC_CLOCK_RATE_NTSC : RISC_CLOCK_RATE_PAL);
-	uint32_t cyclesPerSample = riscClockRate / DAC_AUDIO_RATE;
-	WriteLog("DAC: RISC clock = %u, cyclesPerSample = %u\n", riscClockRate, cyclesPerSample);
 }
 
 
@@ -140,7 +148,7 @@ void DACReset(void)
 //
 void DACPauseAudioThread(bool state/*= true*/)
 {
-		SDL_PauseAudio(state);
+	SDL_PauseAudio(state);
 }
 
 
@@ -174,10 +182,6 @@ void DACDone(void)
 // Note: The samples are packed in the buffer in 16 bit left/16 bit right pairs.
 //       Also, length is the length of the buffer in BYTES
 //
-static Uint8 * sampleBuffer;
-static int bufferIndex = 0;
-static int numberOfSamples = 0;
-static bool bufferDone = false;
 void SDLSoundCallback(void * userdata, Uint8 * buffer, int length)
 {
 	// 1st, check to see if the DSP is running. If not, fill the buffer with L/RXTD and exit.
@@ -189,44 +193,48 @@ void SDLSoundCallback(void * userdata, Uint8 * buffer, int length)
 			((uint16_t *)buffer)[i + 0] = ltxd;
 			((uint16_t *)buffer)[i + 1] = rtxd;
 		}
-
-		return;
 	}
-
-	// The length of time we're dealing with here is 1/48000 s, so we multiply this
-	// by the number of cycles per second to get the number of cycles for one sample.
-//	uint32_t riscClockRate = (vjs.hardwareTypeNTSC ? RISC_CLOCK_RATE_NTSC : RISC_CLOCK_RATE_PAL);
-//	uint32_t cyclesPerSample = riscClockRate / DAC_AUDIO_RATE;
-	// This is the length of time
-//	timePerSample = (1000000.0 / (double)riscClockRate) * ();
-
-	// Now, run the DSP for that length of time for each sample we need to make
-
-	bufferIndex = 0;
-	sampleBuffer = buffer;
-// If length is the length of the sample buffer in BYTES, then shouldn't the # of
-// samples be / 4? No, because we bump the sample count by 2, so this is OK.
-	numberOfSamples = length / 2;
-	bufferDone = false;
-
-	SetCallbackTime(DSPSampleCallback, 1000000.0 / (double)DAC_AUDIO_RATE, EVENT_JERRY);
-
-	// These timings are tied to NTSC, need to fix that in event.cpp/h! [FIXED]
-	do
+	else
 	{
-		double timeToNextEvent = GetTimeToNextEvent(EVENT_JERRY);
+		// The length of time we're dealing with here is 1/48000 s, so we multiply this
+		// by the number of cycles per second to get the number of cycles for one sample.
+	//	uint32_t riscClockRate = (vjs.hardwareTypeNTSC ? RISC_CLOCK_RATE_NTSC : RISC_CLOCK_RATE_PAL);
+	//	uint32_t cyclesPerSample = riscClockRate / DAC_AUDIO_RATE;
+		// This is the length of time
+	//	timePerSample = (1000000.0 / (double)riscClockRate) * ();
 
-		if (vjs.DSPEnabled)
+		// Now, run the DSP for that length of time for each sample we need to make
+
+		bufferIndex = 0;
+		sampleBuffer = buffer;
+		// If length is the length of the sample buffer in BYTES, then shouldn't the # of
+		// samples be / 4? No, because we bump the sample count by 2, so this is OK.
+		numberOfSamples = length / 2;
+		bufferDone = false;
+
+		SetCallbackTime(DSPSampleCallback, 1000000.0 / (double)DAC_AUDIO_RATE, EVENT_JERRY);
+
+		// These timings are tied to NTSC, need to fix that in event.cpp/h! [FIXED]
+		do
 		{
-			if (vjs.usePipelinedDSP)
-				DSPExecP2(USEC_TO_RISC_CYCLES(timeToNextEvent));
-			else
-				DSPExec(USEC_TO_RISC_CYCLES(timeToNextEvent));
-		}
+			double timeToNextEvent = GetTimeToNextEvent(EVENT_JERRY);
 
-		HandleNextEvent(EVENT_JERRY);
+			if (vjs.DSPEnabled)
+			{
+				if (vjs.usePipelinedDSP)
+				{
+					DSPExecP2(USEC_TO_RISC_CYCLES(timeToNextEvent));
+				}
+				else
+				{
+					DSPExec(USEC_TO_RISC_CYCLES(timeToNextEvent));
+				}
+			}
+
+			HandleNextEvent(EVENT_JERRY);
+		}
+		while (!bufferDone);
 	}
-	while (!bufferDone);
 }
 
 
@@ -333,5 +341,51 @@ uint16_t DACReadWord(uint32_t offset, uint32_t who/*= UNKNOWN*/)
 		return rrxd;
 
 	return 0xFFFF;	// May need SSTAT as well... (but may be a Jaguar II only feature)
+}
+
+
+// Read savestate data
+// Return the size of the savestate
+uint32_t DacReadSavestate(unsigned char *ptrsst)
+{
+	unsigned char *Origin = ptrsst;
+
+	// Struct and arrays
+	memcpy(&desired, ptrsst, sizeof(desired));
+	ptrsst += sizeof(desired);
+
+	// Variables
+	SDLSoundInitialized = *((bool *&)ptrsst)++;
+	ltxd = *((uint16_t *&)ptrsst)++;
+	lrxd = *((uint16_t *&)ptrsst)++;
+	sclk = *((uint8_t *&)ptrsst)++;
+	bufferIndex = *((int *&)ptrsst)++;
+	numberOfSamples = *((int *&)ptrsst)++;
+	bufferDone = *((bool *&)ptrsst)++;
+
+	return ((uint32_t)(ptrsst - Origin));
+}
+
+
+// Write savestate data
+// Return the size of the savestate
+uint32_t DacWriteSavestate(unsigned char *ptrsst)
+{
+	unsigned char *Origin = ptrsst;
+
+	// Struct and arrays
+	memcpy(ptrsst, &desired, sizeof(desired));
+	ptrsst += sizeof(desired);
+
+	// Variables
+	*((bool *&)ptrsst)++ = SDLSoundInitialized;
+	*((uint16_t *&)ptrsst)++ = ltxd;
+	*((uint16_t *&)ptrsst)++ = lrxd;
+	*((uint8_t *&)ptrsst)++ = sclk;
+	*((int *&)ptrsst)++ = bufferIndex;
+	*((int *&)ptrsst)++ = numberOfSamples;
+	*((bool *&)ptrsst)++ = bufferDone;
+
+	return ((uint32_t)(ptrsst - Origin));
 }
 

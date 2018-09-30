@@ -1368,8 +1368,7 @@ bool m68k_write_cartridge_alert(unsigned int address, char *bits, unsigned int v
 	}
 
 	int retVal = msgBox.exec();
-#endif
-#if 0
+#else
 	QMessageBox::StandardButton retVal = QMessageBox::question(this, tr("Remove Mapping"), msg, QMessageBox::No | QMessageBox::Yes, QMessageBox::No);
 #endif
 
@@ -2218,7 +2217,7 @@ memset(jaguarMainRAM + 0x804, 0xFF, 4);
 
 //New timer based code stuffola...
 void HalflineCallback(void);
-void RenderCallback(void);
+//void RenderCallback(void);
 void JaguarReset(void)
 {
 	// Only problem with this approach: It wipes out RAM loaded files...!
@@ -2245,10 +2244,10 @@ void JaguarReset(void)
 		SetBIOS();
 #endif
 	}
-	else
-	{
-		SET32(jaguarMainRAM, 4, jaguarRunAddress);
-	}
+//	else
+//	{
+//		SET32(jaguarMainRAM, 4, jaguarRunAddress);
+//	}
 
 //	WriteLog("jaguar_reset():\n");
 	TOMReset();
@@ -2449,7 +2448,9 @@ void JaguarExecuteNew(void)
 		m68k_execute(USEC_TO_M68K_CYCLES(timeToNextEvent));
 
 		if (vjs.GPUEnabled)
+		{
 			GPUExec(USEC_TO_RISC_CYCLES(timeToNextEvent));
+		}
 
 		HandleNextEvent();
  	}

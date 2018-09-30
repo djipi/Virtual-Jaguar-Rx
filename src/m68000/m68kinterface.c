@@ -5,10 +5,12 @@
 // (C) 2011 Underground Software
 //
 // JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JLH  10/28/2011  Created this file ;-)
+// JPM  09/28/2018  Added savestate functions
 //
 
 #include "m68kinterface.h"
@@ -17,6 +19,7 @@
 #include "inlines.h"
 #include "cpuextra.h"
 #include "readcpu.h"
+#include <string.h>
 
 // Exception Vectors handled by emulation
 #define EXCEPTION_BUS_ERROR                2 /* This one is not emulated! */
@@ -784,3 +787,26 @@ void BuildCPUFunctionTable(void)
 	}
 #endif
 }
+
+
+// Read savestate data
+// Return the size of the savestate
+unsigned int m68k_read_savestate(unsigned char *ptrsst)
+{
+	// Struct and array
+	memcpy((void *)&regs, ptrsst, sizeof(regs));
+
+	return sizeof(regs);
+}
+
+
+// Write savestate data
+// Return the size of the savestate
+unsigned int m68k_write_savestate(unsigned char *ptrsst)
+{
+	// Struct and array
+	memcpy(ptrsst, (void *)&regs, sizeof(regs));
+
+	return sizeof(regs);
+}
+

@@ -6,6 +6,7 @@
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
 // JPM  06/19/2016  Soft debugger support
+// JPM  Sept./2018  Added the new Models and BIOS handler, a screenshot & savestate settings
 //
 
 #ifndef __SETTINGS_H__
@@ -55,16 +56,16 @@ extern bool EraseSettings(char *Setting);
 // Settings struct
 struct VJSettings
 {
-	bool useJoystick;
+	bool useJoystick;											// Joystick usage
 	int32_t joyport;											// Joystick port
 	bool hardwareTypeNTSC;										// Set to false for PAL, otherwise it is NTSC
 	bool useJaguarBIOS;											// Use of any Jaguar BIOS
 	bool useRetailBIOS;											// Use of Retail BIOS
 	bool useDevBIOS;											// Use of Development BIOS
-	bool GPUEnabled;
-	bool DSPEnabled;
+	bool GPUEnabled;											// Use of GPU
+	bool DSPEnabled;											// Use of DSP
 	bool usePipelinedDSP;
-	bool fullscreen;
+	bool fullscreen;											// Emulator in full screen mode so video output display only
 	bool useOpenGL;												// OpenGL support (always 'true')
 	uint32_t glFilter;
 	bool hardwareTypeAlpine;									// Alpine mode
@@ -73,7 +74,7 @@ struct VJSettings
 	uint32_t frameSkip;
 	uint32_t renderType;
 	uint32_t refresh;
-	bool allowWritesToROM;
+	bool allowWritesToROM;										// Allow writing to ROM cartdridge
 	uint32_t biosType;											// Bios type used
 	uint32_t jaguarModel;										// Jaguar model
 	size_t nbrdisasmlines;										// Number of lines to show in the M68K tracing window
@@ -93,13 +94,14 @@ struct VJSettings
 
 	// Paths
 	char ROMPath[MAX_PATH];
-	char jagBootPath[MAX_PATH];
-	char CDBootPath[MAX_PATH];
+	//char jagBootPath[MAX_PATH];
+	//char CDBootPath[MAX_PATH];
 	char EEPROMPath[MAX_PATH];
 	char alpineROMPath[MAX_PATH];
 	char debuggerROMPath[MAX_PATH];
 	char absROMPath[MAX_PATH];
 	char screenshotPath[MAX_PATH];
+	char savestatePath[MAX_PATH];
 };
 
 // Render types

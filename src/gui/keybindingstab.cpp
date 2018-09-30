@@ -8,6 +8,9 @@
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
 // JPM  09/10/2017  Created this file
+// JPM  Sept./2018  Added screenshot and savestate key bindings
+//
+
 
 #include "keybindingstab.h"
 #include "settings.h"
@@ -23,6 +26,7 @@ KeyBindings KeyBindingsTable[KB_END] =	{
 											{ KB_TYPEGENERAL, "KB_FrameAdvance", "Frame Advance", "Frame advance key binding", "F7", NULL, NULL },
 											{ KB_TYPEGENERAL, "KB_FullScreen", "Full Screen", "Full screen key binding", "F9", NULL, NULL	},
 											{ KB_TYPEGENERAL, "KB_Screenshot", "Screenshot", "Screenshot key binding", "F8", NULL, NULL	},
+											{ KB_TYPEGENERAL, "KB_Savestate", "Savestate", "Savestate key binding", "F6", NULL, NULL	},
 											{ KB_TYPEDEBUGGER, "KB_Restart", "Restart", "Restart key binding", "Ctrl+Shift+F5", NULL, NULL	},
 											{ KB_TYPEDEBUGGER, "KB_StepInto", "Step Into", "Step into key binding", "F11", NULL, NULL	},
 											{ KB_TYPEDEBUGGER, "KB_StepOver", "Step Over", "Step over key binding", "F10", NULL, NULL	}
