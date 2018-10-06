@@ -10,6 +10,7 @@
 // JPM  12/03/2016  Created this file
 // JPM  12/03/2016  DWARF format support
 // JPM  Sept./2018  Added LEB128 decoding features, and improve the DWARF parsing information
+// JPM   Oct./2018  Improve the DWARF parsing information
 //
 
 // To Do
@@ -26,9 +27,9 @@
 #include "LEB128.h"
 
 
-//
+// Debug definitions
 //#define DEBUG_NumCU			0x9					// CU number to debug or undefine it
-//#define DEBUG_VariableName	"alloc"				// Variable name to look for or undefine it
+//#define DEBUG_VariableName	"sound_death"				// Variable name to look for or undefine it
 //#define DEBUG_TypeName		"Cbuf_Execute"			// Type name to look for or undefine it
 //#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for or undefine it (not supported)
 //#define DEBUG_Filename		"cmd.c"			// Filename to look for or undefine it
@@ -281,7 +282,6 @@ void DWARFManager_InitDMI(void)
 	Dwarf_Off return_offset;
 	Dwarf_Line *linebuf;
 	FILE *SrcFile;
-	size_t i, j, k;
 	char *return_string;
 	char *Ptr, *Ptr1;
 
@@ -557,7 +557,22 @@ void DWARFManager_InitDMI(void)
 											dwarf_dealloc(dbg, atlist[i], DW_DLA_ATTR);
 										}
 
-										PtrCU[NbCU].NbVariables++;
+										// Check variable's name validity
+										if (PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].PtrName)
+										{
+											// Check variable's memory address validity
+											if (PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].Addr)
+											{
+												// Valid variable
+												PtrCU[NbCU].NbVariables++;
+											}
+											else
+											{
+												// Invalid variable
+												free(PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].PtrName);
+												PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].PtrName = NULL;
+											}
+										}
 
 										dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
 									}
@@ -746,7 +761,7 @@ void DWARFManager_InitDMI(void)
 										dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
 
 										// Get source line number and associated block of address
-										for (i = 0; i < (size_t)cnt; ++i)
+										for (Dwarf_Signed i = 0; i < cnt; ++i)
 										{
 											if (dwarf_lineaddr(linebuf[i], &return_lineaddr, &error) == DW_DLV_OK)
 											{
@@ -888,7 +903,7 @@ void DWARFManager_InitDMI(void)
 					}
 
 					// Release the memory used by the source lines
-					for (i = 0; i < (size_t)cnt; ++i)
+					for (Dwarf_Signed i = 0; i < cnt; ++i)
 					{
 						dwarf_dealloc(dbg, linebuf[i], DW_DLA_LINE);
 					}
@@ -900,13 +915,13 @@ void DWARFManager_InitDMI(void)
 				{
 					if (PtrCU[NbCU].PtrLinesLoadSrc = (char **)calloc(PtrCU[NbCU].NbLinesLoadSrc, sizeof(char *)))
 					{
-						for (j = 0; j < PtrCU[NbCU].NbLinesLoadSrc; j++)
+						for (size_t j = 0; j < PtrCU[NbCU].NbLinesLoadSrc; j++)
 						{
 							if (PtrCU[NbCU].PtrLinesLoadSrc[j] = (char *)calloc(10000, sizeof(char)))
 							{
 								if (Ptr = DWARFManager_GetLineSrcFromNumLine(PtrCU[NbCU].PtrLoadSrc, (j + 1)))
 								{
-									i = 0;
+									size_t i = 0;
 
 									while (*Ptr)
 									{
@@ -914,17 +929,17 @@ void DWARFManager_InitDMI(void)
 										{
 										case 9:
 											strcat(PtrCU[NbCU].PtrLinesLoadSrc[j], "&nbsp;");
-											i += strlen("&nbsp;");
+											i += 6;
 											break;
 
 										case '<':
 											strcat(PtrCU[NbCU].PtrLinesLoadSrc[j], "&lt;");
-											i += strlen("&lt;");
+											i += 4;
 											break;
 
 										case '>':
 											strcat(PtrCU[NbCU].PtrLinesLoadSrc[j], "&gt;");
-											i += strlen("&gt;");
+											i += 4;
 											break;
 #if 0
 										case '&':
@@ -945,12 +960,12 @@ void DWARFManager_InitDMI(void)
 										Ptr++;
 									}
 								}
-								PtrCU[NbCU].PtrLinesLoadSrc[j] = (char *)realloc(PtrCU[NbCU].PtrLinesLoadSrc[j], i + 1);
+								PtrCU[NbCU].PtrLinesLoadSrc[j] = (char *)realloc(PtrCU[NbCU].PtrLinesLoadSrc[j], strlen(PtrCU[NbCU].PtrLinesLoadSrc[j]) + 1);
 							}
 						}
 
 						// Init lines source information based on each source code line numbers
-						for (j = 0; j < PtrCU[NbCU].NbSubProgs; j++)
+						for (size_t j = 0; j < PtrCU[NbCU].NbSubProgs; j++)
 						{
 							// Check if the subprog / function's line exists in the source code
 							if (PtrCU[NbCU].PtrSubProgs[j].NumLineSrc <= PtrCU[NbCU].NbLinesLoadSrc)
@@ -958,7 +973,7 @@ void DWARFManager_InitDMI(void)
 								PtrCU[NbCU].PtrSubProgs[j].PtrLineSrc = PtrCU[NbCU].PtrLinesLoadSrc[PtrCU[NbCU].PtrSubProgs[j].NumLineSrc - 1];
 							}
 
-							for (k = 0; k < PtrCU[NbCU].PtrSubProgs[j].NbLinesSrc; k++)
+							for (size_t k = 0; k < PtrCU[NbCU].PtrSubProgs[j].NbLinesSrc; k++)
 							{
 								if (PtrCU[NbCU].PtrSubProgs[j].PtrLinesSrc[k].NumLineSrc <= PtrCU[NbCU].NbLinesLoadSrc)
 								{
@@ -976,10 +991,10 @@ void DWARFManager_InitDMI(void)
 						// Check the presence of source lines dedicated to the sub progs
 						if (PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].NbLinesSrc)
 						{
-							i = PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].NbLinesSrc - 1].NumLineSrc;
+							size_t i = PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs - 1].NbLinesSrc - 1].NumLineSrc;
 							if (PtrCU[NbCU].PtrLinesLoadSrc = (char **)calloc(i, sizeof(char *)))
 							{
-								for (j = 0; j < i; j++)
+								for (size_t j = 0; j < i; j++)
 								{
 									PtrCU[NbCU].PtrLinesLoadSrc[j] = NULL;
 								}
@@ -989,15 +1004,15 @@ void DWARFManager_InitDMI(void)
 				}
 
 				// Init global variables information based on types information
-				for (i = 0; i < PtrCU[NbCU].NbVariables; i++)
+				for (size_t i = 0; i < PtrCU[NbCU].NbVariables; i++)
 				{
 					DWARFManager_InitInfosVariable(PtrCU[NbCU].PtrVariables + i);
 				}
 
 				// Init local variables information based on types information
-				for (i = 0; i < PtrCU[NbCU].NbSubProgs; i++)
+				for (size_t i = 0; i < PtrCU[NbCU].NbSubProgs; i++)
 				{
-					for (j = 0; j < PtrCU[NbCU].PtrSubProgs[i].NbVariables; j++)
+					for (size_t j = 0; j < PtrCU[NbCU].PtrSubProgs[i].NbVariables; j++)
 					{
 						DWARFManager_InitInfosVariable(PtrCU[NbCU].PtrSubProgs[i].PtrVariables + j);
 					}
