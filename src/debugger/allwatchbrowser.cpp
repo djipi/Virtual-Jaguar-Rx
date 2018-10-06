@@ -8,8 +8,8 @@
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JPM  12/07/2017  Created this file
-// JPM  09/14/2018  Added a status bar and better status report
-// JPM  09/14/2018  Set information values in a tab
+// JPM  09/14/2018  Added a status bar, better status report and set information values in a tab
+// JPM  10/05/2018  Added a sorting filter 
 //
 
 // STILL TO DO:
@@ -17,7 +17,7 @@
 // To set the information display at the right
 //
 
-//#define AW_DEBUGNUMVARIABLE		177						// Set the global variable number to debug
+//#define AW_DEBUGNUMVARIABLE		4415						// Set the global variable number to debug
 #ifndef AW_DEBUGNUMVARIABLE
 #define AW_STARTNUMVARIABLE		0							// Must be kept to 0 in case of no debug is required
 #else
@@ -128,6 +128,7 @@ void AllWatchBrowserWindow::RefreshContents(void)
 			}
 		}
 #ifndef AW_LAYOUTTEXTS
+		TableView->setSortingEnabled(false);
 		model->setRowCount(0);
 #endif
 		if (NbWatch)
@@ -164,6 +165,8 @@ void AllWatchBrowserWindow::RefreshContents(void)
 #ifdef AW_LAYOUTTEXTS
 			text->clear();
 			text->setText(WatchAll);
+#else
+			TableView->setSortingEnabled(true);
 #endif
 			sprintf(msg, "Ready");
 		}
