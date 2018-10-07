@@ -8,6 +8,9 @@
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
 // JPM  09/10/2017  Created this file
+// JPM  Sept./2018  Added screenshot key bindings
+//
+
 
 #include "keybindingstab.h"
 #include "settings.h"

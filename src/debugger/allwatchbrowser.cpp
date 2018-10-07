@@ -15,6 +15,8 @@
 // STILL TO DO:
 // Better presentation
 // To set the information display at the right
+// Display arrays information
+// Display structures information
 //
 
 //#define AW_DEBUGNUMVARIABLE		4415						// Set the global variable number to debug

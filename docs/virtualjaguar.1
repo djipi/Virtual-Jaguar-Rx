@@ -1,11 +1,11 @@
-.TH virtualjaguar 1 2017-09-06 Virtualjaguar Rx
+.TH virtualjaguar 1 2018-09-19 Virtualjaguar Rx
 .SH NAME
 virtualjaguar \- An Atari Jaguar emulator
 
 .SH SYNOPSIS
 .B virtualjaguar
 .RI [options]
-.RI [rom\ image\ file]
+.RI [rom image file]
 
 .SH DESCRIPTION
 Virtualjaguar is an emulator for the Atari Jaguar videogame system.
@@ -13,7 +13,7 @@ Virtualjaguar is an emulator for the Atari Jaguar videogame system.
 .SH OPTIONS
 .TP
 .B [rom image file]
-Name of file to load
+Name of file to load;
 .TP
 .B \-a, \-\-alpine
 Run in Alpine emulation mode
@@ -24,10 +24,10 @@ Boot using Jaguar BIOS
 .B \-\-no\-bios
 Do not use Jaguar BIOS
 .TP
-.B \-a, \-\-debugger
+.B \-d, \-\-debugger
 Run in Debugger emulation mode
 .TP
-.B \-a, \-\-dram-max
+.B , \-\-dram-max
 Set the main ram to 8MB
 .TP
 .B \-g, \-\-gpu
@@ -42,11 +42,22 @@ Create and use log file
 .B \-\-no\-log
 Do not use log file
 .TP
-.B \-h, \-\-help
+.B \-h, \-?, \-\-help
 Show command line help
 
+.SH SETTINGS
+.TP
+.B \-\-es\-all
+Erase all settings,
+.B \-\-es\-ui
+Erase UI settings only,
+.B \-\-es\-alpine
+Erase alpine mode settings only,
+.B \-\-es\-debugger
+Erase debugger mode settings only
+
 .SH SOUND
-DSP emulation is needed for audio output
+DSP emulation is needed for audio output;
 .TP
 .B \-d, \-\-dsp
 Enable DSP emulation
@@ -74,53 +85,74 @@ Disable GL bilinear filter
 .B \-z, \-\-please\-dont\-kill\-my\-computer
 Do not show emulation of tv static. This can be slow on low end CPUs.
 
-.SH CONTROLS
+.SH SHORTCUTS
+.TP
+The default key bindings are:
 .TP
 .B Ctrl-Q
-Quit virtualjaguar
+Quit virtualjaguar,
 .TP
 .B Ctrl-I
-Load a new program
+Load a new program,
+.TP
+.B Ctrl+C
+Configure tab,
+.TP
+.B Ctrl+S
+Emulator status,
+.TP
+.B Ctrl+Shift+F5
+Restart program,
+.TP
+.B F11
+Step into code,
+.TP
+.B F10
+Step over code,
 .TP
 .B Esc
-Pause emulation
+Pause emulation,
 .TP
 .B F7
-Advance the emulation by a single frame
+Advance the emulation by a single frame,
 .TP
 .B F9
-Toggle full screen mode
-
+Toggle full screen mode,
 .TP
-The default keybindings for controller 1 are:
-(Keybindings can be changed in the configuration dialog.)
+.B F8
+Screenshot
+
+.SH CONTROLS
+.TP
+The default key bindings for controller 1 are:
+(Key bindings can be changed in the configuration dialog.)
 .TP
 .B S
-Up
+Up,
 .TP
 .B X
-Down
+Down,
 .TP
 .B A
-Left
+Left,
 .TP
 .B D
-Right
+Right,
 .TP
 .B P
-Pause
+Pause,
 .TP
 .B O
-Option
+Option,
 .TP
 .B J
-Button C
+Button C,
 .TP
 .B K
-Button B
+Button B,
 .TP
 .B L
-Button A
+Button A,
 .TP
 .B 1 through 0
 Buttons 1 through 0 on the keypad
@@ -132,19 +164,22 @@ Keypad *
 Keypad #
 
 .SH FILES
-.TP
+.PP
 .B virtualjaguar.log
 Virtualjaguar log file. Only written if the log option (\-l or
 \-\-log) is given. If the file cannot be opened, the log it sent to
 standard output instead. The log file is overwritten on startup. Note
 that the file is written to the current directory.
-.TP
+.PP
+.B ${XDG_DATA_HOME}/virtualjaguar/screenshots/ (typically ~/.local/share/data/virtualjaguar/screenshots/)
+Screenshots will be save in this directory.
+.PP
 .B ${XDG_DATA_HOME}/virtualjaguar/eeproms/ (typically ~/.local/share/data/virtualjaguar/eeproms/)
 Some Atari Jaguar cartridges feature a small writable EEPROM, used for
 saving game state and score lists. If this directory exists,
 virtualjaguar will emulate the EEPROM by saving the state in file in
 this directory.
-.TP
+.PP
 .B ${XDG_DATA_HOME}/virtualjaguar/software/ (typically ~/.local/share/data/virtualjaguar/software/)
 The virtualjaguar GUI for loading software scans this directory, and
 shows the loadable files, along with information about the program,
@@ -152,4 +187,4 @@ and a label image if one is included in a zip archive of the software.
 
 .SH AUTHOR
 This manual page was written by Teemu Hukkanen <tjhukkan@iki.fi>.
-Additional informations written by Flynn.
+Additional information written by Jean-Paul Mari <djipi.mari@gmail.com>.

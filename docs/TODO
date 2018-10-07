@@ -12,7 +12,6 @@ Stuff to add/fix for the next release of Virtual Jaguar
 - Need to propagate blitter fixes in the A1 <- A2 direction to the A1 -> A2
   direction and the GPU fixes to various instructions to the DSP. [Shamus]
 - Blitter needs fixing. [Shamus]
-- In emulator screenshots. [Shamus]
 - Audio/video dumping. [Shamus]
 - Need to emulate bus contention. [Shamus]
 - Need to fix timing in the OP. As it is now, it gives a false impression of
@@ -28,6 +27,7 @@ Stuff to add/fix for the next release of Virtual Jaguar
 Stuff that was added/fixed
 --------------------------
 
+- In emulator screenshots. [Shamus] [DONE--Flynn]
 - Create an EEPROMs directory (or whatever is in EEPROMPath[]) if it doesn't
   already exist. [Shamus] [DONE--Flynn]
 - Controller handling. [Shamus] [DONE--Shamus]

@@ -9,8 +9,8 @@ REQUIREMENTS:
 The minimum requirements for compiling Virtual Jaguar from source are:
 
  o  GCC v4.4.x or higher
- o  SDL v1.2.15 or higher
- o  zlib v1.2.8
+ o  SDL v1.2.15
+ o  zlib v1.2.8 or higher
  o  libelf 0.8.13
  o  libdwarf 1.41
  o  libcdio v0.90 or higher (optional, for Jaguar CD support)

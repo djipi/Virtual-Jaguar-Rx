@@ -191,7 +191,7 @@ bool ParseCommandLine(int argc, char * argv[])
 				"   --pal         -p  PAL mode\n"
 				"   --ntsc        -n  NTSC mode\n"
 				"   --dram-max        Set DRAM size to 8MB\n"
-				"   --bios        -b  Boot using Jagaur BIOS\n"
+				"   --bios        -b  Boot using Jaguar BIOS\n"
 				"   --no-bios         Do not use Jaguar BIOS\n"
 				"   --gpu         -g  Enable GPU\n"
 				"   --no-gpu          Disable GPU\n"

@@ -227,16 +227,22 @@ extern size_t DBGManager_GetType(void);
 extern void	DBGManager_Reset(void);
 extern void	DBGManager_Close(void);
 
-// General manager
-extern char	*DBGManager_GetSymbolNameFromAdr(size_t Adr);
-extern char	*DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error);
+// Source text lines manager
 extern size_t DBGManager_GetNumLineFromAdr(size_t Adr, size_t Tag);
 extern char *DBGManager_GetLineSrcFromAdr(size_t Adr, size_t Tag);
 extern char *DBGManager_GetLineSrcFromAdrNumLine(size_t Adr, size_t NumLine);
 extern char *DBGManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine);
-extern size_t DBGManager_GetAdrFromSymbolName(char *SymbolName);
+
+// General manager
 extern char *DBGManager_GetFunctionName(size_t Adr);
 extern char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t TypeByteSize);
+
+// Symbols manager
+extern char	*DBGManager_GetSymbolNameFromAdr(size_t Adr);
+extern size_t DBGManager_GetAdrFromSymbolName(char *SymbolName);
+
+// Source text files manager
+extern char	*DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error);
 extern size_t DBGManager_GetNbFullSourceFilename(void);
 extern char *DBGManager_GetNumFullSourceFilename(size_t Index);
 

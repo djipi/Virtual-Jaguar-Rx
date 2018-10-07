@@ -123,7 +123,7 @@ void FilesrcListWindow::AddFilename(char *FileName, QStandardItem *root, size_t 
 	char Buffer[255];
 	char a;
 
-#ifdef _MSC_VER
+#ifdef _WIN32
 	while ((a = *Ptr++) && (a != '\\'));
 #else
 	while ((a = *Ptr++) && (a != '/'));

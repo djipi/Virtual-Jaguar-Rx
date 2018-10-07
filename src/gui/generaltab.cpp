@@ -11,10 +11,13 @@
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
 // JLH  06/23/2011  Created this file
-// JPM  09/03/2018  Added a Models & Bios tab
-// JPM  09/03/2018  Depend the platform transform slashes or backslashes
-// JPM  09/17/2018  Added a screenshot path
+// JPM  Sept./2018  Added a Models & Bios tab, slashes / backslashes formatting, and screenshot path
 //
+
+// STILL TO DO:
+// To scan the bios folder for the 5 known BIOSes, and just present a radio button to choose between them...
+// 
+
 
 #include "configdialog.h"
 #include "generaltab.h"
@@ -24,9 +27,6 @@
 // 
 GeneralTab::GeneralTab(QWidget * parent/*= 0*/): QWidget(parent)
 {
-// I'm thinking we should scan the bios folder for the 5 known BIOSes, and
-// just present a radio button to choose between them...
-// (BIOS is built-in now...)
 //	QLabel * label1 = new QLabel("Boot ROM:");
 //	QLabel * label2 = new QLabel("CD Boot ROM:");
 	QLabel * label3 = new QLabel("EEPROMs:");

@@ -10,7 +10,9 @@
 // JPM  12/21/2016  Created this file
 // JPM              Various efforts to set the ELF format support
 // JPM              Various efforts to set the DWARF format support
-// JPM  09/15/2018  Support the unsigned char 
+// JPM  09/15/2018  Support the unsigned char
+// JPM  10/06/2018  Cosmetic changes
+//
 
 // To Do
 //
@@ -600,44 +602,44 @@ char *DBGManager_GetSymbolNameFromAdr(size_t Adr)
 // Return NULL if no source line has been found
 char *DBGManager_GetLineSrcFromAdr(size_t Adr, size_t Tag)
 {
-	char *Symbolname = NULL;
+	char *TextLine = NULL;
 
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		Symbolname = DWARFManager_GetLineSrcFromAdr(Adr, Tag);
+		TextLine = DWARFManager_GetLineSrcFromAdr(Adr, Tag);
 	}
 
-	return	Symbolname;
+	return	TextLine;
 }
 
 
-// Get text line from source based on address and num line (starting by 1)
+// Get text line from source based on address and num line (starting from 1)
 // Return NULL if no text line has been found
 char *DBGManager_GetLineSrcFromAdrNumLine(size_t Adr, size_t NumLine)
 {
-	char *Symbolname = NULL;
+	char *TextLine = NULL;
 
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		Symbolname = DWARFManager_GetLineSrcFromAdrNumLine(Adr, NumLine);
+		TextLine = DWARFManager_GetLineSrcFromAdrNumLine(Adr, NumLine);
 	}
 
-	return	Symbolname;
+	return	TextLine;
 }
 
 
-// Get text line from source based on address and num line (starting by 1)
+// Get text line from source based on address and num line (starting from 1)
 // Return NULL if no text line has been found
 char *DBGManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine)
 {
-	char *Symbolname = NULL;
+	char *TextLine = NULL;
 
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		Symbolname = DWARFManager_GetLineSrcFromNumLineBaseAdr(Adr, NumLine);
+		TextLine = DWARFManager_GetLineSrcFromNumLineBaseAdr(Adr, NumLine);
 	}
 
-	return	Symbolname;
+	return	TextLine;
 }
 
 

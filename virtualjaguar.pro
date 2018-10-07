@@ -4,6 +4,8 @@
 # by James Hammons
 # Copyright (C) 2011 Underground Software
 #
+# Modified by Jean-Paul Mari
+#
 # See the README and GPLv3 files for licensing and warranty information
 #
 # NOTE: M68000 core is built and linked in as a library, so there should be no

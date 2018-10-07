@@ -7,7 +7,7 @@ Virtual Jaguar v2.1.3 R3 GCC/Qt
 * Added ui, alpine & debugger groups in the settings
 * Added the possibility to erase settings
 * Added the --es-all, --es-ui, --es-alpine & --es-debugger options to erase specific settings
-* Added a keybindings tab and adapted the configuration dialog tabs
+* Added a key bindings tab and adapted the configuration dialog tabs
 * Fixed a crash, in Release mode, when the HW labels setting is turn on
 * Fixed the SP (Stack) window UI potential missing data
 * Create a directory for EEPROMs (based on the EEPROMs setting) if it doesn't already exist
