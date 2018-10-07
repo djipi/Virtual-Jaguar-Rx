@@ -10,7 +10,7 @@
 // JPM  12/03/2016  Created this file
 // JPM  12/03/2016  DWARF format support
 // JPM  Sept./2018  Added LEB128 decoding features, and improve the DWARF parsing information
-// JPM   Oct./2018  Improve the DWARF parsing information
+// JPM  10/06/2018  Improve the DWARF parsing information, and the source file text reading
 //
 
 // To Do
@@ -32,7 +32,7 @@
 //#define DEBUG_VariableName	"sound_death"				// Variable name to look for or undefine it
 //#define DEBUG_TypeName		"Cbuf_Execute"			// Type name to look for or undefine it
 //#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for or undefine it (not supported)
-//#define DEBUG_Filename		"cmd.c"			// Filename to look for or undefine it
+//#define DEBUG_Filename		"net_jag.c"			// Filename to look for or undefine it
 
 
 // Source line internal structure
@@ -433,36 +433,60 @@ void DWARFManager_InitDMI(void)
 								strcpy((Ptr1 + 1), (Ptr + 4));
 							}
 
-							// Read the file as text
-#ifndef __CYGWIN__
-							if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rt"))
-#else
-							if (!(SrcFile = fopen(SourceFullFilename, "rt")))
-#endif
+							// Open the source file as a binary file
+							if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rb"))
 							{
 								if (!fseek(SrcFile, 0, SEEK_END))
 								{
 									if ((PtrCU[NbCU].SizeLoadSrc = ftell(SrcFile)) > 0)
 									{
-										if (PtrCU[NbCU].PtrLoadSrc = Ptr = (char *)calloc((PtrCU[NbCU].SizeLoadSrc + 1), 1))
+										if (!fseek(SrcFile, 0, SEEK_SET))
 										{
-											rewind(SrcFile);
-											if (PtrCU[NbCU].SizeLoadSrc < fread(Ptr, 1, PtrCU[NbCU].SizeLoadSrc, SrcFile))
+											if (PtrCU[NbCU].PtrLoadSrc = Ptr = Ptr1 = (char *)calloc(1, (PtrCU[NbCU].SizeLoadSrc + 2)))
 											{
-												free(PtrCU[NbCU].PtrLoadSrc);
-												PtrCU[NbCU].PtrLoadSrc = NULL;
-												PtrCU[NbCU].SizeLoadSrc = 0;
-											}
-											else
-											{
-												do
+												// Read whole file
+												if (fread_s(PtrCU[NbCU].PtrLoadSrc, PtrCU[NbCU].SizeLoadSrc, PtrCU[NbCU].SizeLoadSrc, 1, SrcFile) != 1)
 												{
-													if (*Ptr == 0xa)
+													free(PtrCU[NbCU].PtrLoadSrc);
+													PtrCU[NbCU].PtrLoadSrc = NULL;
+													PtrCU[NbCU].SizeLoadSrc = 0;
+												}
+												else
+												{
+													// Eliminate all carriage return code '\r' (oxd)
+													do
 													{
-														PtrCU[NbCU].NbLinesLoadSrc++;
-														*Ptr = 0;
+														if ((*Ptr = *Ptr1) != '\r')
+														{
+															Ptr++;
+														}
 													}
-												} while (*++Ptr);
+													while (*Ptr1++);
+
+													// Get back the new text file size
+													PtrCU[NbCU].SizeLoadSrc = strlen(Ptr = PtrCU[NbCU].PtrLoadSrc);
+
+													// Make sure the text file finish with a new line code '\n' (0xa)
+													if (PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc - 1] != '\n')
+													{
+														PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc++] = '\n';
+														PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc] = 0;
+													}
+
+													// Reallocate text file
+													if (PtrCU[NbCU].PtrLoadSrc = Ptr = (char *)realloc(PtrCU[NbCU].PtrLoadSrc, (PtrCU[NbCU].SizeLoadSrc + 1)))
+													{
+														// Count line numbers, based on the new line code '\n' (0xa), and finish each line with 0
+														do
+														{
+															if (*Ptr == '\n')
+															{
+																PtrCU[NbCU].NbLinesLoadSrc++;
+																*Ptr = 0;
+															}
+														} while (*++Ptr);
+													}
+												}
 											}
 										}
 									}
@@ -476,7 +500,7 @@ void DWARFManager_InitDMI(void)
 						}
 					}
 
-					// Get the source lines table located in the Compilation Unit
+					// Get the source lines table located in the CU
 					if (dwarf_srclines(return_sib, &linebuf, &cnt, &error) == DW_DLV_OK)
 					{
 					}
@@ -1768,8 +1792,8 @@ char *DWARFManager_GetLineSrcFromAdrNumLine(size_t Adr, size_t NumLine)
 }
 
 
-// Get text line from source based on address and num line (starting by 1)
-// Return NULL if no text line has been found
+// Get text line pointer from source, based on address and line number (starting by 1)
+// Return NULL if no text line has been found, or if requested number line is above the source total number of lines
 char *DWARFManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine)
 {
 	size_t i;
