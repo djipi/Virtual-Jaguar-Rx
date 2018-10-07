@@ -15,6 +15,7 @@
 // JLH  10/08/2011  Updated credits, added Esc & Return as exit keys
 // JPM  08/14/2017  Updated credits, added flynn
 // JPM  09/06/2017  Updated flynn credit line to be more specific about the work
+// JPM  09/22/2018  Updated Rx credit line to be more specific about the work
 //
 
 // STILL TO DO:
@@ -42,12 +43,12 @@ AboutWindow::AboutWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dialog)
 		"<tr><td align='right'><b>Coders: </b></td><td>James Hammons (shamus)<br>Niels Wagenaar (nwagenaar)<br>Carwin Jones (Caz)<br>Adam Green</td></tr>"
 		"<tr><td align='right'><b>Testers: </b></td><td>Cyrano Jones, LinkoVitch, partycle, ggn,<br>neo-rg, Robert R, TheUMan, Dissection,<br>overridex, geormetal</td></tr>"
 		"<tr><td align='right'><b>Build Team: </b></td><td>shamus (win32)<br>goldenegg (MacOS)</td></tr>"
-		"<tr><td align='right'><b>Homepage: </b></td><td>http://icculus.org/virtualjaguar/</td></tr>"
+		"<tr><td align='right'><b>Homepage: </b></td><td>http://icculus.org/virtualjaguar/<br>https://github.com/djipi/Virtual-Jaguar-Rx/</td></tr>"
 		"</table>"
 		"<br><br>"
 		"<i>Rx version:<i>"
 		"<br>"
-		"<b>Flynn</b> for the debugger integration, ELF/DWARF format, Win64 & Visual Studio 2015/2017 support"
+		"<b>Jean-Paul Mari</b> for the debugger integration, ELF/DWARF format, Win64 & Visual Studio 2015/2017 support"
 		"<br><br>"
 		"<i>The Virtual Jaguar team would like to express their gratitude to:</i>"
 		"<br><br>"
