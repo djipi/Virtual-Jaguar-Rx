@@ -1075,7 +1075,7 @@ static uint32_t ntscTickCount;
 		// Otherwise, run the Jaguar simulation
 		HandleGamepads();
 		JaguarExecuteNew();
-		if (!vjs.softTypeDebugger)
+		//if (!vjs.softTypeDebugger)
 			videoWidget->HandleMouseHiding();
 
 static uint32_t refresh = 0;
@@ -1140,7 +1140,7 @@ void MainWin::TogglePowerState(void)
 	if (!powerButtonOn)
 	{
 		// Restore the mouse pointer, if hidden:
-		if (!vjs.softTypeDebugger)
+		//if (!vjs.softTypeDebugger)
 		{
 			videoWidget->CheckAndRestoreMouseCursor();
 		}
@@ -1410,8 +1410,8 @@ void MainWin::LoadSoftware(QString file)
 	}
 	else
 	{
-		// Prevent the Alpine mode to crash in case of software without a start address
-		if (vjs.hardwareTypeAlpine && !jaguarRunAddress)
+		// Prevent the launch in case of software without a start address and without BIOS presence
+		if (!vjs.useJaguarBIOS && !jaguarRunAddress)
 		{
 			ToggleRunState();
 		}

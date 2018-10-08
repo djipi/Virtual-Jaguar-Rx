@@ -64,6 +64,7 @@ Git commit: TBD
 31) Added a sorting filter in the all watches window
 32) Improve source code file reading to avoid additional text/bytes reading
 33) Help & content texts updates
+34) Fixed a crash legacy issue when emulator launches in Alpine mode without a valid rom
 
 Release 3 (13th November 2017)
 ------------------------------
@@ -161,7 +162,8 @@ Known issues
 2) The BPM (Breapoint) remains stuck on his address when user wants to continue the code execution
 -- Need to trace over the BPM or unset the BPM
 -- The issue can be prevented if the code doesn't set IRQ, otherwise the IRQ will need to be traced to get back control
-3) To support DWARF 2 with GCC, the code must be compiled with the -gdwarf-2 option
+3) To support DWARF 2
+-- With GCC: the code must be compiled with the -gdwarf-2 option
 4) The Local and Watch variables window  may display not available type information or empty information
 -- Such missing information may be included in future release
 -- The 'const' type may not be reported correctly in the DWARF information 
