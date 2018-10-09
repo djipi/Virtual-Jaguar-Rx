@@ -65,6 +65,9 @@ Git commit: TBD
 32) Improve source code file reading to avoid additional text/bytes reading
 33) Help & content texts updates
 34) Fixed a crash legacy issue when emulator launches in Alpine mode without a valid rom
+35) Added the support for the used lines source's DWARF structure
+-- Mostly used to handle missing subprogram's lines information, and missing CU's low/high PC
+36) Added the Rx version's contact in the help text
 
 Release 3 (13th November 2017)
 ------------------------------
