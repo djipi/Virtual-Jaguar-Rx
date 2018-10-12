@@ -226,6 +226,7 @@ extern void	DBGManager_SetType(size_t DBGTypeSet);
 extern size_t DBGManager_GetType(void);
 extern void	DBGManager_Reset(void);
 extern void	DBGManager_Close(void);
+extern void DBGManager_SourceFileSearchPathsSet(char *ListPaths);
 
 // Source text lines manager
 extern size_t DBGManager_GetNumLineFromAdr(size_t Adr, size_t Tag);

@@ -4,22 +4,29 @@
 #define __DWARFMANAGER_H__
 
 
-// 
+// Internal manager
 extern bool	DWARFManager_Reset(void);
 extern bool	DWARFManager_Close(void);
 extern void	DWARFManager_Init(void);
 extern int DWARFManager_ElfInit(Elf *ElfPtr);
+extern void DWARFManager_Set(size_t NbPathsInList, char **PtrListPaths);
 
-// 
+// General manager
+extern char *DWARFManager_GetFunctionName(size_t Adr);
+
+// Source text files manager
 extern char	*DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error);
-extern size_t DWARFManager_GetNumLineFromAdr(size_t Adr, size_t Tag);
+extern size_t DWARFManager_GetNbFullSourceFilename(void);
+extern char *DWARFManager_GetNumFullSourceFilename(size_t Index);
+
+// Symbols manager
 extern char	*DWARFManager_GetSymbolnameFromAdr(size_t Adr);
+
+// Source text lines manager
+extern size_t DWARFManager_GetNumLineFromAdr(size_t Adr, size_t Tag);
 extern char *DWARFManager_GetLineSrcFromAdr(size_t Adr, size_t Tag);
 extern char *DWARFManager_GetLineSrcFromAdrNumLine(size_t Adr, size_t NumLine);
 extern char *DWARFManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine);
-extern char *DWARFManager_GetFunctionName(size_t Adr);
-extern size_t DWARFManager_GetNbFullSourceFilename(void);
-extern char *DWARFManager_GetNumFullSourceFilename(size_t Index);
 
 // Global variables manager
 extern size_t DWARFManager_GetNbGlobalVariables(void);

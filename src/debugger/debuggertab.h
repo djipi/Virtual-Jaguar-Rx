@@ -3,8 +3,8 @@
 //
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
-// JPM  06/19/2016  Created this file
-// JPM  06/19/2016  Soft debugger support
+// JPM  Sept./2016  Created this file, and added Soft debugger support
+// JPM  10/09/2018  Added the source file search paths
 //
 
 #ifndef __DEBUGGERTAB_H__
@@ -22,9 +22,12 @@ class DebuggerTab: public QWidget
 		void SetSettings(void);
 		void GetSettings(void);
 
-	public:
-		QLineEdit *edit3;
+	private:
+		QString CheckForTrailingSlash(QString s);
 
+	public:
+		QLineEdit *nbrdisasmlines;
+		QLineEdit *sourcefilesearchpaths;
 		QCheckBox *displayHWlabels;
 		QCheckBox *disasmopcodes;
 		QCheckBox *displayFullSourceFilename;

@@ -68,6 +68,8 @@ Git commit: TBD
 35) Added the support for the used lines source's DWARF structure
 -- Mostly used to handle missing subprogram's lines information, and missing CU's low/high PC
 36) Added the Rx version's contact in the help text
+37) Added search paths in case of missing DWARF directories information
+-- Used to look for the file(s)
 
 Release 3 (13th November 2017)
 ------------------------------

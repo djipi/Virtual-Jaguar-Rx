@@ -20,6 +20,7 @@
 // JPM  11/04/2017  Added the local window
 // JPM  08/31/2018  Added the call stack window
 // JPM  Sept./2018  Added the new Models and BIOS handler, a screenshot feature and source code files browsing
+// JPM  10/10/2018  Added search paths in the settings
 //
 
 // FIXED:
@@ -83,6 +84,7 @@
 #include "joystick.h"
 #include "m68000/m68kinterface.h"
 
+#include "debugger/DBGManager.h"
 //#include "debugger/VideoWin.h"
 //#include "debugger/DasmWin.h"
 #include "debugger/m68KDasmWin.h"
@@ -1763,6 +1765,7 @@ void MainWin::ReadSettings(void)
 	// Read settings from the Debugger mode
 	settings.beginGroup("debugger");
 	strcpy(vjs.debuggerROMPath, settings.value("DefaultROM", "").toString().toUtf8().data());
+	strcpy(vjs.sourcefilesearchPaths, settings.value("SourceFileSearchPaths", "").toString().toUtf8().data());
 	vjs.nbrdisasmlines = settings.value("NbrDisasmLines", 32).toUInt();
 	vjs.disasmopcodes = settings.value("DisasmOpcodes", true).toBool();
 	vjs.displayHWlabels = settings.value("DisplayHWLabels", true).toBool();
@@ -1788,13 +1791,15 @@ void MainWin::ReadSettings(void)
 
 	// Write important settings to the log file
 	WriteLog("MainWin: Paths\n");
-	WriteLog("     EEPROMPath = \"%s\"\n", vjs.EEPROMPath);
-	WriteLog("        ROMPath = \"%s\"\n", vjs.ROMPath);
-	WriteLog("  AlpineROMPath = \"%s\"\n", vjs.alpineROMPath);
-	WriteLog("DebuggerROMPath = \"%s\"\n", vjs.debuggerROMPath);
-	WriteLog("     absROMPath = \"%s\"\n", vjs.absROMPath);
-	WriteLog("ScreenshotsPath = \"%s\"\n", vjs.screenshotPath);
-	WriteLog("  Pipelined DSP = %s\n", (vjs.usePipelinedDSP ? "ON" : "off"));
+	WriteLog("           EEPROMPath = \"%s\"\n", vjs.EEPROMPath);
+	WriteLog("              ROMPath = \"%s\"\n", vjs.ROMPath);
+	WriteLog("        AlpineROMPath = \"%s\"\n", vjs.alpineROMPath);
+	WriteLog("      DebuggerROMPath = \"%s\"\n", vjs.debuggerROMPath);
+	WriteLog("           absROMPath = \"%s\"\n", vjs.absROMPath);
+	WriteLog("      ScreenshotsPath = \"%s\"\n", vjs.screenshotPath);
+	WriteLog("SourceFileSearchPaths = \"%s\"\n", vjs.sourcefilesearchPaths);
+	WriteLog("MainWin: Misc.\n");
+	WriteLog("   Pipelined DSP = %s\n", (vjs.usePipelinedDSP ? "ON" : "off"));
 
 #if 0
 	// Keybindings in order of U, D, L, R, C, B, A, Op, Pa, 0-9, #, *
@@ -1846,6 +1851,7 @@ void MainWin::ReadSettings(void)
 	WriteLog("Read setting = Done\n");
 
 	ReadProfiles(&settings);
+	DBGManager_SourceFileSearchPathsSet(vjs.sourcefilesearchPaths);
 }
 
 
@@ -2049,6 +2055,7 @@ void MainWin::WriteSettings(void)
 	settings.setValue("displayFullSourceFilename", vjs.displayFullSourceFilename);
 	settings.setValue("NbrMemory1BrowserWindow", (unsigned int)vjs.nbrmemory1browserwindow);
 	settings.setValue("DefaultROM", vjs.debuggerROMPath);
+	settings.setValue("SourceFileSearchPaths", vjs.sourcefilesearchPaths);
 	settings.endGroup();
 
 	// Write settings from the Keybindings
@@ -2106,6 +2113,7 @@ void MainWin::WriteSettings(void)
 #endif
 
 	WriteProfiles(&settings);
+	DBGManager_SourceFileSearchPathsSet(vjs.sourcefilesearchPaths);
 }
 
 

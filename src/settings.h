@@ -6,7 +6,8 @@
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
 // JPM  06/19/2016  Soft debugger support
-// JPM  Sept. / 2018  Added the new Models and BIOS handler, and a screenshot settings
+// JPM  Sept./2018  Added the new Models and BIOS handler, and a screenshot settings
+// JPM  10/10/2018  Added search paths in settings 
 //
 
 #ifndef __SETTINGS_H__
@@ -101,6 +102,7 @@ struct VJSettings
 	char debuggerROMPath[MAX_PATH];
 	char absROMPath[MAX_PATH];
 	char screenshotPath[MAX_PATH];
+	char sourcefilesearchPaths[4096];
 };
 
 // Render types
