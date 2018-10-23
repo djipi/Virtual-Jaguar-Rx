@@ -9,7 +9,7 @@
 // ---  ----------  -----------------------------------------------------------
 // JPM  08/31/2018  Created this file
 // JPM  09/12/2018  Added a status bar and better status report
-//
+// JPM  10/20/2018  Added the return address information in the call stack
 
 // STILL TO DO:
 // To set the information display at the right
@@ -45,9 +45,10 @@ layout(new QVBoxLayout)
 	layout->addWidget(text);
 #else
 	// Set the new layout with proper identation and readibility
-	model->setColumnCount(2);
+	model->setColumnCount(3);
 	model->setHeaderData(0, Qt::Horizontal, QObject::tr("Name"));
 	model->setHeaderData(1, Qt::Horizontal, QObject::tr("Line"));
+	model->setHeaderData(2, Qt::Horizontal, QObject::tr("Return address"));
 	// Information table
 	TableView->setModel(model);
 	TableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -105,10 +106,12 @@ void CallStackBrowserWindow::RefreshContents(void)
 				}
 #else
 				model->insertRow(NbRaw);
-				model->setItem(NbRaw, 0, new QStandardItem(QString("%1").arg((FuncName = DBGManager_GetFunctionName(ret)) ? FuncName : "(null)")));
+				model->setItem(NbRaw, 0, new QStandardItem(QString("%1").arg((FuncName = DBGManager_GetFunctionName(ret)) ? FuncName : "(N/A)")));
 				FunctionName = QString(FuncName = DBGManager_GetLineSrcFromAdr(ret, DBG_NO_TAG));
 				FunctionName.replace("&nbsp;", " ");
-				model->setItem(NbRaw++, 1, new QStandardItem(QString("%1").arg(FuncName ? FunctionName : "(null)")));
+				model->setItem(NbRaw, 1, new QStandardItem(QString("%1").arg(FuncName ? FunctionName : "(N/A)")));
+				sprintf(msg, "0x%06X", ret);
+				model->setItem(NbRaw++, 2, new QStandardItem(QString("%1").arg(msg)));
 #endif
 			}
 #ifdef CS_LAYOUTTEXTS
