@@ -135,6 +135,16 @@ int m68k_cycles_remaining(void);        // Number of cycles left
 void m68k_modify_timeslice(int cycles); // Modify cycles left
 void m68k_end_timeslice(void);          // End timeslice now
 
+// Breakpoints functions
+extern void m68k_brk_init(void);
+extern void m68k_brk_hitcounts_reset(void);
+extern unsigned int m68k_brk_add(void *PtrInfo);
+extern void m68k_brk_del(unsigned int NumBrk);
+extern void m68k_brk_disable(void);
+extern void m68k_brk_reset(void);
+extern void m68k_brk_close(void);
+extern unsigned int m68k_brk_check(unsigned int adr);
+
 #ifdef __cplusplus
 }
 #endif

@@ -20,7 +20,7 @@
 // JPM  11/04/2017  Added the local window
 // JPM  08/31/2018  Added the call stack window
 // JPM  Sept./2018  Added the new Models and BIOS handler, a screenshot feature and source code files browsing
-// JPM  10/10/2018  Added search paths in the settings
+// JPM   Oct./2018  Added search paths in the settings, breakpoints feature
 //
 
 // FIXED:
@@ -91,7 +91,8 @@
 #include "debugger/GPUDasmWin.h"
 #include "debugger/DSPDasmWin.h"
 #include "debugger/memory1browser.h"
-//#include "debugger/brkWin.h"
+#include "debugger/BreakpointsWin.h"
+#include "debugger/NewFnctBreakpointWin.h"
 #include "debugger/FilesrcListWin.h"
 #include "debugger/exceptionvectortablebrowser.h"
 #include "debugger/allwatchbrowser.h"
@@ -194,7 +195,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		allWatchBrowseWin = new AllWatchBrowserWindow(this);
 		LocalBrowseWin = new LocalBrowserWindow(this);
 		heapallocatorBrowseWin = new HeapAllocatorBrowserWindow(this);
-		//brkWin = new BrkWindow(this);
+		BreakpointsWin = new BreakpointsWindow(this);
+		NewFunctionBreakpointWin = new NewFnctBreakpointWindow(this);
 		exceptionvectortableBrowseWin = new ExceptionVectorTableBrowserWindow(this);
 		CallStackBrowseWin = new CallStackBrowserWindow(this);
 
@@ -391,7 +393,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		traceStepOverAct->setDisabled(true);
 		connect(traceStepOverAct, SIGNAL(triggered()), this, SLOT(DebuggerTraceStepOver()));
 
-		// Trace into trace
+		// Trace into tracing
 		traceStepIntoAct = new QAction(QIcon(":/res/debug-stepinto.png"), tr("&Step Into"), this);
 		traceStepIntoAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBSTEPINTO].KBSettingValue)));
 		traceStepIntoAct->setShortcutContext(Qt::ApplicationShortcut);
@@ -399,9 +401,18 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		traceStepIntoAct->setDisabled(true);
 		connect(traceStepIntoAct, SIGNAL(triggered()), this, SLOT(DebuggerTraceStepInto()));
 
-		//newBreakpointFunctionAct = new QAction(QIcon(""), tr("&Function Breakpoint"), this);
-		//newBreakpointFunctionAct->setShortcut(QKeySequence(tr("Ctrl+B")));
-		//connect(newBreakpointFunctionAct, SIGNAL(triggered()), this, SLOT(NewBreakpointFunction()));
+		// Function breakpoint
+		newFunctionBreakpointAct = new QAction(QIcon(""), tr("&Function Breakpoint"), this);
+		newFunctionBreakpointAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBFUNCTIONBREAKPOINT].KBSettingValue)));
+		connect(newFunctionBreakpointAct, SIGNAL(triggered()), this, SLOT(ShowNewFunctionBreakpointWin()));
+		BreakpointsAct = new QAction(QIcon(":/res/debug-breakpoints.png"), tr("&Breakpoints"), this);
+		BreakpointsAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBBREAKPOINTS].KBSettingValue)));
+		connect(BreakpointsAct, SIGNAL(triggered()), this, SLOT(ShowBreakpointsWin()));
+		deleteAllBreakpointsAct = new QAction(QIcon(":/res/debug-deleteallbreakpoints.png"), tr("&Delete All Breakpoints"), this);
+		deleteAllBreakpointsAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBDELETEALLBREAKPOINTS].KBSettingValue)));
+		connect(deleteAllBreakpointsAct, SIGNAL(triggered()), this, SLOT(DeleteAllBreakpoints()));
+		disableAllBreakpointsAct = new QAction(QIcon(":/res/debug-disableallbreakpoints.png"), tr("&Disable All Breakpoints"), this);
+		connect(disableAllBreakpointsAct, SIGNAL(triggered()), this, SLOT(DisableAllBreakpoints()));
 
 		//VideoOutputAct = new QAction(tr("Output Video"), this);
 		//VideoOutputAct->setStatusTip(tr("Shows the output video window"));
@@ -512,6 +523,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		if (vjs.softTypeDebugger)
 		{
 			debugWindowsMenu = debugMenu->addMenu(tr("&Windows"));
+			debugWindowsMenu->addAction(BreakpointsAct);
 			debugWindowExceptionMenu = debugWindowsMenu->addMenu(tr("&Exception"));
 			debugWindowExceptionMenu->addAction(exceptionVectorTableBrowseAct);
 			debugWindowsMenu->addSeparator();
@@ -548,11 +560,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugMenu->addSeparator();
 			debugMenu->addAction(traceStepIntoAct);
 			debugMenu->addAction(traceStepOverAct);
-#if 0
 			debugMenu->addSeparator();
 			debugNewBreakpointMenu = debugMenu->addMenu(tr("&New Breakpoint"));
-			debugNewBreakpointMenu->addAction(newBreakpointFunctionAct);
-#endif
+			debugNewBreakpointMenu->addAction(newFunctionBreakpointAct);
+			debugMenu->addAction(deleteAllBreakpointsAct);
+			debugMenu->addAction(disableAllBreakpointsAct);
 			//debugMenu->addSeparator();
 			//debugMenu->addAction(DasmAct);
 		}
@@ -607,6 +619,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		debuggerbar->addSeparator();
 		debuggerbar->addAction(traceStepIntoAct);
 		debuggerbar->addAction(traceStepOverAct);
+		debuggerbar->addSeparator();
+		debuggerbar->addAction(BreakpointsAct);
 	}
 
 	if (vjs.hardwareTypeAlpine)
@@ -1196,6 +1210,7 @@ void MainWin::TogglePowerState(void)
 
 		WriteLog("GUI: Resetting Jaguar...\n");
 		JaguarReset();
+		DeleteAllBreakpoints();
 		DebuggerResetWindows();
 		DACPauseAudioThread(false);
 	}
@@ -1258,6 +1273,7 @@ void MainWin::ToggleRunState(void)
 		}
 
 		cpuBrowseWin->UnholdBPM();
+		BreakpointsWin->RefreshContents();
 	}
 
 	// Pause/unpause any running/non-running threads...
@@ -1440,10 +1456,36 @@ void MainWin::ToggleCDUsage(void)
 
 
 //
-void MainWin::NewBreakpointFunction(void)
+void MainWin::ShowBreakpointsWin(void)
 {
-	//brkWin->show();
-	//brkWin->RefreshContents();
+	BreakpointsWin->show();
+	BreakpointsWin->RefreshContents();
+}
+
+
+//
+void MainWin::DeleteAllBreakpoints(void)
+{
+	cpuBrowseWin->ResetBPM();
+	m68k_brk_reset();
+	ShowBreakpointsWin();
+}
+
+
+//
+void MainWin::DisableAllBreakpoints(void)
+{
+	cpuBrowseWin->DisableBPM();
+	m68k_brk_disable();
+	ShowBreakpointsWin();
+}
+
+
+//
+void MainWin::ShowNewFunctionBreakpointWin(void)
+{
+	NewFunctionBreakpointWin->show();
+	ShowBreakpointsWin();
 }
 
 
@@ -1461,7 +1503,7 @@ void MainWin::DebuggerTraceStepInto(void)
 }
 
 
-// Restart
+// Restart the Jaguar executable
 void MainWin::DebuggerRestart(void)
 {
 #if 1
@@ -1471,7 +1513,8 @@ void MainWin::DebuggerRestart(void)
 	m68k_set_reg(M68K_REG_SP, vjs.DRAM_size);
 #endif
 	m68k_set_reg(M68K_REG_A6, 0);
-
+	m68k_brk_hitcounts_reset();
+	bpmHitCounts = 0;
 	DebuggerResetWindows();
 	DebuggerRefreshWindows();
 #ifdef _MSC_VER
@@ -1980,6 +2023,19 @@ void MainWin::ReadUISettings(void)
 		size = settings.value("CallStackBrowseWinSize", QSize(400, 400)).toSize();
 		CallStackBrowseWin->resize(size);
 
+		// Breakpoints UI information
+		pos = settings.value("BreakpointsWinPos", QPoint(200, 200)).toPoint();
+		BreakpointsWin->move(pos);
+		settings.value("BreakpointsWinIsVisible", false).toBool() ? ShowBreakpointsWin() : void();
+		size = settings.value("BreakpointsWinSize", QSize(400, 400)).toSize();
+		BreakpointsWin->resize(size);
+		// New function breakpoint UI information
+		pos = settings.value("NewFunctionBreakpointWinPos", QPoint(200, 200)).toPoint();
+		NewFunctionBreakpointWin->move(pos);
+		settings.value("NewFunctionBreakpointWinIsVisible", false).toBool() ? ShowNewFunctionBreakpointWin() : void();
+		size = settings.value("NewFunctionBreakpointWinSize", QSize(400, 400)).toSize();
+		NewFunctionBreakpointWin->resize(size);
+
 		// Memories browser UI information
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
@@ -2180,6 +2236,12 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("CallStackBrowseWinPos", CallStackBrowseWin->pos());
 		settings.setValue("CallStackBrowseWinIsVisible", CallStackBrowseWin->isVisible());
 		settings.setValue("CallStackBrowseWinSize", CallStackBrowseWin->size());
+		settings.setValue("BreakpointsWinPos", BreakpointsWin->pos());
+		settings.setValue("BreakpointsWinIsVisible", BreakpointsWin->isVisible());
+		settings.setValue("BreakpointsWinSize", BreakpointsWin->size());
+		settings.setValue("NewFunctionBreakpointWinPos", NewFunctionBreakpointWin->pos());
+		settings.setValue("NewFunctionBreakpointWinIsVisible", NewFunctionBreakpointWin->isVisible());
+		settings.setValue("NewFunctionBreakpointWinSize", NewFunctionBreakpointWin->size());
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
 			sprintf(mem1Name, "mem1BrowseWinPos[%i]", (unsigned int)i);
@@ -2216,6 +2278,7 @@ void MainWin::DebuggerResetWindows(void)
 		FilesrcListWin->Reset();
 		allWatchBrowseWin->Reset();
 		heapallocatorBrowseWin->Reset();
+		BreakpointsWin->Reset();
 
 		//ResetAlpineWindows();
 	}
@@ -2237,6 +2300,7 @@ void MainWin::DebuggerRefreshWindows(void)
 		LocalBrowseWin->RefreshContents();
 		CallStackBrowseWin->RefreshContents();
 		heapallocatorBrowseWin->RefreshContents();
+		BreakpointsWin->RefreshContents();
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
 			mem1BrowseWin[i]->RefreshContents(i);

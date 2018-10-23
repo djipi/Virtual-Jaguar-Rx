@@ -14,6 +14,7 @@
 // ---  ----------  -----------------------------------------------------------
 // JLH  11/25/2009  Major rewrite of memory subsystem and handlers
 // JPM  09/04/2018  Added the new Models and BIOS handler
+// JPM  10/13/2018  Added breakpoints features
 //
 
 
@@ -43,7 +44,7 @@
 #include "mmu.h"
 #include "settings.h"
 #include "tom.h"
-//#include "debugger/brkWin.h"
+//#include "debugger/BreakpointsWin.h"
 #ifdef NEWMODELSBIOSHANDLER
 #include "modelsBIOS.h"
 #endif
@@ -119,8 +120,10 @@ bool startM68KTracing = false;
 // Breakpoint on memory access vars (exported)
 bool bpmActive = false;
 bool bpmSaveActive = false;
+size_t bpmHitCounts;
 uint32_t bpmAddress1;
-//BrkInfo bpm;
+S_BrkInfo *brkInfo;
+size_t brkNbr;
 
 
 //
@@ -1048,12 +1051,139 @@ void	M68K_Debughalt(void)
 #endif
 
 
-// 
+// M68000 breakpoints initialisations
+void m68k_brk_init(void)
+{
+	brkNbr = 0;
+	brkInfo = NULL;
+}
+
+
+// Reset the M68000 breakpoints structures
+void m68k_brk_reset(void)
+{
+	// Reset the breakpoints
+	free(brkInfo);
+	brkInfo = NULL;
+	brkNbr = 0;
+}
+
+
+// Delete a M68000 breakpoint (starting from 1)
+void m68k_brk_del(unsigned int NumBrk)
+{
+	// Remove the breakpoint
+	memset((void *)(brkInfo + (NumBrk - 1)), 0, sizeof(S_BrkInfo));
+}
+
+
+// Add a M68000 breakpoint
+// return true if breakpoint has been added, and false if breakpoint already exists
+unsigned int m68k_brk_add(void *PtrInfo)
+{
+	S_BrkInfo *Ptr = NULL;
+
+	// Check if breakpoint already exists
+	for (size_t i = 0; i < brkNbr; i++)
+	{
+		if (brkInfo[i].Used)
+		{
+			if (brkInfo[i].Adr == ((S_BrkInfo *)PtrInfo)->Adr)
+			{
+				return false;
+			}
+		}
+	}
+
+	// Look for an available breakpoint
+	for (size_t i = 0; i < brkNbr, Ptr; i++)
+	{
+		if (!brkInfo[i].Used)
+		{
+			Ptr = &brkInfo[i];
+		}
+	}
+
+	// Add a breakpoint
+	if (!Ptr)
+	{
+		brkInfo = (S_BrkInfo *)realloc(brkInfo, (++brkNbr * sizeof(S_BrkInfo)));
+		Ptr = &brkInfo[brkNbr - 1];
+	}
+
+	// Transfert the breakpoint information and init the activities
+	memcpy((void *)Ptr, PtrInfo, sizeof(S_BrkInfo));
+	Ptr->HitCounts = 0;
+	return (Ptr->Active = Ptr->Used = true);
+}
+
+
+// Check if breakpoint has been reached
+unsigned int m68k_brk_check(unsigned int adr)
+{
+	// Check if BPM has been reached
+	if ((adr == bpmAddress1) && bpmActive)
+	{
+		bpmHitCounts++;
+		return true;
+	}
+	else
+	{
+		// Check user breakpoints
+		for (size_t i = 0; i < brkNbr; i++)
+		{
+			if (brkInfo[i].Used && brkInfo[i].Active)
+			{
+				if (brkInfo[i].Adr == adr)
+				{
+					brkInfo[i].HitCounts++;
+					return true;
+				}
+			}
+		}
+	}
+
+	// No breakpoint found
+	return false;
+}
+
+
+// Disable the M68000 breakpoints
+void m68k_brk_disable(void)
+{
+	// reset active for the breakpoints
+	for (size_t i = 0; i < brkNbr; i++)
+	{
+		brkInfo[i].Active = 0;
+	}
+}
+
+
+// Reset the M68000 breakpoints
+void m68k_brk_hitcounts_reset(void)
+{
+	// reset hit counts for the breakpoints
+	for (size_t i = 0; i < brkNbr; i++)
+	{
+		brkInfo[i].HitCounts = 0;
+	}
+}
+
+
+// Close the M68000 breakpoints structures
+void m68k_brk_close(void)
+{
+	free(brkInfo);
+}
+
+
+// Read 1 byte from address
+// Check if address reaches a breakpoint
 unsigned int m68k_read_memory_8(unsigned int address)
 {
 #ifdef ALPINE_FUNCTIONS
 	// Check if breakpoint on memory is active, and deal with it
-	if (bpmActive && address == bpmAddress1)
+	if (!startM68KTracing && m68k_brk_check(address))
 	{
 		M68KDebugHalt();
 	}
@@ -1145,7 +1275,7 @@ unsigned int m68k_read_memory_16(unsigned int address)
 {
 #ifdef ALPINE_FUNCTIONS
 	// Check if breakpoint on memory is active, and deal with it
-	if (bpmActive && (address == bpmAddress1))
+	if (!startM68KTracing && m68k_brk_check(address))
 	{
 		M68KDebugHalt();
 	}
@@ -1292,7 +1422,7 @@ unsigned int m68k_read_memory_32(unsigned int address)
 {
 #ifdef ALPINE_FUNCTIONS
 	// Check if breakpoint on memory is active, and deal with it
-	if (bpmActive && address == bpmAddress1)
+	if (!startM68KTracing && m68k_brk_check(address))
 	{
 		M68KDebugHalt();
 	}
@@ -2213,6 +2343,7 @@ memset(jaguarMainRAM + 0x804, 0xFF, 4);
 	TOMInit();
 	JERRYInit();
 	CDROMInit();
+	m68k_brk_init();
 }
 
 
@@ -2258,7 +2389,6 @@ void JaguarReset(void)
 	CDROMReset();
     m68k_pulse_reset();								// Reset the 68000
 	WriteLog("Jaguar: 68K reset. PC=%06X SP=%08X\n", m68k_get_reg(NULL, M68K_REG_PC), m68k_get_reg(NULL, M68K_REG_A7));
-
 	lowerField = false;								// Reset the lower field flag
 //	SetCallbackTime(ScanlineCallback, 63.5555);
 //	SetCallbackTime(ScanlineCallback, 31.77775);
@@ -2368,6 +2498,7 @@ void JaguarDone(void)
 	DSPDone();
 	TOMDone();
 	JERRYDone();
+	m68k_brk_close();
 
 	// temp, until debugger is in place
 //00802016: jsr     $836F1A.l

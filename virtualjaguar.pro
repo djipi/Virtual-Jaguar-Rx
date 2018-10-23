@@ -120,11 +120,12 @@ HEADERS = \
 	src/debugger/DWARFManager.h \
 	src/debugger/memory1browser.h \
 	src/debugger/heapallocatorbrowser.h \
-	src/debugger/brkWin.h \
+	src/debugger/BreakpointsWin.h \
 	src/debugger/VideoWin.h 
 	src/debugger/FilesrcListWin.h \
 	src/debugger/callstackbrowser.h \
 	src/debugger/exceptionvectortablebrowser.h \
+	src/debugger/NewFnctBreakpointWin.h \
 	src/log.h \
 	src/unzip.h \
 	src/crc32.h \
@@ -172,11 +173,12 @@ SOURCES = \
 	src/debugger/DWARFManager.cpp \
 	src/debugger/memory1browser.cpp \
 	src/debugger/heapallocatorbrowser.cpp \
-	src/debugger/brkWin.cpp \
+	src/debugger/BreakpointsWin.cpp \
 	src/debugger/VideoWin.cpp \
 	src/debugger/FilesrcListWin.cpp \
 	src/debugger/exceptionvectortablebrowser.cpp \
 	src/debugger/callstackbrowser.cpp \
+	src/debugger/NewFnctBreakpointWin.cpp \
 	src/log.cpp \
 	src/unzip.cpp \
 	src/crc32.cpp \

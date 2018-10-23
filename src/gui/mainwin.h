@@ -43,7 +43,8 @@ class LocalBrowserWindow;
 class CallStackBrowserWindow;
 class HeapAllocatorBrowserWindow;
 class Memory1BrowserWindow;
-//class BrkWindow;
+class BreakpointsWindow;
+class NewFnctBreakpointWindow;
 class ExceptionVectorTableBrowserWindow;
 class FilesrcListWindow;
 
@@ -100,7 +101,10 @@ class MainWin: public QMainWindow
 		void ShowHeapAllocatorBrowserWin(void);
 		void ShowMemory1BrowserWin(int NumWin);
 		void ShowExceptionVectorTableBrowserWin(void);
-		void NewBreakpointFunction(void);
+		void ShowNewFunctionBreakpointWin(void);
+		void ShowBreakpointsWin(void);
+		void DeleteAllBreakpoints(void);
+		void DisableAllBreakpoints(void);
 		//void ShowVideoOutputWin(void);
 		//void ShowDasmWin(void);
 		// Alpine
@@ -149,7 +153,8 @@ class MainWin: public QMainWindow
 		GPUDasmWindow *GPUDasmWin;
 		DSPDasmWindow *DSPDasmWin;
 		FilesrcListWindow *FilesrcListWin;
-		//BrkWindow *brkWin;
+		BreakpointsWindow *BreakpointsWin;
+		NewFnctBreakpointWindow *NewFunctionBreakpointWin;
 		QTimer *timer;
 		bool running;
 		int zoomLevel;
@@ -205,9 +210,6 @@ class MainWin: public QMainWindow
 		QAction *emustatusAct;
 		QAction *useCDAct;
 		QAction *frameAdvanceAct;
-		QAction *traceStepOverAct;
-		QAction *traceStepIntoAct;
-		QAction *restartAct;
 		QAction *fullScreenAct;
 		//QAction *DasmAct;
 		QAction *screenshotAct;
@@ -221,13 +223,19 @@ class MainWin: public QMainWindow
 		QAction *riscDasmBrowseAct;
 
 		// Debugger
+		QAction *traceStepOverAct;
+		QAction *traceStepIntoAct;
+		QAction *restartAct;
 		//QAction *VideoOutputAct;
 		QAction *heapallocatorBrowseAct;
 		QAction *allWatchBrowseAct;
 		QAction *LocalBrowseAct;
 		QAction *CallStackBrowseAct;
 		QAction **mem1BrowseAct;
-		//QAction *newBreakpointFunctionAct;
+		QAction *newFunctionBreakpointAct;
+		QAction *BreakpointsAct;
+		QAction *deleteAllBreakpointsAct;
+		QAction *disableAllBreakpointsAct;
 		QAction *exceptionVectorTableBrowseAct;
 
 		QIcon powerGreen;

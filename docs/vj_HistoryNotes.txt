@@ -1,0 +1,238 @@
+Release 4 (TBD)
+---------------
+Git commit: TBD
+-
+0) The zoom value setting has been fixed in the registry
+1) Debugger mode now shares the same alpine rom path setting
+2) Local variables window displays register name now
+3) Switch to Zlib 1.2.11 static library 64bits for VS 2017
+4) Switch to SDL 1.2.15 static library 64bits for VS 2017
+5) Local variables window displays values from function's parameters
+6) Fixed the typedef's name display in Local and Watch variables window
+7) Breakpoint may now occur in case of a ROM cartridge writing
+-- ROM cartridge writing detection follow the alpine "allow writes to cartridge rom"'s flag check
+-- Alert box will display a message with possibility to pass or not the breakpoint only if this is related to a 8 or 16 bits ROM access
+8) Local variables window detects now if a variable is used or not by the code
+9) The address provided in the debugger memory windows is now verified to prevent crash
+-- Wrong address will be displayed in red
+10) UI changes 
+-- Added new icons for the exit and status features
+-- Modified icons for the SP (Stack) browser
+-- Unified icons sizes depend on their usage (drop down menu and main menu)
+-- Underline the active M68K line in the disassembly window
+-- Allow the up/down navigation on the SP (Stack) browser
+-- Restart function cleans-up the SP (Stack) browser and the heap allocator system
+-- Fixed the up navigation on the memory window
+11) Added some log information for the emulator initialisations
+12) Breakpoint will happen in case of writing at unknown memory location
+-- Alert box will display a message and then the code will stop
+13) Added the DRAM size in the emulator status window
+14) Debugger sources code clean-up
+15) Added a call stack feature
+16) Follow platform requirement to prevent source file reading issue
+17) UI modifications
+-- Modified icon for the memory window to make a distinction with the memory browser
+-- The all watch, and Exception Vector Table windows, can be closed using keyboard
+-- Renamed the debugger dedicated icons to make a distinction
+-- Added the call stack window
+18) Fixed a crash in the all watch window after loading a new binary without ELF/DWARF information
+-- Previously used ELF/DWARF information was still accessible
+19) Fixed slash/backslash issue, in the Alpine tab, to follow platform requirement
+20) Heap allocation window uses the DRAM size limit option and detect if heap allocation shares space with SP (Stack)
+21) Added a Jaguar model and BIOS configuration tab
+22) Jaguar model and BIOS configuration integration
+23) Added LEB128 decoding functions
+-- It is used for the DWARF decoding information
+24) Debugger support improvement
+-- DWARF support for the enum type (partial), structure and subroutine type
+-- Debugger can report variable's unsigned char value
+25) UI modifications
+-- Added a status bar, better status report & information display for the heap allocation window
+-- Added a status bar, better status report & information display for the local variables window
+-- Added better information display for the exception vectors table window, and added some missing vectors
+-- Added a status bar, better status report & information display for the call stack window
+-- Added a status bar, better status report & information display for the all watches window
+26) Added screenshot feature
+-- Not accessible in debugger mode
+-- Added screenshot editable path in the general tab, and a key binding
+27) Minor misspellings fixes
+28) DWARF source code directory path clean-up
+29) Added a source code files list viewer
+-- List comes from the DWARF information
+30) Check potential variables missing/incomplete description found in the DWARF information
+-- No crash involved but can help to reduce such as variables duplicate or the blank ones
+31) Added a sorting filter in the all watches window
+32) Improve source code file reading to avoid additional text/bytes reading
+33) Help & content texts updates
+34) Fixed a crash legacy issue when emulator launches in Alpine mode without a valid rom
+35) Added the support for the used lines source's DWARF structure
+-- Mostly used to handle missing subprogram's lines information, and missing CU's low/high PC
+36) Added the Rx version's contact in the help text
+37) Added search paths in case of missing DWARF directories information
+-- Used to look for the file(s)
+38) Setup CU's low/high PC in case of the DWARF structures doesn't have it
+-- Used mostly to allow display the source assembled with vasm
+39) Added function name support from ELF structure
+40) Added the return address information in the call stack
+41) Added multiple breakpoints feature and their key bindings
+-- For functions only
+
+Release 3 (13th November 2017)
+------------------------------
+Git commit: b1b673a3b0d19e3c2c45b6590b773b11e45bced7
+-
+0) Fixed the windows respawning in the next emulator launch within --alpine or --debugger options
+1) Added an Exception Vector Table window
+2) Modified the About window to update the credits list in a more appropriate way
+-- Updated the emulator application credits line
+3) Added 'Rx' word to the emulator name
+4) Fixed a crash when reading the DWARF information in the case of the DWARF2 format has not been used
+5) Added ui, alpine and debugger groups in the settings
+6) Added the possibility to erase settings
+7) Added the --es-all, --es-ui, --es-alpine and --es-debugger options to erase specific settings
+8) Added a key bindings tab and adapted the configuration dialog tabs
+-- User can modify the key bindings where appropriate
+-- Key bindings UI is displayed based on the option used (--debugger, -- alpine)
+9) Fixed a crash, in Release mode, when the HW labels setting is turn on
+10) Solved an interference between the HW labels setting and the one used by the debugger
+-- The setting is now only the reference used
+11) Fixed the SP (Stack) browser UI potential missing data
+12) Create a directory for EEPROMs (based on the EEPROMs setting) if it doesn't already exist
+13) Keep the scrollbar position in accordance of the M68K PC pointer
+-- UI displays the source without the need to move down/up the scrollbar
+14) Fixed a crash when DWARF information report a source line number exceeding the number of lines present in a source file
+-- This may come from the linker vlink
+15) Improved the .heap section detection to avoid a detection error
+-- Depend vlink version, .heap section may have an Alloc flag
+16) Fixed a crash when DWARF information does references to missing source code files
+17) Added a local variables window
+18) Project has switched to Visual Studio 2017 and QT 5.9.1 library
+
+Release 2 (3rd September 2017)
+------------------------------
+0) Added some error detections when reading the ELF executable file
+1) Added all hardware labels (based on the document scans from the Version 2.4 - June 7, 1995)
+2) "Step Over" code function for BSR/JSR functions
+3) Added the .debug_ranges detection to avoid a detection error
+4) DWARF support
+-- TAG: Compilation Unit, Subprogram, Variables, Types
+-- Line numbers, symbols, functions
+5) Added an All Watch window for non-local variables
+6) Added a heap allocator window based on my own memory allocation functions
+7) Added additional 4 memory windows with address input based on hexa, decimal or symbol name
+8) Windows refreshing executed only if windows is visible
+9) Added a restart function
+-- Restart only the 68000 program counter to his original set
+10) Modified the icons color backgound for the "Step In" and "Step Over" functions
+11) Updated the About window to update the credits list
+12) 64 bits Release executable
+13) Fixed (hacking) the display of the SP (Stack) browser
+14) Set the emulator in Halt mode when launched in alpine debug mode without a loaded rom
+-- Otherwise the 68000 program counter will have a 0 value and will execute the code at this address
+15) Added some information in the --help/-h/-? option
+16) --debugger option no longer force the log file
+17) Added a --dram-max option to extend the DRAM size to 8MB
+18) Added the "enter" key support when setting the BPM (Breapoint)
+19) Save the windows positions, size and visibilities (show or hide) status
+-- Such windows will automatically respawn in the next emulator launch
+
+Release 1 (12th February 2017)
+------------------------------
+0) BPM (Breapoint) now stop at the designated address and no longer stop after executing the code
+1) Clean-up the tracing / no-tracing flags for better U.I understanding
+2) Added SP (Stack) browser
+3) User can change now the number of lines of disassembly displayed in the tracing window
+4) User can turn on/off the op-codes associated in the disassembly lines displayed in the M68K tracing window
+5) Added an emulator status window (GPU status, M68K debugger and tracking status)
+6) Added a GPU disassembly tracing window - Display the current PC pointer
+7) Added a DSP disassembly tracing window - Display the current PC pointer
+8) Added possibility to change refresh rate of browsers when emulation is launched
+9) Display partial hardware labels (Internal Memory and Graphics sub-system address space) in the disassembly lines displayed in the M68K tracing window
+-- Display first the hardware labels (based from the Jag V8 dev. PDF) and then the ones possibly found in the ELF debug symbol
+10) Minor U.I cosmetic changes
+11) User can turn on/off the hardware labels associated in the disassembly lines displayed in the M68K tracing window
+-- It doesn't apply to the hardware labels possibly found in the ELF debug symbol
+
+Release 0 (5th January 2017)
+----------------------------
+0) New option --debugger
+1) ELF format support
+2) ELF debug symbol support
+3) "Step Into" code function
+4) Menus layout dedicated to the debugger
+5) Added a dedicated main window for tracing (M68K)
+6) Added a Debugger tab in the config tab
+7) Visual Studio 2015 project support
+8) libelf-0.8.13 library support
+9) 64 bits debug executable only
+
+
+Known issues
+============
+1) Video output is not displayed due to my OpenGL / QT5 5.5.1 integration with VS 2015 but solved when using the QT 5.9.1 package for VS 2017
+2) The BPM (Breapoint) remains stuck on his address when user wants to continue the code execution
+-- Need to trace over the BPM or unset the BPM
+-- The issue can be prevented if the code doesn't set IRQ, otherwise the IRQ will need to be traced to get back control
+3) DWARF 2 support
+-- With GCC: the code must be compiled with the -gdwarf-2 option
+4) The Local and Watch variables window  may display not available type information or empty information
+-- Such missing information may be included in future release
+-- The 'const' type may not be reported correctly in the DWARF information 
+5) The 2MB mirroring is no longer applied in case of --dram-max option usage
+6) Stack must reflect the --dram-max option usage otherwise the stack may be corrupted
+-- The application needs to set the SP (Stack) in accordance
+7) The Exception Vector Table window displays only 65 vectors
+-- Missing vectors may be added in future release
+8) User needs to manualy check if the Atari Jaguar executable match his source code files
+-- Otherwise, source code and assembly may not match or leads to instabilities
+9) The emulator needs to be restarted in case of the following actions occur
+-- Key bindings changes
+-- BIOS selection changes and without new executable load
+10) In the case of a ROM cartridge writing, and with occuring breakpoint, the PC pointer will point at the next instruction and not at the instruction causing the breakpoint
+11) Emulator will crash in case of wrong address value provided in the memory browser
+12) The RAM access log is limited to the 2MB
+13) In various occasions, global variables may be duplicated or without name in the DWARF information
+-- It may come from the Vlink linker and/or GCC 7.1.0 or 8.2.0 compilation with -gdwarf-2 option
+14) Source code disply only assembled code from vasm with option -dwarf
+15) After a new breakpoint set, the breakpoint list window is not refreshed
+-- User must perform an operation, such code tracing, to see the breakpoints list update
+16) Some ASCII characters may be not displayed correctly
+-- It depend how the text is displayed, this is related to the QT/HTML encoding done when reading DWARF file
+
+Cosmetic / UX issues
+====================
+1) The SP (Stack) icon color backgound doesn't look similar with the other ones
+2) The SP (Stack) browser size always open at a forced size no matter if the size has been changed
+3) Not every features have associated key bindings
+
+Legacy issues/hints
+===================
+1) Emulator seems to have easter egg(s)
+-- The option --yarrr displays a single message and end the application
+-- Pressing F8, while in the main window, will create an extra message in the log file
+2) The --alpine option force the log file but it can be override if --no-log option is set after the --alpine option
+
+Project information
+===================
+1) Code based on the Shamus Hammons source code available via Gethub by the 12th September 2017 (2.1.3 Final)
+2) Visual Studio 2015/2017 project support for 64 bits
+3) libelf 0.8.13 library 64bits for VS 2015/2017
+4) libdwarf 1.41 library 64bits for VS 2015, cygwin64 and Msys2/MinGW64
+5) QT 5.5.1 library 64bits for VS 2015
+6) QT 5.9.1 library 64bits for VS 2017
+7) Zlib 1.2.8 library 64bits for VS 2015
+8) Zlib 1.2.11 library 64bits for VS 2017
+9) SDL 1.2.15 library 64bits for VS 2015/2017
+10) The original make files have been modified to follow the requirements and modifications
+11) The 'Rx' word has been added to the emulator name to make distinction with the official version
+12) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
+13) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
+-- Text / License terms are the same
+
+
+Download statistics
+-------------------
+jaguar64eu : 15 downloads for the Release 0 on the 12th Feb, 2017
+jaguar64eu : 18 downloads for the Release 1 on the 21st May, 2017
+No downloads statistics available for the Release 2
+No downloads statistics available for the Release 3

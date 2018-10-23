@@ -50,5 +50,8 @@
 	<file>../../res/debug-callstack.png</file>	
 	<file>../../res/debug-memory.png</file>
 	<file>../../res/screenshot.png</file>
+	<file>../../res/debug-breakpoints.png</file>
+	<file>../../res/debug-deleteallbreakpoints.png</file>
+	<file>../../res/debug-disableallbreakpoints.png</file>
 </qresource>
 </RCC>

@@ -160,9 +160,6 @@
     <ClCompile Include="..\src\debugger\DBGManager.cpp">
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\debugger\brkWin.cpp">
-      <Filter>Source Files\debugger</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\debugger\exceptionvectortablebrowser.cpp">
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
@@ -361,12 +358,6 @@
     <ClCompile Include="GeneratedFiles\Release\moc_configdialog.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_brkWin.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_brkWin.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_alpinetab.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -410,6 +401,24 @@
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\debugger\FilesrcListWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\BreakpointsWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_BreakpointsWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_BreakpointsWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_NewFnctBreakpointWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_NewFnctBreakpointWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\NewFnctBreakpointWin.cpp">
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
   </ItemGroup>
@@ -602,9 +611,6 @@
     <None Include="..\docs\INSTALL">
       <Filter>Docs</Filter>
     </None>
-    <None Include="..\docs\vj_ReleaseNotes.txt">
-      <Filter>Docs</Filter>
-    </None>
     <None Include="..\docs\LICENSE">
       <Filter>Docs</Filter>
     </None>
@@ -625,6 +631,9 @@
     </None>
     <None Include="..\res\debug-local.png">
       <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\docs\vj_HistoryNotes.txt">
+      <Filter>Docs</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -685,9 +694,6 @@
     <CustomBuild Include="..\src\debugger\memory1browser.h">
       <Filter>Header Files\debugger</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\src\debugger\brkWin.h">
-      <Filter>Header Files\debugger</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\src\debugger\exceptionvectortablebrowser.h">
       <Filter>Header Files\debugger</Filter>
     </CustomBuild>
@@ -716,6 +722,12 @@
       <Filter>Header Files\gui\tab</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\debugger\FilesrcListWin.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\BreakpointsWin.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\NewFnctBreakpointWin.h">
       <Filter>Header Files\debugger</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -752,6 +764,15 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\res\screenshot.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\debug-breakpoints.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\debug-deleteallbreakpoints.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\debug-disableallbreakpoints.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
