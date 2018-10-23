@@ -14,6 +14,7 @@
 
 // To Do
 // To use pointers instead of arrays usage
+// To keep sources text file intact wihtout QT/HTML transformation
 // 
 
 
@@ -1126,6 +1127,14 @@ void DWARFManager_InitDMI(void)
 						{
 							PtrCU[NbCU].PtrLinesSrc[i].PtrLineSrc = PtrCU[NbCU].PtrLinesLoadSrc[PtrCU[NbCU].PtrLinesSrc[i].NumLineSrc - 1];
 						}
+
+						// Setup memory range for the code if CU doesn't have already this information
+						// It is taken from the used lines structure
+						if (!PtrCU[NbCU].LowPC && (!PtrCU[NbCU].HighPC || (PtrCU[NbCU].HighPC == ~0)))
+						{
+							PtrCU[NbCU].LowPC = PtrCU[NbCU].PtrLinesSrc[0].StartPC;
+							PtrCU[NbCU].HighPC = PtrCU[NbCU].PtrLinesSrc[PtrCU[NbCU].NbLinesSrc - 1].StartPC;
+						}
 					}
 				}
 
@@ -1787,6 +1796,15 @@ size_t DWARFManager_GetNumLineFromAdr(size_t Adr, size_t Tag)
 						return PtrCU[i].PtrSubProgs[j].NumLineSrc;
 					}
 #endif
+				}
+			}
+
+			// Check if a used line is found with the address
+			for (size_t j = 0; j < PtrCU[i].NbLinesSrc; j++)
+			{
+				if (PtrCU[i].PtrLinesSrc[j].StartPC == Adr)
+				{
+					return PtrCU[i].PtrLinesSrc[j].NumLineSrc;
 				}
 			}
 		}
