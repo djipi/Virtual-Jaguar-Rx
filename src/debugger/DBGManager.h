@@ -235,8 +235,10 @@ extern char *DBGManager_GetLineSrcFromAdrNumLine(size_t Adr, size_t NumLine);
 extern char *DBGManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine);
 
 // General manager
-extern char *DBGManager_GetFunctionName(size_t Adr);
 extern char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t TypeByteSize);
+
+// Functions manager
+extern char *DBGManager_GetFunctionName(size_t Adr);
 
 // Symbols manager
 extern char	*DBGManager_GetSymbolNameFromAdr(size_t Adr);

@@ -28,6 +28,7 @@ typedef enum {
 }ELFSECTIONTYPE;
 
 
+// Internal manager
 extern void	ELFManager_Init(void);
 extern bool	ELFManager_DwarfInit(Elf *PtrElfMem);
 extern Elf *ELFManager_MemOpen(char *PtrELFExe, size_t Size);
@@ -35,10 +36,17 @@ extern int	ELFManager_MemEnd(void);
 extern void	ELFManager_Reset(void);
 extern void	ELFManager_Close(void);
 extern bool ELFManager_AddTab(void *Ptr, size_t type);
-extern char *ELFManager_GetSymbolnameFromAdr(size_t Adr);
 extern void	*ELFManager_ExeCopy(void *src, size_t size);
+
+// Sections manager
 extern size_t ELFManager_GetSectionType(char *SectionName);
+
+// Symbols manager
 extern size_t ELFManager_GetAdrFromSymbolName(char *SymbolName);
+extern char *ELFManager_GetSymbolnameFromAdr(size_t Adr);
+
+// Functions manager
+extern char *ELFManager_GetFunctionName(size_t Adr);
 
 
 #endif	// __ELFMANAGER_H__

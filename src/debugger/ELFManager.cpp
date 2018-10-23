@@ -7,9 +7,9 @@
 //
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
-// JPM  12/01/2016  Created this file
-// JPM  12/01/2016  ELF format support
-// JPM  13/07/2017  ELF DWARF format support
+// JPM   Jan./2016  Created this file and added ELF format support
+// JPM  07/13/2017  ELF DWARF format support improvement
+// JPM  10/20/2018  Added function name support from ELF structure
 //
 
 #include <stdlib.h>
@@ -20,6 +20,9 @@
 #include "log.h"
 #include "ELFManager.h"
 #include "DwarfManager.h"
+
+
+//#define LOG_SUPPORT					// Support log
 
 
 typedef struct {
@@ -241,6 +244,39 @@ size_t ELFManager_GetAdrFromSymbolName(char *SymbolName)
 }
 
 
+// Get function name from his address
+// Return NULL if function name is not found
+char *ELFManager_GetFunctionName(size_t Adr)
+{
+	char *SymbolName = NULL;
+	GElf_Sym *PtrST, ST;
+
+	if (ELFtab != NULL)
+	{
+		for (size_t i = 0; i < NbELFtabStruct; i++)
+		{
+			if ((ELFtab[i]->Type == ELF_symtab_TYPE) && ((ELFtab[i]->PtrDataTab) != NULL))
+			{
+				int j = 0;
+
+				while ((PtrST = gelf_getsym(ELFtab[i]->PtrDataTab, j++, &ST)) != NULL)
+				{
+					if (PtrST->st_value == Adr)
+					{
+						if (ELF32_ST_TYPE(PtrST->st_info) == STT_FUNC)
+						{
+							SymbolName = ELFManager_GetSymbolnameFromSymbolindex(PtrST->st_name);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return SymbolName;
+}
+
+
 // Get Symbol name from his address
 // Return NULL if Symbol name is not found
 char *ELFManager_GetSymbolnameFromAdr(size_t Adr)
@@ -260,7 +296,9 @@ char *ELFManager_GetSymbolnameFromAdr(size_t Adr)
 				{
 					if (PtrST->st_value == Adr)
 					{
+#ifdef LOG_SUPPORT
 						WriteLog("ELF: .symtab: DATA: st_info=%0x, st_name=%0x, st_other=%0x, st_shndx=%0x, st_size=%0x, st_value=%0x\n", PtrST->st_info, PtrST->st_name, PtrST->st_other, PtrST->st_shndx, PtrST->st_size, PtrST->st_value);
+#endif
 						SymbolName = ELFManager_GetSymbolnameFromSymbolindex(PtrST->st_name);
 					}
 				}

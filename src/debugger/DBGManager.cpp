@@ -11,10 +11,11 @@
 // JPM              Various efforts to set the ELF format support
 // JPM              Various efforts to set the DWARF format support
 // JPM  09/15/2018  Support the unsigned char
-// JPM  Oct./2018  Cosmetic changes, and added source file search paths
+// JPM   Oct./2018  Cosmetic changes, added source file search paths, and ELF function name
 //
 
 // To Do
+// To think about unique format to handle variations from ELF, DWARF, etc.
 //
 
 
@@ -627,14 +628,19 @@ char *DBGManager_GetGlobalVariableName(size_t Index)
 // Return NULL if no function name has been found
 char *DBGManager_GetFunctionName(size_t Adr)
 {
+	char *Symbolname = NULL;
+
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetFunctionName(Adr);
+		Symbolname = DWARFManager_GetFunctionName(Adr);
 	}
-	else
+
+	if ((DBGType & DBG_ELF) && (Symbolname == NULL))
 	{
-		return	NULL;
+		Symbolname = ELFManager_GetFunctionName(Adr);
 	}
+
+	return	Symbolname;
 }
 
 
