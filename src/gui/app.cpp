@@ -17,7 +17,7 @@
 // JPM  Sept./2016  Visual Studio support, and Soft debugger support (--debugger)
 // JPM  09/  /2017  Added option (--dram-max) to support 8MB ram (which doesn't exist)
 // JPM  Sept./2017  Added the 'Rx' word to the emulator name, updated the credits line, added option (--es-all, --es-ui, --es-alpine & --es-debugger) to support the erase settings
-// JPM  10/09/2018  Added the Rx version's contact in the help text
+// JPM   Oct./2018  Added the Rx version's contact in the help text, added timer initialisation in the SDL_Init
 //
 
 #include "app.h"
@@ -106,7 +106,7 @@ int main(int argc, char * argv[])
 	}
 
 	// Set up SDL library
-	if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) < 0)
+	if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0)
 	{
 		WriteLog("VJ: Could not initialize the SDL library: %s\n", SDL_GetError());
 	}
