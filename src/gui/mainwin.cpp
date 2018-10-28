@@ -20,7 +20,7 @@
 // JPM  11/04/2017  Added the local window
 // JPM  08/31/2018  Added the call stack window
 // JPM  Sept./2018  Added the new Models and BIOS handler, a screenshot feature and source code files browsing
-// JPM   Oct./2018  Added search paths in the settings, breakpoints feature
+// JPM   Oct./2018  Added search paths in the settings, breakpoints feature, cartdridge view menu
 //
 
 // FIXED:
@@ -99,6 +99,7 @@
 #include "debugger/localbrowser.h"
 #include "debugger/heapallocatorbrowser.h"
 #include "debugger/callstackbrowser.h"
+#include "debugger/CartFilesListWin.h"
 
 
 // According to SebRmv, this header isn't seen on Arch Linux either... :-/
@@ -199,6 +200,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		NewFunctionBreakpointWin = new NewFnctBreakpointWindow(this);
 		exceptionvectortableBrowseWin = new ExceptionVectorTableBrowserWindow(this);
 		CallStackBrowseWin = new CallStackBrowserWindow(this);
+		CartFilesListWin = new CartFilesListWindow(this);
 
 		mem1BrowseWin = (Memory1BrowserWindow **)calloc(vjs.nbrmemory1browserwindow, sizeof(Memory1BrowserWindow));
 #ifdef _MSC_VER
@@ -447,6 +449,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		CallStackBrowseAct->setStatusTip(tr("Shows Call Stack browser window"));
 		connect(CallStackBrowseAct, SIGNAL(triggered()), this, SLOT(ShowCallStackBrowserWin()));
 
+		// Cart files list
+		CartFilesListAct = new QAction(QIcon(""), tr("Directory and files"), this);
+		CartFilesListAct->setStatusTip(tr("List of the files in the cartdridge's directory"));
+		connect(CartFilesListAct, SIGNAL(triggered()), this, SLOT(ShowCartFilesListWin()));
+
 		// Memory windows
 		mem1BrowseAct = (QAction **)calloc(vjs.nbrmemory1browserwindow, sizeof(QAction));
 		QSignalMapper *signalMapper = new QSignalMapper(this);
@@ -517,11 +524,25 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	fileMenu->addSeparator();
 	fileMenu->addAction(quitAppAct);
 
+	// Alpine and debugger menus
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
+		// Create debug & view menu
 		debugMenu = menuBar()->addMenu(tr("&Debug"));
+		viewMenu = menuBar()->addMenu(tr("&View"));
+
+		// Create debugger menu
 		if (vjs.softTypeDebugger)
 		{
+			// Cart menu
+			viewCartMenu = viewMenu->addMenu(tr("&Cartridge"));
+			viewCartMenu->addAction(CartFilesListAct);
+#if 0
+			viewCartMenu->addSeparator();
+			viewCartMenu->addAction(CartStreamsAct);
+#endif
+
+			// Windows menu
 			debugWindowsMenu = debugMenu->addMenu(tr("&Windows"));
 			debugWindowsMenu->addAction(BreakpointsAct);
 			debugWindowExceptionMenu = debugWindowsMenu->addMenu(tr("&Exception"));
@@ -565,11 +586,14 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugNewBreakpointMenu->addAction(newFunctionBreakpointAct);
 			debugMenu->addAction(deleteAllBreakpointsAct);
 			debugMenu->addAction(disableAllBreakpointsAct);
-			//debugMenu->addSeparator();
-			//debugMenu->addAction(DasmAct);
+#if 0
+			debugMenu->addSeparator();
+			debugMenu->addAction(DasmAct);
+#endif
 		}
 		else
 		{
+			// Create alpine menu
 			debugMenu->addAction(memBrowseAct);
 			debugMenu->addAction(stackBrowseAct);
 			debugMenu->addAction(cpuBrowseAct);
@@ -1489,6 +1513,14 @@ void MainWin::ShowNewFunctionBreakpointWin(void)
 }
 
 
+// 
+void MainWin::ShowCartFilesListWin(void)
+{
+	CartFilesListWin->show();
+	CartFilesListWin->RefreshContents();
+}
+
+
 // Step Into trace
 void MainWin::DebuggerTraceStepInto(void)
 {
@@ -2023,6 +2055,13 @@ void MainWin::ReadUISettings(void)
 		size = settings.value("CallStackBrowseWinSize", QSize(400, 400)).toSize();
 		CallStackBrowseWin->resize(size);
 
+		// Cartdridge directory and files
+		pos = settings.value("CartFilesListWinPos", QPoint(200, 200)).toPoint();
+		CartFilesListWin->move(pos);
+		settings.value("CartFilesListWinIsVisible", false).toBool() ? ShowCartFilesListWin() : void();
+		size = settings.value("CartFilesListWinSize", QSize(400, 400)).toSize();
+		CartFilesListWin->resize(size);
+
 		// Breakpoints UI information
 		pos = settings.value("BreakpointsWinPos", QPoint(200, 200)).toPoint();
 		BreakpointsWin->move(pos);
@@ -2242,6 +2281,10 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("NewFunctionBreakpointWinPos", NewFunctionBreakpointWin->pos());
 		settings.setValue("NewFunctionBreakpointWinIsVisible", NewFunctionBreakpointWin->isVisible());
 		settings.setValue("NewFunctionBreakpointWinSize", NewFunctionBreakpointWin->size());
+		settings.setValue("CartFilesListWinPos", CartFilesListWin->pos());
+		settings.setValue("CartFilesListWinIsVisible", CartFilesListWin->isVisible());
+		settings.setValue("CartFilesListWinSize", CartFilesListWin->size());
+
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
 			sprintf(mem1Name, "mem1BrowseWinPos[%i]", (unsigned int)i);
@@ -2270,6 +2313,13 @@ void MainWin::AlpineRefreshWindows(void)
 }
 
 
+// Reset soft view windows
+void MainWin::ViewResetWindows(void)
+{
+	CartFilesListWin->Reset();
+}
+
+
 // Reset soft debugger windows
 void MainWin::DebuggerResetWindows(void)
 {
@@ -2279,9 +2329,16 @@ void MainWin::DebuggerResetWindows(void)
 		allWatchBrowseWin->Reset();
 		heapallocatorBrowseWin->Reset();
 		BreakpointsWin->Reset();
-
 		//ResetAlpineWindows();
+		ViewResetWindows();
 	}
+}
+
+
+// Refresh view windows
+void MainWin::ViewRefreshWindows(void)
+{
+	CartFilesListWin->RefreshContents();
 }
 
 
@@ -2307,6 +2364,7 @@ void MainWin::DebuggerRefreshWindows(void)
 		}
 
 		AlpineRefreshWindows();
+		ViewRefreshWindows();
 	}
 }
 

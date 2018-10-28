@@ -126,6 +126,7 @@ HEADERS = \
 	src/debugger/callstackbrowser.h \
 	src/debugger/exceptionvectortablebrowser.h \
 	src/debugger/NewFnctBreakpointWin.h \
+	src/debugger/CartFilesListWin.h \
 	src/log.h \
 	src/unzip.h \
 	src/crc32.h \
@@ -179,6 +180,7 @@ SOURCES = \
 	src/debugger/exceptionvectortablebrowser.cpp \
 	src/debugger/callstackbrowser.cpp \
 	src/debugger/NewFnctBreakpointWin.cpp \
+	src/debugger/CartFilesListWin.cpp \
 	src/log.cpp \
 	src/unzip.cpp \
 	src/crc32.cpp \

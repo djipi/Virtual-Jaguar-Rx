@@ -47,6 +47,7 @@ class BreakpointsWindow;
 class NewFnctBreakpointWindow;
 class ExceptionVectorTableBrowserWindow;
 class FilesrcListWindow;
+class CartFilesListWindow;
 
 
 // 
@@ -61,8 +62,10 @@ class MainWin: public QMainWindow
 		void LoadFile(QString);
 		void SyncUI(void);
 		void DebuggerRefreshWindows(void);
-		void DebuggerResetWindows(void);
+		void ViewRefreshWindows(void);
 		void AlpineRefreshWindows(void);
+		void DebuggerResetWindows(void);
+		void ViewResetWindows(void);
 
 	protected:
 		void closeEvent(QCloseEvent *);
@@ -105,8 +108,11 @@ class MainWin: public QMainWindow
 		void ShowBreakpointsWin(void);
 		void DeleteAllBreakpoints(void);
 		void DisableAllBreakpoints(void);
-		//void ShowVideoOutputWin(void);
-		//void ShowDasmWin(void);
+#if 0
+		void ShowVideoOutputWin(void);
+		void ShowDasmWin(void);
+#endif
+		void ShowCartFilesListWin(void);
 		// Alpine
 		void ShowMemoryBrowserWin(void);
 		void ShowStackBrowserWin(void);
@@ -155,6 +161,7 @@ class MainWin: public QMainWindow
 		FilesrcListWindow *FilesrcListWin;
 		BreakpointsWindow *BreakpointsWin;
 		NewFnctBreakpointWindow *NewFunctionBreakpointWin;
+		CartFilesListWindow *CartFilesListWin;
 		QTimer *timer;
 		bool running;
 		int zoomLevel;
@@ -187,6 +194,7 @@ class MainWin: public QMainWindow
 		QMenu *fileMenu;
 		QMenu *helpMenu;
 		QMenu *debugMenu, *debugWindowsMenu, *debugWindowsBrowsesMenu, *debugWindowsWatchMenu, *debugWindowOutputMenu, *debugWindowExceptionMenu, *debugWindowsMemoryMenu, *debugNewBreakpointMenu;
+		QMenu *viewMenu, *viewCartMenu;
 		QToolBar * toolbar;
 		QToolBar * debugbar;
 		QToolBar * debuggerbar;
@@ -237,6 +245,7 @@ class MainWin: public QMainWindow
 		QAction *deleteAllBreakpointsAct;
 		QAction *disableAllBreakpointsAct;
 		QAction *exceptionVectorTableBrowseAct;
+		QAction *CartFilesListAct;
 
 		QIcon powerGreen;
 		QIcon powerRed;

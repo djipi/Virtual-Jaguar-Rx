@@ -76,6 +76,9 @@ Git commit: TBD
 40) Added the return address information in the call stack
 41) Added multiple breakpoints feature and their key bindings
 -- For functions only
+42) Added timer initialisation for the SDL setup
+43) Added a cartdridge view menu
+-- Added a window to display my own directory and his files list
 
 Release 3 (13th November 2017)
 ------------------------------
@@ -198,6 +201,7 @@ Known issues
 -- User must perform an operation, such code tracing, to see the breakpoints list update
 16) Some ASCII characters may be not displayed correctly
 -- It depend how the text is displayed, this is related to the QT/HTML encoding done when reading DWARF file
+17) Potential legacy crash when leaving emulator in pause mode for a long period of time
 
 Cosmetic / UX issues
 ====================

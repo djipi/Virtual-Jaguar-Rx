@@ -62,6 +62,12 @@
     <Filter Include="Source Files\gui\tab">
       <UniqueIdentifier>{3764368c-2eb6-49e9-a11a-a49b210d6297}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\debugger\View">
+      <UniqueIdentifier>{e33caa2f-f4da-4d11-a399-c61abae9129c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\debugger\View">
+      <UniqueIdentifier>{6a9b2983-c30d-47db-8c30-73c1ec7d029d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GeneratedFiles\qrc_virtualjaguar.cpp">
@@ -421,6 +427,15 @@
     <ClCompile Include="..\src\debugger\NewFnctBreakpointWin.cpp">
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_CartFilesListWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_CartFilesListWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\CartFilesListWin.cpp">
+      <Filter>Source Files\debugger\View</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -729,6 +744,9 @@
     </CustomBuild>
     <CustomBuild Include="..\src\debugger\NewFnctBreakpointWin.h">
       <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\CartFilesListWin.h">
+      <Filter>Header Files\debugger\View</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
