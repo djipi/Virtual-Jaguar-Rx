@@ -79,6 +79,7 @@ Git commit: TBD
 42) Added timer initialisation for the SDL setup
 43) Added a cartdridge view menu
 -- Added a window to display my own directory and his files list
+44) Debugger sources code clean-up
 
 Release 3 (13th November 2017)
 ------------------------------

@@ -7,7 +7,7 @@
 //
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
-// JPM  10/26/2018  Created this file
+// JPM   Oct./2018  Created this file, and changed position of the status bar
 //
 
 // TO DO:
@@ -26,12 +26,14 @@
 CartFilesListWindow::CartFilesListWindow(QWidget * parent/*= 0*/) : QWidget(parent, Qt::Dialog),
 TableView(new QTableView),
 model(new QStandardItemModel),
+TVlayout(new QVBoxLayout),
+Mlayout(new QVBoxLayout),
 layout(new QVBoxLayout),
 treeView(new QTreeView),
 standardModel(new QStandardItemModel),
 rootNode(new QStandardItem),
 CartDirectory(NULL),
-statusbar(new QStatusBar),
+TVstatusbar(new QStatusBar),
 fileItems(NULL),
 nbItem(0),
 CartUsedBytes(0),
@@ -63,17 +65,19 @@ CartDirType(CFL_NOTYPE)
 	TableView->setFont(fixedFont);
 	TableView->verticalHeader()->setDefaultSectionSize(TableView->verticalHeader()->minimumSectionSize());
 	TableView->verticalHeader()->setDefaultAlignment(Qt::AlignRight);
-	layout->addWidget(TableView);
+	TVlayout->addWidget(TableView);
+	TVlayout->addWidget(TVstatusbar);
 
 	// Setup root
 	rootNode = standardModel->invisibleRootItem();
 	//register the model
 	treeView->setModel(standardModel);
 	treeView->expandAll();
-	layout->addWidget(treeView);
+	Mlayout->addWidget(treeView);
 
-	// Status bar
-	layout->addWidget(statusbar);
+	// Set layouts
+	layout->addLayout(TVlayout);
+	layout->addLayout(Mlayout);
 	setLayout(layout);
 }
 
@@ -140,18 +144,18 @@ void CartFilesListWindow::RefreshContents(void)
 			{
 				if ((Error & CFL_WARNING))
 				{
-					statusbar->setStyleSheet("background-color: lightyellow; font: bold");
+					TVstatusbar->setStyleSheet("background-color: lightyellow; font: bold");
 				}
 				else
 				{
-					statusbar->setStyleSheet("background-color: tomato; font: bold");
+					TVstatusbar->setStyleSheet("background-color: tomato; font: bold");
 				}
 			}
 			else
 			{
-				statusbar->setStyleSheet("background-color: lightgreen; font: bold");
+				TVstatusbar->setStyleSheet("background-color: lightgreen; font: bold");
 			}
-			statusbar->showMessage(QString(msg));
+			TVstatusbar->showMessage(QString(msg));
 		}
 		else
 		{
@@ -234,12 +238,7 @@ void *CartFilesListWindow::CreateInfos(void)
 		// Display row content
 		model->insertRow(i);
 		model->setItem(i, 0, new QStandardItem(QString("%1").arg(Ptr[i].PtrFilename)));
-		if (!Ptr[i].SizeFile)
-		{
-			//model->setItem(i, 1, new QStandardItem(QString("%1").arg("")));
-			//model->setItem(i, 2, new QStandardItem(QString("%1").arg("")));
-		}
-		else
+		if (Ptr[i].SizeFile)
 		{
 			model->setItem(i, 1, new QStandardItem(QString("0x%1").arg(Ptr[i].PtrDataFile, 6, 16, QChar('0'))));
 			model->setItem(i, 2, new QStandardItem(QString("0x%1").arg(Ptr[i].SizeFile, 6, 16, QChar('0'))));
@@ -266,10 +265,6 @@ void CartFilesListWindow::UpdateInfos(void)
 			if ((CartDirectory[i].CurrentSeek = GET32(jagMemSpace, Offset)) < vjs.DRAM_size)
 			{
 				model->setItem(i, 3, new QStandardItem(QString("0x%1").arg(CartDirectory[i].CurrentSeek, 6, 16, QChar('0'))));
-			}
-			else
-			{
-				//model->setItem(i, 3, new QStandardItem(QString("%1").arg("")));
 			}
 
 			// Get stream buffer address and check validity (must be included in the ram zone)

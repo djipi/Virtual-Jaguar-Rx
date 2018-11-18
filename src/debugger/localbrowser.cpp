@@ -8,14 +8,15 @@
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JPM  11/03/2017  Created this file
-// JPM  09/08/2018  Added a status bar and better status report
-// JPM  09/08/2018  Set information values in a tab
+// JPM  Sept./2018  Added a status bar and better status report, and set information values in a tab
 //
 
 // STILL TO DO:
 // Feature to list the pointer(s) in the code using the allocation
 // To set the information display at the right
 // To support the array
+// To support the static variables
+// To add a filter
 //
 
 

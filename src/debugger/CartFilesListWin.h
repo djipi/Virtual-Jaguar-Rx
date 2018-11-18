@@ -78,11 +78,13 @@ class CartFilesListWindow: public QWidget
 	private:
 		size_t nbItem, CartDirType, CartNbrFiles, CartUsedBytes;
 		QVBoxLayout *layout;
+		QVBoxLayout *TVlayout;
+		QVBoxLayout *Mlayout;
 		QTreeView *treeView;
 		QStandardItemModel *standardModel;
 		QStandardItem *rootNode;
 		CARTDIRINFO *CartDirectory;
-		QStatusBar *statusbar;
+		QStatusBar *TVstatusbar;
 		Sfileitem *fileItems;
 		QStandardItemModel *model;
 		QTableView *TableView;
