@@ -65,7 +65,7 @@ class MainWin: public QMainWindow
 		void ViewRefreshWindows(void);
 		void AlpineRefreshWindows(void);
 		void DebuggerResetWindows(void);
-		void ViewResetWindows(void);
+		void DebuggerReset(void);
 
 	protected:
 		void closeEvent(QCloseEvent *);

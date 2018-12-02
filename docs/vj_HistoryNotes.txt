@@ -80,6 +80,7 @@ Git commit: TBD
 43) Added a cartdridge view menu
 -- Added a window to display my own directory and his files list
 44) Debugger sources code clean-up
+45) Fix a crash when emulator, in non-debugger mode, opens the breakpoint UIs at launch
 
 Release 3 (13th November 2017)
 ------------------------------

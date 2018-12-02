@@ -21,6 +21,7 @@
 // JPM  08/31/2018  Added the call stack window
 // JPM  Sept./2018  Added the new Models and BIOS handler, a screenshot feature and source code files browsing
 // JPM   Oct./2018  Added search paths in the settings, breakpoints feature, cartdridge view menu
+// JPM  11/18/2018  Fix crash with non-debugger mode
 //
 
 // FIXED:
@@ -1234,7 +1235,7 @@ void MainWin::TogglePowerState(void)
 
 		WriteLog("GUI: Resetting Jaguar...\n");
 		JaguarReset();
-		DeleteAllBreakpoints();
+		DebuggerReset();
 		DebuggerResetWindows();
 		DACPauseAudioThread(false);
 	}
@@ -1294,10 +1295,10 @@ void MainWin::ToggleRunState(void)
 			traceStepIntoAct->setDisabled(true);
 			traceStepOverAct->setDisabled(true);
 			restartAct->setDisabled(true);
+			BreakpointsWin->RefreshContents();
 		}
 
 		cpuBrowseWin->UnholdBPM();
-		BreakpointsWin->RefreshContents();
 	}
 
 	// Pause/unpause any running/non-running threads...
@@ -1479,7 +1480,7 @@ void MainWin::ToggleCDUsage(void)
 }
 
 
-//
+// Open, or display, the breakpoints list window
 void MainWin::ShowBreakpointsWin(void)
 {
 	BreakpointsWin->show();
@@ -1487,7 +1488,7 @@ void MainWin::ShowBreakpointsWin(void)
 }
 
 
-//
+// Delete all breakpoints
 void MainWin::DeleteAllBreakpoints(void)
 {
 	cpuBrowseWin->ResetBPM();
@@ -1496,7 +1497,7 @@ void MainWin::DeleteAllBreakpoints(void)
 }
 
 
-//
+// Disable all breakpoints
 void MainWin::DisableAllBreakpoints(void)
 {
 	cpuBrowseWin->DisableBPM();
@@ -1505,7 +1506,7 @@ void MainWin::DisableAllBreakpoints(void)
 }
 
 
-//
+// Open, or display, the new breakpoint function window
 void MainWin::ShowNewFunctionBreakpointWin(void)
 {
 	NewFunctionBreakpointWin->show();
@@ -2313,10 +2314,13 @@ void MainWin::AlpineRefreshWindows(void)
 }
 
 
-// Reset soft view windows
-void MainWin::ViewResetWindows(void)
+// Reset soft debugger
+void MainWin::DebuggerReset(void)
 {
-	CartFilesListWin->Reset();
+	if (vjs.softTypeDebugger)
+	{
+		DeleteAllBreakpoints();
+	}
 }
 
 
@@ -2329,8 +2333,8 @@ void MainWin::DebuggerResetWindows(void)
 		allWatchBrowseWin->Reset();
 		heapallocatorBrowseWin->Reset();
 		BreakpointsWin->Reset();
+		CartFilesListWin->Reset();
 		//ResetAlpineWindows();
-		ViewResetWindows();
 	}
 }
 
@@ -2345,8 +2349,6 @@ void MainWin::ViewRefreshWindows(void)
 // Refresh soft debugger & alpine debug windows
 void MainWin::DebuggerRefreshWindows(void)
 {
-	size_t i;
-
 	if (vjs.softTypeDebugger)
 	{
 		FilesrcListWin->RefreshContents();
@@ -2358,7 +2360,7 @@ void MainWin::DebuggerRefreshWindows(void)
 		CallStackBrowseWin->RefreshContents();
 		heapallocatorBrowseWin->RefreshContents();
 		BreakpointsWin->RefreshContents();
-		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
+		for (size_t i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
 			mem1BrowseWin[i]->RefreshContents(i);
 		}
