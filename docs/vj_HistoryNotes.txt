@@ -81,6 +81,7 @@ Git commit: TBD
 -- Added a window to display my own directory and his files list
 44) Debugger sources code clean-up
 45) Fix a crash when emulator, in non-debugger mode, opens the breakpoint UIs at launch
+46) Fix crash with potential missing DWARF structure tag's type name
 
 Release 3 (13th November 2017)
 ------------------------------
@@ -225,7 +226,7 @@ Project information
 3) libelf 0.8.13 library 64bits for VS 2015/2017
 4) libdwarf 1.41 library 64bits for VS 2015, cygwin64 and Msys2/MinGW64
 5) QT 5.5.1 library 64bits for VS 2015
-6) QT 5.9.1 library 64bits for VS 2017
+6) QT 5.12.0 library 64bits for VS 2017
 7) Zlib 1.2.8 library 64bits for VS 2015
 8) Zlib 1.2.11 library 64bits for VS 2017
 9) SDL 1.2.15 library 64bits for VS 2015/2017
