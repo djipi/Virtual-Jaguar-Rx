@@ -70,9 +70,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GeneratedFiles\qrc_virtualjaguar.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\debugger\DasmWin.cpp">
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
@@ -435,6 +432,9 @@
     </ClCompile>
     <ClCompile Include="..\src\debugger\CartFilesListWin.cpp">
       <Filter>Source Files\debugger\View</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_virtualjaguar.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
