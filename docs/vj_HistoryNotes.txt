@@ -82,6 +82,7 @@ Git commit: TBD
 44) Debugger sources code clean-up
 45) Fix a crash when emulator, in non-debugger mode, opens the breakpoint UIs at launch
 46) Fix crash with potential missing DWARF structure tag's type name
+47) Added ELF sections check so a potential unknown section won't stop the reading
 
 Release 3 (13th November 2017)
 ------------------------------

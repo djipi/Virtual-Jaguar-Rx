@@ -7,7 +7,8 @@
 // ---  ----------  ------------------------------------------------------------
 // JPM  06/19/2016  Soft debugger support
 // JPM  Sept./2018  Added the new Models and BIOS handler, and a screenshot settings
-// JPM  10/10/2018  Added search paths in settings 
+// JPM  10/10/2018  Added search paths in settings
+// JPM  04/06/2019  Added ELF sections check
 //
 
 #ifndef __SETTINGS_H__
@@ -83,6 +84,7 @@ struct VJSettings
 	bool displayHWlabels;
 	bool useFastBlitter;
 	bool displayFullSourceFilename;
+	bool ELFSectionsCheck;
 	size_t nbrmemory1browserwindow;								// Number of memory browser windows
 	size_t DRAM_size;											// DRAM size
 

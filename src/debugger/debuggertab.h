@@ -5,6 +5,7 @@
 // ---  ----------  ------------------------------------------------------------
 // JPM  Sept./2016  Created this file, and added Soft debugger support
 // JPM  10/09/2018  Added the source file search paths
+// JPM  04/06/2019  Added ELF sections check
 //
 
 #ifndef __DEBUGGERTAB_H__
@@ -31,6 +32,7 @@ class DebuggerTab: public QWidget
 		QCheckBox *displayHWlabels;
 		QCheckBox *disasmopcodes;
 		QCheckBox *displayFullSourceFilename;
+		QCheckBox *ELFSectionsCheck;
 };
 
 #endif	// __DEBUGGERTAB_H__

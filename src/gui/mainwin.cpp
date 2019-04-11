@@ -22,6 +22,7 @@
 // JPM  Sept./2018  Added the new Models and BIOS handler, a screenshot feature and source code files browsing
 // JPM   Oct./2018  Added search paths in the settings, breakpoints feature, cartdridge view menu
 // JPM  11/18/2018  Fix crash with non-debugger mode
+// JPM  04/06/2019  Added ELF sections check
 //
 
 // FIXED:
@@ -1846,6 +1847,7 @@ void MainWin::ReadSettings(void)
 	vjs.disasmopcodes = settings.value("DisasmOpcodes", true).toBool();
 	vjs.displayHWlabels = settings.value("DisplayHWLabels", true).toBool();
 	vjs.displayFullSourceFilename = settings.value("displayFullSourceFilename", true).toBool();
+	vjs.ELFSectionsCheck = settings.value("ELFSectionsCheck", false).toBool();
 	vjs.nbrmemory1browserwindow = settings.value("NbrMemory1BrowserWindow", MaxMemory1BrowserWindow).toUInt();
 	settings.endGroup();
 
@@ -2149,6 +2151,7 @@ void MainWin::WriteSettings(void)
 	settings.setValue("NbrDisasmLines", vjs.nbrdisasmlines);
 	settings.setValue("DisasmOpcodes", vjs.disasmopcodes);
 	settings.setValue("displayFullSourceFilename", vjs.displayFullSourceFilename);
+	settings.setValue("ELFSectionsCheck", vjs.ELFSectionsCheck);
 	settings.setValue("NbrMemory1BrowserWindow", (unsigned int)vjs.nbrmemory1browserwindow);
 	settings.setValue("DefaultROM", vjs.debuggerROMPath);
 	settings.setValue("SourceFileSearchPaths", vjs.sourcefilesearchPaths);

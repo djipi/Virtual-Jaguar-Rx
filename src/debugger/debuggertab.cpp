@@ -9,6 +9,7 @@
 // ---  ----------  ------------------------------------------------------------
 // JPM  Sept./2016  Created this file, and added Soft debugger support
 // JPM  10/09/2018  Added source file search paths
+// JPM  04/06/2019  Added ELF sections check
 //
 
 #include "debuggertab.h"
@@ -52,13 +53,16 @@ DebuggerTab::DebuggerTab(QWidget * parent/*= 0*/): QWidget(parent)
 	displayHWlabels = new QCheckBox(tr("Display HW labels"));
 	disasmopcodes	= new QCheckBox(tr("Display M68000 opcodes"));
 	displayFullSourceFilename = new QCheckBox(tr("Display source filename"));
+	ELFSectionsCheck = new QCheckBox(tr("ELF sections check"));
 	disasmopcodes->setDisabled(false);
 	displayHWlabels->setDisabled(false);
 	displayFullSourceFilename->setDisabled(false);
+	ELFSectionsCheck->setDisabled(false);
 
 	layout4->addWidget(disasmopcodes);
 	layout4->addWidget(displayHWlabels);
 	layout4->addWidget(displayFullSourceFilename);
+	layout4->addWidget(ELFSectionsCheck);
 
 	setLayout(layout4);
 }
@@ -81,6 +85,7 @@ void DebuggerTab::SetSettings(void)
 	vjs.displayHWlabels = displayHWlabels->isChecked();
 	vjs.disasmopcodes = disasmopcodes->isChecked();
 	vjs.displayFullSourceFilename = displayFullSourceFilename->isChecked();
+	vjs.ELFSectionsCheck = ELFSectionsCheck->isChecked();
 }
 
 
@@ -93,6 +98,7 @@ void DebuggerTab::GetSettings(void)
 	displayHWlabels->setChecked(vjs.displayHWlabels);
 	disasmopcodes->setChecked(vjs.disasmopcodes);
 	displayFullSourceFilename->setChecked(vjs.displayFullSourceFilename);
+	ELFSectionsCheck->setChecked(vjs.ELFSectionsCheck);
 }
 
 

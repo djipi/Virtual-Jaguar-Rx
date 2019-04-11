@@ -28,7 +28,7 @@
 
 
 // Definitions for debugging
-//#define DEBUG_NumCU			0xf				// CU number to debug or undefine it
+//#define DEBUG_NumCU			0x4d				// CU number to debug or undefine it
 //#define DEBUG_VariableName	"sound_death"				// Variable name to look for or undefine it
 //#define DEBUG_TypeName		"Cbuf_Execute"			// Type name to look for or undefine it
 //#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for or undefine it (not supported)
