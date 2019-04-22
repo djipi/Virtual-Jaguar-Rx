@@ -22,7 +22,7 @@
 // JPM  Sept./2018  Added the new Models and BIOS handler, a screenshot feature and source code files browsing
 // JPM   Oct./2018  Added search paths in the settings, breakpoints feature, cartdridge view menu
 // JPM  11/18/2018  Fix crash with non-debugger mode
-// JPM  04/06/2019  Added ELF sections check
+// JPM  April/2019  Added ELF sections check, added a save memory dump
 //
 
 // FIXED:
@@ -102,6 +102,7 @@
 #include "debugger/heapallocatorbrowser.h"
 #include "debugger/callstackbrowser.h"
 #include "debugger/CartFilesListWin.h"
+#include "debugger/SaveDumpAsWin.h"
 
 
 // According to SebRmv, this header isn't seen on Arch Linux either... :-/
@@ -200,6 +201,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		heapallocatorBrowseWin = new HeapAllocatorBrowserWindow(this);
 		BreakpointsWin = new BreakpointsWindow(this);
 		NewFunctionBreakpointWin = new NewFnctBreakpointWindow(this);
+		SaveDumpAsWin = new SaveDumpAsWindow(this);
 		exceptionvectortableBrowseWin = new ExceptionVectorTableBrowserWindow(this);
 		CallStackBrowseWin = new CallStackBrowserWindow(this);
 		CartFilesListWin = new CartFilesListWindow(this);
@@ -418,6 +420,12 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		disableAllBreakpointsAct = new QAction(QIcon(":/res/debug-disableallbreakpoints.png"), tr("&Disable All Breakpoints"), this);
 		connect(disableAllBreakpointsAct, SIGNAL(triggered()), this, SLOT(DisableAllBreakpoints()));
 
+		// Save dump
+		saveDumpAsAct = new QAction(tr("&Save Dump As..."), this);
+		saveDumpAsAct->setCheckable(false);
+		saveDumpAsAct->setDisabled(false);
+		connect(saveDumpAsAct, SIGNAL(triggered()), this, SLOT(ShowSaveDumpAsWin()));
+
 		//VideoOutputAct = new QAction(tr("Output Video"), this);
 		//VideoOutputAct->setStatusTip(tr("Shows the output video window"));
 		//connect(VideoOutputAct, SIGNAL(triggered()), this, SLOT(ShowVideoOutputWin()));
@@ -588,6 +596,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugNewBreakpointMenu->addAction(newFunctionBreakpointAct);
 			debugMenu->addAction(deleteAllBreakpointsAct);
 			debugMenu->addAction(disableAllBreakpointsAct);
+			debugMenu->addSeparator();
+			debugMenu->addAction(saveDumpAsAct);
 #if 0
 			debugMenu->addSeparator();
 			debugMenu->addAction(DasmAct);
@@ -1515,11 +1525,18 @@ void MainWin::ShowNewFunctionBreakpointWin(void)
 }
 
 
-// 
+// Display list of files found in cartdridge
 void MainWin::ShowCartFilesListWin(void)
 {
 	CartFilesListWin->show();
 	CartFilesListWin->RefreshContents();
+}
+
+
+//
+void MainWin::ShowSaveDumpAsWin(void)
+{
+	SaveDumpAsWin->show();
 }
 
 
@@ -2058,12 +2075,19 @@ void MainWin::ReadUISettings(void)
 		size = settings.value("CallStackBrowseWinSize", QSize(400, 400)).toSize();
 		CallStackBrowseWin->resize(size);
 
-		// Cartdridge directory and files
+		// Cartdridge directory and files UI information
 		pos = settings.value("CartFilesListWinPos", QPoint(200, 200)).toPoint();
 		CartFilesListWin->move(pos);
 		settings.value("CartFilesListWinIsVisible", false).toBool() ? ShowCartFilesListWin() : void();
 		size = settings.value("CartFilesListWinSize", QSize(400, 400)).toSize();
 		CartFilesListWin->resize(size);
+
+		// Save dump UI information
+		pos = settings.value("SaveDumpAsWinPos", QPoint(200, 200)).toPoint();
+		SaveDumpAsWin->move(pos);
+		settings.value("SaveDumpAsWinIsVisible", false).toBool() ? ShowSaveDumpAsWin() : void();
+		size = settings.value("SaveDumpAsWinSize", QSize(400, 400)).toSize();
+		SaveDumpAsWin->resize(size);
 
 		// Breakpoints UI information
 		pos = settings.value("BreakpointsWinPos", QPoint(200, 200)).toPoint();
@@ -2288,6 +2312,9 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("CartFilesListWinPos", CartFilesListWin->pos());
 		settings.setValue("CartFilesListWinIsVisible", CartFilesListWin->isVisible());
 		settings.setValue("CartFilesListWinSize", CartFilesListWin->size());
+		settings.setValue("SaveDumpAsWinPos", SaveDumpAsWin->pos());
+		settings.setValue("SaveDumpAsWinIsVisible", SaveDumpAsWin->isVisible());
+		settings.setValue("SaveDumpAsWinSize", SaveDumpAsWin->size());
 
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{

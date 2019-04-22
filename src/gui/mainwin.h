@@ -48,6 +48,7 @@ class NewFnctBreakpointWindow;
 class ExceptionVectorTableBrowserWindow;
 class FilesrcListWindow;
 class CartFilesListWindow;
+class SaveDumpAsWindow;
 
 
 // 
@@ -108,6 +109,7 @@ class MainWin: public QMainWindow
 		void ShowBreakpointsWin(void);
 		void DeleteAllBreakpoints(void);
 		void DisableAllBreakpoints(void);
+		void ShowSaveDumpAsWin(void);
 #if 0
 		void ShowVideoOutputWin(void);
 		void ShowDasmWin(void);
@@ -162,6 +164,7 @@ class MainWin: public QMainWindow
 		BreakpointsWindow *BreakpointsWin;
 		NewFnctBreakpointWindow *NewFunctionBreakpointWin;
 		CartFilesListWindow *CartFilesListWin;
+		SaveDumpAsWindow *SaveDumpAsWin;
 		QTimer *timer;
 		bool running;
 		int zoomLevel;
@@ -244,6 +247,7 @@ class MainWin: public QMainWindow
 		QAction *BreakpointsAct;
 		QAction *deleteAllBreakpointsAct;
 		QAction *disableAllBreakpointsAct;
+		QAction *saveDumpAsAct;
 		QAction *exceptionVectorTableBrowseAct;
 		QAction *CartFilesListAct;
 

@@ -436,6 +436,15 @@
     <ClCompile Include="GeneratedFiles\qrc_virtualjaguar.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SaveDumpAsWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_SaveDumpAsWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\SaveDumpAsWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -747,6 +756,9 @@
     </CustomBuild>
     <CustomBuild Include="..\src\debugger\CartFilesListWin.h">
       <Filter>Header Files\debugger\View</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\SaveDumpAsWin.h">
+      <Filter>Header Files\debugger</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
