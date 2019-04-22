@@ -9,16 +9,18 @@
 // ---  ----------  -----------------------------------------------------------
 // JPM  12/07/2017  Created this file
 // JPM  09/14/2018  Added a status bar, better status report and set information values in a tab
-// JPM  10/05/2018  Added a sorting filter 
+// JPM  April/2019  Added a sorting filter, tableview unique rows creation
 //
 
 // STILL TO DO:
 // Better presentation
 // To set the information display at the right
+// To understand/fix the problem with the sorting filter
 // Display arrays information
 // Display structures information
 //
 
+//#define AW_SORTINGFILTER									// Authorise the sorting filtes
 //#define AW_DEBUGNUMVARIABLE		4415						// Set the global variable number to debug
 #ifndef AW_DEBUGNUMVARIABLE
 #define AW_STARTNUMVARIABLE		0							// Must be kept to 0 in case of no debug is required
@@ -112,7 +114,12 @@ void AllWatchBrowserWindow::RefreshContents(void)
 			if (NbWatch = DBGManager_GetNbGlobalVariables())
 			{
 				PtrWatchInfo = (WatchInfo *)calloc(NbWatch, sizeof(WatchInfo));
-
+#ifndef AW_LAYOUTTEXTS
+#ifdef AW_SORTINGFILTER
+				TableView->setSortingEnabled(false);
+#endif
+				model->setRowCount(0);
+#endif
 				for (uint32_t i = AW_STARTNUMVARIABLE; i < NbWatch; i++)
 				{
 					PtrWatchInfo[i].PtrVariableName = DBGManager_GetGlobalVariableName(i + 1);
@@ -125,14 +132,12 @@ void AllWatchBrowserWindow::RefreshContents(void)
 					}
 #else
 					PtrWatchInfo[i].PtrVariableBaseTypeName = DBGManager_GetGlobalVariableTypeName(i + 1);
+					model->insertRow(i);
 #endif
 				}
 			}
 		}
-#ifndef AW_LAYOUTTEXTS
-		TableView->setSortingEnabled(false);
-		model->setRowCount(0);
-#endif
+
 		if (NbWatch)
 		{
 			for (uint32_t i = AW_STARTNUMVARIABLE; i < NbWatch; i++)
@@ -158,7 +163,6 @@ void AllWatchBrowserWindow::RefreshContents(void)
 				sprintf(string, "%i : %s | %s | 0x%06X | %s", (i + 1), PtrWatchInfo[i].PtrVariableBaseTypeName, PtrWatchInfo[i].PtrVariableName, (unsigned int)PtrWatchInfo[i].addr, PtrValue ? PtrValue : (char *)"<font color='#ff0000'>N/A</font>");
 				WatchAll += QString(string);
 #else
-				model->insertRow(i);
 				model->setItem(i, 0, new QStandardItem(QString("%1").arg(PtrWatchInfo[i].PtrVariableName)));
 				model->setItem(i, 1, new QStandardItem(QString("%1").arg(PtrValue)));
 				model->setItem(i, 2, new QStandardItem(QString("%1").arg(PtrWatchInfo[i].PtrVariableBaseTypeName)));
@@ -168,7 +172,9 @@ void AllWatchBrowserWindow::RefreshContents(void)
 			text->clear();
 			text->setText(WatchAll);
 #else
+#ifdef AW_SORTINGFILTER
 			TableView->setSortingEnabled(true);
+#endif
 #endif
 			sprintf(msg, "Ready");
 		}
