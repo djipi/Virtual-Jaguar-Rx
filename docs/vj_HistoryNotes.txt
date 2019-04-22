@@ -85,6 +85,8 @@ Git commit: TBD
 47) Added ELF sections check so a potential unknown section will stop, or not stop, the decoding
 48) Project has switched to QT 5.12.0 library 64bits for VS 2017
 49) Added a Save Dump As... feature to save a memory zone to a file
+50) The -d command line option, dedicated to the debugger, has been renamed to avoid duplication with the dsp one
+-- -d has been renamed by -D because another -d was also used for the dsp command line option
 
 Release 3 (13th November 2017)
 ------------------------------

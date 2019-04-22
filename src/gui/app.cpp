@@ -18,6 +18,7 @@
 // JPM  09/  /2017  Added option (--dram-max) to support 8MB ram (which doesn't exist)
 // JPM  Sept./2017  Added the 'Rx' word to the emulator name, updated the credits line, added option (--es-all, --es-ui, --es-alpine & --es-debugger) to support the erase settings
 // JPM   Oct./2018  Added the Rx version's contact in the help text, added timer initialisation in the SDL_Init
+// JPM   Apr./2019  Fixed a command line option duplication
 //
 
 #include "app.h"
@@ -187,7 +188,7 @@ bool ParseCommandLine(int argc, char * argv[])
 				"   ----------------  -----------------------------------\n"
 				"   <filename>        Name of file to autoload\n"
 				"   --alpine      -a  Put Virtual Jaguar into Alpine mode\n"
-				"   --debugger    -d  Put Virtual Jaguar into Debugger mode\n"
+				"   --debugger    -D  Put Virtual Jaguar into Debugger mode\n"
 				"   --pal         -p  PAL mode\n"
 				"   --ntsc        -n  NTSC mode\n"
 				"   --dram-max        Set DRAM size to 8MB\n"
@@ -252,7 +253,7 @@ bool ParseCommandLine(int argc, char * argv[])
 		}
 
 		// Debugger mode
-		if ((strcmp(argv[i], "--debugger") == 0) || (strcmp(argv[i], "-d") == 0))
+		if ((strcmp(argv[i], "--debugger") == 0) || (strcmp(argv[i], "-D") == 0))
 		{
 			printf("Debugger mode enabled.\n");
 			vjs.softTypeDebugger = true;
