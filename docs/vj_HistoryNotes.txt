@@ -87,6 +87,7 @@ Git commit: TBD
 50) The -d command line option, dedicated to the debugger, has been renamed to avoid duplication with the dsp one
 -- -d has been renamed by -D because another -d was also used for the dsp command line option
 51) Removed the sorting filter in the all watches window
+52) Fix the support of the DRAM size limit option in the heap allocation window
 
 Release 3 (13th November 2017)
 ------------------------------
