@@ -22,7 +22,7 @@
 // JPM  Sept./2018  Added the new Models and BIOS handler, a screenshot feature and source code files browsing
 // JPM   Oct./2018  Added search paths in the settings, breakpoints feature, cartdridge view menu
 // JPM  11/18/2018  Fix crash with non-debugger mode
-// JPM  April/2019  Added ELF sections check, added a save memory dump
+// JPM  April/2019  Added ELF sections check, added a save memory dump, added Console IO window
 //
 
 // FIXED:
@@ -64,6 +64,7 @@
 #include "settings.h"
 #include "version.h"
 #include "emustatus.h"
+#include "IOConsole.h"
 #include "debug/cpubrowser.h"
 #include "debug/m68kdasmbrowser.h"
 #include "debug/memorybrowser.h"
@@ -180,16 +181,22 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 	setWindowTitle(title);
 
+	// Windows common features
 	aboutWin = new AboutWindow(this);
 	helpWin = new HelpWindow(this);
 	filePickWin = new FilePickerWindow(this);
+	emuStatusWin = new EmuStatusWindow(this);
+	IOConsoleWin = new IOConsoleWindow(this);
+
+	// Windows alpine mode features
 	memBrowseWin = new MemoryBrowserWindow(this);
 	stackBrowseWin = new StackBrowserWindow(this);
-	emuStatusWin = new EmuStatusWindow(this);
 	cpuBrowseWin = new CPUBrowserWindow(this);
 	opBrowseWin = new OPBrowserWindow(this);
 	m68kDasmBrowseWin = new M68KDasmBrowserWindow(this);
 	riscDasmBrowseWin = new RISCDasmBrowserWindow(this);
+
+	// Windows debugger mode features
 	if (vjs.softTypeDebugger)
 	{
 		//VideoOutputWin = new VideoOutputWindow(this);
@@ -1081,7 +1088,7 @@ void MainWin::Configure(void)
 	// Just in case we crash before a clean exit...
 	WriteSettings();
 
-	DebuggerRefreshWindows();
+	RefreshWindows();
 }
 
 
@@ -1091,7 +1098,7 @@ void MainWin::Configure(void)
 void MainWin::Timer(void)
 {
 #if 0
-static uint32_t ntscTickCount;
+	static uint32_t ntscTickCount;
 	if (vjs.hardwareTypeNTSC)
 	{
 		ntscTickCount++;
@@ -1108,7 +1115,7 @@ static uint32_t ntscTickCount;
 		// Some machines can't handle this, so we give them the option to disable it. :-)
 		if (!plzDontKillMyComputer)
 		{
-//			if (!vjs.softTypeDebugger)
+			//			if (!vjs.softTypeDebugger)
 			{
 				// Random hash & trash
 				// We try to simulate an untuned tank circuit here... :-)
@@ -1128,22 +1135,25 @@ static uint32_t ntscTickCount;
 		HandleGamepads();
 		JaguarExecuteNew();
 		//if (!vjs.softTypeDebugger)
-			videoWidget->HandleMouseHiding();
+		videoWidget->HandleMouseHiding();
 
-static uint32_t refresh = 0;
+		static uint32_t refresh = 0;
 		// Do autorefresh on debug windows
 		// Have to be careful, too much causes the emulator to slow way down!
-		if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
+		if (refresh == vjs.refresh)
 		{
-			if (refresh == vjs.refresh)
+			if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 			{
 				AlpineRefreshWindows();
 				//memBrowseWin->RefreshContents();
 				//cpuBrowseWin->RefreshContents();
-				refresh = 0;
 			}
-			else
-				refresh++;
+			CommonRefreshWindows();
+			refresh = 0;
+		}
+		else
+		{
+			refresh++;
 		}
 	}
 
@@ -1247,7 +1257,9 @@ void MainWin::TogglePowerState(void)
 		WriteLog("GUI: Resetting Jaguar...\n");
 		JaguarReset();
 		DebuggerReset();
+		CommonReset();
 		DebuggerResetWindows();
+		CommonResetWindows();
 		DACPauseAudioThread(false);
 	}
 }
@@ -1293,7 +1305,7 @@ void MainWin::ToggleRunState(void)
 
 			cpuBrowseWin->HoldBPM();
 			cpuBrowseWin->HandleBPMContinue();
-			DebuggerRefreshWindows();
+			RefreshWindows();
 		}
 	}
 	else
@@ -1416,6 +1428,8 @@ void MainWin::Unpause(void)
 // Jaguar initialisation and load software file
 void MainWin::LoadSoftware(QString file)
 {
+	size_t adr;
+
 	running = false;							// Prevent bad things(TM) from happening...
 	pauseForFileSelector = false;				// Reset the file selector pause flag
 
@@ -1443,6 +1457,17 @@ void MainWin::LoadSoftware(QString file)
 	cartridgeLoaded = JaguarLoadFile(file.toUtf8().data());
 	SET32(jaguarMainRAM, 0, vjs.DRAM_size);						// Set stack in the M68000's Reset SP
 
+	// Get the Console Input/Output pointer
+	if ((adr = DBGManager_GetAdrFromSymbolName((char *)"OSJag_process")))
+	{
+		IOConsoleExist = (int *)&jagMemSpace[adr];
+		*IOConsoleExist = 0;
+	}
+	else
+	{
+		IOConsoleExist = NULL;
+	}
+
 	// This is icky because we've already done it
 // it gets worse :-P
 	if (!vjs.useJaguarBIOS)
@@ -1452,7 +1477,7 @@ void MainWin::LoadSoftware(QString file)
 
 	m68k_pulse_reset();
 
-// set the M68K in halt mode in case of a debug mode is used, so control is at user side
+	// set the M68K in halt mode in case of a debug mode is used, so control is at user side
 	if (vjs.softTypeDebugger)
 	{
 		m68k_set_reg(M68K_REG_A6, 0);
@@ -1471,6 +1496,7 @@ void MainWin::LoadSoftware(QString file)
 		}
 	}
 
+	// Display the Atari Jaguar software which is running
 	if ((!vjs.hardwareTypeAlpine || !vjs.softTypeDebugger) && !loadAndGo && jaguarRunAddress)
 	{
 		QString newTitle = QString("Virtual Jaguar " VJ_RELEASE_VERSION " Rx - Now playing: %1").arg(filePickWin->GetSelectedPrettyName());
@@ -1533,7 +1559,7 @@ void MainWin::ShowCartFilesListWin(void)
 }
 
 
-//
+// Display the save dump pickup file
 void MainWin::ShowSaveDumpAsWin(void)
 {
 	SaveDumpAsWin->show();
@@ -1545,7 +1571,7 @@ void MainWin::DebuggerTraceStepInto(void)
 {
 	JaguarStepInto();
 	videoWidget->updateGL();
-	DebuggerRefreshWindows();
+	RefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Step Into function !!!")
 #else
@@ -1567,7 +1593,8 @@ void MainWin::DebuggerRestart(void)
 	m68k_brk_hitcounts_reset();
 	bpmHitCounts = 0;
 	DebuggerResetWindows();
-	DebuggerRefreshWindows();
+	CommonResetWindows();
+	RefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Restart function !!!")
 #else
@@ -1581,7 +1608,7 @@ void MainWin::DebuggerTraceStepOver(void)
 {
 	JaguarStepOver(0);
 	videoWidget->updateGL();
-	DebuggerRefreshWindows();
+	RefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Step Over function !!!")
 #else
@@ -1724,6 +1751,17 @@ void MainWin::ShowMemory1BrowserWin(int NumWin)
 	{
 		mem1BrowseWin[NumWin]->show();
 		mem1BrowseWin[NumWin]->RefreshContents(NumWin);
+	}
+}
+
+
+// Display the console IO
+void MainWin::ShowIOConsoleWin(void)
+{
+	if (IOConsoleExist && *IOConsoleExist)
+	{
+		IOConsoleWin->show();
+		IOConsoleWin->RefreshContents();
 	}
 }
 
@@ -1980,6 +2018,17 @@ void MainWin::ReadUISettings(void)
 	// Video output information
 	zoomLevel = settings.value("zoom", 2).toInt();
 
+	// Emulator status UI information
+	pos = settings.value("emuStatusWinPos", QPoint(200, 200)).toPoint();
+	emuStatusWin->move(pos);
+	settings.value("emuStatusWinIsVisible", false).toBool() ? ShowEmuStatusWin() : void();
+
+	// Console Input/Output information
+	pos = settings.value("IOConsoleWinPos", QPoint(200, 200)).toPoint();
+	IOConsoleWin->move(pos);
+	size = settings.value("IOConsoleWinSize", QSize(400, 400)).toSize();
+	IOConsoleWin->resize(size);
+
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
@@ -1999,11 +2048,6 @@ void MainWin::ReadUISettings(void)
 		settings.value("stackBrowseWinIsVisible", false).toBool() ? ShowStackBrowserWin() : void();
 		size = settings.value("stackBrowseWinSize", QSize(400, 400)).toSize();
 		stackBrowseWin->resize(size);
-
-		// Emulator status UI information
-		pos = settings.value("emuStatusWinPos", QPoint(200, 200)).toPoint();
-		emuStatusWin->move(pos);
-		settings.value("emuStatusWinIsVisible", false).toBool() ? ShowEmuStatusWin() : void();
 
 		// OP (Object Processor) UI information
 		pos = settings.value("opBrowseWinPos", QPoint(200, 200)).toPoint();
@@ -2258,6 +2302,12 @@ void MainWin::WriteUISettings(void)
 	// Video output information
 	settings.setValue("zoom", zoomLevel);
 
+	// Common UI information
+	settings.setValue("emuStatusWinPos", emuStatusWin->pos());
+	settings.setValue("emuStatusWinIsVisible", emuStatusWin->isVisible());
+	settings.setValue("IOConsoleWinPos", IOConsoleWin->pos());
+	settings.setValue("IOConsoleWinSize", IOConsoleWin->size());
+
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
@@ -2268,8 +2318,6 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("stackBrowseWinPos", stackBrowseWin->pos());
 		settings.setValue("stackBrowseWinIsVisible", stackBrowseWin->isVisible());
 		settings.setValue("stackBrowseWinSize", stackBrowseWin->size());
-		settings.setValue("emuStatusWinPos", emuStatusWin->pos());
-		settings.setValue("emuStatusWinIsVisible", emuStatusWin->isVisible());
 		settings.setValue("opBrowseWinPos", opBrowseWin->pos());
 		settings.setValue("opBrowseWinIsVisible", opBrowseWin->isVisible());
 		settings.setValue("opBrowseWinSize", opBrowseWin->size());
@@ -2337,10 +2385,27 @@ void MainWin::AlpineRefreshWindows(void)
 	cpuBrowseWin->RefreshContents();
 	memBrowseWin->RefreshContents();
 	stackBrowseWin->RefreshContents();
-	emuStatusWin->RefreshContents();
 	opBrowseWin->RefreshContents();
 	riscDasmBrowseWin->RefreshContents();
 	m68kDasmBrowseWin->RefreshContents();
+}
+
+
+// 
+void MainWin::CommonResetWindows(void)
+{
+	if (IOConsoleExist && *IOConsoleExist)
+	{
+		*IOConsoleExist = 0;
+		IOConsoleWin->hide();
+	}
+}
+
+
+// Reset common
+void MainWin::CommonReset(void)
+{
+	IOConsoleWin->Reset();
 }
 
 
@@ -2369,10 +2434,27 @@ void MainWin::DebuggerResetWindows(void)
 }
 
 
+// Refresh common windows
+void MainWin::CommonRefreshWindows(void)
+{
+	emuStatusWin->RefreshContents();
+	ShowIOConsoleWin();
+	//IOConsoleWin->RefreshContents();
+}
+
+
 // Refresh view windows
 void MainWin::ViewRefreshWindows(void)
 {
 	CartFilesListWin->RefreshContents();
+}
+
+
+// 
+void MainWin::RefreshWindows(void)
+{
+	DebuggerRefreshWindows();
+	CommonRefreshWindows();
 }
 
 

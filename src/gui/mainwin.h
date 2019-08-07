@@ -22,11 +22,9 @@ class GLWidget;
 class AboutWindow;
 class HelpWindow;
 class FilePickerWindow;
+class IOConsoleWindow;
 //class VideoOutputWindow;
 //class DasmWindow;
-class m68KDasmWindow;
-class GPUDasmWindow;
-class DSPDasmWindow;
 class EmuStatusWindow;
 
 // Alpine
@@ -38,6 +36,9 @@ class M68KDasmBrowserWindow;
 class RISCDasmBrowserWindow;
 
 // Debugger
+class m68KDasmWindow;
+class GPUDasmWindow;
+class DSPDasmWindow;
 class AllWatchBrowserWindow;
 class LocalBrowserWindow;
 class CallStackBrowserWindow;
@@ -64,8 +65,12 @@ class MainWin: public QMainWindow
 		void SyncUI(void);
 		void DebuggerRefreshWindows(void);
 		void ViewRefreshWindows(void);
+		void RefreshWindows(void);
+		void CommonRefreshWindows(void);
 		void AlpineRefreshWindows(void);
 		void DebuggerResetWindows(void);
+		void CommonResetWindows(void);
+		void CommonReset(void);
 		void DebuggerReset(void);
 
 	protected:
@@ -104,6 +109,7 @@ class MainWin: public QMainWindow
 		void ShowCallStackBrowserWin(void);
 		void ShowHeapAllocatorBrowserWin(void);
 		void ShowMemory1BrowserWin(int NumWin);
+		void ShowIOConsoleWin(void);
 		void ShowExceptionVectorTableBrowserWin(void);
 		void ShowNewFunctionBreakpointWin(void);
 		void ShowBreakpointsWin(void);
@@ -141,6 +147,7 @@ class MainWin: public QMainWindow
 		HelpWindow *helpWin;
 		FilePickerWindow *filePickWin;
 		EmuStatusWindow *emuStatusWin;
+		IOConsoleWindow *IOConsoleWin;
 		MemoryBrowserWindow *memBrowseWin;
 		StackBrowserWindow *stackBrowseWin;
 		CPUBrowserWindow *cpuBrowseWin;
@@ -183,6 +190,7 @@ class MainWin: public QMainWindow
 		bool keyHeld[8];
 		bool fullScreen;
 		bool scannedSoftwareFolder;
+		int *IOConsoleExist = NULL;
 
 	public:
 		bool plzDontKillMyComputer;

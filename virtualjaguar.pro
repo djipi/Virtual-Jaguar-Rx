@@ -101,6 +101,7 @@ HEADERS = \
 	src/gui/mainwin.h \
 	src/gui/profile.h \
 	src/gui/emustatus.h \
+	src/gui/IOConsole.h \
 	src/gui/debug/cpubrowser.h \
 	src/gui/debug/m68kdasmbrowser.h \
 	src/gui/debug/memorybrowser.h \
@@ -133,6 +134,7 @@ HEADERS = \
 	src/crc32.h \
 	src/settings.h \
 	src/file.h \
+	src/cart.h \
 	src/LEB128.h
 
 SOURCES = \
@@ -156,6 +158,7 @@ SOURCES = \
 	src/gui/mainwin.cpp \
 	src/gui/profile.cpp \
 	src/gui/emustatus.cpp \
+	src/gui/IOConsole.cpp \
 	src/gui/debug/cpubrowser.cpp \
 	src/gui/debug/m68kdasmbrowser.cpp \
 	src/gui/debug/memorybrowser.cpp \
@@ -188,5 +191,6 @@ SOURCES = \
 	src/crc32.cpp \
 	src/settings.cpp \
 	src/file.cpp \
+	src/cart.cpp \
 	src/LEB128.cpp
 		
