@@ -76,7 +76,7 @@ Git commit: TBD
 40) Added the return address information in the call stack
 41) Added multiple breakpoints feature, and their key bindings, for functions only
 42) Added timer initialisation for the SDL setup
-43) Added a cartdridge view menu
+43) Added a cartridge view menu
 -- Added a window to display my own directory and his files list
 44) Debugger sources code clean-up
 45) Fix a crash when emulator, in non-debugger mode, opens the breakpoint UIs at launch
@@ -88,6 +88,7 @@ Git commit: TBD
 -- -d has been renamed by -D because another -d was also used for the dsp command line option
 51) Removed the sorting filter in the all watches window
 52) Fix the support of the DRAM size limit option in the heap allocation window
+53) Set cartridge view menu for debugger mode only
 
 Release 3 (13th November 2017)
 ------------------------------

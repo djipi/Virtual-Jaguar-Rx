@@ -20,9 +20,10 @@
 // JPM  11/04/2017  Added the local window
 // JPM  08/31/2018  Added the call stack window
 // JPM  Sept./2018  Added the new Models and BIOS handler, a screenshot feature and source code files browsing
-// JPM   Oct./2018  Added search paths in the settings, breakpoints feature, cartdridge view menu
+// JPM   Oct./2018  Added search paths in the settings, breakpoints feature, cartridge view menu
 // JPM  11/18/2018  Fix crash with non-debugger mode
 // JPM  April/2019  Added ELF sections check, added a save memory dump
+// JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only
 //
 
 // FIXED:
@@ -180,16 +181,21 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 	setWindowTitle(title);
 
+	// Windows common features
 	aboutWin = new AboutWindow(this);
 	helpWin = new HelpWindow(this);
 	filePickWin = new FilePickerWindow(this);
+	emuStatusWin = new EmuStatusWindow(this);
+	
+	// Windows alpine mode features
 	memBrowseWin = new MemoryBrowserWindow(this);
 	stackBrowseWin = new StackBrowserWindow(this);
-	emuStatusWin = new EmuStatusWindow(this);
 	cpuBrowseWin = new CPUBrowserWindow(this);
 	opBrowseWin = new OPBrowserWindow(this);
 	m68kDasmBrowseWin = new M68KDasmBrowserWindow(this);
 	riscDasmBrowseWin = new RISCDasmBrowserWindow(this);
+
+	// Windows debugger mode features
 	if (vjs.softTypeDebugger)
 	{
 		//VideoOutputWin = new VideoOutputWindow(this);
@@ -461,7 +467,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 		// Cart files list
 		CartFilesListAct = new QAction(QIcon(""), tr("Directory and files"), this);
-		CartFilesListAct->setStatusTip(tr("List of the files in the cartdridge's directory"));
+		CartFilesListAct->setStatusTip(tr("List of the files in the cartridge's directory structure"));
 		connect(CartFilesListAct, SIGNAL(triggered()), this, SLOT(ShowCartFilesListWin()));
 
 		// Memory windows
@@ -537,13 +543,15 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	// Alpine and debugger menus
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
-		// Create debug & view menu
+		// Create debug menu
 		debugMenu = menuBar()->addMenu(tr("&Debug"));
-		viewMenu = menuBar()->addMenu(tr("&View"));
 
 		// Create debugger menu
 		if (vjs.softTypeDebugger)
 		{
+			// Create view menu
+			viewMenu = menuBar()->addMenu(tr("&View"));
+
 			// Cart menu
 			viewCartMenu = viewMenu->addMenu(tr("&Cartridge"));
 			viewCartMenu->addAction(CartFilesListAct);
@@ -1081,7 +1089,7 @@ void MainWin::Configure(void)
 	// Just in case we crash before a clean exit...
 	WriteSettings();
 
-	DebuggerRefreshWindows();
+	RefreshWindows();
 }
 
 
@@ -1133,16 +1141,19 @@ static uint32_t ntscTickCount;
 static uint32_t refresh = 0;
 		// Do autorefresh on debug windows
 		// Have to be careful, too much causes the emulator to slow way down!
+		if (refresh == vjs.refresh)
+		{
 		if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 		{
-			if (refresh == vjs.refresh)
-			{
 				AlpineRefreshWindows();
 				//memBrowseWin->RefreshContents();
 				//cpuBrowseWin->RefreshContents();
+			}
+			CommonRefreshWindows();
 				refresh = 0;
 			}
 			else
+		{
 				refresh++;
 		}
 	}
@@ -1247,7 +1258,9 @@ void MainWin::TogglePowerState(void)
 		WriteLog("GUI: Resetting Jaguar...\n");
 		JaguarReset();
 		DebuggerReset();
+		CommonReset();
 		DebuggerResetWindows();
+		CommonResetWindows();
 		DACPauseAudioThread(false);
 	}
 }
@@ -1293,7 +1306,7 @@ void MainWin::ToggleRunState(void)
 
 			cpuBrowseWin->HoldBPM();
 			cpuBrowseWin->HandleBPMContinue();
-			DebuggerRefreshWindows();
+			RefreshWindows();
 		}
 	}
 	else
@@ -1471,6 +1484,7 @@ void MainWin::LoadSoftware(QString file)
 		}
 	}
 
+	// Display the Atari Jaguar software which is running
 	if ((!vjs.hardwareTypeAlpine || !vjs.softTypeDebugger) && !loadAndGo && jaguarRunAddress)
 	{
 		QString newTitle = QString("Virtual Jaguar " VJ_RELEASE_VERSION " Rx - Now playing: %1").arg(filePickWin->GetSelectedPrettyName());
@@ -1525,7 +1539,7 @@ void MainWin::ShowNewFunctionBreakpointWin(void)
 }
 
 
-// Display list of files found in cartdridge
+// Display list of files found in cartridge
 void MainWin::ShowCartFilesListWin(void)
 {
 	CartFilesListWin->show();
@@ -1533,7 +1547,7 @@ void MainWin::ShowCartFilesListWin(void)
 }
 
 
-//
+// Display the save dump pickup file
 void MainWin::ShowSaveDumpAsWin(void)
 {
 	SaveDumpAsWin->show();
@@ -1545,7 +1559,7 @@ void MainWin::DebuggerTraceStepInto(void)
 {
 	JaguarStepInto();
 	videoWidget->updateGL();
-	DebuggerRefreshWindows();
+	RefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Step Into function !!!")
 #else
@@ -1567,7 +1581,8 @@ void MainWin::DebuggerRestart(void)
 	m68k_brk_hitcounts_reset();
 	bpmHitCounts = 0;
 	DebuggerResetWindows();
-	DebuggerRefreshWindows();
+	CommonResetWindows();
+	RefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Restart function !!!")
 #else
@@ -1581,7 +1596,7 @@ void MainWin::DebuggerTraceStepOver(void)
 {
 	JaguarStepOver(0);
 	videoWidget->updateGL();
-	DebuggerRefreshWindows();
+	RefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Step Over function !!!")
 #else
@@ -1980,6 +1995,11 @@ void MainWin::ReadUISettings(void)
 	// Video output information
 	zoomLevel = settings.value("zoom", 2).toInt();
 
+// Emulator status UI information
+	pos = settings.value("emuStatusWinPos", QPoint(200, 200)).toPoint();
+	emuStatusWin->move(pos);
+	settings.value("emuStatusWinIsVisible", false).toBool() ? ShowEmuStatusWin() : void();
+	
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
@@ -1999,11 +2019,6 @@ void MainWin::ReadUISettings(void)
 		settings.value("stackBrowseWinIsVisible", false).toBool() ? ShowStackBrowserWin() : void();
 		size = settings.value("stackBrowseWinSize", QSize(400, 400)).toSize();
 		stackBrowseWin->resize(size);
-
-		// Emulator status UI information
-		pos = settings.value("emuStatusWinPos", QPoint(200, 200)).toPoint();
-		emuStatusWin->move(pos);
-		settings.value("emuStatusWinIsVisible", false).toBool() ? ShowEmuStatusWin() : void();
 
 		// OP (Object Processor) UI information
 		pos = settings.value("opBrowseWinPos", QPoint(200, 200)).toPoint();
@@ -2075,7 +2090,7 @@ void MainWin::ReadUISettings(void)
 		size = settings.value("CallStackBrowseWinSize", QSize(400, 400)).toSize();
 		CallStackBrowseWin->resize(size);
 
-		// Cartdridge directory and files UI information
+		// cartridge directory and files UI information
 		pos = settings.value("CartFilesListWinPos", QPoint(200, 200)).toPoint();
 		CartFilesListWin->move(pos);
 		settings.value("CartFilesListWinIsVisible", false).toBool() ? ShowCartFilesListWin() : void();
@@ -2258,6 +2273,10 @@ void MainWin::WriteUISettings(void)
 	// Video output information
 	settings.setValue("zoom", zoomLevel);
 
+	// Common UI information
+	settings.setValue("emuStatusWinPos", emuStatusWin->pos());
+	settings.setValue("emuStatusWinIsVisible", emuStatusWin->isVisible());
+	
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
@@ -2268,8 +2287,6 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("stackBrowseWinPos", stackBrowseWin->pos());
 		settings.setValue("stackBrowseWinIsVisible", stackBrowseWin->isVisible());
 		settings.setValue("stackBrowseWinSize", stackBrowseWin->size());
-		settings.setValue("emuStatusWinPos", emuStatusWin->pos());
-		settings.setValue("emuStatusWinIsVisible", emuStatusWin->isVisible());
 		settings.setValue("opBrowseWinPos", opBrowseWin->pos());
 		settings.setValue("opBrowseWinIsVisible", opBrowseWin->isVisible());
 		settings.setValue("opBrowseWinSize", opBrowseWin->size());
@@ -2337,10 +2354,21 @@ void MainWin::AlpineRefreshWindows(void)
 	cpuBrowseWin->RefreshContents();
 	memBrowseWin->RefreshContents();
 	stackBrowseWin->RefreshContents();
-	emuStatusWin->RefreshContents();
 	opBrowseWin->RefreshContents();
 	riscDasmBrowseWin->RefreshContents();
 	m68kDasmBrowseWin->RefreshContents();
+}
+
+
+// 
+void MainWin::CommonResetWindows(void)
+{
+}
+
+
+// Reset common
+void MainWin::CommonReset(void)
+{
 }
 
 
@@ -2369,10 +2397,25 @@ void MainWin::DebuggerResetWindows(void)
 }
 
 
+// Refresh common windows
+void MainWin::CommonRefreshWindows(void)
+{
+	emuStatusWin->RefreshContents();
+}
+
+
 // Refresh view windows
 void MainWin::ViewRefreshWindows(void)
 {
 	CartFilesListWin->RefreshContents();
+}
+
+
+// 
+void MainWin::RefreshWindows(void)
+{
+	DebuggerRefreshWindows();
+	CommonRefreshWindows();
 }
 
 

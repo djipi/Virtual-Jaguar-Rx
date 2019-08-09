@@ -24,9 +24,6 @@ class HelpWindow;
 class FilePickerWindow;
 //class VideoOutputWindow;
 //class DasmWindow;
-class m68KDasmWindow;
-class GPUDasmWindow;
-class DSPDasmWindow;
 class EmuStatusWindow;
 
 // Alpine
@@ -38,6 +35,9 @@ class M68KDasmBrowserWindow;
 class RISCDasmBrowserWindow;
 
 // Debugger
+class m68KDasmWindow;
+class GPUDasmWindow;
+class DSPDasmWindow;
 class AllWatchBrowserWindow;
 class LocalBrowserWindow;
 class CallStackBrowserWindow;
@@ -64,8 +64,12 @@ class MainWin: public QMainWindow
 		void SyncUI(void);
 		void DebuggerRefreshWindows(void);
 		void ViewRefreshWindows(void);
+		void RefreshWindows(void);
+		void CommonRefreshWindows(void);
 		void AlpineRefreshWindows(void);
 		void DebuggerResetWindows(void);
+		void CommonResetWindows(void);
+		void CommonReset(void);
 		void DebuggerReset(void);
 
 	protected:

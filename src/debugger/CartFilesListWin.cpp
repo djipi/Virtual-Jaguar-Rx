@@ -1,5 +1,5 @@
 //
-// CartFilesListWin.cpp - List files in the cartdridge
+// CartFilesListWin.cpp - List files in the cartridge
 //
 // by Jean-Paul Mari
 //
@@ -8,6 +8,7 @@
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JPM   Oct./2018  Created this file, and changed position of the status bar
+// JPM   Aug./2019  Update texts descriptions
 //
 
 // TO DO:
@@ -39,7 +40,7 @@ nbItem(0),
 CartUsedBytes(0),
 CartDirType(CFL_NOTYPE)
 {
-	setWindowTitle(tr("Cartdridge directory & files"));
+	setWindowTitle(tr("cartridge directory & files"));
 
 	// Set the font
 	QFont fixedFont("Lucida Console", 8, QFont::Normal);
@@ -118,7 +119,7 @@ void CartFilesListWindow::RefreshContents(void)
 					if ((CartDirectory = (CARTDIRINFO *)CreateInfos()))
 					{
 						UpdateInfos();
-						sprintf(msg, "%u files | %u bytes in cartdridge", (unsigned int)CartNbrFiles, (unsigned int)CartUsedBytes);
+						sprintf(msg, "%u files | %u bytes in cartridge", (unsigned int)CartNbrFiles, (unsigned int)CartUsedBytes);
 						Error = CFL_NOERROR;
 					}
 					else
@@ -165,7 +166,7 @@ void CartFilesListWindow::RefreshContents(void)
 }
 
 
-// Get files number in the directory
+// Get files number in the cartridge directory
 size_t CartFilesListWindow::GetNbrFiles(void)
 {
 	switch (CartDirType)
@@ -181,7 +182,7 @@ size_t CartFilesListWindow::GetNbrFiles(void)
 }
 
 
-// Get directory type
+// Get cartridge directory type
 size_t CartFilesListWindow::GetDirType(void)
 {
 	if (DBGManager_GetAdrFromSymbolName((char *)"OSJAG_Directory"))
@@ -225,7 +226,7 @@ void CartFilesListWindow::GetFileInfos(CARTDIRINFO *Ptr, size_t index)
 }
 
 
-// Create information from the directory information
+// Create information from the cartridge directory information
 void *CartFilesListWindow::CreateInfos(void)
 {
 	CARTDIRINFO *Ptr = (CARTDIRINFO *)calloc(CartNbrFiles, sizeof(CARTDIRINFO));
