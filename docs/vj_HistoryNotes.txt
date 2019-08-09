@@ -89,6 +89,7 @@ Git commit: TBD
 51) Removed the sorting filter in the all watches window
 52) Fix the support of the DRAM size limit option in the heap allocation window
 53) Set cartridge view menu for debugger mode only
+54) Prevent crash in case of call stack is out of range
 
 Release 3 (13th November 2017)
 ------------------------------

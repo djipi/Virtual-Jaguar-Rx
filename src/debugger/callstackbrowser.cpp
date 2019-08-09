@@ -10,16 +10,19 @@
 // JPM  08/31/2018  Created this file
 // JPM  09/12/2018  Added a status bar and better status report
 // JPM  10/20/2018  Added the return address information in the call stack
+// JPM  08/09/2019  Prevent crash in case of call stack is out of range
 
 // STILL TO DO:
 // To set the information display at the right
-// To use DWARF frame information
+// To use DWARF frame information?
+// To check if call stack pointer is used (DWARF information?)
 //
 
 #include "debugger/callstackbrowser.h"
 #include "memory.h"
 #include "debugger/DBGManager.h"
 #include "m68000/m68kinterface.h"
+#include "settings.h"
 
 
 // 
@@ -82,7 +85,8 @@ void CallStackBrowserWindow::RefreshContents(void)
 	QString CallStack;
 	char string[1024];
 #else
-	size_t NbRaw = 0;
+	int NbRaw = 0;
+	size_t NumError = 0;
 	QString FunctionName;
 #endif
 
@@ -93,33 +97,55 @@ void CallStackBrowserWindow::RefreshContents(void)
 #endif
 		if ((a6 = m68k_get_reg(NULL, M68K_REG_A6)) && DBGManager_GetType())
 		{
-			while ((Sa6 = a6))
+			while ((Sa6 = a6) && !NumError)
 			{
-				a6 = GET32(jaguarMainRAM, Sa6);
-				ret = GET32(jaguarMainRAM, Sa6 + 4);
-#ifdef CS_LAYOUTTEXTS
-				sprintf(string, "0x%06X | Ret: 0x%06X | From: %s - 0x%06X | Line: %s", Sa6, ret, (FuncName = DBGManager_GetFunctionName(ret)), (unsigned int)DBGManager_GetAdrFromSymbolName(FuncName), DBGManager_GetLineSrcFromAdr(ret, DBG_NO_TAG));
-				CallStack += QString(string);
-				if (a6)
+				if ((Sa6 >= (m68k_get_reg(NULL, M68K_REG_SP) - 4)) && (Sa6 < vjs.DRAM_size))
 				{
-					CallStack += QString("<br>");
-				}
+					a6 = GET32(jaguarMainRAM, Sa6);
+					ret = GET32(jaguarMainRAM, Sa6 + 4);
+#ifdef CS_LAYOUTTEXTS
+					sprintf(string, "0x%06X | Ret: 0x%06X | From: %s - 0x%06X | Line: %s", Sa6, ret, (FuncName = DBGManager_GetFunctionName(ret)), (unsigned int)DBGManager_GetAdrFromSymbolName(FuncName), DBGManager_GetLineSrcFromAdr(ret, DBG_NO_TAG));
+					CallStack += QString(string);
+					if (a6)
+					{
+						CallStack += QString("<br>");
+					}
 #else
-				model->insertRow(NbRaw);
-				model->setItem(NbRaw, 0, new QStandardItem(QString("%1").arg((FuncName = DBGManager_GetFunctionName(ret)) ? FuncName : "(N/A)")));
-				FunctionName = QString(FuncName = DBGManager_GetLineSrcFromAdr(ret, DBG_NO_TAG));
-				FunctionName.replace("&nbsp;", " ");
-				model->setItem(NbRaw, 1, new QStandardItem(QString("%1").arg(FuncName ? FunctionName : "(N/A)")));
-				sprintf(msg, "0x%06X", ret);
-				model->setItem(NbRaw++, 2, new QStandardItem(QString("%1").arg(msg)));
+					model->insertRow(NbRaw);
+					model->setItem(NbRaw, 0, new QStandardItem(QString("%1").arg((FuncName = DBGManager_GetFunctionName(ret)) ? FuncName : "(N/A)")));
+					FunctionName = QString(FuncName = DBGManager_GetLineSrcFromAdr(ret, DBG_NO_TAG));
+					FunctionName.replace("&nbsp;", " ");
+					model->setItem(NbRaw, 1, new QStandardItem(QString("%1").arg(FuncName ? FunctionName : "(N/A)")));
+					sprintf(msg, "0x%06X", ret);
+					model->setItem(NbRaw++, 2, new QStandardItem(QString("%1").arg(msg)));
+				}
+				else
+				{
+					NumError = 0x1;
+				}
 #endif
 			}
 #ifdef CS_LAYOUTTEXTS
 			text->clear();
 			text->setText(CallStack);
 #endif
-			sprintf(msg, "Ready");
-			Error = CS_NOERROR;
+			switch (NumError)
+			{
+			case 0:
+				sprintf(msg, "Ready");
+				Error = CS_NOERROR;
+				break;
+
+			case 0x1:
+				sprintf(msg, "Call Stack out of range");
+				Error = CS_ERROR;
+				break;
+
+			default:
+				sprintf(msg, "Call Stack in limbo");
+				Error = CS_WARNING;
+				break;
+			}
 		}
 		else
 		{
