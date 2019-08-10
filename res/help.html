@@ -178,11 +178,13 @@
 <li>Display M68000 opcodes</li>
 <li>Display HW labels</li>
 <li>Display source filename</li>
+<li>ELF sections check</li>
 </ul>
 <p><strong>Disassembly lines</strong>&nbsp;represent the number of disassembly lines to display in the M68000 tracing window. This doesn't include the number of source lines displayed.</p>
 <p><strong>Display M68000 opcode</strong>&nbsp;allows or not the opcode display. Can be useful in case of user prefers to see the disassembly only.</p>
 <p><strong>Display HW labels</strong>&nbsp;allows or not the name of the Jaguar hardware registers as reported in the official documentation.</p>
 <p><strong>Display source filename</strong>&nbsp;allows or not the source code filename display depend the disassembly in the M68000 tracing window.</p>
+<p><strong>ELF sections check</strong>&nbsp;allows or not potential unknown ELF section, it will stop, or not stop, the sections decoding.</p>
 <p>When started in Alpine mode, or in Debugger mode, a specific tab is made available in the configuration dialogue which gives you the following options:</p>
 <ul>
 <li>ROM to load</li>
@@ -199,12 +201,18 @@
 <li>Restart</li>
 <li>Step Into</li>
 <li>Step Over</li>
+<li>Breakpoints</li>
+<li>New Function Breakpoint</li>
+<li>Delete All Breakpoints</li>
+<li>Disable All Breakpoints</li>
 <li>Exception Vector Table</li>
 <li>All Watch</li>
 <li>Locals</li>
 <li>Call Stack</li>
 <li>Heap Allocator</li>
 <li>Memory (1-4)</li>
+<li>Save Dump As...</li>
+<li>Cartridge directory and files list.</li>
 </ul>
 <h3>Restart</h3>
 <p>Restart M68000 code (PC) and the stack (SP) pointer to the original ones provided in the ROM.</p>
@@ -212,6 +220,14 @@
 <p>Trace into M68000 instruction, similar to a step by step tracing.</p>
 <h3>Step Over</h3>
 <p>Trace over M68000 instruction such as jsr/bsr, otherwise this feature functions like a Step Into.</p>
+<h3>Breakpoints</h3>
+<p>List the breakpoints and their status. The first breakpoint represents the breakpoint set via the CPU browser, also named as BPM.</p>
+<h3>New Function Breakpoint</h3>
+<p>Add breakpoint to a function.</p>
+<h3>Delete All Breakpoints</h3>
+<p>Delete all breakpoints, also reset the BPM.</p>
+<h3>Disable All Breakpoints</h3>
+<p>Disable all breakpoints, and also disable BPM.</p>
 <h3>Exception Vector Table</h3>
 <p>Display a partial table of the M68000 exception vectors as reported by Motorola.</p>
 <h3>All Watch</h3>
@@ -224,6 +240,10 @@
 <p>Display the status of all memory allocations. It uses a specific structure memory allocation, if such structure is not found then nothing will be displayed.</p>
 <h3>Memory (1-4)</h3>
 <p>This 4 independent windows lets you inspect <em>Virtual Jaguar</em>&rsquo;s emulated memory space. The <strong>PgDn</strong> key will advance the top of the window&rsquo;s memory location by 480 bytes, and <strong>PgUp</strong> will go back by the same amount. The <strong>Plus (+)</strong> key will advance the top of the window&rsquo;s memory location by 16 bytes, and <strong>Minus (-)</strong> will go back by the same amount. Entering a memory location, in hexadecimal, label or decimal, in the edit field and pressing the <strong>Go</strong> button will display memory from that location. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
+<h3>Save Dump As...</h3>
+<p>Save a memory portion to a file.</p>
+<h3>Cartridge directory and files list</h3>
+<p>List the cartridge's directory and files; available only if specific structure is used.</p>
 <h3><em>Main window</em></h3>
 <p>In the debugger mode, the main window doesn't display anymore the video output; it is replaced by a source code files viewer and a disassembly window made of tabs to allow tracing / display of code.</p>
 <p><strong>Source code files</strong></p>
@@ -244,7 +264,7 @@
 <h3>Stack Browser</h3>
 <p>This window lets you inspect <em>Virtual Jaguar</em>&rsquo;s emulated memory stack (SP) space. The <strong>PgDn</strong> key will advance the top of the window&rsquo;s memory location by 480 bytes, and <strong>PgUp</strong> will go back by the same amount. The <strong>Plus (+)</strong> key will advance the top of the window&rsquo;s memory location by 16 bytes, and <strong>Minus (-)</strong> will go back by the same amount. Entering a memory location, in hexadecimal, in the edit field and pressing the <strong>Go</strong> button will display memory from that location. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
 <h3>CPU Browser</h3>
-<p>This window shows the state of the various CPUs in the emulated Jaguar. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
+<p>This window shows the state of the various CPUs in the emulated Jaguar, a breakpoint can also be set via the BPM setting. The window can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
 <h3>OP Browser</h3>
 <p>This window shows the current state of object list that the Object Processor is pointing to. Note that most of the time, this will likely show an object list that has had its objects processed. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
 <h3>M68K Disassembly Browser</h3>

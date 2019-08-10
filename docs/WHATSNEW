@@ -1,3 +1,24 @@
+Virtual Jaguar v2.1.3 R4 GCC/Qt
+-------------------------------
+
+* Fixed a crash legacy issue when emulator launches in Alpine mode without a valid rom
+* Stability improvements for the DWARF information decoding, the all watch, and the debugger memory windows
+* Improvements and fixes for the Heap allocation, the Alpine tab, the emulator status, Local & all Watch variables windows
+* Debugger mode improvements, better source code file reading and ELF/DWARF structures decoding
+* Breakpoint / alert box may now occur in case of writing at unknown memory location or in case of ROM writing
+* UI modifications mostly for the debugger mode, key bindings, and icons
+* Added screenshot & call stack window features, Jaguar model & BIOS configurations, and a source code files list viewer
+* Added multiple breakpoints feature but only for M68K functions
+* Added a Save Dump As... feature to save a memory zone to a file
+* Added a cartdridge view menu to display cartdridge directory system and his files list
+* Added some log information for the emulator initialisations
+* Added search paths in case of missing DWARF directories information
+* Added ELF sections check so a potential unknown section will stop, or not stop, the ELF structure decoding
+* Minor misspellings fixes and text help update
+* The -d command line option, dedicated to the debugger, has been renamed with -D
+* Updates for the setup registries
+
+
 Virtual Jaguar v2.1.3 R3 GCC/Qt
 -------------------------------
 
