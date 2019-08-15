@@ -1460,7 +1460,7 @@ unsigned int m68k_read_memory_32(unsigned int address)
 }
 
 
-//
+// Alert message in case of writing to unknown memory location
 bool m68k_write_unknown_alert(unsigned int address, char *bits, unsigned int value)
 {
 	QString msg;
@@ -1468,58 +1468,55 @@ bool m68k_write_unknown_alert(unsigned int address, char *bits, unsigned int val
 
 	msg.sprintf("$%06x: Writing at this unknown memory location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
 	msgBox.setText(msg);
-	msgBox.setStandardButtons(QMessageBox::Cancel);
-	msgBox.setDefaultButton(QMessageBox::Cancel);
+	msgBox.setStandardButtons(QMessageBox::Abort);
+	msgBox.setDefaultButton(QMessageBox::Abort);
 	msgBox.exec();
 	return M68KDebugHalt();
 }
 
 
-// 
+// Alert message in case of writing to cartridge/ROM memory location
 bool m68k_write_cartridge_alert(unsigned int address, char *bits, unsigned int value)
 {
-	QString msg;
-	QMessageBox msgBox;
-
-	msg.sprintf("$%06x: Writing at this ROM cartridge location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
-#if 1
-	msgBox.setText(msg);
-
-	if (!M68KDebugHaltStatus() && !strstr(bits, "32"))
+	if (!M68KDebugHaltStatus())
 	{
+		QString msg;
+		QMessageBox msgBox;
+
+		msg.sprintf("$%06x: Writing at this ROM cartridge location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
+		msgBox.setText(msg);
+
 		msgBox.setInformativeText("Do you want to continue?");
-		msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-		msgBox.setDefaultButton(QMessageBox::Cancel);
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+
+		int retVal = msgBox.exec();
+
+		if (retVal == QMessageBox::Yes)
+		{
+			return false;
+		}
+		else
+		{
+			return M68KDebugHalt();
+		}
 	}
 	else
 	{
-		msgBox.setStandardButtons(QMessageBox::Cancel);
-		msgBox.setDefaultButton(QMessageBox::Cancel);
-	}
-
-	int retVal = msgBox.exec();
-#endif
-#if 0
-	QMessageBox::StandardButton retVal = QMessageBox::question(this, tr("Remove Mapping"), msg, QMessageBox::No | QMessageBox::Yes, QMessageBox::No);
-#endif
-
-	if (retVal == QMessageBox::Ok)
-	{
-		return false;
-	}
-	else
-	{
-		return M68KDebugHalt();
+		return 1;
 	}
 }
 
 
-// 
+// Check memory write location
+// BPM & cartridge/ROM detections
 bool m68k_write_memory_check(unsigned int address, char *bits, unsigned int value)
 {
+	unsigned int address1;
+
 #ifdef ALPINE_FUNCTIONS
 	// Check if breakpoint on memory is active, and deal with it
-	if (bpmActive && (address == bpmAddress1))
+	if (!M68KDebugHaltStatus() && bpmActive && (address == bpmAddress1))
 	{
 		return M68KDebugHalt();
 	}
@@ -1527,223 +1524,203 @@ bool m68k_write_memory_check(unsigned int address, char *bits, unsigned int valu
 #endif
 	{
 		// Rom writing authorisation detection
-		if (!vjs.allowWritesToROM && ((address >= 0x800000) && (address < 0xDFFF00)))
+		if (!vjs.allowWritesToROM)
 		{
-			return m68k_write_cartridge_alert(address, bits, value);
-		}
-		else
-		{
-			//if ((address & 0xFF000000))
-			//{
-			//	return m68k_write_unknown_alert(address, bits, value);
-			//}
-			//else
-			//{
-				return false;
-			//}
-		}
-	}
-}
-
-
-// 
-void m68k_write_memory_8(unsigned int address, unsigned int value)
-{
-#if 1
-	m68k_write_memory_check(address, "8", value);
-#else
-#ifdef ALPINE_FUNCTIONS
-	// Check if breakpoint on memory is active, and deal with it
-	if (bpmActive && (address == bpmAddress1))
-	{
-		M68KDebugHalt();
-	}
-	else
-#endif
-	{
-		// Rom writing authorisation detection
-		if (!vjs.allowWritesToROM && ((address >= 0x800000) && (address < 0xe00000)))
-		{
-			m68k_write_cartridge_alert(address, "8", value);
-		}
-	}
-#endif
-
-	// Musashi does this automagically for you, UAE core does not :-P
-	//address &= 0x00FFFFFF;
-#ifdef CPU_DEBUG_MEMORY
-	// Note that the Jaguar only has 2M of RAM, not 4!
-	if ((address >= 0x000000) && (address <= 0x1FFFFF))
-	{
-		if (startMemLog)
-		{
-			if (value > writeMemMax[address])
-				writeMemMax[address] = value;
-			if (value < writeMemMin[address])
-				writeMemMin[address] = value;
-		}
-	}
-#endif
-/*if (address == 0x4E00)
-	WriteLog("M68K: Writing %02X at %08X, PC=%08X\n", value, address, m68k_get_reg(NULL, M68K_REG_PC));//*/
-//if ((address >= 0x1FF020 && address <= 0x1FF03F) || (address >= 0x1FF820 && address <= 0x1FF83F))
-//	WriteLog("M68K: Writing %02X at %08X\n", value, address);
-//WriteLog("[WM8  PC=%08X] Addr: %08X, val: %02X\n", m68k_get_reg(NULL, M68K_REG_PC), address, value);
-/*if (effect_start)
-	if (address >= 0x18FA70 && address < (0x18FA70 + 8000))
-		WriteLog("M68K: Byte %02X written at %08X by 68K\n", value, address);//*/
-//$53D0
-/*if (address >= 0x53D0 && address <= 0x53FF)
-	printf("M68K: Writing byte $%02X at $%08X, PC=$%08X\n", value, address, m68k_get_reg(NULL, M68K_REG_PC));//*/
-//Testing AvP on UAE core...
-//000075A0: FFFFF80E B6320220 (BITMAP)
-/*if (address == 0x75A0 && value == 0xFF)
-	printf("M68K: (8) Tripwire hit...\n");//*/
-
-#ifndef USE_NEW_MMU
-	// Note that the Jaguar only has 2M of RAM, not 4!
-	if ((address >= 0x000000) && (address <= (vjs.DRAM_size - 1)))
-	{
-		jaguarMainRAM[address] = value;
-	}
-	else
-	{
-		if ((address >= 0xDFFF00) && (address <= 0xDFFFFF))
-		{
-			CDROMWriteByte(address, value, M68K);
-		}
-		else
-		{
-			if ((address >= 0xF00000) && (address <= 0xF0FFFF))
+			// Calcul the end address
+			if (strstr(bits, "32"))
 			{
-				TOMWriteByte(address, value, M68K);
+				address1 = address + 3;
 			}
 			else
 			{
-				if ((address >= 0xF10000) && (address <= 0xF1FFFF))
+				if (strstr(bits, "16"))
 				{
-					JERRYWriteByte(address, value, M68K);
+					address1 = address + 1;
 				}
 				else
 				{
-					jaguar_unknown_writebyte(address, value, M68K);
+					address1 = address;
 				}
 			}
+
+			// Rom writing detection
+			if ((address >= 0x800000) && (address1 < 0xDFFF00))
+			{
+				return m68k_write_cartridge_alert(address, bits, value);
+			}
 		}
+
+		return false;
 	}
-#else
-	MMUWrite8(address, value, M68K);
-#endif
 }
 
 
-// 
-void m68k_write_memory_16(unsigned int address, unsigned int value)
+// Memory write location on 8 bits
+void m68k_write_memory_8(unsigned int address, unsigned int value)
 {
-#if 1
-	if (!M68KDebugHaltStatus())
+	// Check memory write location on 8 bits
+	if (!m68k_write_memory_check(address, "8", value))
 	{
-		m68k_write_memory_check(address, "16", value);
-	}
-#else
-#ifdef ALPINE_FUNCTIONS
-	// Check if breakpoint on memory is active, and deal with it
-	if (bpmActive && address == bpmAddress1)
-	{
-		M68KDebugHalt();
-	}
-	else
-#endif
-	{
-		// Rom writing authorisation detection
-		if (!vjs.allowWritesToROM && ((address >= 0x800000) && (address < 0xe00000)))
-		{
-			if (!M68KDebugHaltStatus())
-			{
-				m68k_write_cartridge_alert(address, "16", value);
-			}
-		}
-	}
-#endif
-
-	// Musashi does this automagically for you, UAE core does not :-P
-	//address &= 0x00FFFFFF;
+		// Musashi does this automagically for you, UAE core does not :-P
+		//address &= 0x00FFFFFF;
 #ifdef CPU_DEBUG_MEMORY
 	// Note that the Jaguar only has 2M of RAM, not 4!
-	if ((address >= 0x000000) && (address <= 0x1FFFFE))
-	{
-		if (startMemLog)
+		if ((address >= 0x000000) && (address <= 0x1FFFFF))
 		{
-			uint8_t hi = value >> 8, lo = value & 0xFF;
-
-			if (hi > writeMemMax[address])
-				writeMemMax[address] = hi;
-			if (hi < writeMemMin[address])
-				writeMemMin[address] = hi;
-
-			if (lo > writeMemMax[address+1])
-				writeMemMax[address+1] = lo;
-			if (lo < writeMemMin[address+1])
-				writeMemMin[address+1] = lo;
+			if (startMemLog)
+			{
+				if (value > writeMemMax[address])
+					writeMemMax[address] = value;
+				if (value < writeMemMin[address])
+					writeMemMin[address] = value;
+			}
 		}
-	}
 #endif
-/*if (address == 0x4E00)
-	WriteLog("M68K: Writing %02X at %08X, PC=%08X\n", value, address, m68k_get_reg(NULL, M68K_REG_PC));//*/
-//if ((address >= 0x1FF020 && address <= 0x1FF03F) || (address >= 0x1FF820 && address <= 0x1FF83F))
-//	WriteLog("M68K: Writing %04X at %08X\n", value, address);
-//WriteLog("[WM16 PC=%08X] Addr: %08X, val: %04X\n", m68k_get_reg(NULL, M68K_REG_PC), address, value);
-//if (address >= 0xF02200 && address <= 0xF0229F)
-//	WriteLog("M68K: Writing to blitter --> %04X at %08X\n", value, address);
-//if (address >= 0x0E75D0 && address <= 0x0E75E7)
-//	WriteLog("M68K: Writing %04X at %08X, M68K PC=%08X\n", value, address, m68k_get_reg(NULL, M68K_REG_PC));
-/*extern uint32_t totalFrames;
-if (address == 0xF02114)
-	WriteLog("M68K: Writing to GPU_CTRL (frame:%u)... [M68K PC:%08X]\n", totalFrames, m68k_get_reg(NULL, M68K_REG_PC));
-if (address == 0xF02110)
-	WriteLog("M68K: Writing to GPU_PC (frame:%u)... [M68K PC:%08X]\n", totalFrames, m68k_get_reg(NULL, M68K_REG_PC));//*/
-//if (address >= 0xF03B00 && address <= 0xF03DFF)
-//	WriteLog("M68K: Writing %04X to %08X...\n", value, address);
-
-/*if (address == 0x0100)//64*4)
-	WriteLog("M68K: Wrote word to VI vector value %04X...\n", value);//*/
-/*if (effect_start)
-	if (address >= 0x18FA70 && address < (0x18FA70 + 8000))
-		WriteLog("M68K: Word %04X written at %08X by 68K\n", value, address);//*/
-/*	if (address == 0x51136 || address == 0x51138 || address == 0xFB074 || address == 0xFB076
-		|| address == 0x1AF05E)
-		WriteLog("[WM16  PC=%08X] Addr: %08X, val: %04X\n", m68k_get_reg(NULL, M68K_REG_PC), address, value);//*/
-//$53D0
-/*if (address >= 0x53D0 && address <= 0x53FF)
-	printf("M68K: Writing word $%04X at $%08X, PC=$%08X\n", value, address, m68k_get_reg(NULL, M68K_REG_PC));//*/
-//Testing AvP on UAE core...
-//000075A0: FFFFF80E B6320220 (BITMAP)
-/*if (address == 0x75A0 && value == 0xFFFF)
-{
-	printf("\nM68K: (16) Tripwire hit...\n");
-	ShowM68KContext();
-}//*/
+		/*if (address == 0x4E00)
+			WriteLog("M68K: Writing %02X at %08X, PC=%08X\n", value, address, m68k_get_reg(NULL, M68K_REG_PC));//*/
+			//if ((address >= 0x1FF020 && address <= 0x1FF03F) || (address >= 0x1FF820 && address <= 0x1FF83F))
+			//	WriteLog("M68K: Writing %02X at %08X\n", value, address);
+			//WriteLog("[WM8  PC=%08X] Addr: %08X, val: %02X\n", m68k_get_reg(NULL, M68K_REG_PC), address, value);
+			/*if (effect_start)
+				if (address >= 0x18FA70 && address < (0x18FA70 + 8000))
+					WriteLog("M68K: Byte %02X written at %08X by 68K\n", value, address);//*/
+					//$53D0
+					/*if (address >= 0x53D0 && address <= 0x53FF)
+						printf("M68K: Writing byte $%02X at $%08X, PC=$%08X\n", value, address, m68k_get_reg(NULL, M68K_REG_PC));//*/
+						//Testing AvP on UAE core...
+						//000075A0: FFFFF80E B6320220 (BITMAP)
+						/*if (address == 0x75A0 && value == 0xFF)
+							printf("M68K: (8) Tripwire hit...\n");//*/
 
 #ifndef USE_NEW_MMU
-	// Note that the Jaguar only has 2M of RAM, not 4!
-	if ((address >= 0x000000) && (address <= (vjs.DRAM_size - 2)))
-	{
-/*		jaguar_mainRam[address] = value >> 8;
-		jaguar_mainRam[address + 1] = value & 0xFF;*/
-		SET16(jaguarMainRAM, address, value);
-	}
-	// Memory Track device writes....
-	else
-	{
-		if ((address >= 0x800000) && (address <= 0x87FFFE))
+							// Note that the Jaguar only has 2M of RAM, not 4!
+		if ((address >= 0x000000) && (address <= (vjs.DRAM_size - 1)))
 		{
-			if (((TOMGetMEMCON1() & 0x0006) == (2 << 1)) && (jaguarMainROMCRC32 == 0xFDF37F47))
-			{
-				MTWriteWord(address, value);
-			}
+			jaguarMainRAM[address] = value;
 		}
 		else
 		{
+			if ((address >= 0xDFFF00) && (address <= 0xDFFFFF))
+			{
+				CDROMWriteByte(address, value, M68K);
+			}
+			else
+			{
+				if ((address >= 0xF00000) && (address <= 0xF0FFFF))
+				{
+					TOMWriteByte(address, value, M68K);
+				}
+				else
+				{
+					if ((address >= 0xF10000) && (address <= 0xF1FFFF))
+					{
+						JERRYWriteByte(address, value, M68K);
+					}
+					else
+					{
+						if ((address >= 0x800000) && (address <= 0xDFFEFF))
+						{
+							jagMemSpace[address] = (uint8_t)value;
+						}
+						else
+						{
+							jaguar_unknown_writebyte(address, value, M68K);
+						}
+					}
+				}
+			}
+		}
+#else
+		MMUWrite8(address, value, M68K);
+#endif
+	}
+}
+
+
+// Memory write location on 16 bits
+void m68k_write_memory_16(unsigned int address, unsigned int value)
+{
+	// Check memory write location on 16 bits
+	if (!m68k_write_memory_check(address, "16", value))
+	{
+		// Musashi does this automagically for you, UAE core does not :-P
+		//address &= 0x00FFFFFF;
+#ifdef CPU_DEBUG_MEMORY
+	// Note that the Jaguar only has 2M of RAM, not 4!
+		if ((address >= 0x000000) && (address <= 0x1FFFFE))
+		{
+			if (startMemLog)
+			{
+				uint8_t hi = value >> 8, lo = value & 0xFF;
+
+				if (hi > writeMemMax[address])
+					writeMemMax[address] = hi;
+				if (hi < writeMemMin[address])
+					writeMemMin[address] = hi;
+
+				if (lo > writeMemMax[address + 1])
+					writeMemMax[address + 1] = lo;
+				if (lo < writeMemMin[address + 1])
+					writeMemMin[address + 1] = lo;
+			}
+		}
+#endif
+		/*if (address == 0x4E00)
+			WriteLog("M68K: Writing %02X at %08X, PC=%08X\n", value, address, m68k_get_reg(NULL, M68K_REG_PC));//*/
+			//if ((address >= 0x1FF020 && address <= 0x1FF03F) || (address >= 0x1FF820 && address <= 0x1FF83F))
+			//	WriteLog("M68K: Writing %04X at %08X\n", value, address);
+			//WriteLog("[WM16 PC=%08X] Addr: %08X, val: %04X\n", m68k_get_reg(NULL, M68K_REG_PC), address, value);
+			//if (address >= 0xF02200 && address <= 0xF0229F)
+			//	WriteLog("M68K: Writing to blitter --> %04X at %08X\n", value, address);
+			//if (address >= 0x0E75D0 && address <= 0x0E75E7)
+			//	WriteLog("M68K: Writing %04X at %08X, M68K PC=%08X\n", value, address, m68k_get_reg(NULL, M68K_REG_PC));
+			/*extern uint32_t totalFrames;
+			if (address == 0xF02114)
+				WriteLog("M68K: Writing to GPU_CTRL (frame:%u)... [M68K PC:%08X]\n", totalFrames, m68k_get_reg(NULL, M68K_REG_PC));
+			if (address == 0xF02110)
+				WriteLog("M68K: Writing to GPU_PC (frame:%u)... [M68K PC:%08X]\n", totalFrames, m68k_get_reg(NULL, M68K_REG_PC));//*/
+				//if (address >= 0xF03B00 && address <= 0xF03DFF)
+				//	WriteLog("M68K: Writing %04X to %08X...\n", value, address);
+
+				/*if (address == 0x0100)//64*4)
+					WriteLog("M68K: Wrote word to VI vector value %04X...\n", value);//*/
+					/*if (effect_start)
+						if (address >= 0x18FA70 && address < (0x18FA70 + 8000))
+							WriteLog("M68K: Word %04X written at %08X by 68K\n", value, address);//*/
+							/*	if (address == 0x51136 || address == 0x51138 || address == 0xFB074 || address == 0xFB076
+									|| address == 0x1AF05E)
+									WriteLog("[WM16  PC=%08X] Addr: %08X, val: %04X\n", m68k_get_reg(NULL, M68K_REG_PC), address, value);//*/
+									//$53D0
+									/*if (address >= 0x53D0 && address <= 0x53FF)
+										printf("M68K: Writing word $%04X at $%08X, PC=$%08X\n", value, address, m68k_get_reg(NULL, M68K_REG_PC));//*/
+										//Testing AvP on UAE core...
+										//000075A0: FFFFF80E B6320220 (BITMAP)
+										/*if (address == 0x75A0 && value == 0xFFFF)
+										{
+											printf("\nM68K: (16) Tripwire hit...\n");
+											ShowM68KContext();
+										}//*/
+
+#ifndef USE_NEW_MMU
+										// Note that the Jaguar only has 2M of RAM, not 4!
+		if ((address >= 0x000000) && (address <= (vjs.DRAM_size - 2)))
+		{
+			/*		jaguar_mainRam[address] = value >> 8;
+					jaguar_mainRam[address + 1] = value & 0xFF;*/
+			SET16(jaguarMainRAM, address, value);
+		}
+		else
+		{
+			// Memory Track device writes....
+			if ((address >= 0x800000) && (address <= 0x87FFFE))
+			{
+				if (((TOMGetMEMCON1() & 0x0006) == (2 << 1)) && (jaguarMainROMCRC32 == 0xFDF37F47))
+				{
+					MTWriteWord(address, value);
+					return;
+				}
+			}
+
 			if ((address >= 0xDFFF00) && (address <= 0xDFFFFE))
 			{
 				CDROMWriteWord(address, value, M68K);
@@ -1762,76 +1739,65 @@ if (address == 0xF02110)
 					}
 					else
 					{
-						jaguar_unknown_writeword(address, value, M68K);
+						if ((address >= 0x800000) && (address <= 0xDFFEFE))
+						{
+							SET16(jagMemSpace, address, value);
+						}
+						else
+						{
+							jaguar_unknown_writeword(address, value, M68K);
 #ifdef LOG_UNMAPPED_MEMORY_ACCESSES
-						WriteLog("\tA0=%08X, A1=%08X, D0=%08X, D1=%08X\n",
-							m68k_get_reg(NULL, M68K_REG_A0), m68k_get_reg(NULL, M68K_REG_A1),
-							m68k_get_reg(NULL, M68K_REG_D0), m68k_get_reg(NULL, M68K_REG_D1));
+							WriteLog("\tA0=%08X, A1=%08X, D0=%08X, D1=%08X\n", m68k_get_reg(NULL, M68K_REG_A0), m68k_get_reg(NULL, M68K_REG_A1), m68k_get_reg(NULL, M68K_REG_D0), m68k_get_reg(NULL, M68K_REG_D1));
 #endif
+						}
 					}
 				}
 			}
 		}
-	}
 #else
-	MMUWrite16(address, value, M68K);
+		MMUWrite16(address, value, M68K);
 #endif
+	}
 }
 
 
-// 
+// Memory write location on 32 bits
 void m68k_write_memory_32(unsigned int address, unsigned int value)
 {
-#if 1
-	m68k_write_memory_check(address, "32", value);
-#else
-#ifdef ALPINE_FUNCTIONS
-	// Check if breakpoint on memory is active, and deal with it
-	if (bpmActive && address == bpmAddress1)
+	// Check memory write location on 32 bits
+	if (!m68k_write_memory_check(address, "32", value))
 	{
-		M68KDebugHalt();
-	}
-	else
-#endif
-	{
-		// Rom writing authorisation detection
-		if (!vjs.allowWritesToROM && ((address >= 0x800000) && (address < 0xe00000)))
-		{
-			m68k_write_cartridge_alert(address, "32", value);
-		}
-	}
-#endif
-
-	// Musashi does this automagically for you, UAE core does not :-P
-	//address &= 0x00FFFFFF;
-/*if (address == 0x4E00)
-	WriteLog("M68K: Writing %02X at %08X, PC=%08X\n", value, address, m68k_get_reg(NULL, M68K_REG_PC));//*/
-//WriteLog("--> [WM32]\n");
-/*if (address == 0x0100)//64*4)
-	WriteLog("M68K: Wrote dword to VI vector value %08X...\n", value);//*/
-/*if (address >= 0xF03214 && address < 0xF0321F)
-	WriteLog("M68K: Writing DWORD (%08X) to GPU RAM (%08X)...\n", value, address);//*/
-//M68K: Writing DWORD (88E30047) to GPU RAM (00F03214)...
-/*extern bool doGPUDis;
-if (address == 0xF03214 && value == 0x88E30047)
-//	start = true;
-	doGPUDis = true;//*/
-/*	if (address == 0x51136 || address == 0xFB074)
-		WriteLog("[WM32  PC=%08X] Addr: %08X, val: %02X\n", m68k_get_reg(NULL, M68K_REG_PC), address, value);//*/
-//Testing AvP on UAE core...
-//000075A0: FFFFF80E B6320220 (BITMAP)
-/*if (address == 0x75A0 && (value & 0xFFFF0000) == 0xFFFF0000)
-{
-	printf("\nM68K: (32) Tripwire hit...\n");
-	ShowM68KContext();
-}//*/
+		// Musashi does this automagically for you, UAE core does not :-P
+		//address &= 0x00FFFFFF;
+	/*if (address == 0x4E00)
+		WriteLog("M68K: Writing %02X at %08X, PC=%08X\n", value, address, m68k_get_reg(NULL, M68K_REG_PC));//*/
+		//WriteLog("--> [WM32]\n");
+		/*if (address == 0x0100)//64*4)
+			WriteLog("M68K: Wrote dword to VI vector value %08X...\n", value);//*/
+			/*if (address >= 0xF03214 && address < 0xF0321F)
+				WriteLog("M68K: Writing DWORD (%08X) to GPU RAM (%08X)...\n", value, address);//*/
+				//M68K: Writing DWORD (88E30047) to GPU RAM (00F03214)...
+				/*extern bool doGPUDis;
+				if (address == 0xF03214 && value == 0x88E30047)
+				//	start = true;
+					doGPUDis = true;//*/
+					/*	if (address == 0x51136 || address == 0xFB074)
+							WriteLog("[WM32  PC=%08X] Addr: %08X, val: %02X\n", m68k_get_reg(NULL, M68K_REG_PC), address, value);//*/
+							//Testing AvP on UAE core...
+							//000075A0: FFFFF80E B6320220 (BITMAP)
+							/*if (address == 0x75A0 && (value & 0xFFFF0000) == 0xFFFF0000)
+							{
+								printf("\nM68K: (32) Tripwire hit...\n");
+								ShowM68KContext();
+							}//*/
 
 #ifndef USE_NEW_MMU
-	m68k_write_memory_16(address, value >> 16);
-	m68k_write_memory_16(address + 2, value & 0xFFFF);
+		m68k_write_memory_16(address, value >> 16);
+		m68k_write_memory_16(address + 2, value & 0xFFFF);
 #else
-	MMUWrite32(address, value, M68K);
+		MMUWrite32(address, value, M68K);
 #endif
+	}
 }
 
 
