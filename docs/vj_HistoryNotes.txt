@@ -1,6 +1,12 @@
-Release 4 (TBD)
----------------
-Git commit: TBD
+Release 4a (TBA)
+----------------
+Git commit: 
+-
+0) Fix specific breakpoint for ROM cartridge or unknown memory location writing
+
+Release 4 (10th August 2019)
+----------------------------
+Git commit: 9b25d85d1ea4a9476b83476bcec65e05464f68da
 -
 0) The zoom value setting has been fixed in the registry
 1) Debugger mode now shares the same alpine rom path setting
