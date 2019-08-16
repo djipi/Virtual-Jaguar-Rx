@@ -7,14 +7,14 @@
 //
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
-// JPM  12/03/2016  Created this file
-// JPM  12/03/2016  DWARF format support
+// JPM   Dec./2016  Created this file, and added the DWARF format support
 // JPM  Sept./2018  Added LEB128 decoding features, and improve the DWARF parsing information
-// JPM  10/06/2018  Improve the DWARF parsing information, and the source file text reading
+// JPM   Oct./2018  Improve the DWARF parsing information, and the source file text reading; support the used source lines from DWARF structure, and the search paths for the files
 //
 
 // To Do
 // To use pointers instead of arrays usage
+// To keep sources text file intact wihtout QT/HTML transformation
 // 
 
 
@@ -27,13 +27,31 @@
 #include "LEB128.h"
 
 
-// Debug definitions
-//#define DEBUG_NumCU			0x9					// CU number to debug or undefine it
+// Definitions for debugging
+//#define DEBUG_NumCU			0x4d				// CU number to debug or undefine it
 //#define DEBUG_VariableName	"sound_death"				// Variable name to look for or undefine it
 //#define DEBUG_TypeName		"Cbuf_Execute"			// Type name to look for or undefine it
 //#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for or undefine it (not supported)
 //#define DEBUG_Filename		"net_jag.c"			// Filename to look for or undefine it
 
+// Definitions for the variables's typetag
+#define	TypeTag_structure			0x01			// structure
+#define	TypeTag_pointer				0x02			// pointer
+#define	TypeTag_subrange			0x04			// (subrange_type?)
+#define	TypeTag_arraytype			0x08			// array type
+#define	TypeTag_consttype			0x10			// const type
+#define	TypeTag_typedef				0x20			// typedef
+#define TypeTag_enumeration_type	0x40			// enumeration
+#define TypeTag_subroutine_type		0x80			// subroutine
+
+
+// Source line CU structure
+typedef struct CUStruct_LineSrc
+{
+	size_t StartPC;
+	size_t NumLineSrc;
+	char *PtrLineSrc;
+}S_CUStruct_LineSrc;
 
 // Source line internal structure
 typedef struct DMIStruct_LineSrc
@@ -69,16 +87,6 @@ typedef struct BaseTypeStruct
 	EnumerationStruct *PtrEnumeration;				// Type's enumeration
 //	StructureMembersStruct *PtrStructureMembers;	// Type's structure members
 }S_BaseTypeStruct;
-
-// Definitions for the variables's typetag
-#define	TypeTag_structure			0x01			// structure
-#define	TypeTag_pointer				0x02			// pointer
-#define	TypeTag_subrange			0x04			// (subrange_type?)
-#define	TypeTag_arraytype			0x08			// array type
-#define	TypeTag_consttype			0x10			// const type
-#define	TypeTag_typedef				0x20			// typedef
-#define TypeTag_enumeration_type	0x40			// enumeration
-#define TypeTag_subroutine_type		0x80			// subroutine
 
 // Variables internal structure
 typedef struct VariablesStruct
@@ -117,22 +125,24 @@ typedef struct SubProgStruct
 typedef struct CUStruct
 {
 	size_t Tag;
-	size_t LowPC, HighPC;
+	size_t LowPC, HighPC;							// Memory range for the code
 	char *PtrProducer;								// Pointer to the "Producer" text information (mostly compiler and compilation options used)
 	char *PtrSourceFilename;						// Source file name
 	char *PtrSourceFileDirectory;					// Directory of the source file
 	char *PtrFullFilename;							// Pointer to full namefile (directory & filename)
-	size_t SizeLoadSrc;								// Source code size
-	char *PtrLoadSrc;								// Pointer to loaded source code
-	size_t NbLinesLoadSrc;							// Lines source number
+	size_t SizeLoadSrc;								// Source code text size
+	char *PtrLoadSrc;								// Pointer to the source code text
+	size_t NbLinesLoadSrc;							// Total number of lines in the source code text
 	char **PtrLinesLoadSrc;							// Pointer lists to each source line put in QT html/text conformity
 	size_t NbSubProgs;								// Number of sub programs / routines
-	SubProgStruct *PtrSubProgs;						// Pointer to the sub programs / routines information structure
+	SubProgStruct *PtrSubProgs;						// Pointer to the sub programs / routines structure
 	size_t NbTypes;									// Number of types
 	BaseTypeStruct *PtrTypes;						// Pointer to types
 	size_t NbVariables;								// Variables number
-	VariablesStruct *PtrVariables;					// Pointer to the global variables list information structure
+	VariablesStruct *PtrVariables;					// Pointer to the global variables list structure
 	size_t NbFrames;								// Frames number
+	size_t NbLinesSrc;								// Number of used source lines
+	CUStruct_LineSrc *PtrLinesSrc;					// Pointer to the used source lines list structure
 }S_CUStruct;
 
 
@@ -143,6 +153,8 @@ Dwarf_Ptr errarg;
 Dwarf_Error error;
 Dwarf_Debug dbg;
 CUStruct *PtrCU;
+char **ListSearchPaths;
+size_t NbSearchPaths;
 
 
 //
@@ -152,6 +164,9 @@ void DWARFManager_CloseDMI(void);
 bool DWARFManager_ElfClose(void);
 char *DWARFManager_GetLineSrcFromNumLine(char *PtrSrcFile, size_t NumLine);
 void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables);
+void DWARFManager_SourceFileSearchPathsInit(void);
+void DWARFManager_SourceFileSearchPathsReset(void);
+void DWARFManager_SourceFileSearchPathsClose(void);
 
 
 //
@@ -161,16 +176,50 @@ Dwarf_Handler DWARFManager_ErrorHandler(Dwarf_Ptr perrarg)
 }
 
 
+// Dwarf manager list search paths init
+void DWARFManager_SourceFileSearchPathsInit(void)
+{
+	ListSearchPaths = NULL;
+	NbSearchPaths = 0;
+}
+
+
+// Dwarf manager list search paths reset
+void DWARFManager_SourceFileSearchPathsReset(void)
+{
+	ListSearchPaths = NULL;
+	NbSearchPaths = 0;
+}
+
+
+// Dwarf manager list search paths close
+void DWARFManager_SourceFileSearchPathsClose(void)
+{
+	DWARFManager_SourceFileSearchPathsReset();
+}
+
+
 // Dwarf manager init
 void DWARFManager_Init(void)
 {
+	DWARFManager_SourceFileSearchPathsInit();
 	LibDwarf = DW_DLV_NO_ENTRY;
+}
+
+
+// Dwarf manager settings
+void DWARFManager_Set(size_t NbPathsInList, char **PtrListPaths)
+{
+	// Search paths init
+	ListSearchPaths = PtrListPaths;
+	NbSearchPaths = NbPathsInList;
 }
 
 
 // Dwarf manager Reset
 bool DWARFManager_Reset(void)
 {
+	DWARFManager_SourceFileSearchPathsReset();
 	return DWARFManager_ElfClose();
 }
 
@@ -178,6 +227,7 @@ bool DWARFManager_Reset(void)
 // Dwarf manager Close
 bool DWARFManager_Close(void)
 {
+	DWARFManager_SourceFileSearchPathsClose();
 	return(DWARFManager_Reset());
 }
 
@@ -228,6 +278,7 @@ void DWARFManager_CloseDMI(void)
 		free(PtrCU[NbCU].PtrProducer);
 		free(PtrCU[NbCU].PtrSourceFilename);
 		free(PtrCU[NbCU].PtrSourceFileDirectory);
+		free(PtrCU[NbCU].PtrLinesSrc);
 
 		while (PtrCU[NbCU].NbLinesLoadSrc--)
 		{
@@ -384,23 +435,46 @@ void DWARFManager_InitDMI(void)
 								dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
 							}
 
-							// Check filename validity
+							// Check filename presence
 							if (!PtrCU[NbCU].PtrSourceFilename)
 							{
 								PtrCU[NbCU].PtrSourceFilename = (char *)calloc(1, 1);
 							}
 
-							// Check directory validity
+							// Check directory presence
 							if (!PtrCU[NbCU].PtrSourceFileDirectory)
 							{
-								PtrCU[NbCU].PtrSourceFileDirectory = (char *)calloc(2, 1);
-								PtrCU[NbCU].PtrSourceFileDirectory[0] = '.';
+								// Check if file exists in the search paths
+								for (size_t i = 0; i < NbSearchPaths; i++)
+								{
+									PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + strlen((const char *)ListSearchPaths[i]) + 2);
+#if defined(_WIN32)
+									sprintf(PtrCU[NbCU].PtrFullFilename, "%s\\%s", ListSearchPaths[i], PtrCU[NbCU].PtrSourceFilename);
+#else
+									sprintf(PtrCU[NbCU].PtrFullFilename, "%s/%s", ListSearchPaths[i], PtrCU[NbCU].PtrSourceFilename);
+#endif
+									if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rb"))
+									{
+										PtrCU[NbCU].PtrSourceFileDirectory = (char *)realloc(PtrCU[NbCU].PtrSourceFileDirectory, strlen(ListSearchPaths[i]) + 1);
+										strcpy(PtrCU[NbCU].PtrSourceFileDirectory, ListSearchPaths[i]);
+									}
+								}
+
+								// File directory doesn't exits
+								if (!PtrCU[NbCU].PtrSourceFileDirectory)
+								{
+									PtrCU[NbCU].PtrSourceFileDirectory = (char *)realloc(PtrCU[NbCU].PtrSourceFileDirectory, 2);
+									strcpy(PtrCU[NbCU].PtrSourceFileDirectory, ".");
+								}
 							}
 
 							// Create full filename
 							Ptr = PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + strlen(PtrCU[NbCU].PtrSourceFileDirectory) + 2);
+#if defined(_WIN32)
 							sprintf(PtrCU[NbCU].PtrFullFilename, "%s\\%s", PtrCU[NbCU].PtrSourceFileDirectory, PtrCU[NbCU].PtrSourceFilename);
-
+#else
+							sprintf(PtrCU[NbCU].PtrFullFilename, "%s/%s", PtrCU[NbCU].PtrSourceFileDirectory, PtrCU[NbCU].PtrSourceFilename);
+#endif
 							// Conform slashes and backslashes
 							while (*Ptr)
 							{
@@ -503,6 +577,22 @@ void DWARFManager_InitDMI(void)
 					// Get the source lines table located in the CU
 					if (dwarf_srclines(return_sib, &linebuf, &cnt, &error) == DW_DLV_OK)
 					{
+						if (cnt)
+						{
+							PtrCU[NbCU].NbLinesSrc = cnt;
+							PtrCU[NbCU].PtrLinesSrc = (CUStruct_LineSrc *)calloc(cnt, sizeof(CUStruct_LineSrc));
+							for (Dwarf_Signed i = 0; i < cnt; i++)
+							{
+								if (dwarf_lineaddr(linebuf[i], &return_lineaddr, &error) == DW_DLV_OK)
+								{
+									if (dwarf_lineno(linebuf[i], &return_uvalue, &error) == DW_DLV_OK)
+									{
+										PtrCU[NbCU].PtrLinesSrc[i].StartPC = return_lineaddr;
+										PtrCU[NbCU].PtrLinesSrc[i].NumLineSrc = return_uvalue;
+									}
+								}
+							}
+						}
 					}
 
 					// Check if the CU has child
@@ -988,7 +1078,7 @@ void DWARFManager_InitDMI(void)
 							}
 						}
 
-						// Init lines source information based on each source code line numbers
+						// Init lines source information for each source code line numbers and for each subprogs
 						for (size_t j = 0; j < PtrCU[NbCU].NbSubProgs; j++)
 						{
 							// Check if the subprog / function's line exists in the source code
@@ -1023,6 +1113,27 @@ void DWARFManager_InitDMI(void)
 									PtrCU[NbCU].PtrLinesLoadSrc[j] = NULL;
 								}
 							}
+						}
+					}
+				}
+
+				// Set information based on used line numbers
+				if (PtrCU[NbCU].PtrLinesSrc)
+				{
+					// Set the line source pointer for each used line numbers
+					if (PtrCU[NbCU].PtrLinesLoadSrc)
+					{
+						for (size_t i = 0; i < PtrCU[NbCU].NbLinesSrc; i++)
+						{
+							PtrCU[NbCU].PtrLinesSrc[i].PtrLineSrc = PtrCU[NbCU].PtrLinesLoadSrc[PtrCU[NbCU].PtrLinesSrc[i].NumLineSrc - 1];
+						}
+
+						// Setup memory range for the code if CU doesn't have already this information
+						// It is taken from the used lines structure
+						if (!PtrCU[NbCU].LowPC && (!PtrCU[NbCU].HighPC || (PtrCU[NbCU].HighPC == ~0)))
+						{
+							PtrCU[NbCU].LowPC = PtrCU[NbCU].PtrLinesSrc[0].StartPC;
+							PtrCU[NbCU].HighPC = PtrCU[NbCU].PtrLinesSrc[PtrCU[NbCU].NbLinesSrc - 1].StartPC;
 						}
 					}
 				}
@@ -1077,7 +1188,10 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 					PtrVariables->TypeTag |= TypeTag_structure;
 					if (!(PtrVariables->TypeTag & TypeTag_typedef))
 					{
-						strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
+						if (PtrCU[NbCU].PtrTypes[j].PtrName)
+						{
+							strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
+						}
 					}
 					if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
 					{
@@ -1196,13 +1310,11 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 // Return NULL if no symbol name exists
 char *DWARFManager_GetSymbolnameFromAdr(size_t Adr)
 {
-	size_t i, j;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; (j < PtrCU[i].NbSubProgs); j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((PtrCU[i].PtrSubProgs[j].StartPC == Adr))
 				{
@@ -1221,9 +1333,7 @@ char *DWARFManager_GetSymbolnameFromAdr(size_t Adr)
 // Return the existence status (true or false) in Error
 char *DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error)
 {
-	size_t i;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
@@ -1236,7 +1346,7 @@ char *DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error)
 }
 
 
-// Get text line source based on line number (starting by 1)
+// Get text line source based on line number (starting from 1)
 // Return NULL if no text line exists or if line number is 0
 char *DWARFManager_GetLineSrcFromNumLine(char *PtrSrcFile, size_t NumLine)
 {
@@ -1260,13 +1370,11 @@ char *DWARFManager_GetLineSrcFromNumLine(char *PtrSrcFile, size_t NumLine)
 // Get number of variables referenced by the function range address
 size_t DWARFManager_GetNbLocalVariables(size_t Adr)
 {
-	size_t i, j;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
 				{
@@ -1280,18 +1388,16 @@ size_t DWARFManager_GetNbLocalVariables(size_t Adr)
 }
 
 
-// Get local variable name based on his index (starting by 1)
+// Get local variable name based on his index (starting from 1)
 // Return name's pointer text found
 // Return NULL if not found
 char *DWARFManager_GetLocalVariableName(size_t Adr, size_t Index)
 {
-	size_t i, j;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
 				{
@@ -1305,17 +1411,15 @@ char *DWARFManager_GetLocalVariableName(size_t Adr, size_t Index)
 }
 
 
-// Get local variable's type tag based on his index (starting by 1)
+// Get local variable's type tag based on his index (starting from 1)
 // Return 0 if not found
 size_t DWARFManager_GetLocalVariableTypeTag(size_t Adr, size_t Index)
 {
-	size_t i, j;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
 				{
@@ -1329,16 +1433,15 @@ size_t DWARFManager_GetLocalVariableTypeTag(size_t Adr, size_t Index)
 }
 
 
-//
+// Get the local variable's offset based on a index (starting from 1)
+// Return 0 if no offset has been found
 int DWARFManager_GetLocalVariableOffset(size_t Adr, size_t Index)
 {
-	size_t i, j;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
 				{
@@ -1352,18 +1455,16 @@ int DWARFManager_GetLocalVariableOffset(size_t Adr, size_t Index)
 }
 
 
-// Get local variable Type Byte Size based on his address and index (starting by 1)
+// Get local variable Type Byte Size based on his address and index (starting from 1)
 // Return 0 if not found
 // May return 0 if there is no Type Byte Size linked to the variable's address and index
 size_t DWARFManager_GetLocalVariableTypeByteSize(size_t Adr, size_t Index)
 {
-	size_t i, j;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
 				{
@@ -1377,18 +1478,16 @@ size_t DWARFManager_GetLocalVariableTypeByteSize(size_t Adr, size_t Index)
 }
 
 
-// Get local variable Type Encoding based on his address and index (starting by 1)
+// Get local variable Type Encoding based on his address and index (starting from 1)
 // Return 0 if not found
 // May return 0 if there is no Type Encoding linked to the variable's address and index
 size_t DWARFManager_GetLocalVariableTypeEncoding(size_t Adr, size_t Index)
 {
-	size_t i, j;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
 				{
@@ -1402,18 +1501,15 @@ size_t DWARFManager_GetLocalVariableTypeEncoding(size_t Adr, size_t Index)
 }
 
 
-// Get local variable Op based on his address and index (starting by 1)
-// Return 0 if not found
-// May return 0 if there isn't Op linked to the variable's index
+// Get local variable Op based on his address and index (starting from 1)
+// Return 0 if not found, may return 0 if there isn't Op linked to the variable's index
 size_t DWARFManager_GetLocalVariableOp(size_t Adr, size_t Index)
 {
-	size_t i, j;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
 				{
@@ -1427,18 +1523,15 @@ size_t DWARFManager_GetLocalVariableOp(size_t Adr, size_t Index)
 }
 
 
-// Get local variable type name based on his index (starting by 1)
-// Return NULL if not found
-// May return NULL if there is not type linked to the variable's index
+// Get local variable type name based on his index (starting from 1) and an address
+// Return NULL if not found, may also return NULL if there is no type linked to the variable's index
 char *DWARFManager_GetLocalVariableTypeName(size_t Adr, size_t Index)
 {
-	size_t i, j;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
 				{
@@ -1453,12 +1546,12 @@ char *DWARFManager_GetLocalVariableTypeName(size_t Adr, size_t Index)
 
 
 // Get Compilation Unit / global variables numbers
-// Return variables number
+// Return number of variables
 size_t DWARFManager_GetNbGlobalVariables(void)
 {
-	size_t NbVariables = 0, i;
+	size_t NbVariables = 0;
 
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		NbVariables += PtrCU[i].NbVariables;
 	}
@@ -1467,14 +1560,12 @@ size_t DWARFManager_GetNbGlobalVariables(void)
 }
 
 
-// Get global variable type name based on his index (starting by 1)
+// Get global variable type name based on his index (starting from 1)
 // Return NULL if not found
 // May return NULL if there is not type linked to the variable's index
 char *DWARFManager_GetGlobalVariableTypeName(size_t Index)
 {
-	size_t i;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if (PtrCU[i].NbVariables)
 		{
@@ -1493,13 +1584,11 @@ char *DWARFManager_GetGlobalVariableTypeName(size_t Index)
 }
 
 
-// Get global variable's type tag based on his index (starting by 1)
+// Get global variable's type tag based on his index (starting from 1)
 // Return 0 if not found
 size_t DWARFManager_GetGlobalVariableTypeTag(size_t Index)
 {
-	size_t i;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if (PtrCU[i].NbVariables)
 		{
@@ -1518,13 +1607,11 @@ size_t DWARFManager_GetGlobalVariableTypeTag(size_t Index)
 }
 
 
-// Get global variable byte size based on his index (starting by 1)
+// Get global variable byte size based on his index (starting from 1)
 // Return 0 if not found
 size_t DWARFManager_GetGlobalVariableTypeByteSize(size_t Index)
 {
-	size_t i;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if (PtrCU[i].NbVariables)
 		{
@@ -1543,13 +1630,11 @@ size_t DWARFManager_GetGlobalVariableTypeByteSize(size_t Index)
 }
 
 
-// Get global variable encoding based on his index (starting by 1)
+// Get global variable encoding based on his index (starting from 1)
 // Return 0 if not found
 size_t DWARFManager_GetGlobalVariableTypeEncoding(size_t Index)
 {
-	size_t i;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if (PtrCU[i].NbVariables)
 		{
@@ -1568,13 +1653,11 @@ size_t DWARFManager_GetGlobalVariableTypeEncoding(size_t Index)
 }
 
 
-// Get global variable address based on his index (starting by 1)
+// Get global variable memory address based on his index (starting from 1)
 // Return 0 if not found
 size_t DWARFManager_GetGlobalVariableAdr(size_t Index)
 {
-	size_t i;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if (PtrCU[i].NbVariables)
 		{
@@ -1594,17 +1677,14 @@ size_t DWARFManager_GetGlobalVariableAdr(size_t Index)
 
 
 // Get global variable memory address based on his name
-// Return 0 if not found
-// Note: Return the first occurence found
+// Return 0 if not found, or will return the first occurence found
 size_t DWARFManager_GetGlobalVariableAdrFromName(char *VariableName)
 {
-	size_t i, j;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if (PtrCU[i].NbVariables)
 		{
-			for (j = 0; j < PtrCU[i].NbVariables; j++)
+			for (size_t j = 0; j < PtrCU[i].NbVariables; j++)
 			{
 				if (!strcmp(PtrCU[i].PtrVariables[j].PtrName,VariableName))
 				{
@@ -1618,14 +1698,11 @@ size_t DWARFManager_GetGlobalVariableAdrFromName(char *VariableName)
 }
 
 
-// Get global variable name based on his index (starting by 1)
-// Return name's pointer text found
-// Return NULL if not found
+// Get global variable name based on his index (starting from 1)
+// Return name's pointer text found, or will return NULL if no variable can be found
 char *DWARFManager_GetGlobalVariableName(size_t Index)
 {
-	size_t i;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if (PtrCU[i].NbVariables)
 		{
@@ -1645,16 +1722,16 @@ char *DWARFManager_GetGlobalVariableName(size_t Index)
 
 
 // Get text line from source based on address and his tag
+// A tag can be either 0 or a DW_TAG_subprogram
+// DW_TAG_subprogram will look for the line pointing to the function
 // Return NULL if no text line has been found
 char *DWARFManager_GetLineSrcFromAdr(size_t Adr, size_t Tag)
 {
-	size_t i, j, k;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
 				{
@@ -1664,7 +1741,7 @@ char *DWARFManager_GetLineSrcFromAdr(size_t Adr, size_t Tag)
 					}
 					else
 					{
-						for (k = 0; k < PtrCU[i].PtrSubProgs[j].NbLinesSrc; k++)
+						for (size_t k = 0; k < PtrCU[i].PtrSubProgs[j].NbLinesSrc; k++)
 						{
 							if (PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].StartPC <= Adr)
 							{
@@ -1688,17 +1765,17 @@ char *DWARFManager_GetLineSrcFromAdr(size_t Adr, size_t Tag)
 }
 
 
-// Get line number based on the address and the tag
+// Get line number based on the address and a tag
+// A tag can be either 0 or a DW_TAG_subprogram
+// DW_TAG_subprogram will look for the line pointing to the function name as described in the source code
 // Return 0 if no line number has been found
 size_t DWARFManager_GetNumLineFromAdr(size_t Adr, size_t Tag)
 {
-	size_t i, j, k;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; (j < PtrCU[i].NbSubProgs); j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
 				{
@@ -1708,7 +1785,7 @@ size_t DWARFManager_GetNumLineFromAdr(size_t Adr, size_t Tag)
 					}
 					else
 					{
-						for (k = 0; (k < PtrCU[i].PtrSubProgs[j].NbLinesSrc); k++)
+						for (size_t k = 0; k < PtrCU[i].PtrSubProgs[j].NbLinesSrc; k++)
 						{
 							if ((PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].StartPC == Adr) && (!Tag || (PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].Tag == Tag)))
 							{
@@ -1724,6 +1801,15 @@ size_t DWARFManager_GetNumLineFromAdr(size_t Adr, size_t Tag)
 #endif
 				}
 			}
+
+			// Check if a used line is found with the address
+			for (size_t j = 0; j < PtrCU[i].NbLinesSrc; j++)
+			{
+				if (PtrCU[i].PtrLinesSrc[j].StartPC == Adr)
+				{
+					return PtrCU[i].PtrLinesSrc[j].NumLineSrc;
+				}
+			}
 		}
 	}
 
@@ -1731,17 +1817,15 @@ size_t DWARFManager_GetNumLineFromAdr(size_t Adr, size_t Tag)
 }
 
 
-// Get function name based on address and his range
-// Return NULL if no function name has been found
+// Get function name based on an address
+// Return NULL if no function name has been found, otherwise will return the function name in the range of the provided address
 char *DWARFManager_GetFunctionName(size_t Adr)
 {
-	size_t i, j;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
 				{
@@ -1755,17 +1839,15 @@ char *DWARFManager_GetFunctionName(size_t Adr)
 }
 
 
-// Get text line from source based on address and num line (starting by 1)
+// Get text line from source based on address and num line (starting from 1)
 // Return NULL if no text line has been found
 char *DWARFManager_GetLineSrcFromAdrNumLine(size_t Adr, size_t NumLine)
 {
-	size_t i, j, k;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			for (j = 0; j < PtrCU[i].NbSubProgs; j++)
+			for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
 			{
 				if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
 				{
@@ -1775,7 +1857,7 @@ char *DWARFManager_GetLineSrcFromAdrNumLine(size_t Adr, size_t NumLine)
 					}
 					else
 					{
-						for (k = 0; k < PtrCU[i].PtrSubProgs[j].NbLinesSrc; k++)
+						for (size_t k = 0; k < PtrCU[i].PtrSubProgs[j].NbLinesSrc; k++)
 						{
 							if (PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].NumLineSrc == NumLine)
 							{
@@ -1792,13 +1874,11 @@ char *DWARFManager_GetLineSrcFromAdrNumLine(size_t Adr, size_t NumLine)
 }
 
 
-// Get text line pointer from source, based on address and line number (starting by 1)
+// Get text line pointer from source, based on address and line number (starting from 1)
 // Return NULL if no text line has been found, or if requested number line is above the source total number of lines
 char *DWARFManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine)
 {
-	size_t i;
-
-	for (i = 0; i < NbCU; i++)
+	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
@@ -1824,7 +1904,7 @@ size_t DWARFManager_GetNbFullSourceFilename(void)
 }
 
 
-// Get source code filename based on index
+// Get source code filename based on index (starting from 0)
 char *DWARFManager_GetNumFullSourceFilename(size_t Index)
 {
 	return (PtrCU[Index].PtrFullFilename);

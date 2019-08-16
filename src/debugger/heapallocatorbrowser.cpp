@@ -5,14 +5,11 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When        What
-// ---  ----------  -----------------------------------------------------------
-// JPM  01/08/2017  Created this file
-// JPM  09/05/2018  Support of the DRAM size limit option
-// JPM  09/05/2018  Use definitions for error instead of hard values
-// JPM  09/05/2018  Detect if heap allocation shares space with SP (Stack)
-// JPM  09/06/2018  Added a status bar and better status report
-// JPM  09/07/2018  Set information values in a tab
+// Who  When (MM/DD/YY)       What
+// ---  ---------------       -----------------------------------------------------------
+// JPM  01/08/2017            Created this file
+// JPM  Sept./2018            Support of the DRAM size limit option, use definitions for error instead of hard values, detect if heap allocation shares space with SP (Stack), added a status bar and better status report, and set information values in a tab
+// JPM  07/04/2019            Fix the support of the DRAM size limit option
 //
 
 // STILL TO DO:
@@ -189,7 +186,7 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 			{
 				if (Adr68K = DBGManager_GetGlobalVariableAdrFromName((char *)"alloc"))
 				{
-					if (!(Adr68K = (jaguarMainRAM[Adr68K] << 24) + (jaguarMainRAM[Adr68K + 1] << 16) + (jaguarMainRAM[Adr68K + 2] << 8) + (jaguarMainRAM[Adr68K + 3])) || ((Adr68K < 0x4000) || (Adr68K >= 0x200000)))
+					if (!(Adr68K = (jaguarMainRAM[Adr68K] << 24) + (jaguarMainRAM[Adr68K + 1] << 16) + (jaguarMainRAM[Adr68K + 2] << 8) + (jaguarMainRAM[Adr68K + 3])) || ((Adr68K < 0x4000) || (Adr68K >= vjs.DRAM_size)))
 					{
 						sprintf(msg, "Memory allocator not yet initialised");
 						Error = HA_MEMORYALLOCATORNOTINITIALIZED;

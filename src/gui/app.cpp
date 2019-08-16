@@ -13,12 +13,12 @@
 // JLH  01/21/2011  Added SDL initialization
 // JLH  06/26/2011  Added fix to keep SDL from hijacking main() on win32
 // JLH  05/24/2012  Added option switches
-// JLH  03/05/2013  Fixed console redireciton on win32 platform  :-P
-// JPM  06/06/2016  Visual Studio support
-// JPM  06/19/2016  Soft debugger support (--debugger)
+// JLH  03/05/2013  Fixed console redirection on win32 platform  :-P
+// JPM  Sept./2016  Visual Studio support, and Soft debugger support (--debugger)
 // JPM  09/  /2017  Added option (--dram-max) to support 8MB ram (which doesn't exist)
-// JPM  09/06/2017  Added the 'Rx' word to the emulator name and updated the credits line
-// JPM  09/08/2017  Added option (--es-all, --es-ui, --es-alpine & --es-debugger) to support the erase settings
+// JPM  Sept./2017  Added the 'Rx' word to the emulator name, updated the credits line, added option (--es-all, --es-ui, --es-alpine & --es-debugger) to support the erase settings
+// JPM   Oct./2018  Added the Rx version's contact in the help text, added timer initialisation in the SDL_Init
+// JPM   Apr./2019  Fixed a command line option duplication
 //
 
 #include "app.h"
@@ -107,7 +107,7 @@ int main(int argc, char * argv[])
 	}
 
 	// Set up SDL library
-	if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) < 0)
+	if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0)
 	{
 		WriteLog("VJ: Could not initialize the SDL library: %s\n", SDL_GetError());
 	}
@@ -179,6 +179,7 @@ bool ParseCommandLine(int argc, char * argv[])
 				"Based upon the work by James Hammons (Linux/WIN32), Niels Wagenaar (Linux/WIN32),\n"
 				"Carwin Jones (BeOS), and Adam Green (MacOS)\n"
 				"Contact: http://sdlemu.ngemu.com/ | sdlemu@ngemu.com\n"
+				"Contact: https://github.com/djipi/Virtual-Jaguar-Rx | djipi.mari@gmail.com\n"
 				"\n"
 				"Usage:\n"
 				"   virtualjaguar [<filename>] [switches]\n"
@@ -187,7 +188,7 @@ bool ParseCommandLine(int argc, char * argv[])
 				"   ----------------  -----------------------------------\n"
 				"   <filename>        Name of file to autoload\n"
 				"   --alpine      -a  Put Virtual Jaguar into Alpine mode\n"
-				"   --debugger    -d  Put Virtual Jaguar into Debugger mode\n"
+				"   --debugger    -D  Put Virtual Jaguar into Debugger mode\n"
 				"   --pal         -p  PAL mode\n"
 				"   --ntsc        -n  NTSC mode\n"
 				"   --dram-max        Set DRAM size to 8MB\n"
@@ -252,7 +253,7 @@ bool ParseCommandLine(int argc, char * argv[])
 		}
 
 		// Debugger mode
-		if ((strcmp(argv[i], "--debugger") == 0) || (strcmp(argv[i], "-d") == 0))
+		if ((strcmp(argv[i], "--debugger") == 0) || (strcmp(argv[i], "-D") == 0))
 		{
 			printf("Debugger mode enabled.\n");
 			vjs.softTypeDebugger = true;

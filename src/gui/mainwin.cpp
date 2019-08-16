@@ -20,6 +20,10 @@
 // JPM  11/04/2017  Added the local window
 // JPM  08/31/2018  Added the call stack window
 // JPM  Sept./2018  Added the new Models and BIOS handler, a screenshot feature and source code files browsing
+// JPM   Oct./2018  Added search paths in the settings, breakpoints feature, cartridge view menu
+// JPM  11/18/2018  Fix crash with non-debugger mode
+// JPM  April/2019  Added ELF sections check, added a save memory dump
+// JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only
 //
 
 // FIXED:
@@ -83,19 +87,23 @@
 #include "joystick.h"
 #include "m68000/m68kinterface.h"
 
+#include "debugger/DBGManager.h"
 //#include "debugger/VideoWin.h"
 //#include "debugger/DasmWin.h"
 #include "debugger/m68KDasmWin.h"
 #include "debugger/GPUDasmWin.h"
 #include "debugger/DSPDasmWin.h"
 #include "debugger/memory1browser.h"
-//#include "debugger/brkWin.h"
+#include "debugger/BreakpointsWin.h"
+#include "debugger/NewFnctBreakpointWin.h"
 #include "debugger/FilesrcListWin.h"
 #include "debugger/exceptionvectortablebrowser.h"
 #include "debugger/allwatchbrowser.h"
 #include "debugger/localbrowser.h"
 #include "debugger/heapallocatorbrowser.h"
 #include "debugger/callstackbrowser.h"
+#include "debugger/CartFilesListWin.h"
+#include "debugger/SaveDumpAsWin.h"
 
 
 // According to SebRmv, this header isn't seen on Arch Linux either... :-/
@@ -173,16 +181,21 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 	setWindowTitle(title);
 
+	// Windows common features
 	aboutWin = new AboutWindow(this);
 	helpWin = new HelpWindow(this);
 	filePickWin = new FilePickerWindow(this);
+	emuStatusWin = new EmuStatusWindow(this);
+	
+	// Windows alpine mode features
 	memBrowseWin = new MemoryBrowserWindow(this);
 	stackBrowseWin = new StackBrowserWindow(this);
-	emuStatusWin = new EmuStatusWindow(this);
 	cpuBrowseWin = new CPUBrowserWindow(this);
 	opBrowseWin = new OPBrowserWindow(this);
 	m68kDasmBrowseWin = new M68KDasmBrowserWindow(this);
 	riscDasmBrowseWin = new RISCDasmBrowserWindow(this);
+
+	// Windows debugger mode features
 	if (vjs.softTypeDebugger)
 	{
 		//VideoOutputWin = new VideoOutputWindow(this);
@@ -192,9 +205,12 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		allWatchBrowseWin = new AllWatchBrowserWindow(this);
 		LocalBrowseWin = new LocalBrowserWindow(this);
 		heapallocatorBrowseWin = new HeapAllocatorBrowserWindow(this);
-		//brkWin = new BrkWindow(this);
+		BreakpointsWin = new BreakpointsWindow(this);
+		NewFunctionBreakpointWin = new NewFnctBreakpointWindow(this);
+		SaveDumpAsWin = new SaveDumpAsWindow(this);
 		exceptionvectortableBrowseWin = new ExceptionVectorTableBrowserWindow(this);
 		CallStackBrowseWin = new CallStackBrowserWindow(this);
+		CartFilesListWin = new CartFilesListWindow(this);
 
 		mem1BrowseWin = (Memory1BrowserWindow **)calloc(vjs.nbrmemory1browserwindow, sizeof(Memory1BrowserWindow));
 #ifdef _MSC_VER
@@ -389,7 +405,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		traceStepOverAct->setDisabled(true);
 		connect(traceStepOverAct, SIGNAL(triggered()), this, SLOT(DebuggerTraceStepOver()));
 
-		// Trace into trace
+		// Trace into tracing
 		traceStepIntoAct = new QAction(QIcon(":/res/debug-stepinto.png"), tr("&Step Into"), this);
 		traceStepIntoAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBSTEPINTO].KBSettingValue)));
 		traceStepIntoAct->setShortcutContext(Qt::ApplicationShortcut);
@@ -397,9 +413,24 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		traceStepIntoAct->setDisabled(true);
 		connect(traceStepIntoAct, SIGNAL(triggered()), this, SLOT(DebuggerTraceStepInto()));
 
-		//newBreakpointFunctionAct = new QAction(QIcon(""), tr("&Function Breakpoint"), this);
-		//newBreakpointFunctionAct->setShortcut(QKeySequence(tr("Ctrl+B")));
-		//connect(newBreakpointFunctionAct, SIGNAL(triggered()), this, SLOT(NewBreakpointFunction()));
+		// Function breakpoint
+		newFunctionBreakpointAct = new QAction(QIcon(""), tr("&Function Breakpoint"), this);
+		newFunctionBreakpointAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBFUNCTIONBREAKPOINT].KBSettingValue)));
+		connect(newFunctionBreakpointAct, SIGNAL(triggered()), this, SLOT(ShowNewFunctionBreakpointWin()));
+		BreakpointsAct = new QAction(QIcon(":/res/debug-breakpoints.png"), tr("&Breakpoints"), this);
+		BreakpointsAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBBREAKPOINTS].KBSettingValue)));
+		connect(BreakpointsAct, SIGNAL(triggered()), this, SLOT(ShowBreakpointsWin()));
+		deleteAllBreakpointsAct = new QAction(QIcon(":/res/debug-deleteallbreakpoints.png"), tr("&Delete All Breakpoints"), this);
+		deleteAllBreakpointsAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBDELETEALLBREAKPOINTS].KBSettingValue)));
+		connect(deleteAllBreakpointsAct, SIGNAL(triggered()), this, SLOT(DeleteAllBreakpoints()));
+		disableAllBreakpointsAct = new QAction(QIcon(":/res/debug-disableallbreakpoints.png"), tr("&Disable All Breakpoints"), this);
+		connect(disableAllBreakpointsAct, SIGNAL(triggered()), this, SLOT(DisableAllBreakpoints()));
+
+		// Save dump
+		saveDumpAsAct = new QAction(tr("&Save Dump As..."), this);
+		saveDumpAsAct->setCheckable(false);
+		saveDumpAsAct->setDisabled(false);
+		connect(saveDumpAsAct, SIGNAL(triggered()), this, SLOT(ShowSaveDumpAsWin()));
 
 		//VideoOutputAct = new QAction(tr("Output Video"), this);
 		//VideoOutputAct->setStatusTip(tr("Shows the output video window"));
@@ -433,6 +464,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		CallStackBrowseAct = new QAction(QIcon(":/res/debug-callstack.png"), tr("Call Stack"), this);
 		CallStackBrowseAct->setStatusTip(tr("Shows Call Stack browser window"));
 		connect(CallStackBrowseAct, SIGNAL(triggered()), this, SLOT(ShowCallStackBrowserWin()));
+
+		// Cart files list
+		CartFilesListAct = new QAction(QIcon(""), tr("Directory and files"), this);
+		CartFilesListAct->setStatusTip(tr("List of the files in the cartridge's directory structure"));
+		connect(CartFilesListAct, SIGNAL(triggered()), this, SLOT(ShowCartFilesListWin()));
 
 		// Memory windows
 		mem1BrowseAct = (QAction **)calloc(vjs.nbrmemory1browserwindow, sizeof(QAction));
@@ -504,12 +540,29 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	fileMenu->addSeparator();
 	fileMenu->addAction(quitAppAct);
 
+	// Alpine and debugger menus
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
+		// Create debug menu
 		debugMenu = menuBar()->addMenu(tr("&Debug"));
+
+		// Create debugger menu
 		if (vjs.softTypeDebugger)
 		{
+			// Create view menu
+			viewMenu = menuBar()->addMenu(tr("&View"));
+
+			// Cart menu
+			viewCartMenu = viewMenu->addMenu(tr("&Cartridge"));
+			viewCartMenu->addAction(CartFilesListAct);
+#if 0
+			viewCartMenu->addSeparator();
+			viewCartMenu->addAction(CartStreamsAct);
+#endif
+
+			// Windows menu
 			debugWindowsMenu = debugMenu->addMenu(tr("&Windows"));
+			debugWindowsMenu->addAction(BreakpointsAct);
 			debugWindowExceptionMenu = debugWindowsMenu->addMenu(tr("&Exception"));
 			debugWindowExceptionMenu->addAction(exceptionVectorTableBrowseAct);
 			debugWindowsMenu->addSeparator();
@@ -546,16 +599,21 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugMenu->addSeparator();
 			debugMenu->addAction(traceStepIntoAct);
 			debugMenu->addAction(traceStepOverAct);
-#if 0
 			debugMenu->addSeparator();
 			debugNewBreakpointMenu = debugMenu->addMenu(tr("&New Breakpoint"));
-			debugNewBreakpointMenu->addAction(newBreakpointFunctionAct);
+			debugNewBreakpointMenu->addAction(newFunctionBreakpointAct);
+			debugMenu->addAction(deleteAllBreakpointsAct);
+			debugMenu->addAction(disableAllBreakpointsAct);
+			debugMenu->addSeparator();
+			debugMenu->addAction(saveDumpAsAct);
+#if 0
+			debugMenu->addSeparator();
+			debugMenu->addAction(DasmAct);
 #endif
-			//debugMenu->addSeparator();
-			//debugMenu->addAction(DasmAct);
 		}
 		else
 		{
+			// Create alpine menu
 			debugMenu->addAction(memBrowseAct);
 			debugMenu->addAction(stackBrowseAct);
 			debugMenu->addAction(cpuBrowseAct);
@@ -605,6 +663,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		debuggerbar->addSeparator();
 		debuggerbar->addAction(traceStepIntoAct);
 		debuggerbar->addAction(traceStepOverAct);
+		debuggerbar->addSeparator();
+		debuggerbar->addAction(BreakpointsAct);
 	}
 
 	if (vjs.hardwareTypeAlpine)
@@ -1029,7 +1089,7 @@ void MainWin::Configure(void)
 	// Just in case we crash before a clean exit...
 	WriteSettings();
 
-	DebuggerRefreshWindows();
+	RefreshWindows();
 }
 
 
@@ -1075,22 +1135,25 @@ static uint32_t ntscTickCount;
 		// Otherwise, run the Jaguar simulation
 		HandleGamepads();
 		JaguarExecuteNew();
-		if (!vjs.softTypeDebugger)
+		//if (!vjs.softTypeDebugger)
 			videoWidget->HandleMouseHiding();
 
 static uint32_t refresh = 0;
 		// Do autorefresh on debug windows
 		// Have to be careful, too much causes the emulator to slow way down!
+		if (refresh == vjs.refresh)
+		{
 		if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 		{
-			if (refresh == vjs.refresh)
-			{
 				AlpineRefreshWindows();
 				//memBrowseWin->RefreshContents();
 				//cpuBrowseWin->RefreshContents();
+			}
+			CommonRefreshWindows();
 				refresh = 0;
 			}
 			else
+		{
 				refresh++;
 		}
 	}
@@ -1140,7 +1203,7 @@ void MainWin::TogglePowerState(void)
 	if (!powerButtonOn)
 	{
 		// Restore the mouse pointer, if hidden:
-		if (!vjs.softTypeDebugger)
+		//if (!vjs.softTypeDebugger)
 		{
 			videoWidget->CheckAndRestoreMouseCursor();
 		}
@@ -1194,7 +1257,10 @@ void MainWin::TogglePowerState(void)
 
 		WriteLog("GUI: Resetting Jaguar...\n");
 		JaguarReset();
+		DebuggerReset();
+		CommonReset();
 		DebuggerResetWindows();
+		CommonResetWindows();
 		DACPauseAudioThread(false);
 	}
 }
@@ -1240,7 +1306,7 @@ void MainWin::ToggleRunState(void)
 
 			cpuBrowseWin->HoldBPM();
 			cpuBrowseWin->HandleBPMContinue();
-			DebuggerRefreshWindows();
+			RefreshWindows();
 		}
 	}
 	else
@@ -1253,6 +1319,7 @@ void MainWin::ToggleRunState(void)
 			traceStepIntoAct->setDisabled(true);
 			traceStepOverAct->setDisabled(true);
 			restartAct->setDisabled(true);
+			BreakpointsWin->RefreshContents();
 		}
 
 		cpuBrowseWin->UnholdBPM();
@@ -1410,13 +1477,14 @@ void MainWin::LoadSoftware(QString file)
 	}
 	else
 	{
-		// Prevent the Alpine mode to crash in case of software without a start address
-		if (vjs.hardwareTypeAlpine && !jaguarRunAddress)
+		// Prevent the launch in case of software without a start address and without BIOS presence
+		if (!vjs.useJaguarBIOS && !jaguarRunAddress)
 		{
 			ToggleRunState();
 		}
 	}
 
+	// Display the Atari Jaguar software which is running
 	if ((!vjs.hardwareTypeAlpine || !vjs.softTypeDebugger) && !loadAndGo && jaguarRunAddress)
 	{
 		QString newTitle = QString("Virtual Jaguar " VJ_RELEASE_VERSION " Rx - Now playing: %1").arg(filePickWin->GetSelectedPrettyName());
@@ -1437,11 +1505,52 @@ void MainWin::ToggleCDUsage(void)
 }
 
 
-//
-void MainWin::NewBreakpointFunction(void)
+// Open, or display, the breakpoints list window
+void MainWin::ShowBreakpointsWin(void)
 {
-	//brkWin->show();
-	//brkWin->RefreshContents();
+	BreakpointsWin->show();
+	BreakpointsWin->RefreshContents();
+}
+
+
+// Delete all breakpoints
+void MainWin::DeleteAllBreakpoints(void)
+{
+	cpuBrowseWin->ResetBPM();
+	m68k_brk_reset();
+	ShowBreakpointsWin();
+}
+
+
+// Disable all breakpoints
+void MainWin::DisableAllBreakpoints(void)
+{
+	cpuBrowseWin->DisableBPM();
+	m68k_brk_disable();
+	ShowBreakpointsWin();
+}
+
+
+// Open, or display, the new breakpoint function window
+void MainWin::ShowNewFunctionBreakpointWin(void)
+{
+	NewFunctionBreakpointWin->show();
+	ShowBreakpointsWin();
+}
+
+
+// Display list of files found in cartridge
+void MainWin::ShowCartFilesListWin(void)
+{
+	CartFilesListWin->show();
+	CartFilesListWin->RefreshContents();
+}
+
+
+// Display the save dump pickup file
+void MainWin::ShowSaveDumpAsWin(void)
+{
+	SaveDumpAsWin->show();
 }
 
 
@@ -1450,7 +1559,7 @@ void MainWin::DebuggerTraceStepInto(void)
 {
 	JaguarStepInto();
 	videoWidget->updateGL();
-	DebuggerRefreshWindows();
+	RefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Step Into function !!!")
 #else
@@ -1459,7 +1568,7 @@ void MainWin::DebuggerTraceStepInto(void)
 }
 
 
-// Restart
+// Restart the Jaguar executable
 void MainWin::DebuggerRestart(void)
 {
 #if 1
@@ -1469,9 +1578,11 @@ void MainWin::DebuggerRestart(void)
 	m68k_set_reg(M68K_REG_SP, vjs.DRAM_size);
 #endif
 	m68k_set_reg(M68K_REG_A6, 0);
-
+	m68k_brk_hitcounts_reset();
+	bpmHitCounts = 0;
 	DebuggerResetWindows();
-	DebuggerRefreshWindows();
+	CommonResetWindows();
+	RefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Restart function !!!")
 #else
@@ -1485,7 +1596,7 @@ void MainWin::DebuggerTraceStepOver(void)
 {
 	JaguarStepOver(0);
 	videoWidget->updateGL();
-	DebuggerRefreshWindows();
+	RefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Step Over function !!!")
 #else
@@ -1763,10 +1874,12 @@ void MainWin::ReadSettings(void)
 	// Read settings from the Debugger mode
 	settings.beginGroup("debugger");
 	strcpy(vjs.debuggerROMPath, settings.value("DefaultROM", "").toString().toUtf8().data());
+	strcpy(vjs.sourcefilesearchPaths, settings.value("SourceFileSearchPaths", "").toString().toUtf8().data());
 	vjs.nbrdisasmlines = settings.value("NbrDisasmLines", 32).toUInt();
 	vjs.disasmopcodes = settings.value("DisasmOpcodes", true).toBool();
 	vjs.displayHWlabels = settings.value("DisplayHWLabels", true).toBool();
 	vjs.displayFullSourceFilename = settings.value("displayFullSourceFilename", true).toBool();
+	vjs.ELFSectionsCheck = settings.value("ELFSectionsCheck", false).toBool();
 	vjs.nbrmemory1browserwindow = settings.value("NbrMemory1BrowserWindow", MaxMemory1BrowserWindow).toUInt();
 	settings.endGroup();
 
@@ -1788,13 +1901,15 @@ void MainWin::ReadSettings(void)
 
 	// Write important settings to the log file
 	WriteLog("MainWin: Paths\n");
-	WriteLog("     EEPROMPath = \"%s\"\n", vjs.EEPROMPath);
-	WriteLog("        ROMPath = \"%s\"\n", vjs.ROMPath);
-	WriteLog("  AlpineROMPath = \"%s\"\n", vjs.alpineROMPath);
-	WriteLog("DebuggerROMPath = \"%s\"\n", vjs.debuggerROMPath);
-	WriteLog("     absROMPath = \"%s\"\n", vjs.absROMPath);
-	WriteLog("ScreenshotsPath = \"%s\"\n", vjs.screenshotPath);
-	WriteLog("  Pipelined DSP = %s\n", (vjs.usePipelinedDSP ? "ON" : "off"));
+	WriteLog("           EEPROMPath = \"%s\"\n", vjs.EEPROMPath);
+	WriteLog("              ROMPath = \"%s\"\n", vjs.ROMPath);
+	WriteLog("        AlpineROMPath = \"%s\"\n", vjs.alpineROMPath);
+	WriteLog("      DebuggerROMPath = \"%s\"\n", vjs.debuggerROMPath);
+	WriteLog("           absROMPath = \"%s\"\n", vjs.absROMPath);
+	WriteLog("      ScreenshotsPath = \"%s\"\n", vjs.screenshotPath);
+	WriteLog("SourceFileSearchPaths = \"%s\"\n", vjs.sourcefilesearchPaths);
+	WriteLog("MainWin: Misc.\n");
+	WriteLog("   Pipelined DSP = %s\n", (vjs.usePipelinedDSP ? "ON" : "off"));
 
 #if 0
 	// Keybindings in order of U, D, L, R, C, B, A, Op, Pa, 0-9, #, *
@@ -1846,6 +1961,7 @@ void MainWin::ReadSettings(void)
 	WriteLog("Read setting = Done\n");
 
 	ReadProfiles(&settings);
+	DBGManager_SourceFileSearchPathsSet(vjs.sourcefilesearchPaths);
 }
 
 
@@ -1879,6 +1995,11 @@ void MainWin::ReadUISettings(void)
 	// Video output information
 	zoomLevel = settings.value("zoom", 2).toInt();
 
+// Emulator status UI information
+	pos = settings.value("emuStatusWinPos", QPoint(200, 200)).toPoint();
+	emuStatusWin->move(pos);
+	settings.value("emuStatusWinIsVisible", false).toBool() ? ShowEmuStatusWin() : void();
+	
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
@@ -1898,11 +2019,6 @@ void MainWin::ReadUISettings(void)
 		settings.value("stackBrowseWinIsVisible", false).toBool() ? ShowStackBrowserWin() : void();
 		size = settings.value("stackBrowseWinSize", QSize(400, 400)).toSize();
 		stackBrowseWin->resize(size);
-
-		// Emulator status UI information
-		pos = settings.value("emuStatusWinPos", QPoint(200, 200)).toPoint();
-		emuStatusWin->move(pos);
-		settings.value("emuStatusWinIsVisible", false).toBool() ? ShowEmuStatusWin() : void();
 
 		// OP (Object Processor) UI information
 		pos = settings.value("opBrowseWinPos", QPoint(200, 200)).toPoint();
@@ -1973,6 +2089,33 @@ void MainWin::ReadUISettings(void)
 		settings.value("CallStackBrowseWinIsVisible", false).toBool() ? ShowCallStackBrowserWin() : void();
 		size = settings.value("CallStackBrowseWinSize", QSize(400, 400)).toSize();
 		CallStackBrowseWin->resize(size);
+
+		// cartridge directory and files UI information
+		pos = settings.value("CartFilesListWinPos", QPoint(200, 200)).toPoint();
+		CartFilesListWin->move(pos);
+		settings.value("CartFilesListWinIsVisible", false).toBool() ? ShowCartFilesListWin() : void();
+		size = settings.value("CartFilesListWinSize", QSize(400, 400)).toSize();
+		CartFilesListWin->resize(size);
+
+		// Save dump UI information
+		pos = settings.value("SaveDumpAsWinPos", QPoint(200, 200)).toPoint();
+		SaveDumpAsWin->move(pos);
+		settings.value("SaveDumpAsWinIsVisible", false).toBool() ? ShowSaveDumpAsWin() : void();
+		size = settings.value("SaveDumpAsWinSize", QSize(400, 400)).toSize();
+		SaveDumpAsWin->resize(size);
+
+		// Breakpoints UI information
+		pos = settings.value("BreakpointsWinPos", QPoint(200, 200)).toPoint();
+		BreakpointsWin->move(pos);
+		settings.value("BreakpointsWinIsVisible", false).toBool() ? ShowBreakpointsWin() : void();
+		size = settings.value("BreakpointsWinSize", QSize(400, 400)).toSize();
+		BreakpointsWin->resize(size);
+		// New function breakpoint UI information
+		pos = settings.value("NewFunctionBreakpointWinPos", QPoint(200, 200)).toPoint();
+		NewFunctionBreakpointWin->move(pos);
+		settings.value("NewFunctionBreakpointWinIsVisible", false).toBool() ? ShowNewFunctionBreakpointWin() : void();
+		size = settings.value("NewFunctionBreakpointWinSize", QSize(400, 400)).toSize();
+		NewFunctionBreakpointWin->resize(size);
 
 		// Memories browser UI information
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
@@ -2047,8 +2190,10 @@ void MainWin::WriteSettings(void)
 	settings.setValue("NbrDisasmLines", vjs.nbrdisasmlines);
 	settings.setValue("DisasmOpcodes", vjs.disasmopcodes);
 	settings.setValue("displayFullSourceFilename", vjs.displayFullSourceFilename);
+	settings.setValue("ELFSectionsCheck", vjs.ELFSectionsCheck);
 	settings.setValue("NbrMemory1BrowserWindow", (unsigned int)vjs.nbrmemory1browserwindow);
 	settings.setValue("DefaultROM", vjs.debuggerROMPath);
+	settings.setValue("SourceFileSearchPaths", vjs.sourcefilesearchPaths);
 	settings.endGroup();
 
 	// Write settings from the Keybindings
@@ -2106,6 +2251,7 @@ void MainWin::WriteSettings(void)
 #endif
 
 	WriteProfiles(&settings);
+	DBGManager_SourceFileSearchPathsSet(vjs.sourcefilesearchPaths);
 }
 
 
@@ -2127,6 +2273,10 @@ void MainWin::WriteUISettings(void)
 	// Video output information
 	settings.setValue("zoom", zoomLevel);
 
+	// Common UI information
+	settings.setValue("emuStatusWinPos", emuStatusWin->pos());
+	settings.setValue("emuStatusWinIsVisible", emuStatusWin->isVisible());
+	
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
@@ -2137,8 +2287,6 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("stackBrowseWinPos", stackBrowseWin->pos());
 		settings.setValue("stackBrowseWinIsVisible", stackBrowseWin->isVisible());
 		settings.setValue("stackBrowseWinSize", stackBrowseWin->size());
-		settings.setValue("emuStatusWinPos", emuStatusWin->pos());
-		settings.setValue("emuStatusWinIsVisible", emuStatusWin->isVisible());
 		settings.setValue("opBrowseWinPos", opBrowseWin->pos());
 		settings.setValue("opBrowseWinIsVisible", opBrowseWin->isVisible());
 		settings.setValue("opBrowseWinSize", opBrowseWin->size());
@@ -2172,6 +2320,19 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("CallStackBrowseWinPos", CallStackBrowseWin->pos());
 		settings.setValue("CallStackBrowseWinIsVisible", CallStackBrowseWin->isVisible());
 		settings.setValue("CallStackBrowseWinSize", CallStackBrowseWin->size());
+		settings.setValue("BreakpointsWinPos", BreakpointsWin->pos());
+		settings.setValue("BreakpointsWinIsVisible", BreakpointsWin->isVisible());
+		settings.setValue("BreakpointsWinSize", BreakpointsWin->size());
+		settings.setValue("NewFunctionBreakpointWinPos", NewFunctionBreakpointWin->pos());
+		settings.setValue("NewFunctionBreakpointWinIsVisible", NewFunctionBreakpointWin->isVisible());
+		settings.setValue("NewFunctionBreakpointWinSize", NewFunctionBreakpointWin->size());
+		settings.setValue("CartFilesListWinPos", CartFilesListWin->pos());
+		settings.setValue("CartFilesListWinIsVisible", CartFilesListWin->isVisible());
+		settings.setValue("CartFilesListWinSize", CartFilesListWin->size());
+		settings.setValue("SaveDumpAsWinPos", SaveDumpAsWin->pos());
+		settings.setValue("SaveDumpAsWinIsVisible", SaveDumpAsWin->isVisible());
+		settings.setValue("SaveDumpAsWinSize", SaveDumpAsWin->size());
+
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
 			sprintf(mem1Name, "mem1BrowseWinPos[%i]", (unsigned int)i);
@@ -2193,10 +2354,31 @@ void MainWin::AlpineRefreshWindows(void)
 	cpuBrowseWin->RefreshContents();
 	memBrowseWin->RefreshContents();
 	stackBrowseWin->RefreshContents();
-	emuStatusWin->RefreshContents();
 	opBrowseWin->RefreshContents();
 	riscDasmBrowseWin->RefreshContents();
 	m68kDasmBrowseWin->RefreshContents();
+}
+
+
+// 
+void MainWin::CommonResetWindows(void)
+{
+}
+
+
+// Reset common
+void MainWin::CommonReset(void)
+{
+}
+
+
+// Reset soft debugger
+void MainWin::DebuggerReset(void)
+{
+	if (vjs.softTypeDebugger)
+	{
+		DeleteAllBreakpoints();
+	}
 }
 
 
@@ -2208,17 +2390,38 @@ void MainWin::DebuggerResetWindows(void)
 		FilesrcListWin->Reset();
 		allWatchBrowseWin->Reset();
 		heapallocatorBrowseWin->Reset();
-
+		BreakpointsWin->Reset();
+		CartFilesListWin->Reset();
 		//ResetAlpineWindows();
 	}
+}
+
+
+// Refresh common windows
+void MainWin::CommonRefreshWindows(void)
+{
+	emuStatusWin->RefreshContents();
+}
+
+
+// Refresh view windows
+void MainWin::ViewRefreshWindows(void)
+{
+	CartFilesListWin->RefreshContents();
+}
+
+
+// 
+void MainWin::RefreshWindows(void)
+{
+	DebuggerRefreshWindows();
+	CommonRefreshWindows();
 }
 
 
 // Refresh soft debugger & alpine debug windows
 void MainWin::DebuggerRefreshWindows(void)
 {
-	size_t i;
-
 	if (vjs.softTypeDebugger)
 	{
 		FilesrcListWin->RefreshContents();
@@ -2229,12 +2432,14 @@ void MainWin::DebuggerRefreshWindows(void)
 		LocalBrowseWin->RefreshContents();
 		CallStackBrowseWin->RefreshContents();
 		heapallocatorBrowseWin->RefreshContents();
-		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
+		BreakpointsWin->RefreshContents();
+		for (size_t i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
 			mem1BrowseWin[i]->RefreshContents(i);
 		}
 
 		AlpineRefreshWindows();
+		ViewRefreshWindows();
 	}
 }
 

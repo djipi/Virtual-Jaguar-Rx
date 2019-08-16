@@ -11,10 +11,11 @@
 // JPM              Various efforts to set the ELF format support
 // JPM              Various efforts to set the DWARF format support
 // JPM  09/15/2018  Support the unsigned char
-// JPM  10/06/2018  Cosmetic changes
+// JPM   Oct./2018  Cosmetic changes, added source file search paths, and ELF function name
 //
 
 // To Do
+// To think about unique format to handle variations from ELF, DWARF, etc.
 //
 
 
@@ -50,16 +51,109 @@ struct Value
 }S_Value;
 
 
+//
+void DBGManager_SourceFileSearchPathsInit(void);
+void DBGManager_SourceFileSearchPathsReset(void);
+void DBGManager_SourceFileSearchPathsClose(void);
+
+
 // Common debugger variables
 size_t	DBGType;
 char value[1000];
+size_t NbSFSearchPaths;
+char **SourceFileSearchPaths;
+
+
+// Init the source file search paths
+void DBGManager_SourceFileSearchPathsInit(void)
+{
+	NbSFSearchPaths = 0;
+	SourceFileSearchPaths = NULL;
+}
+
+
+// Set the source file search paths
+// Create individual path for each one provided in the list (separate with ';')
+void DBGManager_SourceFileSearchPathsSet(char *ListPaths)
+{
+	// Check presence of a previous list
+	if (NbSFSearchPaths)
+	{
+		// Reset previous list
+		DBGManager_SourceFileSearchPathsReset();
+	}
+
+	// Check if there is a paths list
+	if (strlen(ListPaths))
+	{
+		// Get number of paths
+		char *Ptr = ListPaths;
+		while(*Ptr)
+		{
+			while (*Ptr && (*Ptr++ != ';'));
+			{
+				NbSFSearchPaths++;
+			}
+		}
+
+		// Isolate each search path
+		SourceFileSearchPaths = (char **)calloc(NbSFSearchPaths, sizeof(char *));
+		size_t i = 0;
+		Ptr = ListPaths;
+
+		while (*Ptr)
+		{
+			// Search the path separator (';')
+			char *Ptr1 = Ptr;
+			while (*Ptr && (*Ptr++ != ';'));
+
+			// Copy the inidividual search path
+			SourceFileSearchPaths[i] = (char *)calloc(1, (Ptr - Ptr1) + 1);
+			strncpy(SourceFileSearchPaths[i], Ptr1, (Ptr - Ptr1));
+			if (SourceFileSearchPaths[i][strlen(SourceFileSearchPaths[i]) - 1] == ';')
+			{
+				SourceFileSearchPaths[i][strlen(SourceFileSearchPaths[i]) - 1] = 0;
+			}
+			i++;
+		}
+	}
+
+	DWARFManager_Set(NbSFSearchPaths, SourceFileSearchPaths);
+}
+
+
+// Reset the source file search paths
+void DBGManager_SourceFileSearchPathsReset(void)
+{
+	// Free each path
+	while (NbSFSearchPaths)
+	{
+		free(SourceFileSearchPaths[--NbSFSearchPaths]);
+	}
+
+	// Free the pointers list
+	free(SourceFileSearchPaths);
+	SourceFileSearchPaths = NULL;
+}
+
+
+// Close the source file search paths
+void DBGManager_SourceFileSearchPathsClose(void)
+{
+	DBGManager_SourceFileSearchPathsReset();
+}
 
 
 // Common debugger initialisation
 void DBGManager_Init(void)
 {
+	// DBG initialisations
 	DBGType = DBG_NO_TYPE;
+	DBGManager_SourceFileSearchPathsInit();
+
+	// ELF initialisation 
 	ELFManager_Init();
+	// DWARF initialisation
 	DWARFManager_Init();
 }
 
@@ -82,20 +176,6 @@ void DBGManager_Reset(void)
 }
 
 
-// Get debugger type
-size_t DBGManager_GetType(void)
-{
-	return DBGType;
-}
-
-
-// Common debugger set
-void DBGManager_SetType(size_t DBGTypeSet)
-{
-	DBGType |= DBGTypeSet;
-}
-
-
 // Common debugger close
 void DBGManager_Close(void)
 {
@@ -108,6 +188,23 @@ void DBGManager_Close(void)
 	{
 		ELFManager_Close();
 	}
+
+	DBGManager_SourceFileSearchPathsClose();
+	DBGType = DBG_NO_TYPE;
+}
+
+
+// Common debugger set
+void DBGManager_SetType(size_t DBGTypeSet)
+{
+	DBGType |= DBGTypeSet;
+}
+
+
+// Get debugger type
+size_t DBGManager_GetType(void)
+{
+	return DBGType;
 }
 
 
@@ -531,14 +628,19 @@ char *DBGManager_GetGlobalVariableName(size_t Index)
 // Return NULL if no function name has been found
 char *DBGManager_GetFunctionName(size_t Adr)
 {
+	char *Symbolname = NULL;
+
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetFunctionName(Adr);
+		Symbolname = DWARFManager_GetFunctionName(Adr);
 	}
-	else
+
+	if ((DBGType & DBG_ELF) && (Symbolname == NULL))
 	{
-		return	NULL;
+		Symbolname = ELFManager_GetFunctionName(Adr);
 	}
+
+	return	Symbolname;
 }
 
 

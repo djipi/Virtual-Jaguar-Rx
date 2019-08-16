@@ -11,13 +11,11 @@
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
-// JLH  02/28/2010  Added functions to look inside .ZIP files and handle
-//                  contents
+// JLH  02/28/2010  Added functions to look inside .ZIP files and handle contents
 // JLH  06/01/2012  Added function to check ZIP file CRCs against file DB
-// JPM  06/06/2016  Visual Studio support
-// JPM  06/15/2016  ELF format support
-// JPM  06/19/2016  Soft debugger support
+// JPM   June/2016  Visual Studio support, ELF format support and Soft debugger support
 // JPM  07/15/2016  DWARF format support
+// JPM  04/06/2019  Added ELF sections check
 //
 
 #include "file.h"
@@ -40,6 +38,7 @@
 #include "libdwarf.h"
 #include "debugger/ELFManager.h"
 #include "debugger/DBGManager.h"
+#include "settings.h"
 
 
 // Private function prototypes
@@ -222,11 +221,11 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 							else
 							{
 								NameSection = elf_strptr(ElfMem, PtrGElfEhdr->e_shstrndx, (size_t)PtrGElfShdr->sh_name);
-								WriteLog("FILE: ELF Section name: %s\n", NameSection);
+								WriteLog("FILE: ELF Section %s found\n", NameSection);
 
-								if ((ElfSectionNameType = ELFManager_GetSectionType(NameSection)) == ELF_NO_TYPE)
+								if (((ElfSectionNameType = ELFManager_GetSectionType(NameSection)) == ELF_NO_TYPE) && vjs.ELFSectionsCheck)
 								{
-									WriteLog("FILE: ELF Section not listed\n");
+									WriteLog("FILE: ELF Section %s not recognized\n", NameSection);
 									error = true;
 								}
 								else

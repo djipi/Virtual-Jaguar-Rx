@@ -24,9 +24,6 @@ class HelpWindow;
 class FilePickerWindow;
 //class VideoOutputWindow;
 //class DasmWindow;
-class m68KDasmWindow;
-class GPUDasmWindow;
-class DSPDasmWindow;
 class EmuStatusWindow;
 
 // Alpine
@@ -38,14 +35,20 @@ class M68KDasmBrowserWindow;
 class RISCDasmBrowserWindow;
 
 // Debugger
+class m68KDasmWindow;
+class GPUDasmWindow;
+class DSPDasmWindow;
 class AllWatchBrowserWindow;
 class LocalBrowserWindow;
 class CallStackBrowserWindow;
 class HeapAllocatorBrowserWindow;
 class Memory1BrowserWindow;
-//class BrkWindow;
+class BreakpointsWindow;
+class NewFnctBreakpointWindow;
 class ExceptionVectorTableBrowserWindow;
 class FilesrcListWindow;
+class CartFilesListWindow;
+class SaveDumpAsWindow;
 
 
 // 
@@ -60,8 +63,14 @@ class MainWin: public QMainWindow
 		void LoadFile(QString);
 		void SyncUI(void);
 		void DebuggerRefreshWindows(void);
-		void DebuggerResetWindows(void);
+		void ViewRefreshWindows(void);
+		void RefreshWindows(void);
+		void CommonRefreshWindows(void);
 		void AlpineRefreshWindows(void);
+		void DebuggerResetWindows(void);
+		void CommonResetWindows(void);
+		void CommonReset(void);
+		void DebuggerReset(void);
 
 	protected:
 		void closeEvent(QCloseEvent *);
@@ -100,9 +109,16 @@ class MainWin: public QMainWindow
 		void ShowHeapAllocatorBrowserWin(void);
 		void ShowMemory1BrowserWin(int NumWin);
 		void ShowExceptionVectorTableBrowserWin(void);
-		void NewBreakpointFunction(void);
-		//void ShowVideoOutputWin(void);
-		//void ShowDasmWin(void);
+		void ShowNewFunctionBreakpointWin(void);
+		void ShowBreakpointsWin(void);
+		void DeleteAllBreakpoints(void);
+		void DisableAllBreakpoints(void);
+		void ShowSaveDumpAsWin(void);
+#if 0
+		void ShowVideoOutputWin(void);
+		void ShowDasmWin(void);
+#endif
+		void ShowCartFilesListWin(void);
 		// Alpine
 		void ShowMemoryBrowserWin(void);
 		void ShowStackBrowserWin(void);
@@ -149,7 +165,10 @@ class MainWin: public QMainWindow
 		GPUDasmWindow *GPUDasmWin;
 		DSPDasmWindow *DSPDasmWin;
 		FilesrcListWindow *FilesrcListWin;
-		//BrkWindow *brkWin;
+		BreakpointsWindow *BreakpointsWin;
+		NewFnctBreakpointWindow *NewFunctionBreakpointWin;
+		CartFilesListWindow *CartFilesListWin;
+		SaveDumpAsWindow *SaveDumpAsWin;
 		QTimer *timer;
 		bool running;
 		int zoomLevel;
@@ -182,6 +201,7 @@ class MainWin: public QMainWindow
 		QMenu *fileMenu;
 		QMenu *helpMenu;
 		QMenu *debugMenu, *debugWindowsMenu, *debugWindowsBrowsesMenu, *debugWindowsWatchMenu, *debugWindowOutputMenu, *debugWindowExceptionMenu, *debugWindowsMemoryMenu, *debugNewBreakpointMenu;
+		QMenu *viewMenu, *viewCartMenu;
 		QToolBar * toolbar;
 		QToolBar * debugbar;
 		QToolBar * debuggerbar;
@@ -205,9 +225,6 @@ class MainWin: public QMainWindow
 		QAction *emustatusAct;
 		QAction *useCDAct;
 		QAction *frameAdvanceAct;
-		QAction *traceStepOverAct;
-		QAction *traceStepIntoAct;
-		QAction *restartAct;
 		QAction *fullScreenAct;
 		//QAction *DasmAct;
 		QAction *screenshotAct;
@@ -221,14 +238,22 @@ class MainWin: public QMainWindow
 		QAction *riscDasmBrowseAct;
 
 		// Debugger
+		QAction *traceStepOverAct;
+		QAction *traceStepIntoAct;
+		QAction *restartAct;
 		//QAction *VideoOutputAct;
 		QAction *heapallocatorBrowseAct;
 		QAction *allWatchBrowseAct;
 		QAction *LocalBrowseAct;
 		QAction *CallStackBrowseAct;
 		QAction **mem1BrowseAct;
-		//QAction *newBreakpointFunctionAct;
+		QAction *newFunctionBreakpointAct;
+		QAction *BreakpointsAct;
+		QAction *deleteAllBreakpointsAct;
+		QAction *disableAllBreakpointsAct;
+		QAction *saveDumpAsAct;
 		QAction *exceptionVectorTableBrowseAct;
+		QAction *CartFilesListAct;
 
 		QIcon powerGreen;
 		QIcon powerRed;

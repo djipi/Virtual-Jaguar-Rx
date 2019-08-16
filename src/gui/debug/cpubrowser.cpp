@@ -11,6 +11,7 @@
 // ---  ----------  -----------------------------------------------------------
 // JLH  08/14/2012  Created this file
 // JPM  08/09/2017  Added windows display detection in order to avoid the refresh
+// JPM  10/13/2018  Added BPM hit counts
 //
 
 // STILL TO DO:
@@ -268,10 +269,32 @@ void CPUBrowserWindow::UnholdBPM(void)
 }
 
 
+// Disable BPM
+void CPUBrowserWindow::DisableBPM(void)
+{
+	// Uncheck the BPM checkbox and handle BPM
+	if (bpm->checkState())
+	{
+		bpm->setCheckState(Qt::Unchecked);
+	}
+	HandleBPM(false);
+}
+
+
+// BPM reset
+// Disable checkbox and breakpoint address
+void CPUBrowserWindow::ResetBPM(void)
+{
+	DisableBPM();
+	bpmAddress->setText("");
+}
+
+
 // Toggle breakpoint set
 void CPUBrowserWindow::HandleBPM(bool state)
 {
 	bpmSaveActive = bpmActive = state;
+	bpmHitCounts = 0;
 
 	if (bpmActive)
 	{
@@ -284,7 +307,7 @@ void CPUBrowserWindow::HandleBPM(bool state)
 }
 
 
-// Breakpoint address set
+// Breakpoint address set and reset the hit counts
 void CPUBrowserWindow::HandleBPMAddress(const QString & newText)
 {
 	bool ok;
