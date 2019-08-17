@@ -1418,6 +1418,22 @@ unsigned int m68k_read_memory_16(unsigned int address)
 }
 
 
+// Alert message in case of exception vector request
+bool m68k_read_exception_vector(unsigned int address, char *text)
+{
+	QString msg;
+	QMessageBox msgBox;
+
+	msg.sprintf("$%06x: %s", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], text);
+	msgBox.setText(msg);
+	msgBox.setStandardButtons(QMessageBox::Abort);
+	msgBox.setDefaultButton(QMessageBox::Abort);
+	msgBox.exec();
+	return M68KDebugHalt();
+}
+
+
+// Read 4 bytes from memory
 unsigned int m68k_read_memory_32(unsigned int address)
 {
 #ifdef ALPINE_FUNCTIONS
@@ -1436,23 +1452,36 @@ unsigned int m68k_read_memory_32(unsigned int address)
 
 //WriteLog("--> [RM32]\n");
 #ifndef USE_NEW_MMU
-	uint32_t retVal = 0;
+	//uint32_t retVal = 0;
 
-	if ((address >= 0x800000) && (address <= 0xDFFEFE))
+	// check exception vectors access
+	if ((address >= 0x8) && (address <= 0x7c))
 	{
-		// Memory Track reading...
-		if (((TOMGetMEMCON1() & 0x0006) == (2 << 1)) && (jaguarMainROMCRC32 == 0xFDF37F47))
+		switch (address)
 		{
-			retVal = MTReadLong(address);
+		case 0x10:
+			m68k_read_exception_vector(address, "Illegal instruction");
+			break;
 		}
-		else
+	}
+	else
+	{
+		// check ROM or Memory Track access
+		if ((address >= 0x800000) && (address <= 0xDFFEFE))
 		{
-			retVal = GET32(jaguarMainROM, address - 0x800000);
+			// Memory Track reading...
+			if (((TOMGetMEMCON1() & 0x0006) == (2 << 1)) && (jaguarMainROMCRC32 == 0xFDF37F47))
+			{
+				return MTReadLong(address);
+			}
+			else
+			{
+				return GET32(jaguarMainROM, address - 0x800000);
+			}
 		}
-
-		return retVal;
 	}
 
+	// return value from memory
 	return (m68k_read_memory_16(address) << 16) | m68k_read_memory_16(address + 2);
 #else
 	return MMURead32(address, M68K);
