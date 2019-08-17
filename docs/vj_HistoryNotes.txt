@@ -1,6 +1,6 @@
-Release 4a (TBA)
-----------------
-Git commit: 
+Release 4a (15th August 2019)
+-----------------------------
+Git commit: f04df4f185ed4f3cfc805d0f61b3c019a108ae2c
 -
 0) Fix specific breakpoint for ROM cartridge or unknown memory location writing
 
