@@ -4,6 +4,8 @@ Release 5 (TBA)
 - This date already appears in the Release 4 executable but was not referenced in his history note
 1) Added a specific breakpoint for the M68K illegal instruction exception
 -- Alert box will display a message and then the code will stop
+2) Added a specific breakpoint for the M68K address error exception
+-- Alert box will display a message and then the code will stop
 
 Release 4a (15th August 2019)
 -----------------------------

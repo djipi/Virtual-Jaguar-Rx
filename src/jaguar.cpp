@@ -15,6 +15,7 @@
 // JLH  11/25/2009  Major rewrite of memory subsystem and handlers
 // JPM  09/04/2018  Added the new Models and BIOS handler
 // JPM  10/13/2018  Added breakpoints features
+// JPM   Aug./2019  Fix specific breakpoint for ROM cartridge or unknown memory location writing; added a specific breakpoint for the M68K illegal instruction and address error exceptions
 //
 
 
@@ -1424,7 +1425,11 @@ bool m68k_read_exception_vector(unsigned int address, char *text)
 	QString msg;
 	QMessageBox msgBox;
 
-	msg.sprintf("$%06x: %s", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], text);
+#if 0
+	msg.sprintf("68000 exception\n%s at $%06x", text, pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF]);
+#else
+	msg.sprintf("68000 exception\n$%06x: %s", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], text);
+#endif
 	msgBox.setText(msg);
 	msgBox.setStandardButtons(QMessageBox::Abort);
 	msgBox.setDefaultButton(QMessageBox::Abort);
@@ -1459,6 +1464,10 @@ unsigned int m68k_read_memory_32(unsigned int address)
 	{
 		switch (address)
 		{
+		case 0x0c:
+			m68k_read_exception_vector(address, "Address error");
+			break;
+
 		case 0x10:
 			m68k_read_exception_vector(address, "Illegal instruction");
 			break;
