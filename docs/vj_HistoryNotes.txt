@@ -6,6 +6,7 @@ Release 5 (TBA)
 -- Alert box will display a message and then the code will stop
 2) Added a specific breakpoint for the M68K address error exception
 -- Alert box will display a message and then the code will stop
+3) Added a HW registers browser window and set a tab for the Blitter
 
 Release 4a (15th August 2019)
 -----------------------------

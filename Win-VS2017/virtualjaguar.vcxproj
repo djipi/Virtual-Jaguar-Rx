@@ -288,6 +288,11 @@
     <ClCompile Include="..\src\debugger\SaveDumpAsWin.cpp" />
     <ClCompile Include="..\src\debugger\VideoWin.cpp" />
     <ClCompile Include="..\src\file.cpp" />
+    <ClCompile Include="..\src\gui\debug\hwregsblitterbrowser.cpp" />
+    <ClCompile Include="..\src\gui\debug\hwregsbrowser.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\src\gui\keybindingstab.cpp" />
     <ClCompile Include="..\src\gui\modelsbiostab.cpp" />
     <ClCompile Include="..\src\LEB128.cpp" />
@@ -378,9 +383,19 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_hwregsblitterbrowser.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_hwregsbrowser.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_keybindingstab.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_keygrabber.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
@@ -524,7 +539,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_debuggertab.cpp" />
+    <ClCompile Include="GeneratedFiles\Release\moc_debuggertab.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_DSPDasmWin.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -565,9 +582,18 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_hwregsblitterbrowser.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_hwregsbrowser.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_keybindingstab.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_keygrabber.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
@@ -804,6 +830,46 @@
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_NO_DEBUG -DQT_OPENGL_LIB -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D_UNICODE  "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-IC:\SDK\OpenGL\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-VS2015\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I.\GeneratedFiles"</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\debug\hwregsbrowser.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtOpenGL" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtWidgets" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtGui" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtANGLE" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtCore" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\mkspecs\win32-msvc2015" "-IC:\SDK\SDL-1.2.15\include" "-IC:\SDK\mesa-11.2.0-rc4\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-I.\GeneratedFiles\$(ConfigurationName)" "-I.\GeneratedFiles"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_LIB -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-VS2015\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.8\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-IC:\SDK\OpenGL\include" "-I.\GeneratedFiles"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_NO_DEBUG -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtOpenGL" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtWidgets" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtGui" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtANGLE" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtCore" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\mkspecs\win32-msvc2015" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-I.\GeneratedFiles\$(ConfigurationName)" "-I.\GeneratedFiles"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_NO_DEBUG -DQT_OPENGL_LIB -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-IC:\SDK\OpenGL\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-VS2015\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-I.\GeneratedFiles"</Command>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </DeploymentContent>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\debug\hwregsblitterbrowser.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtOpenGL" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtWidgets" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtGui" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtANGLE" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtCore" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\mkspecs\win32-msvc2015" "-IC:\SDK\SDL-1.2.15\include" "-IC:\SDK\mesa-11.2.0-rc4\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-I.\GeneratedFiles\$(ConfigurationName)" "-I.\GeneratedFiles"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_LIB -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-VS2015\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.8\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-IC:\SDK\OpenGL\include" "-I.\GeneratedFiles"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_NO_DEBUG -DQT_OPENGL_ES_2 -DQT_OPENGL_ES_2_ANGLE -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -DQT_OPENGL_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtOpenGL" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtWidgets" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtGui" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtANGLE" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\include\QtCore" "-I.\..\..\..\Qt\Qt5.5.1\msvc2015_64\mkspecs\win32-msvc2015" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-I.\GeneratedFiles\$(ConfigurationName)" "-I.\GeneratedFiles"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_NO_DEBUG -DQT_OPENGL_LIB -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtWidgets" "-I$(QTDIR)\include\QtOpenGL" "-IC:\SDK\OpenGL\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-VS2015\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-I.\GeneratedFiles"</Command>
     </CustomBuild>
     <ClInclude Include="..\src\LEB128.h" />
     <ClInclude Include="..\src\log.h" />
@@ -1659,6 +1725,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </Image>
+    <Image Include="..\res\tool-hw-regs.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />

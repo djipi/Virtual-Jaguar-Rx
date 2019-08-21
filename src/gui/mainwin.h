@@ -33,6 +33,7 @@ class CPUBrowserWindow;
 class OPBrowserWindow;
 class M68KDasmBrowserWindow;
 class RISCDasmBrowserWindow;
+class HWRegsBrowserWindow;
 
 // Debugger
 class m68KDasmWindow;
@@ -125,6 +126,7 @@ class MainWin: public QMainWindow
 		void ShowCPUBrowserWin(void);
 		void ShowOPBrowserWin(void);
 		void ShowM68KDasmBrowserWin(void);
+		void ShowHWRegsBrowserWin(void);
 		void ShowRISCDasmBrowserWin(void);
 
 	private:
@@ -151,6 +153,7 @@ class MainWin: public QMainWindow
 		OPBrowserWindow *opBrowseWin;
 		M68KDasmBrowserWindow *m68kDasmBrowseWin;
 		RISCDasmBrowserWindow *riscDasmBrowseWin;
+		HWRegsBrowserWindow *hwRegsBrowseWin;
 		//VideoOutputWindow *VideoOutputWin;
 		AllWatchBrowserWindow *allWatchBrowseWin;
 		LocalBrowserWindow *LocalBrowseWin;
@@ -235,6 +238,7 @@ class MainWin: public QMainWindow
 		QAction *cpuBrowseAct;
 		QAction *opBrowseAct;
 		QAction *m68kDasmBrowseAct;
+		QAction *hwRegsBrowseAct;
 		QAction *riscDasmBrowseAct;
 
 		// Debugger

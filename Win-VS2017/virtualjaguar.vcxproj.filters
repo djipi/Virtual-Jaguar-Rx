@@ -445,6 +445,24 @@
     <ClCompile Include="..\src\debugger\SaveDumpAsWin.cpp">
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\gui\debug\hwregsbrowser.cpp">
+      <Filter>Source Files\alpine</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_hwregsbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_hwregsbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_hwregsblitterbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_hwregsblitterbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\debug\hwregsblitterbrowser.cpp">
+      <Filter>Source Files\alpine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -467,9 +485,6 @@
     </CustomBuild>
     <ClInclude Include="..\src\gui\profile.h">
       <Filter>Header Files\gui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\src\debugger\HWLABELManager.h">
-      <Filter>Header Files\debugger</Filter>
     </ClInclude>
     <ClInclude Include="..\src\debugger\DBGManager.h">
       <Filter>Header Files\debugger</Filter>
@@ -497,6 +512,9 @@
     </ClInclude>
     <ClInclude Include="..\src\LEB128.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\debugger\HWLABELManager.h">
+      <Filter>Header Files\debugger</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -760,6 +778,12 @@
     <CustomBuild Include="..\src\debugger\SaveDumpAsWin.h">
       <Filter>Header Files\debugger</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\src\gui\debug\hwregsbrowser.h">
+      <Filter>Header Files\alpine</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\debug\hwregsblitterbrowser.h">
+      <Filter>Header Files\alpine</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\res\vj.rc">
@@ -803,6 +827,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\res\debug-disableallbreakpoints.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\tool-hw-regs.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

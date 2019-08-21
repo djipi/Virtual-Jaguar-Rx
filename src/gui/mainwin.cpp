@@ -23,7 +23,7 @@
 // JPM   Oct./2018  Added search paths in the settings, breakpoints feature, cartridge view menu
 // JPM  11/18/2018  Fix crash with non-debugger mode
 // JPM  April/2019  Added ELF sections check, added a save memory dump
-// JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only
+// JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only, added a HW registers browser
 //
 
 // FIXED:
@@ -71,6 +71,7 @@
 #include "debug/stackbrowser.h"
 #include "debug/opbrowser.h"
 #include "debug/riscdasmbrowser.h"
+#include "debug/hwregsbrowser.h"
 
 #include "dac.h"
 #include "jaguar.h"
@@ -194,6 +195,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	opBrowseWin = new OPBrowserWindow(this);
 	m68kDasmBrowseWin = new M68KDasmBrowserWindow(this);
 	riscDasmBrowseWin = new RISCDasmBrowserWindow(this);
+	hwRegsBrowseWin = new HWRegsBrowserWindow(this);
 
 	// Windows debugger mode features
 	if (vjs.softTypeDebugger)
@@ -515,6 +517,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	m68kDasmBrowseAct->setStatusTip(tr("Shows the 68K disassembly browser window"));
 	connect(m68kDasmBrowseAct, SIGNAL(triggered()), this, SLOT(ShowM68KDasmBrowserWin()));
 
+	// HW registers browser window
+	hwRegsBrowseAct = new QAction(QIcon(":/res/tool-hw-regs.png"), tr("HW Registers Browser"), this);
+	hwRegsBrowseAct->setStatusTip(tr("Shows the HW registers browser window"));
+	connect(hwRegsBrowseAct, SIGNAL(triggered()), this, SLOT(ShowHWRegsBrowserWin()));
+
 	// Risc (DSP / GPU) disassembly browser window
 	riscDasmBrowseAct = new QAction(QIcon(":/res/tool-risc-dis.png"), tr("RISC Listing Browser"), this);
 	riscDasmBrowseAct->setStatusTip(tr("Shows the RISC disassembly browser window"));
@@ -592,6 +599,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugWindowsBrowsesMenu->addAction(opBrowseAct);
 			debugWindowsBrowsesMenu->addAction(m68kDasmBrowseAct);
 			debugWindowsBrowsesMenu->addAction(riscDasmBrowseAct);
+			debugWindowsBrowsesMenu->addAction(hwRegsBrowseAct);
 			debugMenu->addSeparator();
 			debugMenu->addAction(pauseAct);
 			debugMenu->addAction(frameAdvanceAct);
@@ -620,6 +628,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugMenu->addAction(opBrowseAct);
 			debugMenu->addAction(m68kDasmBrowseAct);
 			debugMenu->addAction(riscDasmBrowseAct);
+			debugMenu->addAction(hwRegsBrowseAct);
 		}
 	}
 
@@ -676,6 +685,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		debugbar->addAction(opBrowseAct);
 		debugbar->addAction(m68kDasmBrowseAct);
 		debugbar->addAction(riscDasmBrowseAct);
+		debugbar->addAction(hwRegsBrowseAct);
 	}
 
 	// Add actions to the main window, as hiding widgets with them
@@ -1764,6 +1774,7 @@ void MainWin::ShowCPUBrowserWin(void)
 }
 
 
+// Show the OP browser window
 void MainWin::ShowOPBrowserWin(void)
 {
 	opBrowseWin->show();
@@ -1771,6 +1782,15 @@ void MainWin::ShowOPBrowserWin(void)
 }
 
 
+// Show the HW registers browser window
+void MainWin::ShowHWRegsBrowserWin(void)
+{
+	hwRegsBrowseWin->show();
+	hwRegsBrowseWin->RefreshContents();
+}
+
+
+// Show the M68K browser window
 void MainWin::ShowM68KDasmBrowserWin(void)
 {
 	m68kDasmBrowseWin->show();
@@ -2026,6 +2046,13 @@ void MainWin::ReadUISettings(void)
 		settings.value("opBrowseWinIsVisible", false).toBool() ? ShowOPBrowserWin() : void();
 		size = settings.value("opBrowseWinSize", QSize(400, 400)).toSize();
 		opBrowseWin->resize(size);
+
+		// HW registers UI information
+		pos = settings.value("hwRegsBrowseWinPos", QPoint(200, 200)).toPoint();
+		hwRegsBrowseWin->move(pos);
+		settings.value("hwRegsBrowseWinIsVisible", false).toBool() ? ShowHWRegsBrowserWin() : void();
+		size = settings.value("hwRegsBrowseWinSize", QSize(400, 400)).toSize();
+		hwRegsBrowseWin->resize(size);
 
 		// RISC disassembly UI information
 		pos = settings.value("riscDasmBrowseWinPos", QPoint(200, 200)).toPoint();
@@ -2290,6 +2317,9 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("opBrowseWinPos", opBrowseWin->pos());
 		settings.setValue("opBrowseWinIsVisible", opBrowseWin->isVisible());
 		settings.setValue("opBrowseWinSize", opBrowseWin->size());
+		settings.setValue("hwRegsBrowseWinPos", hwRegsBrowseWin->pos());
+		settings.setValue("hwRegsBrowseWinIsVisible", hwRegsBrowseWin->isVisible());
+		settings.setValue("hwRegsBrowseWinSize", hwRegsBrowseWin->size());
 		settings.setValue("riscDasmBrowseWinPos", riscDasmBrowseWin->pos());
 		settings.setValue("riscDasmBrowseWinIsVisible", riscDasmBrowseWin->isVisible());
 		settings.setValue("m68kDasmBrowseWinPos", m68kDasmBrowseWin->pos());
@@ -2357,6 +2387,7 @@ void MainWin::AlpineRefreshWindows(void)
 	opBrowseWin->RefreshContents();
 	riscDasmBrowseWin->RefreshContents();
 	m68kDasmBrowseWin->RefreshContents();
+	hwRegsBrowseWin->RefreshContents();
 }
 
 
