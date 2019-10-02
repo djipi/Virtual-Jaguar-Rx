@@ -12,6 +12,7 @@
 // JPM              Various efforts to set the DWARF format support
 // JPM  09/15/2018  Support the unsigned char
 // JPM   Oct./2018  Cosmetic changes, added source file search paths, and ELF function name
+// JPM  Sept./2019  Support the unsigned/signed short type
 //
 
 // To Do
@@ -43,8 +44,10 @@ struct Value
 		bool B;
 		double D;
 		float F;
+		int16_t SS;
 		int32_t SI;
 		int64_t SL;
+		uint16_t US;
 		uint32_t UI;
 		uint64_t UL;
 	};
@@ -503,6 +506,10 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 		case DBG_ATE_signed:
 			switch (TypeByteSize)
 			{
+			case 2:
+				sprintf(value, "%i", V.SS);
+				break;
+
 			case 4:
 				sprintf(value, "%i", V.SI);
 				break;
@@ -522,6 +529,10 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 		case DBG_ATE_unsigned:
 			switch (TypeByteSize)
 			{
+			case 2:
+				sprintf(value, "%u", V.US);
+				break;
+
 			case 4:
 				sprintf(value, "%u", V.UI);
 				break;
