@@ -15,7 +15,7 @@
 // JLH  11/25/2009  Major rewrite of memory subsystem and handlers
 // JPM  09/04/2018  Added the new Models and BIOS handler
 // JPM  10/13/2018  Added breakpoints features
-// JPM   Aug./2019  Fix specific breakpoint for ROM cartridge or unknown memory location writing; added a specific breakpoint for the M68K illegal instruction and address error exceptions
+// JPM   Aug./2019  Fix specific breakpoint for ROM cartridge or unknown memory location writing; added a specific breakpoint for the M68K illegal & unimplemented instruction, unknown exceptions and address error exceptions
 //
 
 
@@ -1470,6 +1470,14 @@ unsigned int m68k_read_memory_32(unsigned int address)
 
 		case 0x10:
 			m68k_read_exception_vector(address, "Illegal instruction");
+			break;
+
+		case 0x2c:
+			m68k_read_exception_vector(address, "Unimplemented instruction");
+			break;
+
+		default:
+			m68k_read_exception_vector(address, "Exception not referenced");
 			break;
 		}
 	}
