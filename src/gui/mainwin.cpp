@@ -23,7 +23,7 @@
 // JPM   Oct./2018  Added search paths in the settings, breakpoints feature, cartridge view menu
 // JPM  11/18/2018  Fix crash with non-debugger mode
 // JPM  April/2019  Added ELF sections check, added a save memory dump
-// JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only, added a HW registers browser
+// JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only, added a HW registers browser and source level tracing
 //
 
 // FIXED:
@@ -36,10 +36,10 @@
 //
 // STILL TO BE DONE:
 //
+// - The source file listing do not need to be refresh more than one time
 // - Fix bug in switching between PAL & NTSC in fullscreen mode.
 // - Remove SDL dependencies (sound, mainly) from Jaguar core lib
-// - Fix inconsistency with trailing slashes in paths (eeproms needs one,
-//   software doesn't)
+// - Fix inconsistency with trailing slashes in paths (eeproms needs one, software doesn't)
 //
 // SFDX CODE: S1E9T8H5M23YS
 
@@ -91,6 +91,7 @@
 #include "debugger/DBGManager.h"
 //#include "debugger/VideoWin.h"
 //#include "debugger/DasmWin.h"
+#include "debugger/SourcesWin.h"
 #include "debugger/m68KDasmWin.h"
 #include "debugger/GPUDasmWin.h"
 #include "debugger/DSPDasmWin.h"
@@ -244,9 +245,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 #endif
 		// Setup disasm tabs
 		dasmtabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-		dasmtabWidget->addTab(m68kDasmWin = new m68KDasmWindow(this), tr("M68000"));
+		dasmtabWidget->addTab(SourcesWin = new SourcesWindow(this), tr("Sources"));
+		dasmtabWidget->setCurrentIndex(dasmtabWidget->addTab(m68kDasmWin = new m68KDasmWindow(this), tr("M68000")));
 		dasmtabWidget->addTab(GPUDasmWin = new GPUDasmWindow(this), tr("GPU"));
 		dasmtabWidget->addTab(DSPDasmWin = new DSPDasmWindow(this), tr("DSP"));
+		connect(dasmtabWidget, SIGNAL(currentChanged(const int)), this, SLOT(SelectdasmtabWidget(const int)));
 #if 1
 		setCentralWidget(dasmtabWidget);
 #endif
@@ -855,6 +858,17 @@ void MainWin::SyncUI(void)
 	// Reset the timer to be what was set in the command line (if any):
 //	timer->setInterval(vjs.hardwareTypeNTSC ? 16 : 20);
 	timer->start(vjs.hardwareTypeNTSC ? 16 : 20);
+}
+
+
+// 
+void MainWin::SelectdasmtabWidget(const int Index)
+{
+	// check sources tab
+	if (Index == 0)
+	{
+		SourcesWin->RefreshContents();
+	}
 }
 
 
@@ -1480,6 +1494,7 @@ void MainWin::LoadSoftware(QString file)
 	{
 		m68k_set_reg(M68K_REG_A6, 0);
 		m68kDasmWin->SetAddress(jaguarRunAddress);
+		SourcesWin->Init();
 		//pauseAct->setDisabled(false);
 		//pauseAct->setChecked(true);
 		ToggleRunState();
@@ -1567,7 +1582,18 @@ void MainWin::ShowSaveDumpAsWin(void)
 // Step Into trace
 void MainWin::DebuggerTraceStepInto(void)
 {
-	JaguarStepInto();
+	if (SourcesWin->isVisible() && SourcesWin->GetTraceStatus())
+	{
+		while (!SourcesWin->CheckChangeLine())
+		{
+			JaguarStepInto();
+		}
+	}
+	else
+	{
+		JaguarStepInto();
+	}
+
 	videoWidget->updateGL();
 	RefreshWindows();
 #ifdef _MSC_VER
@@ -1587,11 +1613,13 @@ void MainWin::DebuggerRestart(void)
 	m68k_set_reg(M68K_REG_PC, jaguarRunAddress);
 	m68k_set_reg(M68K_REG_SP, vjs.DRAM_size);
 #endif
+	dasmtabWidget->setCurrentIndex(1);		// set focus on the disasm M68K tab
 	m68k_set_reg(M68K_REG_A6, 0);
 	m68k_brk_hitcounts_reset();
 	bpmHitCounts = 0;
 	DebuggerResetWindows();
 	CommonResetWindows();
+	SourcesWin->Init();
 	RefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Restart function !!!")
@@ -1604,7 +1632,15 @@ void MainWin::DebuggerRestart(void)
 // Step Over trace
 void MainWin::DebuggerTraceStepOver(void)
 {
-	JaguarStepOver(0);
+	if (SourcesWin->isVisible() && SourcesWin->GetTraceStatus())
+	{
+
+	}
+	else
+	{
+		JaguarStepOver(0);
+	}
+
 	videoWidget->updateGL();
 	RefreshWindows();
 #ifdef _MSC_VER
@@ -2423,6 +2459,7 @@ void MainWin::DebuggerResetWindows(void)
 		heapallocatorBrowseWin->Reset();
 		BreakpointsWin->Reset();
 		CartFilesListWin->Reset();
+		SourcesWin->Reset();
 		//ResetAlpineWindows();
 	}
 }
@@ -2456,6 +2493,7 @@ void MainWin::DebuggerRefreshWindows(void)
 	if (vjs.softTypeDebugger)
 	{
 		FilesrcListWin->RefreshContents();
+		SourcesWin->RefreshContents();
 		m68kDasmWin->RefreshContents();
 		GPUDasmWin->RefreshContents();
 		DSPDasmWin->RefreshContents();

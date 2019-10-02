@@ -12,6 +12,7 @@
 // JPM              Various efforts to set the DWARF format support
 // JPM  09/15/2018  Support the unsigned char
 // JPM   Oct./2018  Cosmetic changes, added source file search paths, and ELF function name
+// JPM   Aug./2019  Added new functions mainly for source text lines
 //
 
 // To Do
@@ -746,16 +747,30 @@ char *DBGManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine)
 
 
 // Get number of source code filenames
-size_t DBGManager_GetNbFullSourceFilename(void)
+size_t DBGManager_GetNbSources(void)
 {
 	size_t Nbr = 0;
 
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		Nbr = DWARFManager_GetNbFullSourceFilename();
+		Nbr = DWARFManager_GetNbSources();
 	}
 
 	return Nbr;
+}
+
+
+// Get source code filename based on index
+char *DBGManager_GetNumSourceFilename(size_t Index)
+{
+	char *SourceFilename = NULL;
+
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		SourceFilename = DWARFManager_GetNumSourceFilename(Index);
+	}
+
+	return	SourceFilename;
 }
 
 
@@ -771,3 +786,60 @@ char *DBGManager_GetNumFullSourceFilename(size_t Index)
 
 	return	FullSourceFilename;
 }
+
+
+// Get number of lines of texts source list from source index
+size_t DBGManager_GetSrcNbListPtrFromIndex(size_t Index, bool Used)
+{
+	size_t NbListPtr = 0;
+
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		NbListPtr = DWARFManager_GetSrcNbListPtrFromIndex(Index, Used);
+	}
+
+	return	NbListPtr;
+}
+
+
+// Get pointer to the lines number list from source index
+size_t *DBGManager_GetSrcNumLinesPtrFromIndex(size_t Index, bool Used)
+{
+	size_t *PtrNumLines = NULL;
+
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		PtrNumLines = DWARFManager_GetSrcNumLinesPtrFromIndex(Index, Used);
+	}
+
+	return	PtrNumLines;
+}
+
+
+// Get text source list pointers from source index
+char **DBGManager_GetSrcListPtrFromIndex(size_t Index, bool Used)
+{
+	char **PtrSource = NULL;
+
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		PtrSource = DWARFManager_GetSrcListPtrFromIndex(Index, Used);
+	}
+
+	return	PtrSource;
+}
+
+
+// Get source language
+size_t DBGManager_GetSrcLanguageFromIndex(size_t Index)
+{
+	size_t Language = 0;
+
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		Language = DWARFManager_GetSrcLanguageFromIndex(Index);
+	}
+
+	return	Language;
+}
+

@@ -111,6 +111,8 @@ HEADERS = \
 	src/debugger/debuggertab.h \
 	src/debugger/DasmWin.h \
 	src/debugger/m68kDasmWin.h \
+	src/debugger/SourcesWin.h \
+	src/debugger/SourceCWin.h \
 	src/debugger/DBGManager.h \
 	src/debugger/DSPDasmWin.h \
 	src/debugger/GPUDasmWin.h \
@@ -167,6 +169,8 @@ SOURCES = \
 	src/debugger/debuggertab.cpp \
 	src/debugger/DasmWin.cpp \
 	src/debugger/m68kDasmWin.cpp \
+	src/debugger/SourcesWin.cpp \
+	src/debugger/SourceCWin.cpp \
 	src/debugger/DBGManager.cpp \
 	src/debugger/DSPDasmWin.cpp \
 	src/debugger/GPUDasmWin.cpp \
