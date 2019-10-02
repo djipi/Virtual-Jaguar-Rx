@@ -10,6 +10,7 @@ Release 5 (TBA)
 4) Added detection for the unsigned/signed short type
 -- Will allow the return of a short type variable's value
 5) Added a specific breakpoint for the M68K Unimplemented instruction, and Exception not referenced exceptions
+6) Fix potential emulator freeze after an exception has occured
 
 Release 4a (15th August 2019)
 -----------------------------

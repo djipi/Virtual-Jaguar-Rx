@@ -16,6 +16,7 @@
 // JPM  09/04/2018  Added the new Models and BIOS handler
 // JPM  10/13/2018  Added breakpoints features
 // JPM   Aug./2019  Fix specific breakpoint for ROM cartridge or unknown memory location writing; added a specific breakpoint for the M68K illegal & unimplemented instruction, unknown exceptions and address error exceptions
+// JPM   Aug./2019  Fix potential emulator freeze after an exception has occured
 //
 
 
@@ -126,6 +127,7 @@ uint32_t bpmAddress1;
 S_BrkInfo *brkInfo;
 size_t brkNbr;
 
+bool frameDone;
 
 //
 // Callback function to detect illegal instructions
@@ -1480,6 +1482,8 @@ unsigned int m68k_read_memory_32(unsigned int address)
 			m68k_read_exception_vector(address, "Exception not referenced");
 			break;
 		}
+
+		frameDone = true;			// Hack to avoid the freeze of the emulator
 	}
 	else
 	{
@@ -2579,7 +2583,6 @@ uint8_t * GetRamPtr(void)
 // New Jaguar execution stack
 // This executes 1 frame's worth of code.
 //
-bool frameDone;
 void JaguarExecuteNew(void)
 {
 	frameDone = false;
