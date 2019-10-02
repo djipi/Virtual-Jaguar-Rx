@@ -259,6 +259,7 @@ Project information
 12) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
 13) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
 -- Text / License terms are the same
+14) The x86 configuration has been removed in the VS 2017 project
 
 
 Download statistics
