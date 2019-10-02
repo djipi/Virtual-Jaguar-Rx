@@ -463,6 +463,24 @@
     <ClCompile Include="..\src\gui\debug\hwregsblitterbrowser.cpp">
       <Filter>Source Files\alpine</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SourcesWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\SourcesWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_SourcesWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\debugger\SourceCWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_SourceCWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_SourceCWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -783,6 +801,12 @@
     </CustomBuild>
     <CustomBuild Include="..\src\gui\debug\hwregsblitterbrowser.h">
       <Filter>Header Files\alpine</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\SourcesWin.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\debugger\SourceCWin.h">
+      <Filter>Header Files\debugger</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

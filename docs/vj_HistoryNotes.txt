@@ -7,6 +7,7 @@ Release 5 (TBA)
 2) Added a specific breakpoint for the M68K address error exception
 -- Alert box will display a message and then the code will stop
 3) Added a HW registers browser window and set a tab for the Blitter
+4) Added a source tab in the main window for step into tracing
 
 Release 4a (15th August 2019)
 -----------------------------
@@ -227,8 +228,9 @@ Known issues
 15) After a new breakpoint set, the breakpoint list window is not refreshed
 -- User must perform an operation, such code tracing, to see the breakpoints list update
 16) Some ASCII characters may be not displayed correctly
--- It depend how the text is displayed, this is related to the QT/HTML encoding done when reading DWARF file
+-- Probably depend how the text is displayed, this is related to the QT/HTML encoding done when reading DWARF file
 17) Potential legacy crash when leaving emulator in pause mode for a long period of time
+-- Need much investigation
 
 Cosmetic / UX issues
 ====================
