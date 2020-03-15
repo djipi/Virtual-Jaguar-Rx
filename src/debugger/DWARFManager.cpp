@@ -10,6 +10,7 @@
 // JPM   Dec./2016  Created this file, and added the DWARF format support
 // JPM  Sept./2018  Added LEB128 decoding features, and improve the DWARF parsing information
 // JPM   Oct./2018  Improve the DWARF parsing information, and the source file text reading; support the used source lines from DWARF structure, and the search paths for the files
+// JPM   Mar./2020  Fix a random crash when reading the source lines information
 //
 
 // To Do
@@ -585,6 +586,7 @@ void DWARFManager_InitDMI(void)
 							{
 								if (dwarf_lineaddr(linebuf[i], &return_lineaddr, &error) == DW_DLV_OK)
 								{
+									// Get the source line number
 									if (dwarf_lineno(linebuf[i], &return_uvalue, &error) == DW_DLV_OK)
 									{
 										PtrCU[NbCU].PtrLinesSrc[i].StartPC = return_lineaddr;
@@ -593,6 +595,9 @@ void DWARFManager_InitDMI(void)
 								}
 							}
 						}
+
+						// Release the memory used by the source lines table located in the CU
+						dwarf_srclines_dealloc(dbg, linebuf, cnt);
 					}
 
 					// Check if the CU has child
@@ -877,19 +882,13 @@ void DWARFManager_InitDMI(void)
 										// Get source line number and associated block of address
 										for (Dwarf_Signed i = 0; i < cnt; ++i)
 										{
-											if (dwarf_lineaddr(linebuf[i], &return_lineaddr, &error) == DW_DLV_OK)
+											if ((PtrCU[NbCU].PtrLinesSrc[i].StartPC >= return_lowpc) && (PtrCU[NbCU].PtrLinesSrc[i].StartPC <= return_highpc))
 											{
-												if (dwarf_lineno(linebuf[i], &return_uvalue, &error) == DW_DLV_OK)
-												{
-													if ((return_lineaddr >= return_lowpc) && (return_lineaddr <= return_highpc))
-													{
-														PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc = (DMIStruct_LineSrc *)realloc(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc, (PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc + 1) * sizeof(DMIStruct_LineSrc));
-														memset((void *)(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc + PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc), 0, sizeof(DMIStruct_LineSrc));
-														PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].StartPC = return_lineaddr;
-														PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].NumLineSrc = return_uvalue;
-														PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc++;
-													}
-												}
+												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc = (DMIStruct_LineSrc *)realloc(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc, (PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc + 1) * sizeof(DMIStruct_LineSrc));
+												memset((void *)(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc + PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc), 0, sizeof(DMIStruct_LineSrc));
+												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].StartPC = PtrCU[NbCU].PtrLinesSrc[i].StartPC;
+												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].NumLineSrc = PtrCU[NbCU].PtrLinesSrc[i].NumLineSrc;
+												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc++;
 											}
 										}
 
@@ -1015,13 +1014,6 @@ void DWARFManager_InitDMI(void)
 						}
 						while (dwarf_siblingof(dbg, return_sib, &return_die, &error) == DW_DLV_OK);
 					}
-
-					// Release the memory used by the source lines
-					for (Dwarf_Signed i = 0; i < cnt; ++i)
-					{
-						dwarf_dealloc(dbg, linebuf[i], DW_DLA_LINE);
-					}
-					dwarf_dealloc(dbg, linebuf, DW_DLA_LIST);
 				}
 
 				// Set the source code lines for QT html/text conformity
