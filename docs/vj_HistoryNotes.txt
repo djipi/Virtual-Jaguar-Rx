@@ -14,6 +14,7 @@ Release 5 (TBA)
 7) Fix a random crash when reading the source lines information
 8) Added ELF & DWARF .debug* types
 9) Added ELF section types check and new error messages
+10) Project has switched to libdwarf 20191104 library 64bits for VS 2017
 
 Release 4a (15th August 2019)
 -----------------------------
@@ -255,7 +256,7 @@ Project information
 1) Code based on the Shamus Hammons source code available via Gethub by the 12th September 2017 (2.1.3 Final)
 2) Visual Studio 2015/2017 project support for 64 bits
 3) libelf 0.8.13 library 64bits for VS 2015/2017
-4) libdwarf 1.41 library 64bits for VS 2015, cygwin64 and Msys2/MinGW64
+4) libdwarf 20191104 library 64bits for VS 2017
 5) QT 5.5.1 library 64bits for VS 2015
 6) QT 5.12.0 library 64bits for VS 2017
 7) Zlib 1.2.8 library 64bits for VS 2015
