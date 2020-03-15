@@ -24,6 +24,7 @@
 // JPM  11/18/2018  Fix crash with non-debugger mode
 // JPM  April/2019  Added ELF sections check, added a save memory dump
 // JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only, added a HW registers browser and source level tracing
+// JPM  Marc./2020  Added the step over for source level tracing
 //
 
 // FIXED:
@@ -1634,7 +1635,10 @@ void MainWin::DebuggerTraceStepOver(void)
 {
 	if (SourcesWin->isVisible() && SourcesWin->GetTraceStatus())
 	{
-
+		while (!SourcesWin->CheckChangeLine())
+		{
+			JaguarStepOver(0);
+		}
 	}
 	else
 	{

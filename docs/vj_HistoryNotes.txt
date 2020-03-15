@@ -8,6 +8,7 @@ Release 5 (TBA)
 -- Alert box will display a message and then the code will stop
 3) Added a HW registers browser window and set a tab for the Blitter
 4) Added a source tab in the main window for step into tracing
+5) Added the step over for source level tracing
 
 Release 4a (15th August 2019)
 -----------------------------
