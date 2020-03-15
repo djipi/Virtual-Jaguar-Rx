@@ -10,6 +10,7 @@
 // JPM   Jan./2016  Created this file and added ELF format support
 // JPM  07/13/2017  ELF DWARF format support improvement
 // JPM  10/20/2018  Added function name support from ELF structure
+// JPM  03/13/2020  Added ELF & DWARF .debug* types
 //
 
 #include <stdlib.h>
@@ -48,18 +49,23 @@ ELFSectionType	ELFTabSectionType[] =	{
 	{ ".data", ELF_data_TYPE },
 	{ ".bss", ELF_bss_TYPE },
 	{ ".heap", ELF_heap_TYPE },
-	{ ".debug_aranges", ELF_debug_aranges_TYPE },
-	{ ".debug_info", ELF_debug_info_TYPE },
-	{ ".debug_abbrev", ELF_debug_abbrev_TYPE },
-	{ ".debug_line", ELF_debug_line_TYPE },
-	{ ".debug_frame", ELF_debug_frame_TYPE },
-	{ ".debug_str", ELF_debug_str_TYPE },
-	{ ".debug_loc", ELF_debug_loc_TYPE },
-	{ ".debug_ranges", ELF_debug_ranges_TYPE },
+	{ ".debug", ELF_debug_TYPE	},
 	{ ".comment", ELF_comment_TYPE },
 	{ ".shstrtab", ELF_shstrtab_TYPE },
 	{ ".symtab", ELF_symtab_TYPE },
-	{ ".strtab", ELF_strtab_TYPE }
+	{ ".strtab", ELF_strtab_TYPE },
+	{ ".debug_abbrev", ELF_debug_abbrev_TYPE },
+	{ ".debug_aranges", ELF_debug_aranges_TYPE },
+	{ ".debug_frame", ELF_debug_frame_TYPE },
+	{ ".debug_info", ELF_debug_info_TYPE },
+	{ ".debug_line", ELF_debug_line_TYPE },
+	{ ".debug_loc", ELF_debug_loc_TYPE },
+	{ ".debug_macinfo", ELF_debug_macinfo_TYPE },
+	{ ".debug_pubnames", ELF_debug_pubnames_TYPE },
+	{ ".debug_pubtypes", ELF_debug_pubtypes_TYPE },
+	{ ".debug_ranges", ELF_debug_ranges_TYPE },
+	{ ".debug_str", ELF_debug_str_TYPE },
+	{ ".debug_types", ELF_debug_types_TYPE }
 };
 
 
