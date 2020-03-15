@@ -13,6 +13,7 @@ Release 5 (TBA)
 6) Fix potential emulator freeze after an exception has occured
 7) Fix a random crash when reading the source lines information
 8) Added ELF & DWARF .debug* types
+9) Added ELF section types check and new error messages
 
 Release 4a (15th August 2019)
 -----------------------------
