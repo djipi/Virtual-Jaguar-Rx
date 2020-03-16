@@ -15,6 +15,7 @@ Release 5 (TBA)
 8) Added ELF & DWARF .debug* types
 9) Added ELF section types check and new error messages
 10) Project has switched to libdwarf 20191104 library 64bits for VS 2017
+11) Modified the call stack layout window and added source filename from the called source line
 
 Release 4a (15th August 2019)
 -----------------------------

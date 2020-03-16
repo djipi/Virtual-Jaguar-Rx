@@ -1322,14 +1322,18 @@ char *DWARFManager_GetSymbolnameFromAdr(size_t Adr)
 
 // Get complete source filename based from address
 // Return NULL if no source filename exists
-// Return the existence status (true or false) in Error
+// Return the existence status (true or false) in Error if pointer not NULL
 char *DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error)
 {
 	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			*Error = PtrCU[i].PtrLoadSrc ? true : false;
+			if (Error)
+			{
+				*Error = PtrCU[i].PtrLoadSrc ? true : false;
+			}
+
 			return PtrCU[i].PtrFullFilename;
 		}
 	}
