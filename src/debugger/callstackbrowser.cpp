@@ -11,6 +11,7 @@
 // JPM  09/12/2018  Added a status bar and better status report
 // JPM  10/20/2018  Added the return address information in the call stack
 // JPM  08/09/2019  Prevent crash in case of call stack is out of range
+// JPM   Aug./2020  Added different layouts
 
 // STILL TO DO:
 // To set the information display at the right
@@ -114,7 +115,7 @@ void CallStackBrowserWindow::RefreshContents(void)
 					model->insertRow(NbRaw);
 					model->setItem(NbRaw, 0, new QStandardItem(QString("%1").arg((FuncName = DBGManager_GetFunctionName(ret)) ? FuncName : "(N/A)")));
 					FunctionName = QString(FuncName = DBGManager_GetLineSrcFromAdr(ret, DBG_NO_TAG));
-					FunctionName.replace("&nbsp;", " ");
+					//FunctionName.replace("&nbsp;", " ");
 					model->setItem(NbRaw, 1, new QStandardItem(QString("%1").arg(FuncName ? FunctionName : "(N/A)")));
 					sprintf(msg, "0x%06X", ret);
 					model->setItem(NbRaw++, 2, new QStandardItem(QString("%1").arg(msg)));

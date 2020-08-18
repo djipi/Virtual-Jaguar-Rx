@@ -15,7 +15,6 @@
 
 // To Do
 // To use pointers instead of arrays usage
-// To keep sources text file intact wihtout QT/HTML transformation
 // 
 
 
@@ -29,7 +28,7 @@
 
 
 // Definitions for debugging
-//#define DEBUG_NumCU			0x44				// CU number to debug or undefine it
+//#define DEBUG_NumCU			0x3				// CU number to debug or undefine it
 //#define DEBUG_VariableName	"sound_death"				// Variable name to look for or undefine it
 //#define DEBUG_TypeName		"Cbuf_Execute"			// Type name to look for or undefine it
 //#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for or undefine it (not supported)
@@ -147,10 +146,10 @@ typedef struct CUStruct
 	VariablesStruct *PtrVariables;					// Pointer to the global variables list structure
 	size_t NbFrames;								// Frames number
 	size_t NbUsedLinesSrc;							// Number of used source lines
-	size_t LastNumUsedLinesSrc;						// Last used source number line
+	size_t LastNumUsedLinesSrc;						// Last number line used
 	CUStruct_LineSrc *PtrUsedLinesSrc;				// Pointer to the used source lines list structure
 	char **PtrUsedLinesLoadSrc;						// Pointer lists to each used source line referenced by the CUStruct_LineSrc structure
-	size_t *PtrUsedNumLines;						// Pointer list to the number lines used
+	size_t *PtrUsedNumLines;						// List of the number lines used
 }S_CUStruct;
 
 
@@ -1052,7 +1051,7 @@ void DWARFManager_InitDMI(void)
 					dwarf_dealloc(dbg, linebuf, DW_DLA_LIST);
 				}
 
-				// Set the source code lines for QT html/text conformity
+				// Set the source code lines
 				if (PtrCU[NbCU].NbLinesLoadSrc)
 				{
 					if (PtrCU[NbCU].PtrLinesLoadSrc = (char **)calloc(PtrCU[NbCU].NbLinesLoadSrc, sizeof(char *)))

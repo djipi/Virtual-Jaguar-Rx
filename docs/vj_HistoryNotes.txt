@@ -10,6 +10,7 @@ Release 5 (TBA)
 4) Added a source tab in the main window for step into tracing
 5) Added the step over for source level tracing
 6) Project has switched to libdwarf 20200114 library 64bits for VS 2017
+7) Set text conversion to Qt/HTML format for the M68K tracing window
 
 Release 4a (15th August 2019)
 -----------------------------
