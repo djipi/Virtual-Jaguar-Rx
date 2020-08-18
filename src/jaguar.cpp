@@ -23,7 +23,7 @@
 
 
 #include "jaguar.h"
-#include <QApplication>
+//#include <QApplication>
 #include <QMessageBox>
 #include <time.h>
 #include <SDL.h>
