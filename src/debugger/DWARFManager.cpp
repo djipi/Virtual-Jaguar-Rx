@@ -10,12 +10,12 @@
 // JPM   Dec./2016  Created this file, and added the DWARF format support
 // JPM  Sept./2018  Added LEB128 decoding features, and improve the DWARF parsing information
 // JPM   Oct./2018  Improve the DWARF parsing information, and the source file text reading; support the used source lines from DWARF structure, and the search paths for the files
+// JPM   Aug./2019  Added new functions to handle DWARF information, full filename fix
 // JPM   Mar./2020  Fix a random crash when reading the source lines information
 //
 
 // To Do
 // To use pointers instead of arrays usage
-// To keep sources text file intact wihtout QT/HTML transformation
 // 
 
 
@@ -29,11 +29,14 @@
 
 
 // Definitions for debugging
-//#define DEBUG_NumCU			0x4d				// CU number to debug or undefine it
+//#define DEBUG_NumCU			0x3				// CU number to debug or undefine it
 //#define DEBUG_VariableName	"sound_death"				// Variable name to look for or undefine it
 //#define DEBUG_TypeName		"Cbuf_Execute"			// Type name to look for or undefine it
 //#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for or undefine it (not supported)
-//#define DEBUG_Filename		"net_jag.c"			// Filename to look for or undefine it
+//#define DEBUG_Filename		"crt0"			// Filename to look for or undefine it
+
+// Definitions for handling data
+//#define CONVERT_QT_HML								// Text will be converted as HTML
 
 // Definitions for the variables's typetag
 #define	TypeTag_structure			0x01			// structure
@@ -126,6 +129,7 @@ typedef struct SubProgStruct
 typedef struct CUStruct
 {
 	size_t Tag;
+	size_t Language;								// Language (C, etc.) used by the source code
 	size_t LowPC, HighPC;							// Memory range for the code
 	char *PtrProducer;								// Pointer to the "Producer" text information (mostly compiler and compilation options used)
 	char *PtrSourceFilename;						// Source file name
@@ -142,8 +146,11 @@ typedef struct CUStruct
 	size_t NbVariables;								// Variables number
 	VariablesStruct *PtrVariables;					// Pointer to the global variables list structure
 	size_t NbFrames;								// Frames number
-	size_t NbLinesSrc;								// Number of used source lines
-	CUStruct_LineSrc *PtrLinesSrc;					// Pointer to the used source lines list structure
+	size_t NbUsedLinesSrc;							// Number of used source lines
+	size_t LastNumUsedLinesSrc;						// Last number line used
+	CUStruct_LineSrc *PtrUsedLinesSrc;				// Pointer to the used source lines list structure
+	char **PtrUsedLinesLoadSrc;						// Pointer lists to each used source line referenced by the CUStruct_LineSrc structure
+	size_t *PtrUsedNumLines;						// List of the number lines used
 }S_CUStruct;
 
 
@@ -168,6 +175,7 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables);
 void DWARFManager_SourceFileSearchPathsInit(void);
 void DWARFManager_SourceFileSearchPathsReset(void);
 void DWARFManager_SourceFileSearchPathsClose(void);
+void DWARFManager_ConformSlachesBackslashes(char *Ptr);
 
 
 //
@@ -279,7 +287,9 @@ void DWARFManager_CloseDMI(void)
 		free(PtrCU[NbCU].PtrProducer);
 		free(PtrCU[NbCU].PtrSourceFilename);
 		free(PtrCU[NbCU].PtrSourceFileDirectory);
-		free(PtrCU[NbCU].PtrLinesSrc);
+		free(PtrCU[NbCU].PtrUsedLinesSrc);
+		free(PtrCU[NbCU].PtrUsedLinesLoadSrc);
+		free(PtrCU[NbCU].PtrUsedNumLines);
 
 		while (PtrCU[NbCU].NbLinesLoadSrc--)
 		{
@@ -427,6 +437,14 @@ void DWARFManager_InitDMI(void)
 											}
 											break;
 
+											// Language
+										case DW_AT_language:
+											if (dwarf_formudata(atlist[i], &return_uvalue, &error) == DW_DLV_OK)
+											{
+												PtrCU[NbCU].Language = return_uvalue;
+											}
+											break;
+
 										default:
 											break;
 										}
@@ -469,29 +487,28 @@ void DWARFManager_InitDMI(void)
 								}
 							}
 
-							// Create full filename
-							Ptr = PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + strlen(PtrCU[NbCU].PtrSourceFileDirectory) + 2);
-#if defined(_WIN32)
-							sprintf(PtrCU[NbCU].PtrFullFilename, "%s\\%s", PtrCU[NbCU].PtrSourceFileDirectory, PtrCU[NbCU].PtrSourceFilename);
-#else
-							sprintf(PtrCU[NbCU].PtrFullFilename, "%s/%s", PtrCU[NbCU].PtrSourceFileDirectory, PtrCU[NbCU].PtrSourceFilename);
-#endif
-							// Conform slashes and backslashes
-							while (*Ptr)
+							// Conform slashes / backslashes for the filename
+							DWARFManager_ConformSlachesBackslashes(PtrCU[NbCU].PtrSourceFilename);
+
+							// Check if filename contains already the complete directory
+							if (PtrCU[NbCU].PtrSourceFilename[1] == ':')
 							{
-#if defined(_WIN32)
-								if (*Ptr == '/')
-								{
-									*Ptr = '\\';
-								}
-#else
-								if (*Ptr == '\\')
-								{
-									*Ptr = '/';
-								}
-#endif
-								Ptr++;
+								// Copy the filename as the full filename
+								PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + 1);
+								strcpy(PtrCU[NbCU].PtrFullFilename, PtrCU[NbCU].PtrSourceFilename);
 							}
+							else
+							{
+								// Create full filename and Conform slashes / backslashes
+								PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + strlen(PtrCU[NbCU].PtrSourceFileDirectory) + 2);
+#if defined(_WIN32)
+								sprintf(PtrCU[NbCU].PtrFullFilename, "%s\\%s", PtrCU[NbCU].PtrSourceFileDirectory, PtrCU[NbCU].PtrSourceFilename);
+#else
+								sprintf(PtrCU[NbCU].PtrFullFilename, "%s/%s", PtrCU[NbCU].PtrSourceFileDirectory, PtrCU[NbCU].PtrSourceFilename);
+#endif
+							}
+
+							DWARFManager_ConformSlachesBackslashes(PtrCU[NbCU].PtrFullFilename);
 
 							// Directory path clean-up
 #if defined(_WIN32)
@@ -580,8 +597,12 @@ void DWARFManager_InitDMI(void)
 					{
 						if (cnt)
 						{
-							PtrCU[NbCU].NbLinesSrc = cnt;
-							PtrCU[NbCU].PtrLinesSrc = (CUStruct_LineSrc *)calloc(cnt, sizeof(CUStruct_LineSrc));
+							PtrCU[NbCU].NbUsedLinesSrc = cnt;
+							PtrCU[NbCU].PtrUsedLinesSrc = (CUStruct_LineSrc *)calloc(cnt, sizeof(CUStruct_LineSrc));
+							PtrCU[NbCU].PtrUsedLinesLoadSrc = (char **)calloc(cnt, sizeof(char *));
+							PtrCU[NbCU].PtrUsedNumLines = (size_t *)calloc(cnt, sizeof(size_t));
+
+							// Get the addresses and their source line numbers
 							for (Dwarf_Signed i = 0; i < cnt; i++)
 							{
 								if (dwarf_lineaddr(linebuf[i], &return_lineaddr, &error) == DW_DLV_OK)
@@ -589,8 +610,8 @@ void DWARFManager_InitDMI(void)
 									// Get the source line number
 									if (dwarf_lineno(linebuf[i], &return_uvalue, &error) == DW_DLV_OK)
 									{
-										PtrCU[NbCU].PtrLinesSrc[i].StartPC = return_lineaddr;
-										PtrCU[NbCU].PtrLinesSrc[i].NumLineSrc = return_uvalue;
+										PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC = return_lineaddr;
+										PtrCU[NbCU].PtrUsedLinesSrc[i].NumLineSrc = return_uvalue;
 									}
 								}
 							}
@@ -882,12 +903,12 @@ void DWARFManager_InitDMI(void)
 										// Get source line number and associated block of address
 										for (Dwarf_Signed i = 0; i < cnt; ++i)
 										{
-											if ((PtrCU[NbCU].PtrLinesSrc[i].StartPC >= return_lowpc) && (PtrCU[NbCU].PtrLinesSrc[i].StartPC <= return_highpc))
+											if ((PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC >= return_lowpc) && (PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC <= return_highpc))
 											{
 												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc = (DMIStruct_LineSrc *)realloc(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc, (PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc + 1) * sizeof(DMIStruct_LineSrc));
 												memset((void *)(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc + PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc), 0, sizeof(DMIStruct_LineSrc));
-												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].StartPC = PtrCU[NbCU].PtrLinesSrc[i].StartPC;
-												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].NumLineSrc = PtrCU[NbCU].PtrLinesSrc[i].NumLineSrc;
+												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].StartPC = PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC;
+												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].NumLineSrc = PtrCU[NbCU].PtrUsedLinesSrc[i].NumLineSrc;
 												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc++;
 											}
 										}
@@ -1016,7 +1037,7 @@ void DWARFManager_InitDMI(void)
 					}
 				}
 
-				// Set the source code lines for QT html/text conformity
+				// Set the source code lines
 				if (PtrCU[NbCU].NbLinesLoadSrc)
 				{
 					if (PtrCU[NbCU].PtrLinesLoadSrc = (char **)calloc(PtrCU[NbCU].NbLinesLoadSrc, sizeof(char *)))
@@ -1033,6 +1054,7 @@ void DWARFManager_InitDMI(void)
 									{
 										switch (*Ptr)
 										{
+#ifdef CONVERT_QT_HML
 										case 9:
 											strcat(PtrCU[NbCU].PtrLinesLoadSrc[j], "&nbsp;");
 											i += 6;
@@ -1058,6 +1080,7 @@ void DWARFManager_InitDMI(void)
 											strcpy(PtrCU[NbCU].PtrLinesLoadSrc[j], "&quot;");
 											i += strlen("&quot;");
 											break;
+#endif
 #endif
 										default:
 											PtrCU[NbCU].PtrLinesLoadSrc[j][i++] = *Ptr;
@@ -1109,23 +1132,28 @@ void DWARFManager_InitDMI(void)
 					}
 				}
 
-				// Set information based on used line numbers
-				if (PtrCU[NbCU].PtrLinesSrc)
+				// Check validity between used number lines and number lines in the source file
+				if (PtrCU[NbCU].LastNumUsedLinesSrc <= PtrCU[NbCU].NbLinesLoadSrc)
 				{
-					// Set the line source pointer for each used line numbers
-					if (PtrCU[NbCU].PtrLinesLoadSrc)
+					// Set information based on used line numbers
+					if (PtrCU[NbCU].PtrUsedLinesSrc)
 					{
-						for (size_t i = 0; i < PtrCU[NbCU].NbLinesSrc; i++)
+						// Set the line source pointers for each used line numbers
+						if (PtrCU[NbCU].PtrLinesLoadSrc)
 						{
-							PtrCU[NbCU].PtrLinesSrc[i].PtrLineSrc = PtrCU[NbCU].PtrLinesLoadSrc[PtrCU[NbCU].PtrLinesSrc[i].NumLineSrc - 1];
-						}
+							for (size_t i = 0; i < PtrCU[NbCU].NbUsedLinesSrc; i++)
+							{
+								PtrCU[NbCU].PtrUsedNumLines[i] = PtrCU[NbCU].PtrUsedLinesSrc[i].NumLineSrc - 1;
+								PtrCU[NbCU].PtrUsedLinesLoadSrc[i] = PtrCU[NbCU].PtrUsedLinesSrc[i].PtrLineSrc = PtrCU[NbCU].PtrLinesLoadSrc[PtrCU[NbCU].PtrUsedLinesSrc[i].NumLineSrc - 1];
+							}
 
-						// Setup memory range for the code if CU doesn't have already this information
-						// It is taken from the used lines structure
-						if (!PtrCU[NbCU].LowPC && (!PtrCU[NbCU].HighPC || (PtrCU[NbCU].HighPC == ~0)))
-						{
-							PtrCU[NbCU].LowPC = PtrCU[NbCU].PtrLinesSrc[0].StartPC;
-							PtrCU[NbCU].HighPC = PtrCU[NbCU].PtrLinesSrc[PtrCU[NbCU].NbLinesSrc - 1].StartPC;
+							// Setup memory range for the code if CU doesn't have already this information
+							// It is taken from the used lines structure
+							if (!PtrCU[NbCU].LowPC && (!PtrCU[NbCU].HighPC || (PtrCU[NbCU].HighPC == ~0)))
+							{
+								PtrCU[NbCU].LowPC = PtrCU[NbCU].PtrUsedLinesSrc[0].StartPC;
+								PtrCU[NbCU].HighPC = PtrCU[NbCU].PtrUsedLinesSrc[PtrCU[NbCU].NbUsedLinesSrc - 1].StartPC;
+							}
 						}
 					}
 				}
@@ -1149,6 +1177,27 @@ void DWARFManager_InitDMI(void)
 			++NbCU;
 		}
 	} 
+}
+
+
+// Conform slashes and backslashes
+void DWARFManager_ConformSlachesBackslashes(char *Ptr)
+{
+	while (*Ptr)
+	{
+#if defined(_WIN32)
+		if (*Ptr == '/')
+		{
+			*Ptr = '\\';
+		}
+#else
+		if (*Ptr == '\\')
+		{
+			*Ptr = '/';
+		}
+#endif
+		Ptr++;
+	}
 }
 
 
@@ -1799,11 +1848,11 @@ size_t DWARFManager_GetNumLineFromAdr(size_t Adr, size_t Tag)
 			}
 
 			// Check if a used line is found with the address
-			for (size_t j = 0; j < PtrCU[i].NbLinesSrc; j++)
+			for (size_t j = 0; j < PtrCU[i].NbUsedLinesSrc; j++)
 			{
-				if (PtrCU[i].PtrLinesSrc[j].StartPC == Adr)
+				if (PtrCU[i].PtrUsedLinesSrc[j].StartPC == Adr)
 				{
-					return PtrCU[i].PtrLinesSrc[j].NumLineSrc;
+					return PtrCU[i].PtrUsedLinesSrc[j].NumLineSrc;
 				}
 			}
 		}
@@ -1832,6 +1881,57 @@ char *DWARFManager_GetFunctionName(size_t Adr)
 	}
 
 	return NULL;
+}
+
+
+// Get number of lines of texts source list from source index
+size_t DWARFManager_GetSrcNbListPtrFromIndex(size_t Index, bool Used)
+{
+	if (!Used)
+	{
+		return PtrCU[Index].NbLinesLoadSrc;
+	}
+	else
+	{
+		return PtrCU[Index].NbUsedLinesSrc;
+	}
+}
+
+
+// Get text source line number list pointer from source index
+// Return NULL for the text source used list 
+size_t *DWARFManager_GetSrcNumLinesPtrFromIndex(size_t Index, bool Used)
+{
+	if (Used)
+	{
+		return	PtrCU[Index].PtrUsedNumLines;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+
+// Get text source list pointers from source index
+// Return NULL for the text source used list 
+char **DWARFManager_GetSrcListPtrFromIndex(size_t Index, bool Used)
+{
+	if (!Used)
+	{
+		return PtrCU[Index].PtrLinesLoadSrc;
+	}
+	else
+	{
+		return PtrCU[Index].PtrUsedLinesLoadSrc;
+	}
+}
+
+
+// Get source language
+size_t DWARFManager_GetSrcLanguageFromIndex(size_t Index)
+{
+	return PtrCU[Index].Language;
 }
 
 
@@ -1894,15 +1994,22 @@ char *DWARFManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine)
 
 
 // Get number of source code filenames
-size_t DWARFManager_GetNbFullSourceFilename(void)
+size_t DWARFManager_GetNbSources(void)
 {
 	return NbCU;
 }
 
 
-// Get source code filename based on index (starting from 0)
+// Get source code filename, including his directory, based on index (starting from 0)
 char *DWARFManager_GetNumFullSourceFilename(size_t Index)
 {
 	return (PtrCU[Index].PtrFullFilename);
+}
+
+
+// Get source code filename based on index (starting from 0)
+char *DWARFManager_GetNumSourceFilename(size_t Index)
+{
+	return (PtrCU[Index].PtrSourceFilename);
 }
 

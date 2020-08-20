@@ -120,7 +120,7 @@ void CallStackBrowserWindow::RefreshContents(void)
 					model->setItem(NbRaw, 0, new QStandardItem(QString("%1").arg((Name = DBGManager_GetFunctionName(ret)) ? Name : "(N/A)")));
 					// display the called line
 					FunctionName = QString(Name = DBGManager_GetLineSrcFromAdr(ret, DBG_NO_TAG));
-					FunctionName.replace("&nbsp;", " ");
+					//FunctionName.replace("&nbsp;", " ");
 					FunctionName = FunctionName.trimmed();
 					model->setItem(NbRaw, 1, new QStandardItem(QString("%1").arg(Name ? FunctionName : "(N/A)")));
 					// display the return address

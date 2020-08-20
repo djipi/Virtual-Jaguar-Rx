@@ -16,6 +16,10 @@ Release 5 (TBA)
 9) Added ELF section types check and new error messages
 10) Project has switched to libdwarf 20191104 library 64bits for VS 2017
 11) Modified the call stack layout window and added source filename from the called source line
+12) Added a source tab in the main window for step into tracing
+13) Added the step over for source level tracing
+14) Project has switched to libdwarf 20200114 library 64bits for VS 2017
+15) Set text conversion to Qt/HTML format for the M68K tracing window
 
 Release 4a (15th August 2019)
 -----------------------------
@@ -107,7 +111,7 @@ Git commit: 9b25d85d1ea4a9476b83476bcec65e05464f68da
 45) Fix a crash when emulator, in non-debugger mode, opens the breakpoint UIs at launch
 46) Fix crash with potential missing DWARF structure tag's type name
 47) Added ELF sections check so a potential unknown section will stop, or not stop, the decoding
-48) Project has switched to QT 5.12.0 library 64bits for VS 2017
+48) Project has switched to Qt 5.12.0 library 64bits for VS 2017
 49) Added a Save Dump As... feature to save a memory zone to a file
 50) The -d command line option, dedicated to the debugger, has been renamed to avoid duplication with the dsp one
 -- -d has been renamed by -D because another -d was also used for the dsp command line option
@@ -145,7 +149,7 @@ Git commit: b1b673a3b0d19e3c2c45b6590b773b11e45bced7
 -- Depend vlink version, .heap section may have an Alloc flag
 16) Fixed a crash when DWARF information does references to missing source code files
 17) Added a local variables window
-18) Project has switched to Visual Studio 2017 and QT 5.9.1 library
+18) Project has switched to Visual Studio 2017 and Qt 5.9.1 library
 
 Release 2 (3rd September 2017)
 ------------------------------
@@ -208,7 +212,7 @@ Release 0 (5th January 2017)
 
 Known issues
 ============
-1) Video output is not displayed due to my OpenGL / QT5 5.5.1 integration with VS 2015 but solved when using the QT 5.9.1 package for VS 2017
+1) Video output is not displayed due to my OpenGL / Qt5 5.5.1 integration with VS 2015 but solved when using the Qt 5.9.1 package for VS 2017
 2) The BPM (Breapoint) remains stuck on his address when user wants to continue the code execution
 -- Need to trace over the BPM or unset the BPM
 -- The issue can be prevented if the code doesn't set IRQ, otherwise the IRQ will need to be traced to get back control
@@ -236,8 +240,9 @@ Known issues
 15) After a new breakpoint set, the breakpoint list window is not refreshed
 -- User must perform an operation, such code tracing, to see the breakpoints list update
 16) Some ASCII characters may be not displayed correctly
--- It depend how the text is displayed, this is related to the QT/HTML encoding done when reading DWARF file
+-- Probably depend how the text is displayed, this is related to the Qt/HTML encoding done when reading DWARF file
 17) Potential legacy crash when leaving emulator in pause mode for a long period of time
+-- Need much investigation
 
 Cosmetic / UX issues
 ====================
@@ -255,18 +260,16 @@ Legacy issues/hints
 Project information
 ===================
 1) Code based on the Shamus Hammons source code available via Gethub by the 12th September 2017 (2.1.3 Final)
-2) Visual Studio 2015/2017 project support for 64 bits
-3) libelf 0.8.13 library 64bits for VS 2015/2017
-4) libdwarf 20191104 library 64bits for VS 2017
-5) QT 5.5.1 library 64bits for VS 2015
-6) QT 5.12.0 library 64bits for VS 2017
-7) Zlib 1.2.8 library 64bits for VS 2015
-8) Zlib 1.2.11 library 64bits for VS 2017
-9) SDL 1.2.15 library 64bits for VS 2015/2017
-10) The original make files have been modified to follow the requirements and modifications
-11) The 'Rx' word has been added to the emulator name to make distinction with the official version
-12) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
-13) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
+2) Visual Studio 2017 project support for 64 bits
+3) libelf 0.8.13 library 64bits for VS 2017
+4) libdwarf 20200114 library 64bits for VS 2017
+5) Qt 5.12.0 library 64bits for VS 2017
+6) Zlib 1.2.11 library 64bits for VS 2017
+7) SDL 1.2.15 library 64bits for VS 2017
+8) The original make files have been modified to follow the requirements and modifications
+9) The 'Rx' word has been added to the emulator name to make distinction with the official version
+10) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
+11) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
 -- Text / License terms are the same
 14) The x86 configuration has been removed in the VS 2017 project
 

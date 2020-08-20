@@ -36,6 +36,7 @@ class RISCDasmBrowserWindow;
 class HWRegsBrowserWindow;
 
 // Debugger
+class SourcesWindow;
 class m68KDasmWindow;
 class GPUDasmWindow;
 class DSPDasmWindow;
@@ -115,6 +116,7 @@ class MainWin: public QMainWindow
 		void DeleteAllBreakpoints(void);
 		void DisableAllBreakpoints(void);
 		void ShowSaveDumpAsWin(void);
+		void SelectdasmtabWidget(const int);
 #if 0
 		void ShowVideoOutputWin(void);
 		void ShowDasmWin(void);
@@ -164,6 +166,7 @@ class MainWin: public QMainWindow
 		//DasmWindow * DasmWin;
 		QTabWidget *dasmtabWidget;
 		//QDockWidget *dasmtabWidget;
+		SourcesWindow *SourcesWin;
 		m68KDasmWindow *m68kDasmWin;
 		GPUDasmWindow *GPUDasmWin;
 		DSPDasmWindow *DSPDasmWin;

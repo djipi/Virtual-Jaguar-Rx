@@ -59,7 +59,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Qt\Qt5.9.1\5.9.1\msvc2017_64\include;C:\Qt\Qt5.9.1\5.9.1\msvc2017_64\include\QtGui;C:\Qt\Qt5.9.1\5.9.1\msvc2017_64\include\QtCore;C:\Qt\Qt5.9.1\5.9.1\msvc2017_64\include\QtWidgets;C:\SDK\SDL\SDL-1.2.15\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(QTDIR)\include;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtWidgets;C:\SDK\SDL\SDL-1.2.15\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)obj\</ObjectFileName>
@@ -81,7 +81,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;_RELEASE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>C:\Qt\Qt5.9.1\5.9.1\msvc2017_64\include;C:\Qt\Qt5.9.1\5.9.1\msvc2017_64\include\QtCore;C:\Qt\Qt5.9.1\5.9.1\msvc2017_64\include\QtGui;C:\Qt\Qt5.9.1\5.9.1\msvc2017_64\include\QtWidgets;C:\SDK\SDL\SDL-1.2.15\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(QTDIR)\include;$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtWidgets;C:\SDK\SDL\SDL-1.2.15\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MinimalRebuild>false</MinimalRebuild>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
@@ -153,7 +153,10 @@
     <ClCompile Include="..\..\src\joystick.cpp" />
     <ClCompile Include="..\..\src\memory.cpp" />
     <ClCompile Include="..\..\src\memtrack.cpp" />
-    <ClCompile Include="..\..\src\mmu.cpp" />
+    <ClCompile Include="..\..\src\mmu.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="..\..\src\modelsBIOS.cpp" />
     <ClCompile Include="..\..\src\op.cpp" />
     <ClCompile Include="..\..\src\state.cpp" />
