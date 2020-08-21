@@ -6,7 +6,7 @@
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JPM  06/27/2016  Created this file
-// JPM   Aug./2020  Added different layouts
+// JPM   Aug./2020  Added different layouts, and a status bar
 //
 
 #ifndef __M68KDASMWIN_H__
@@ -38,6 +38,9 @@ class m68KDasmWindow: public QWidget
 
 	private:
 		QVBoxLayout *layout;
+#if MD_LAYOUTFILE == 1
+		QStatusBar *statusbar;
+#endif
 #ifdef MD_LAYOUTTEXTS
 		QTextBrowser *text;
 #endif

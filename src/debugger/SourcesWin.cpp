@@ -158,15 +158,15 @@ void SourcesWindow::RefreshContents(void)
 	size_t m68kPC = m68k_get_reg(NULL, M68K_REG_PC);
 	int index = 0;
 	size_t i;
-	bool Error;
+	DBGstatus Status;
 	char *Filename;
 
 	// Check valid PC
 	if (m68kPC && NbSourcesInfos)
 	{
 		// Get source filename pointed by PC address
-		Filename = DBGManager_GetFullSourceFilenameFromAdr(m68kPC, &Error);
-		if (Error && Filename)
+		Filename = DBGManager_GetFullSourceFilenameFromAdr(m68kPC, &Status);
+		if (!Status && Filename)
 		{
 			// Look for a new tab
 			for (i = 0; i < NbSourcesInfos; i++, !index)
@@ -196,7 +196,7 @@ void SourcesWindow::RefreshContents(void)
 			// Source file doesn't exist
 			if (indexErrorTab == -1)
 			{
-				indexErrorTab = sourcestabWidget->addTab(sourceErrorTab = new(SourceCWindow), tr("Source file not found"));
+				indexErrorTab = sourcestabWidget->addTab(sourceErrorTab = new(SourceCWindow), tr("Source file not available"));
 				//sourceErrorTab->hide();
 			}
 			sourcestabWidget->setCurrentIndex(indexErrorTab);

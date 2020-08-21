@@ -14,12 +14,13 @@ Release 5 (TBA)
 7) Fix a random crash when reading the source lines information
 8) Added ELF & DWARF .debug* types
 9) Added ELF section types check and new error messages
-10) Project has switched to libdwarf 20191104 library 64bits for VS 2017
-11) Modified the call stack layout window and added source filename from the called source line
-12) Added a source tab in the main window for step into tracing
-13) Added the step over for source level tracing
-14) Project has switched to libdwarf 20200114 library 64bits for VS 2017
-15) Set text conversion to Qt/HTML format for the M68K tracing window
+10) Modified the call stack layout window and added source filename from the called source line
+11) Added a source tab in the main window for step into tracing
+12) Added the step over for source level tracing
+13) Project has switched to libdwarf 20200114 library 64bits for VS 2017
+14) Set text conversion to Qt/HTML format for the M68K tracing window
+15) Added a source code file date check when reading DWARF information
+-- Will avoid source code mismatching with the ELF executable
 
 Release 4a (15th August 2019)
 -----------------------------

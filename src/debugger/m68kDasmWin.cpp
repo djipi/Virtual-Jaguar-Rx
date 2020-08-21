@@ -10,7 +10,7 @@
 // JPM  06/27/2016  Created this file
 // JPM  12/04/2016  Suport ELF debug information
 // JPM              Replacing the ELF support by the debugger information manager calls
-// JPM   Aug./2020  Display only the code related to the traced function, added different layouts, Qt/HTML text format support
+// JPM   Aug./2020  Display only the code related to the traced function, added different layouts & a status bar, Qt/HTML text format support
 //
 
 // STILL TO DO:
@@ -28,6 +28,9 @@
 // 
 m68KDasmWindow::m68KDasmWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dialog),
 layout(new QVBoxLayout),
+#if MD_LAYOUTFILE == 1
+statusbar(new QStatusBar),
+#endif
 #ifdef MD_LAYOUTTEXTS
 text(new QTextBrowser),
 #endif
@@ -42,6 +45,12 @@ memBase(0)
 #ifdef MD_LAYOUTTEXTS
 	text->setFont(fixedFont);
 	layout->addWidget(text);
+#endif
+
+	// Status bar
+#if MD_LAYOUTFILE == 1
+	layout->addWidget(statusbar);
+	setLayout(layout);
 #endif
 
 	// Set layout
@@ -59,7 +68,8 @@ void m68KDasmWindow::RefreshContents(void)
 	size_t m68KPCNbrDisasmLines = 0;
 	char *Symbol = NULL, *LineSrc, *CurrentLineSrc = NULL;
 	bool m68kPCShow = false;
-	bool constant, adr, equal, Error;
+	bool constant, adr, equal;
+	DBGstatus Status;
 	size_t j, i;
 	size_t	nbr = vjs.nbrdisasmlines;
 	char *PtrFullSource, *CurrentPtrFullSource = (char *)calloc(1, 1);
@@ -78,7 +88,7 @@ void m68KDasmWindow::RefreshContents(void)
 		adr = constant = equal = false;
 
 		// Display source filename based on the program address
-		if (vjs.displayFullSourceFilename && (PtrFullSource = DBGManager_GetFullSourceFilenameFromAdr(oldpc, &Error)) && strcmp(CurrentPtrFullSource, PtrFullSource))
+		if (vjs.displayFullSourceFilename && (PtrFullSource = DBGManager_GetFullSourceFilenameFromAdr(oldpc, &Status)) && strcmp(CurrentPtrFullSource, PtrFullSource))
 		{
 #if defined(MD_LAYOUTFILE)
 			if (i)
@@ -100,15 +110,33 @@ void m68KDasmWindow::RefreshContents(void)
 				CurrentPtrFullSource = (char *)realloc(CurrentPtrFullSource, strlen(PtrFullSource) + 1);
 				strcpy(CurrentPtrFullSource, PtrFullSource);
 #if defined(MD_LAYOUTFILE)
-				if (!Error)
+				if (Status)
 				{
-					// Referenced filename does exist
+					// Referenced filename doesn't exist
 					sprintf(string, "<font color='#ff0000'><b>%s</b></font><br>", PtrFullSource);
+#if MD_LAYOUTFILE == 1
+					// Display status bar
+					if ((Status & DBGSTATUS_OUTDATEDFILE))
+					{
+						statusbar->setStyleSheet("background-color: lightyellow; font: bold");
+						statusbar->showMessage(QString("Outdated source file"));
+					}
+					else
+					{
+						statusbar->setStyleSheet("background-color: tomato; font: bold");
+						statusbar->showMessage(QString("Unavailable source file"));
+					}
+#endif
 				}
 				else
 				{
-					// Referenced filename doesn't exist
+					// Referenced filename does exist
 					sprintf(string, "<font color='#00ff00'><b>%s</b></font><br>", PtrFullSource);
+#if MD_LAYOUTFILE == 1
+					// Display status bar
+					statusbar->setStyleSheet("background-color: transparent; font: bold");
+					statusbar->showMessage(QString(""));
+#endif
 				}
 				nbr++;
 				s += QString(string);
@@ -118,7 +146,7 @@ void m68KDasmWindow::RefreshContents(void)
 		else
 		{
 			// Display line number based on the program address
-			if ((NumLine = DBGManager_GetNumLineFromAdr(oldpc, DBG_NO_TAG)) && ((signed)NumLine > (signed)CurrentNumLine))
+			if ((NumLine = DBGManager_GetNumLineFromAdr(oldpc, DBG_NO_TAG)) && ((signed)NumLine > (signed)CurrentNumLine) && !Status)
 			{
 #if MD_LAYOUTFILE != 1
 				if ((signed)CurrentNumLine < 0)

@@ -4,11 +4,21 @@
 #define __DWARFMANAGER_H__
 
 
+// Definition for the DWARF status of each source file
+typedef enum
+{
+	DWARFSTATUS_OK = 0x0,
+	DWARFSTATUS_OUTDATEDFILE = 0x1,
+	DWARFSTATUS_NOFILE = 0x2,
+	DWARFSTATUS_NOFILEINFO = 0x4,
+	DWARFSTATUS_UNKNOWN = 0xff
+}DWARFstatus;
+
 // Internal manager
 extern bool	DWARFManager_Reset(void);
 extern bool	DWARFManager_Close(void);
 extern void	DWARFManager_Init(void);
-extern int DWARFManager_ElfInit(Elf *ElfPtr);
+extern int DWARFManager_ElfInit(Elf *ElfPtr, struct _stat FileElfInfo);
 extern void DWARFManager_Set(size_t NbPathsInList, char **PtrListPaths);
 extern size_t DWARFManager_GetNbSources(void);
 
@@ -17,7 +27,7 @@ extern char *DWARFManager_GetFunctionName(size_t Adr);
 extern size_t DWARFManager_GetSrcLanguageFromIndex(size_t Index);
 
 // Source text files manager
-extern char	*DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error);
+extern char	*DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, DWARFstatus *Status);
 extern char *DWARFManager_GetNumFullSourceFilename(size_t Index);
 extern char *DWARFManager_GetNumSourceFilename(size_t Index);
 

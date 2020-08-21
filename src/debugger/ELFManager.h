@@ -35,7 +35,7 @@ typedef enum {
 
 // Internal manager
 extern void	ELFManager_Init(void);
-extern bool	ELFManager_DwarfInit(Elf *PtrElfMem);
+extern bool	ELFManager_DwarfInit(Elf *PtrElfMem, struct _stat FileElfInfo);
 extern Elf *ELFManager_MemOpen(char *PtrELFExe, size_t Size);
 extern int	ELFManager_MemEnd(void);
 extern void	ELFManager_Reset(void);

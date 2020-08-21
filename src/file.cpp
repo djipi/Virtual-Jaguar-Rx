@@ -17,6 +17,7 @@
 // JPM  07/15/2016  DWARF format support
 // JPM  04/06/2019  Added ELF sections check
 // JPM  03/12/2020  Added ELF section types check and new error messages
+// JPM   Aug./2020  ELF executable file information
 //
 
 #include "file.h"
@@ -25,6 +26,8 @@
 #endif // _MSC_VER
 #include <stdarg.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "crc32.h"
 #include "filedb.h"
 #include "eeprom.h"
@@ -147,6 +150,7 @@ bool JaguarLoadFile(char * path)
 	int	DBGType = DBG_NO_TYPE;
 	bool error;
 	int err;
+	struct _stat _statbuf;
 
 	jaguarROMSize = JaguarLoadROM(buffer, path);
 
@@ -200,9 +204,13 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 
 		if (PtrELFExe != NULL)
 		{
+			// check the ELF version
 			if ((elf_version(EV_CURRENT) != EV_NONE) && (ElfMem = ELFManager_MemOpen(PtrELFExe, jaguarROMSize)))
 			{
-				if (ELFManager_DwarfInit(ElfMem))
+				// get the file information
+				_stat(path, &_statbuf);
+
+				if (ELFManager_DwarfInit(ElfMem, _statbuf))
 				{
 					DBGType |= DBG_ELFDWARF;
 				}

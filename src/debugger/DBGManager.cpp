@@ -214,11 +214,11 @@ size_t DBGManager_GetType(void)
 
 // Get source filename based on the memeory address
 // return NULL if no source filename
-char *DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error)
+char *DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, DBGstatus *Status)
 {
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetFullSourceFilenameFromAdr(Adr, Error);
+		return DWARFManager_GetFullSourceFilenameFromAdr(Adr, (DWARFstatus *)Status);
 	}
 	else
 	{

@@ -4,6 +4,16 @@
 #define __DBGMANAGER_H__
 
 
+// Definition for the DWARF status of each source file
+typedef enum
+{
+	DBGSTATUS_OK = 0x0,
+	DBGSTATUS_OUTDATEDFILE = 0x1,
+	DBGSTATUS_NOFILE = 0x2,
+	DBGSTATUS_NOFILEINFO = 0x4,
+	DBGSTATUS_UNKNOWN = 0xff
+}DBGstatus;
+
 // Language tag based in the DW_TAG_... list from the dwarf.h
 typedef enum {
 	DBG_NO_LANG = 0x0,
@@ -260,7 +270,7 @@ extern char	*DBGManager_GetSymbolNameFromAdr(size_t Adr);
 extern size_t DBGManager_GetAdrFromSymbolName(char *SymbolName);
 
 // Source text files manager
-extern char	*DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error);
+extern char	*DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, DBGstatus *Status);
 extern char *DBGManager_GetNumFullSourceFilename(size_t Index);
 extern char *DBGManager_GetNumSourceFilename(size_t Index);
 

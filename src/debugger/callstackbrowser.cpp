@@ -81,7 +81,7 @@ void CallStackBrowserWindow::RefreshContents(void)
 {
 	char msg[1024];
 	size_t Error = CS_NOERROR;
-	bool FilenameError;
+	DBGstatus FilenameStatus;
 	unsigned int a6, Sa6, ret;
 	char *Name;
 	size_t NumError = 0;
@@ -127,7 +127,7 @@ void CallStackBrowserWindow::RefreshContents(void)
 					sprintf(msg, "0x%06X", ret);
 					model->setItem(NbRaw, 2, new QStandardItem(QString("%1").arg(msg)));
 					// display the source filename from called source line
-					model->setItem(NbRaw++, 3, new QStandardItem(QString("%1").arg(((Name = DBGManager_GetFullSourceFilenameFromAdr(ret, &FilenameError)) && FilenameError) ? Name : "(N/A)")));
+					model->setItem(NbRaw++, 3, new QStandardItem(QString("%1").arg(((Name = DBGManager_GetFullSourceFilenameFromAdr(ret, &FilenameStatus)) && !FilenameStatus) ? Name : "(N/A)")));
 #endif
 				}
 				else

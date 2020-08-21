@@ -15,6 +15,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "libelf/libelf.h"
 #include "libelf/gelf.h"
 #include "libdwarf.h"
@@ -145,9 +147,9 @@ void	ELFManager_Init(void)
 
 
 // ELF manager Dwarf Initialisation
-bool	ELFManager_DwarfInit(Elf *PtrElfMem)
+bool	ELFManager_DwarfInit(Elf *PtrElfMem, struct _stat FileElfInfo)
 {
-	return (ElfDwarf = (DWARFManager_ElfInit(PtrElfMem) == DW_DLV_OK) ? true : false);
+	return (ElfDwarf = (DWARFManager_ElfInit(PtrElfMem, FileElfInfo) == DW_DLV_OK) ? true : false);
 }
 
 

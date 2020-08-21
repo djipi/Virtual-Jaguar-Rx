@@ -12,6 +12,7 @@
 // JPM   Oct./2018  Improve the DWARF parsing information, and the source file text reading; support the used source lines from DWARF structure, and the search paths for the files
 // JPM   Aug./2019  Added new functions to handle DWARF information, full filename fix
 // JPM   Mar./2020  Fix a random crash when reading the source lines information
+// JPM   Aug./2020  Added a source code file date check when reading DWARF information
 //
 
 // To Do
@@ -23,9 +24,13 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <libdwarf.h>
-#include <dwarf.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include "libdwarf.h"
+#include "dwarf.h"
 #include "LEB128.h"
+#include "DWARFManager.h"
 
 
 // Definitions for debugging
@@ -131,7 +136,7 @@ typedef struct CUStruct
 	size_t Tag;
 	size_t Language;								// Language (C, etc.) used by the source code
 	size_t LowPC, HighPC;							// Memory range for the code
-	char *PtrProducer;								// Pointer to the "Producer" text information (mostly compiler and compilation options used)
+	char *PtrProducer;								// "Producer" text information (mostly compiler and compilation options used)
 	char *PtrSourceFilename;						// Source file name
 	char *PtrSourceFileDirectory;					// Directory of the source file
 	char *PtrFullFilename;							// Pointer to full namefile (directory & filename)
@@ -151,6 +156,8 @@ typedef struct CUStruct
 	CUStruct_LineSrc *PtrUsedLinesSrc;				// Pointer to the used source lines list structure
 	char **PtrUsedLinesLoadSrc;						// Pointer lists to each used source line referenced by the CUStruct_LineSrc structure
 	size_t *PtrUsedNumLines;						// List of the number lines used
+	struct _stat _statbuf;							// File information
+	DWARFstatus Status;								// File status
 }S_CUStruct;
 
 
@@ -163,6 +170,7 @@ Dwarf_Debug dbg;
 CUStruct *PtrCU;
 char **ListSearchPaths;
 size_t NbSearchPaths;
+struct _stat FileElfExeInfo;
 
 
 //
@@ -242,10 +250,11 @@ bool DWARFManager_Close(void)
 
 
 // Dwarf manager Elf init
-int	DWARFManager_ElfInit(Elf *ElfPtr)
+int	DWARFManager_ElfInit(Elf *ElfPtr, struct _stat FileElfInfo)
 {
 	if ((LibDwarf = dwarf_elf_init(ElfPtr, DW_DLC_READ, (Dwarf_Handler)DWARFManager_ErrorHandler, errarg, &dbg, &error)) == DW_DLV_OK)
 	{
+		FileElfExeInfo = FileElfInfo;
 		DWARFManager_InitDMI();
 	}
 
@@ -525,65 +534,88 @@ void DWARFManager_InitDMI(void)
 								strcpy((Ptr1 + 1), (Ptr + 4));
 							}
 
-							// Open the source file as a binary file
-							if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rb"))
+							// Get the source file information
+							if (!_stat(PtrCU[NbCU].PtrFullFilename, &PtrCU[NbCU]._statbuf))
 							{
-								if (!fseek(SrcFile, 0, SEEK_END))
+								// check the time stamp with the executable
+								if (PtrCU[NbCU]._statbuf.st_mtime <= FileElfExeInfo.st_mtime)
 								{
-									if ((PtrCU[NbCU].SizeLoadSrc = ftell(SrcFile)) > 0)
+									// Open the source file as a binary file
+									if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rb"))
 									{
-										if (!fseek(SrcFile, 0, SEEK_SET))
+										if (!fseek(SrcFile, 0, SEEK_END))
 										{
-											if (PtrCU[NbCU].PtrLoadSrc = Ptr = Ptr1 = (char *)calloc(1, (PtrCU[NbCU].SizeLoadSrc + 2)))
+											if ((PtrCU[NbCU].SizeLoadSrc = ftell(SrcFile)) > 0)
 											{
-												// Read whole file
-												if (fread_s(PtrCU[NbCU].PtrLoadSrc, PtrCU[NbCU].SizeLoadSrc, PtrCU[NbCU].SizeLoadSrc, 1, SrcFile) != 1)
+												if (!fseek(SrcFile, 0, SEEK_SET))
 												{
-													free(PtrCU[NbCU].PtrLoadSrc);
-													PtrCU[NbCU].PtrLoadSrc = NULL;
-													PtrCU[NbCU].SizeLoadSrc = 0;
-												}
-												else
-												{
-													// Eliminate all carriage return code '\r' (oxd)
-													do
+													if (PtrCU[NbCU].PtrLoadSrc = Ptr = Ptr1 = (char *)calloc(1, (PtrCU[NbCU].SizeLoadSrc + 2)))
 													{
-														if ((*Ptr = *Ptr1) != '\r')
+														// Read whole file
+														if (fread_s(PtrCU[NbCU].PtrLoadSrc, PtrCU[NbCU].SizeLoadSrc, PtrCU[NbCU].SizeLoadSrc, 1, SrcFile) != 1)
 														{
-															Ptr++;
+															free(PtrCU[NbCU].PtrLoadSrc);
+															PtrCU[NbCU].PtrLoadSrc = NULL;
+															PtrCU[NbCU].SizeLoadSrc = 0;
 														}
-													}
-													while (*Ptr1++);
-
-													// Get back the new text file size
-													PtrCU[NbCU].SizeLoadSrc = strlen(Ptr = PtrCU[NbCU].PtrLoadSrc);
-
-													// Make sure the text file finish with a new line code '\n' (0xa)
-													if (PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc - 1] != '\n')
-													{
-														PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc++] = '\n';
-														PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc] = 0;
-													}
-
-													// Reallocate text file
-													if (PtrCU[NbCU].PtrLoadSrc = Ptr = (char *)realloc(PtrCU[NbCU].PtrLoadSrc, (PtrCU[NbCU].SizeLoadSrc + 1)))
-													{
-														// Count line numbers, based on the new line code '\n' (0xa), and finish each line with 0
-														do
+														else
 														{
-															if (*Ptr == '\n')
+															// Eliminate all carriage return code '\r' (oxd)
+															do
 															{
-																PtrCU[NbCU].NbLinesLoadSrc++;
-																*Ptr = 0;
+																if ((*Ptr = *Ptr1) != '\r')
+																{
+																	Ptr++;
+																}
+															} while (*Ptr1++);
+
+															// Get back the new text file size
+															PtrCU[NbCU].SizeLoadSrc = strlen(Ptr = PtrCU[NbCU].PtrLoadSrc);
+
+															// Make sure the text file finish with a new line code '\n' (0xa)
+															if (PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc - 1] != '\n')
+															{
+																PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc++] = '\n';
+																PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc] = 0;
 															}
-														} while (*++Ptr);
+
+															// Reallocate text file
+															if (PtrCU[NbCU].PtrLoadSrc = Ptr = (char *)realloc(PtrCU[NbCU].PtrLoadSrc, (PtrCU[NbCU].SizeLoadSrc + 1)))
+															{
+																// Count line numbers, based on the new line code '\n' (0xa), and finish each line with 0
+																do
+																{
+																	if (*Ptr == '\n')
+																	{
+																		PtrCU[NbCU].NbLinesLoadSrc++;
+																		*Ptr = 0;
+																	}
+																} while (*++Ptr);
+															}
+														}
 													}
 												}
 											}
 										}
+
+										fclose(SrcFile);
+									}
+									else
+									{
+										// Source file doesn't exist
+										PtrCU[NbCU].Status = DWARFSTATUS_NOFILE;
 									}
 								}
-								fclose(SrcFile);
+								else
+								{
+									// Source file is outdated
+									PtrCU[NbCU].Status = DWARFSTATUS_OUTDATEDFILE;
+								}
+							}
+							else
+							{
+								// Source file doesn't have information
+								PtrCU[NbCU].Status = DWARFSTATUS_NOFILEINFO;
 							}
 							break;
 
@@ -593,7 +625,7 @@ void DWARFManager_InitDMI(void)
 					}
 
 					// Get the source lines table located in the CU
-					if (dwarf_srclines(return_sib, &linebuf, &cnt, &error) == DW_DLV_OK)
+					if ((dwarf_srclines(return_sib, &linebuf, &cnt, &error) == DW_DLV_OK) && (PtrCU[NbCU].Status == DWARFSTATUS_OK))
 					{
 						if (cnt)
 						{
@@ -903,7 +935,8 @@ void DWARFManager_InitDMI(void)
 										// Get source line number and associated block of address
 										for (Dwarf_Signed i = 0; i < cnt; ++i)
 										{
-											if ((PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC >= return_lowpc) && (PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC <= return_highpc))
+											// Check the presence of the line in the memory frame
+											if (PtrCU[NbCU].PtrUsedLinesSrc && (PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC >= return_lowpc) && (PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC <= return_highpc))
 											{
 												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc = (DMIStruct_LineSrc *)realloc(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc, (PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc + 1) * sizeof(DMIStruct_LineSrc));
 												memset((void *)(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc + PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc), 0, sizeof(DMIStruct_LineSrc));
@@ -1371,16 +1404,16 @@ char *DWARFManager_GetSymbolnameFromAdr(size_t Adr)
 
 // Get complete source filename based from address
 // Return NULL if no source filename exists
-// Return the existence status (true or false) in Error if pointer not NULL
-char *DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error)
+// Return the existence status in Status if pointer not NULL
+char *DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, DWARFstatus *Status)
 {
 	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			if (Error)
+			if (Status)
 			{
-				*Error = PtrCU[i].PtrLoadSrc ? true : false;
+				*Status = PtrCU[i].Status;
 			}
 
 			return PtrCU[i].PtrFullFilename;

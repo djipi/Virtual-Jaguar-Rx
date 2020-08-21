@@ -97,7 +97,7 @@ void NewFnctBreakpointWindow::AddBreakpointAddress(void)
 		{
 			// Set information based on address
 			Brk.Name = DBGManager_GetSymbolNameFromAdr(adr);
-			Brk.Filename = DBGManager_GetFullSourceFilenameFromAdr(adr, &ok);
+			Brk.Filename = DBGManager_GetFullSourceFilenameFromAdr(adr, NULL);
 			Brk.NumLine = DBGManager_GetNumLineFromAdr(adr, DBG_TAG_subprogram);
 			Brk.LineSrc = DBGManager_GetLineSrcFromAdrNumLine(adr, Brk.NumLine);
 
