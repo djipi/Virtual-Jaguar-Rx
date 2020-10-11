@@ -21,6 +21,7 @@ Release 5 (TBA)
 14) Added a source code file date check when reading DWARF information
 -- Will avoid source code mismatching with the ELF executable
 15) Project has switched to libdwarf 20200825 library 64bits for VS 2017
+16) Remove Visual Studio 2015 support
 
 Release 4a (15th August 2019)
 -----------------------------
