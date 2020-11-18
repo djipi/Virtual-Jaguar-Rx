@@ -22,6 +22,8 @@ Release 5 (TBA)
 -- Will avoid source code mismatching with the ELF executable
 15) Remove Visual Studio 2015 support
 16) Project has switched to libdwarf 20201020 library 64bits for VS 2017
+17) Work around fix for a compilation error on Linux
+-- EEPROM directory creation allowed only for Windows at the moment
 
 Release 4a (15th August 2019)
 -----------------------------
