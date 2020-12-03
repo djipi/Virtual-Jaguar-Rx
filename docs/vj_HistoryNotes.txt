@@ -21,9 +21,9 @@ Release 5 (TBA)
 14) Added a source code file date check when reading DWARF information
 -- Will avoid source code mismatching with the ELF executable
 15) Remove Visual Studio 2015 support
-16) Project has switched to libdwarf 20201020 library 64bits for VS 2017
-17) Work around fix for a compilation error on Linux
+16) Work around fix for a compilation error on Linux
 -- EEPROM directory creation allowed only for Windows at the moment
+17) Project has switched to libdwarf 20201201 library 64bits for VS 2017
 
 Release 4a (15th August 2019)
 -----------------------------
@@ -266,7 +266,7 @@ Project information
 1) Code based on the Shamus Hammons source code available via Gethub by the 12th September 2017 (2.1.3 Final)
 2) Visual Studio 2017 project support for 64 bits
 3) libelf 0.8.13 library 64bits for VS 2017
-4) libdwarf 20201017 library 64bits for VS 2017
+4) libdwarf 20201201 library 64bits for VS 2017
 5) Qt 5.12.0 library 64bits for VS 2017
 6) Zlib 1.2.11 library 64bits for VS 2017
 7) SDL 1.2.15 library 64bits for VS 2017
