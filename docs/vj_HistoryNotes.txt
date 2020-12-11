@@ -24,6 +24,7 @@ Release 5 (TBA)
 16) Work around fix for a compilation error on Linux
 -- EEPROM directory creation allowed only for Windows at the moment
 17) Project has switched to libdwarf 20201201 library 64bits for VS 2017
+18) Show the SR value as a readable form in the CPU browser
 
 Release 4a (15th August 2019)
 -----------------------------
