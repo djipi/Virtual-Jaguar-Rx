@@ -8,7 +8,7 @@
 #ifndef __ABOUT_H__
 #define __ABOUT_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 
 class AboutWindow: public QWidget
 {

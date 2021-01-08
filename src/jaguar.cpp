@@ -25,7 +25,7 @@
 
 #include "jaguar.h"
 //#include <QApplication>
-#include <QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <time.h>
 #include <SDL.h>
 #include "SDL_opengl.h"

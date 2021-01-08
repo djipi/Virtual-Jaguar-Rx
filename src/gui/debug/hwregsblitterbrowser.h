@@ -7,7 +7,7 @@
 #ifndef __HWREGSBLITTERBROWSER_H__
 #define __HWREGSBLITTERBROWSER_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 

@@ -7,7 +7,7 @@
 #ifndef __NEWFNCTBREAKPOINTWIN_H__
 #define __NEWFNCTBREAKPOINTWIN_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 class NewFnctBreakpointWindow: public QWidget

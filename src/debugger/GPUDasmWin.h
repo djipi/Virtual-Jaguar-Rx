@@ -11,7 +11,7 @@
 #ifndef __GPUDASMBROWSER_H__
 #define __GPUDASMBROWSER_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 class GPUDasmWindow: public QWidget

@@ -11,7 +11,7 @@
 //#define BRK_REFRESHBUTTON				// Refresh button
 #define BRK_HITCOUNTS				// Support the hit count
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 

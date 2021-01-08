@@ -24,7 +24,7 @@
 #include "app.h"
 
 #include <SDL.h>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include "gamepad.h"
 #include "log.h"
 #include "mainwin.h"

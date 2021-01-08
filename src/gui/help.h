@@ -8,7 +8,7 @@
 #ifndef __HELP_H__
 #define __HELP_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 
 class HelpWindow: public QWidget
 {

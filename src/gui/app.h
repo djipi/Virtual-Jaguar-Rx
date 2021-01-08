@@ -9,7 +9,7 @@
 #define __APP_H__
 
 //Hrm. uh??? I thought this wasn't the way to do this stuff...???
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 
 // Forward declarations
 class MainWin;

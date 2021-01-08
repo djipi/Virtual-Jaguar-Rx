@@ -1,7 +1,7 @@
 #ifndef __CONTROLLERTAB_H__
 #define __CONTROLLERTAB_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 class ControllerWidget;

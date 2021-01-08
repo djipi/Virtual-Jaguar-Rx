@@ -11,7 +11,7 @@
 //#define AW_SUPPORTARRAY						// Support array
 //#define AW_SUPPORTSTRUCTURE					// Support structure
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 // Error code definitions

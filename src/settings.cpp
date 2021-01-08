@@ -15,7 +15,7 @@
 //
 
 #include "settings.h"
-#include <QSettings>
+#include <QtCore/QSettings>
 
 // Global variables
 

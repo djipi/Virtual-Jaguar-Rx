@@ -9,7 +9,7 @@
 
 //#define HA_LAYOUTTEXTS						// Use a layout with just texts
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 // Error code definitions

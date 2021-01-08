@@ -8,7 +8,7 @@
 #ifndef __VIDEOWIN_H__
 #define __VIDEOWIN_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <glwidget.h>
 
 class VideoOutputWindow : public QWidget

@@ -11,7 +11,7 @@
 //#define LOCAL_SUPPORTARRAY						// Support array
 //#define LOCAL_SUPPORTSTRUCTURE					// Support structure
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 // Error code definitions

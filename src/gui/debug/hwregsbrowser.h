@@ -7,7 +7,7 @@
 #ifndef __HWREGSBROWSER_H__
 #define __HWREGSBROWSER_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 #include "hwregsblitterbrowser.h"
 

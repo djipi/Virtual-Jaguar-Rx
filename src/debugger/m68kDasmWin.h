@@ -19,7 +19,7 @@
 #define MD_LAYOUTFILE	1					// Must display only the first filename
 #endif
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 class m68KDasmWindow: public QWidget

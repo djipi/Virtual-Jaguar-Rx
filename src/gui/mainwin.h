@@ -11,7 +11,7 @@
 #define __MAINWIN_H__
 
 //Hrm. uh??? I thought this wasn't the way to do this stuff...???
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include "tom.h"
 
 #define RING_BUFFER_SIZE 32

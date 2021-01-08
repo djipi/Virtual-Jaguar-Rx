@@ -7,7 +7,7 @@
 #ifndef __EMUSTATUS_H__
 #define __EMUSTATUS_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 class EmuStatusWindow : public QWidget

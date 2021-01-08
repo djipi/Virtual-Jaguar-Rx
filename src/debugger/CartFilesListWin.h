@@ -7,7 +7,7 @@
 #ifndef __CARTFILESLISTWIN_H__
 #define __CARTFILESLISTWIN_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 //

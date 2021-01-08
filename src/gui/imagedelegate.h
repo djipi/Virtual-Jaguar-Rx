@@ -5,7 +5,7 @@
 #ifndef __IMAGEDELEGATE_H__
 #define __IMAGEDELEGATE_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 
 class ImageDelegate: public QAbstractItemDelegate
 {

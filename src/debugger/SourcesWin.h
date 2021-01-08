@@ -11,7 +11,7 @@
 #ifndef __SOURCESWIN_H__
 #define __SOURCESWIN_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 //#include <stdint.h>
 
 class SourceCWindow;
