@@ -25,7 +25,7 @@
 #include "controllerwidget.h"
 #include "generaltab.h"
 #include "modelsbiostab.h"
-#include "KeyBindingsTab.h"
+#include "keybindingstab.h"
 #include "settings.h"
 
 

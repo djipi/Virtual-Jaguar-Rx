@@ -32,7 +32,6 @@
 #include "LEB128.h"
 #include "DWARFManager.h"
 
-
 // Definitions for debugging
 //#define DEBUG_NumCU			0x3				// CU number to debug or undefine it
 //#define DEBUG_VariableName	"sound_death"				// Variable name to look for or undefine it
@@ -156,7 +155,7 @@ typedef struct CUStruct
 	CUStruct_LineSrc *PtrUsedLinesSrc;				// Pointer to the used source lines list structure
 	char **PtrUsedLinesLoadSrc;						// Pointer lists to each used source line referenced by the CUStruct_LineSrc structure
 	size_t *PtrUsedNumLines;						// List of the number lines used
-	struct _stat _statbuf;							// File information
+	struct stat _statbuf;							// File information
 	DWARFstatus Status;								// File status
 }S_CUStruct;
 
@@ -170,7 +169,7 @@ Dwarf_Debug dbg;
 CUStruct *PtrCU;
 char **ListSearchPaths;
 size_t NbSearchPaths;
-struct _stat FileElfExeInfo;
+struct stat FileElfExeInfo;
 
 
 //
@@ -250,7 +249,7 @@ bool DWARFManager_Close(void)
 
 
 // Dwarf manager Elf init
-int	DWARFManager_ElfInit(Elf *ElfPtr, struct _stat FileElfInfo)
+int	DWARFManager_ElfInit(Elf *ElfPtr, struct stat FileElfInfo)
 {
 	if ((LibDwarf = dwarf_elf_init(ElfPtr, DW_DLC_READ, (Dwarf_Handler)DWARFManager_ErrorHandler, errarg, &dbg, &error)) == DW_DLV_OK)
 	{
@@ -478,10 +477,12 @@ void DWARFManager_InitDMI(void)
 									PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + strlen((const char *)ListSearchPaths[i]) + 2);
 #if defined(_WIN32)
 									sprintf(PtrCU[NbCU].PtrFullFilename, "%s\\%s", ListSearchPaths[i], PtrCU[NbCU].PtrSourceFilename);
+									if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rb"))
 #else
 									sprintf(PtrCU[NbCU].PtrFullFilename, "%s/%s", ListSearchPaths[i], PtrCU[NbCU].PtrSourceFilename);
+									SrcFile = fopen(PtrCU[NbCU].PtrFullFilename, "rb");
+									if (SrcFile == NULL)
 #endif
-									if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rb"))
 									{
 										PtrCU[NbCU].PtrSourceFileDirectory = (char *)realloc(PtrCU[NbCU].PtrSourceFileDirectory, strlen(ListSearchPaths[i]) + 1);
 										strcpy(PtrCU[NbCU].PtrSourceFileDirectory, ListSearchPaths[i]);
@@ -535,13 +536,18 @@ void DWARFManager_InitDMI(void)
 							}
 
 							// Get the source file information
-							if (!_stat(PtrCU[NbCU].PtrFullFilename, &PtrCU[NbCU]._statbuf))
+							if (!stat(PtrCU[NbCU].PtrFullFilename, &PtrCU[NbCU]._statbuf))
 							{
 								// check the time stamp with the executable
 								if (PtrCU[NbCU]._statbuf.st_mtime <= FileElfExeInfo.st_mtime)
 								{
 									// Open the source file as a binary file
+#if defined(_WIN32)
 									if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rb"))
+#else
+                                    SrcFile = fopen(PtrCU[NbCU].PtrFullFilename, "rb");
+									if (SrcFile == NULL)
+#endif
 									{
 										if (!fseek(SrcFile, 0, SEEK_END))
 										{
@@ -552,7 +558,11 @@ void DWARFManager_InitDMI(void)
 													if (PtrCU[NbCU].PtrLoadSrc = Ptr = Ptr1 = (char *)calloc(1, (PtrCU[NbCU].SizeLoadSrc + 2)))
 													{
 														// Read whole file
+#if defined(_WIN32)														
 														if (fread_s(PtrCU[NbCU].PtrLoadSrc, PtrCU[NbCU].SizeLoadSrc, PtrCU[NbCU].SizeLoadSrc, 1, SrcFile) != 1)
+#else
+														if (fread(PtrCU[NbCU].PtrLoadSrc, PtrCU[NbCU].SizeLoadSrc, 1, SrcFile) != 1)
+#endif
 														{
 															free(PtrCU[NbCU].PtrLoadSrc);
 															PtrCU[NbCU].PtrLoadSrc = NULL;

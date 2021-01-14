@@ -24,11 +24,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include "libelf/libelf.h"
-#include "libelf/gelf.h"
+#include "libelf.h"
+#include "gelf.h"
 #include "log.h"
 #include "ELFManager.h"
-#include "DwarfManager.h"
+#include "DWARFManager.h"
 #include "DBGManager.h"
 #include "HWLABELManager.h"
 #include "settings.h"
@@ -548,7 +548,7 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 			break;
 
 		case DBG_ATE_unsigned_char:
-			sprintf(value, "%u", (unsigned int(V.C)));
+			sprintf(value, "%u", (unsigned int) V.C);
 			break;
 
 		case DBG_ATE_ptr:

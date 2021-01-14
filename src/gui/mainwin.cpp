@@ -93,7 +93,7 @@
 //#include "debugger/VideoWin.h"
 //#include "debugger/DasmWin.h"
 #include "debugger/SourcesWin.h"
-#include "debugger/m68KDasmWin.h"
+#include "debugger/m68kDasmWin.h"
 #include "debugger/GPUDasmWin.h"
 #include "debugger/DSPDasmWin.h"
 #include "debugger/memory1browser.h"
@@ -2254,7 +2254,7 @@ void MainWin::WriteSettings(void)
 	// Write settings from the Debugger mode
 	settings.beginGroup("debugger");
 	settings.setValue("DisplayHWLabels", vjs.displayHWlabels);
-	settings.setValue("NbrDisasmLines", vjs.nbrdisasmlines);
+	settings.setValue("NbrDisasmLines", (qulonglong) vjs.nbrdisasmlines);
 	settings.setValue("DisasmOpcodes", vjs.disasmopcodes);
 	settings.setValue("displayFullSourceFilename", vjs.displayFullSourceFilename);
 	settings.setValue("ELFSectionsCheck", vjs.ELFSectionsCheck);

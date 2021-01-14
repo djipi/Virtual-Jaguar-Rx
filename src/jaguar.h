@@ -1,6 +1,7 @@
 #ifndef __JAGUAR_H__
 #define __JAGUAR_H__
 
+#include <stdlib.h>
 #include <stdint.h>
 #include "memory.h"							// For "UNKNOWN" enum
 

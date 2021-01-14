@@ -92,7 +92,7 @@ void DebuggerTab::SetSettings(void)
 // Load / Update the tabs dialog from the settings
 void DebuggerTab::GetSettings(void)
 {
-	QVariant v(vjs.nbrdisasmlines);
+	QVariant v((qulonglong) vjs.nbrdisasmlines);
 	nbrdisasmlines->setText(v.toString());
 	sourcefilesearchpaths->setText(vjs.sourcefilesearchPaths);
 	displayHWlabels->setChecked(vjs.displayHWlabels);

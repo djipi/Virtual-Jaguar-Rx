@@ -13,8 +13,8 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "libelf/libelf.h"
-#include "libelf/gelf.h"
+#include "libelf.h"
+#include "gelf.h"
 #include "log.h"
 #include "ELFManager.h"
 

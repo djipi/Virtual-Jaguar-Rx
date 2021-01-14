@@ -19,7 +19,7 @@ TARGET     = virtualjaguar
 CONFIG    += qt warn_on release
 # debug
 RESOURCES += src/gui/virtualjaguar.qrc
-LIBS      += -Lobj -Lsrc/m68000/obj -ljaguarcore -lz -lm68k -llibelf -llibdwarf -lelf
+LIBS      += -Lobj -Lsrc/m68000/obj -ljaguarcore -lz -lm68k -lelf -ldwarf
 QT        += opengl widgets
 
 # We stuff all the intermediate crap into obj/ so it won't confuse us mere
@@ -102,6 +102,7 @@ HEADERS = \
 	src/gui/profile.h \
 	src/gui/emustatus.h \
 	src/gui/debug/cpubrowser.h \
+	src/gui/debug/hwregsblitterbrowser.h \
 	src/gui/debug/m68kdasmbrowser.h \
 	src/gui/debug/memorybrowser.h \
 	src/gui/debug/opbrowser.h \
@@ -124,7 +125,7 @@ HEADERS = \
 	src/debugger/memory1browser.h \
 	src/debugger/heapallocatorbrowser.h \
 	src/debugger/BreakpointsWin.h \
-	src/debugger/VideoWin.h 
+	src/debugger/VideoWin.h \
 	src/debugger/FilesrcListWin.h \
 	src/debugger/callstackbrowser.h \
 	src/debugger/exceptionvectortablebrowser.h \
@@ -160,6 +161,7 @@ SOURCES = \
 	src/gui/profile.cpp \
 	src/gui/emustatus.cpp \
 	src/gui/debug/cpubrowser.cpp \
+	src/gui/debug/hwregsblitterbrowser.cpp \
 	src/gui/debug/m68kdasmbrowser.cpp \
 	src/gui/debug/memorybrowser.cpp \
 	src/gui/debug/opbrowser.cpp \
