@@ -25,6 +25,7 @@
 #define MAX_PATH _MAX_PATH		// Urgh.
 #endif
 #endif
+#include <stdlib.h>
 #include <stdint.h>
 
 #define MaxMemory1BrowserWindow		4

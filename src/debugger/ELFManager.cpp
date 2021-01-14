@@ -17,12 +17,12 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include "libelf/libelf.h"
-#include "libelf/gelf.h"
+#include "libelf.h"
+#include "gelf.h"
 #include "libdwarf.h"
 #include "log.h"
 #include "ELFManager.h"
-#include "DwarfManager.h"
+#include "DWARFManager.h"
 
 
 //#define LOG_SUPPORT					// Support log
@@ -147,7 +147,7 @@ void	ELFManager_Init(void)
 
 
 // ELF manager Dwarf Initialisation
-bool	ELFManager_DwarfInit(Elf *PtrElfMem, struct _stat FileElfInfo)
+bool	ELFManager_DwarfInit(Elf *PtrElfMem, struct stat FileElfInfo)
 {
 	return (ElfDwarf = (DWARFManager_ElfInit(PtrElfMem, FileElfInfo) == DW_DLV_OK) ? true : false);
 }

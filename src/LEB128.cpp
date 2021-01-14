@@ -1,4 +1,4 @@
-
+#include <stdlib.h>
 
 // Decode an unsigned LEB128
 // Algorithm from Appendix C of the DWARF 2, and 3, spec section "7.6"

@@ -37,8 +37,8 @@
 #include "universalhdr.h"
 #include "unzip.h"
 #include "zlib.h"
-#include "libelf/libelf.h"
-#include "libelf/gelf.h"
+#include "libelf.h"
+#include "gelf.h"
 #include "libdwarf.h"
 #include "debugger/ELFManager.h"
 #include "debugger/DBGManager.h"
@@ -150,7 +150,7 @@ bool JaguarLoadFile(char * path)
 	int	DBGType = DBG_NO_TYPE;
 	bool error;
 	int err;
-	struct _stat _statbuf;
+	struct stat _statbuf;
 
 	jaguarROMSize = JaguarLoadROM(buffer, path);
 
@@ -208,7 +208,7 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 			if ((elf_version(EV_CURRENT) != EV_NONE) && (ElfMem = ELFManager_MemOpen(PtrELFExe, jaguarROMSize)))
 			{
 				// get the file information
-				_stat(path, &_statbuf);
+				stat(path, &_statbuf);
 
 				if (ELFManager_DwarfInit(ElfMem, _statbuf))
 				{

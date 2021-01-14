@@ -18,7 +18,7 @@ typedef enum
 extern bool	DWARFManager_Reset(void);
 extern bool	DWARFManager_Close(void);
 extern void	DWARFManager_Init(void);
-extern int DWARFManager_ElfInit(Elf *ElfPtr, struct _stat FileElfInfo);
+extern int DWARFManager_ElfInit(Elf *ElfPtr, struct stat FileElfInfo);
 extern void DWARFManager_Set(size_t NbPathsInList, char **PtrListPaths);
 extern size_t DWARFManager_GetNbSources(void);
 
