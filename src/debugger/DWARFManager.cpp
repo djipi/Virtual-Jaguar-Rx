@@ -4,6 +4,7 @@
 // by Jean-Paul Mari
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
@@ -13,6 +14,7 @@
 // JPM   Aug./2019  Added new functions to handle DWARF information, full filename fix
 // JPM   Mar./2020  Fix a random crash when reading the source lines information
 // JPM   Aug./2020  Added a source code file date check when reading DWARF information
+//  RG   Jan./2021  Linux build fixes
 //
 
 // To Do

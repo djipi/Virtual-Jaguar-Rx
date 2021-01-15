@@ -1,14 +1,16 @@
 //
-// ELFManager.cpp: HW Label manager
+// HWLABELManager.cpp: HW Label manager
 //
 // by Jean-Paul Mari
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
 // JPM  02/08/2017  Created this file
 // JPM  02/08/2017  HW Label support
+//  RG   Jan./2021  Linux build fixes
 //
 
 #include <stdlib.h>

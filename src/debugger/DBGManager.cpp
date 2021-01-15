@@ -4,6 +4,7 @@
 // by Jean-Paul Mari
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
@@ -14,6 +15,7 @@
 // JPM   Oct./2018  Cosmetic changes, added source file search paths, and ELF function name
 // JPM   Aug./2019  Added new functions mainly for source text lines
 // JPM  Sept./2019  Support the unsigned/signed short type
+//  RG   Jan./2021  Linux build fixes
 //
 
 // To Do

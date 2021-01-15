@@ -4,6 +4,7 @@
 // by Jean-Paul Mari
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
@@ -11,6 +12,7 @@
 // JPM  07/13/2017  ELF DWARF format support improvement
 // JPM  10/20/2018  Added function name support from ELF structure
 // JPM  03/13/2020  Added ELF & DWARF .debug* types
+//  RG   Jan./2021  Linux build fixes
 //
 
 #include <stdlib.h>

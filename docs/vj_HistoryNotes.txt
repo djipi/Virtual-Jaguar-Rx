@@ -27,6 +27,8 @@ Release 5 (TBA)
 18) Show the SR value as a readable form in the CPU browser
 19) Potential fix to compile on Linux
 -- Added the relative directory path for the Qt include files
+20) Merge the Linux build fixes from @richard42
+-- Jaguar core's makefile and Qt pro file updates, fix filenames case sensitive & fixes for Linux
 
 Release 4a (15th August 2019)
 -----------------------------

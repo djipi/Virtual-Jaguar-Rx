@@ -2,6 +2,7 @@
 // settings.h: Header file
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
@@ -9,6 +10,7 @@
 // JPM  Sept./2018  Added the new Models and BIOS handler, and a screenshot settings
 // JPM  10/10/2018  Added search paths in settings
 // JPM  04/06/2019  Added ELF sections check
+//  RG   Jan./2021  Linux build fix
 //
 
 #ifndef __SETTINGS_H__

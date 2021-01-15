@@ -4,11 +4,13 @@
 // by Jean-Paul Mari
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JPM  11/03/2017  Created this file
 // JPM  Sept./2018  Added a status bar and better status report, and set information values in a tab
+//  RG   Jan./2021  Linux build fixes
 //
 
 // STILL TO DO:

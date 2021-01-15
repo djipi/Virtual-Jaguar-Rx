@@ -7,6 +7,7 @@
 //
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
@@ -18,6 +19,7 @@
 // JPM  04/06/2019  Added ELF sections check
 // JPM  03/12/2020  Added ELF section types check and new error messages
 // JPM   Aug./2020  ELF executable file information
+//  RG   Jan./2021  Linux build fixes
 //
 
 #include "file.h"

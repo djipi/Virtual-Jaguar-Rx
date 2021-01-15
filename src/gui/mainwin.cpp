@@ -5,6 +5,8 @@
 //
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
+
 //
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
@@ -25,6 +27,7 @@
 // JPM  April/2019  Added ELF sections check, added a save memory dump
 // JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only, added a HW registers browser and source level tracing
 // JPM  Marc./2020  Added the step over for source level tracing
+//  RG   Jan./2021  Linux build fixes
 //
 
 // FIXED:

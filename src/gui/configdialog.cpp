@@ -6,6 +6,7 @@
 //
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
@@ -16,6 +17,7 @@
 // JPM  06/19/2016  Soft debugger support
 // JPM  09/  /2017  Added a Keybindings tab
 // JPM  09/03/2018  Added a Models & Bios tab
+//  RG   Jan./2021  Linux build fix
 //
 
 #include "configdialog.h"
