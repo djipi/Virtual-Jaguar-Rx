@@ -1093,13 +1093,15 @@ void DWARFManager_InitDMI(void)
 							{
 								if (Ptr = DWARFManager_GetLineSrcFromNumLine(PtrCU[NbCU].PtrLoadSrc, (j + 1)))
 								{
+#ifndef CONVERT_QT_HML
+									strcpy(PtrCU[NbCU].PtrLinesLoadSrc[j], Ptr);
+#else
 									size_t i = 0;
 
 									while (*Ptr)
 									{
 										switch (*Ptr)
 										{
-#ifdef CONVERT_QT_HML
 										case 9:
 											strcat(PtrCU[NbCU].PtrLinesLoadSrc[j], "&nbsp;");
 											i += 6;
@@ -1126,13 +1128,13 @@ void DWARFManager_InitDMI(void)
 											i += strlen("&quot;");
 											break;
 #endif
-#endif
 										default:
 											PtrCU[NbCU].PtrLinesLoadSrc[j][i++] = *Ptr;
 											break;
 										}
 										Ptr++;
 									}
+#endif
 								}
 								PtrCU[NbCU].PtrLinesLoadSrc[j] = (char *)realloc(PtrCU[NbCU].PtrLinesLoadSrc[j], strlen(PtrCU[NbCU].PtrLinesLoadSrc[j]) + 1);
 							}
