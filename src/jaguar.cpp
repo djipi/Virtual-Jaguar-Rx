@@ -17,6 +17,7 @@
 // JPM  10/13/2018  Added breakpoints features
 // JPM   Aug./2019  Fix specific breakpoint for ROM cartridge or unknown memory location writing; added a specific breakpoint for the M68K illegal & unimplemented instruction, unknown exceptions and address error exceptions
 // JPM   Aug./2019  Fix potential emulator freeze after an exception has occured
+// JPM   Feb./2021  Added a specific breakpoint for the M68K bus error exception, and a M68K exception catch detection
 //
 
 
@@ -1462,10 +1463,14 @@ unsigned int m68k_read_memory_32(unsigned int address)
 	//uint32_t retVal = 0;
 
 	// check exception vectors access
-	if ((address >= 0x8) && (address <= 0x7c))
+	if (vjs.allowM68KExceptionCatch && (address >= 0x8) && (address <= 0x7c))
 	{
 		switch (address)
 		{
+		case 0x08:
+			m68k_read_exception_vector(address, "Bus error");
+			break;
+
 		case 0x0c:
 			m68k_read_exception_vector(address, "Address error");
 			break;

@@ -1952,6 +1952,7 @@ void MainWin::ReadSettings(void)
 	strcpy(vjs.absROMPath, settings.value("DefaultABS", "").toString().toUtf8().data());
 	vjs.refresh = settings.value("refresh", 60).toUInt();
 	vjs.allowWritesToROM = settings.value("writeROM", false).toBool();
+	vjs.allowM68KExceptionCatch = settings.value("M68KExceptionCatch", false).toBool();
 	settings.endGroup();
 
 	// Read settings from the Keybindings
@@ -2252,6 +2253,7 @@ void MainWin::WriteSettings(void)
 	settings.setValue("DefaultROM", vjs.alpineROMPath);
 	settings.setValue("DefaultABS", vjs.absROMPath);
 	settings.setValue("writeROM", vjs.allowWritesToROM);
+	settings.setValue("M68KExceptionCatch", vjs.allowM68KExceptionCatch);
 	settings.endGroup();
 
 	// Write settings from the Debugger mode

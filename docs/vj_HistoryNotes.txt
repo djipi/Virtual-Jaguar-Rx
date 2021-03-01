@@ -29,6 +29,9 @@ Release 5 (TBA)
 -- Added the relative directory path for the Qt include files
 20) Merge the Linux build fixes from @richard42
 -- Jaguar core's makefile and Qt pro file updates, fix filenames case sensitive & fixes for Linux
+21) Updated the M68K exception catch
+-- Added a M68K exception catch check in the Alpine tab settings
+-- Added a specific breakpoint for the M68K bus error exception
 
 Release 4a (15th August 2019)
 -----------------------------

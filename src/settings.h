@@ -79,6 +79,7 @@ struct VJSettings
 	uint32_t frameSkip;
 	uint32_t renderType;
 	uint32_t refresh;
+	bool allowM68KExceptionCatch;								// Allow M68K exception catch
 	bool allowWritesToROM;										// Allow writing to ROM cartdridge
 	uint32_t biosType;											// Bios type used
 	uint32_t jaguarModel;										// Jaguar model
