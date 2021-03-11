@@ -23,15 +23,15 @@ Release 5 (TBA)
 15) Remove Visual Studio 2015 support
 16) Work around fix for a compilation error on Linux
 -- EEPROM directory creation allowed only for Windows at the moment
-17) Project has switched to libdwarf 20201201 library 64bits for VS 2017
-18) Show the SR value as a readable form in the CPU browser
-19) Potential fix to compile on Linux
+17) Show the SR value as a readable form in the CPU browser
+18) Potential fix to compile on Linux
 -- Added the relative directory path for the Qt include files
-20) Merge the Linux build fixes from @richard42
+19) Merge the Linux build fixes from @richard42
 -- Jaguar core's makefile and Qt pro file updates, fix filenames case sensitive & fixes for Linux
-21) Updated the M68K exception catch
+20) Updated the M68K exception catch
 -- Added a M68K exception catch check in the Alpine tab settings
 -- Added a specific breakpoint for the M68K bus error exception
+21) Project has switched to libdwarf 20210305 library 64bits for VS 2017
 
 Release 4a (15th August 2019)
 -----------------------------
@@ -274,7 +274,7 @@ Project information
 1) Code based on the Shamus Hammons source code available via Gethub by the 12th September 2017 (2.1.3 Final)
 2) Visual Studio 2017 project support for 64 bits
 3) libelf 0.8.13 library 64bits for VS 2017
-4) libdwarf 20201201 library 64bits for VS 2017
+4) libdwarf 20210305 library 64bits for VS 2017
 5) Qt 5.12.0 library 64bits for VS 2017
 6) Zlib 1.2.11 library 64bits for VS 2017
 7) SDL 1.2.15 library 64bits for VS 2017
