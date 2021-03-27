@@ -32,6 +32,7 @@ Release 5 (TBA)
 -- Added a M68K exception catch check in the Alpine tab settings
 -- Added a specific breakpoint for the M68K bus error exception
 21) Project has switched to libdwarf 20210305 library 64bits for VS 2017
+22) Breakpoint list window is now refreshed after a new breakpoint is set
 
 Release 4a (15th August 2019)
 -----------------------------

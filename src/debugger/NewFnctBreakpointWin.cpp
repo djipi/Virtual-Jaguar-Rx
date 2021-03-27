@@ -8,6 +8,7 @@
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JPM  10/19/2018  Created this file
+// JPM  March/2021  Breakpoint list window refresh
 //
 
 // STILL TO DO:
@@ -40,6 +41,7 @@ add(new QPushButton(tr("Add")))
 	setLayout(layout);
 
 	connect(add, SIGNAL(clicked()), this, SLOT(AddBreakpointAddress()));
+	connect(address, SIGNAL(cursorPositionChanged(int, int)), this, SLOT(SelectBreakpointAddress()));
 }
 
 
@@ -60,6 +62,19 @@ void NewFnctBreakpointWindow::keyPressEvent(QKeyEvent * e)
 }
 
 
+//
+void NewFnctBreakpointWindow::SetFnctBreakpointWin(BreakpointsWindow* BpW)
+{
+	BPWin = BpW;
+}
+
+
+void NewFnctBreakpointWindow::SelectBreakpointAddress(void)
+{
+	address->setStyleSheet("color: black");
+}
+
+
 // Add a breakpoint to the address
 // Address can be an hexa, decimal or a symbol name
 void NewFnctBreakpointWindow::AddBreakpointAddress(void)
@@ -71,7 +86,6 @@ void NewFnctBreakpointWindow::AddBreakpointAddress(void)
 	S_BrkInfo Brk;
 
 	memset(&Brk, 0, sizeof(Brk));
-	QPalette p = address->palette();
 	newAddress = address->text();
 
 	if ((len = newAddress.size()))
@@ -105,21 +119,28 @@ void NewFnctBreakpointWindow::AddBreakpointAddress(void)
 			Brk.Adr = adr;
 
 			// Add the breakpoint
-			if (m68k_brk_add(&Brk))
+			if (!m68k_brk_add(&Brk))
 			{
-				p.setColor(QPalette::Text, Qt::black);
+				address->setStyleSheet("color: green");
 			}
 			else
 			{
-				p.setColor(QPalette::Text, Qt::darkYellow);
+				address->setText("");
 			}
 		}
 		else
 		{
 			// Address is not valid
-			p.setColor(QPalette::Text, Qt::red);
+			address->setStyleSheet("color: red");
 		}
 
-		address->setPalette(p);
+		// update the breakpoint functions window
+		BPWin->RefreshContents();
 	}
+}
+
+
+//
+NewFnctBreakpointWindow::~NewFnctBreakpointWindow()
+{
 }

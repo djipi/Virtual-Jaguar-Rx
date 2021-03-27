@@ -1563,6 +1563,7 @@ void MainWin::DisableAllBreakpoints(void)
 // Open, or display, the new breakpoint function window
 void MainWin::ShowNewFunctionBreakpointWin(void)
 {
+	NewFunctionBreakpointWin->SetFnctBreakpointWin(BreakpointsWin);
 	NewFunctionBreakpointWin->show();
 	ShowBreakpointsWin();
 }
