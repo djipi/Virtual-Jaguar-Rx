@@ -36,8 +36,8 @@ bool JaguarInterruptHandlerIsValid(uint32_t i);
 void JaguarDasm(uint32_t offset, uint32_t qt);
 
 void JaguarExecuteNew(void);
-void	JaguarStepInto(void);
-void	JaguarStepOver(int depth);
+int JaguarStepInto(void);
+int JaguarStepOver(int depth);
 
 // Exports from JAGUAR.CPP
 

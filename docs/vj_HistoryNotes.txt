@@ -33,6 +33,8 @@ Release 5 (TBA)
 -- Added a specific breakpoint for the M68K bus error exception
 21) Project has switched to libdwarf 20210305 library 64bits for VS 2017
 22) Breakpoint list window is now refreshed after a new breakpoint is set
+23) Handle number of M68K cycles used when tracing in debugger mode
+-- The cycles are displayed in the emulator status window
 
 Release 4a (15th August 2019)
 -----------------------------

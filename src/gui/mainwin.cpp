@@ -28,6 +28,7 @@
 // JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only, added a HW registers browser and source level tracing
 // JPM  Marc./2020  Added the step over for source level tracing
 //  RG   Jan./2021  Linux build fixes
+// JPM   Apr./2021  Handle number of M68K cycles used in tracing mode
 //
 
 // FIXED:
@@ -1353,6 +1354,7 @@ void MainWin::ToggleRunState(void)
 		cpuBrowseWin->UnholdBPM();
 	}
 
+	emuStatusWin->ResetM68KCycles();
 	// Pause/unpause any running/non-running threads...
 	DACPauseAudioThread(!running);
 }
@@ -1591,12 +1593,12 @@ void MainWin::DebuggerTraceStepInto(void)
 	{
 		while (!SourcesWin->CheckChangeLine())
 		{
-			JaguarStepInto();
+			emuStatusWin->UpdateM68KCycles(JaguarStepInto());
 		}
 	}
 	else
 	{
-		JaguarStepInto();
+		emuStatusWin->UpdateM68KCycles(JaguarStepInto());
 	}
 
 	videoWidget->updateGL();
@@ -1621,6 +1623,7 @@ void MainWin::DebuggerRestart(void)
 	dasmtabWidget->setCurrentIndex(1);		// set focus on the disasm M68K tab
 	m68k_set_reg(M68K_REG_A6, 0);
 	m68k_brk_hitcounts_reset();
+	emuStatusWin->ResetM68KCycles();
 	bpmHitCounts = 0;
 	DebuggerResetWindows();
 	CommonResetWindows();
@@ -1641,12 +1644,12 @@ void MainWin::DebuggerTraceStepOver(void)
 	{
 		while (!SourcesWin->CheckChangeLine())
 		{
-			JaguarStepOver(0);
+			emuStatusWin->UpdateM68KCycles(JaguarStepOver(0));
 		}
 	}
 	else
 	{
-		JaguarStepOver(0);
+		emuStatusWin->UpdateM68KCycles(JaguarStepOver(0));
 	}
 
 	videoWidget->updateGL();

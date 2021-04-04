@@ -18,6 +18,7 @@
 // JPM   Aug./2019  Fix specific breakpoint for ROM cartridge or unknown memory location writing; added a specific breakpoint for the M68K illegal & unimplemented instruction, unknown exceptions and address error exceptions
 // JPM   Aug./2019  Fix potential emulator freeze after an exception has occured
 // JPM   Feb./2021  Added a specific breakpoint for the M68K bus error exception, and a M68K exception catch detection
+// JPM   Apr./2021  Keep number of M68K cycles used in tracing mode
 //
 
 
@@ -2609,14 +2610,16 @@ void JaguarExecuteNew(void)
 
 
 // Step over function
-void	JaguarStepOver(int depth)
+int JaguarStepOver(int depth)
 {
 	bool exit;
+	int cycles;
 	//bool case55 = false;
 	//uint32_t m68kSR;
 
 	if (!depth)
 	{
+		cycles = 0;
 		exit = true;
 	}
 	else
@@ -2626,7 +2629,7 @@ void	JaguarStepOver(int depth)
 
 	do
 	{
-		JaguarStepInto();
+		cycles += JaguarStepInto();
 
 		switch (M68KGetCurrentOpcodeFamily())
 		{
@@ -2663,7 +2666,7 @@ void	JaguarStepOver(int depth)
 			// bsr & jsr
 		case 54:
 		case 52:
-			JaguarStepOver(depth+1);
+			cycles += JaguarStepOver(depth+1);
 			//if (depth)
 			//{
 			//	exit = false;
@@ -2683,17 +2686,19 @@ void	JaguarStepOver(int depth)
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Jaguar Step Over function !!!")
 #else
-	#warning "!!! Need to verify the Jaguar Step Over function !!!"
+#warning "!!! Need to verify the Jaguar Step Over function !!!"
 #endif // _MSC_VER
+	return cycles;
 }
 
 
 // Step into function
-void	JaguarStepInto(void)
+int	JaguarStepInto(void)
 {
+	int cycles;
 	//	double timeToNextEvent = GetTimeToNextEvent();
 
-	m68k_execute(USEC_TO_M68K_CYCLES(0));
+	cycles = m68k_execute(USEC_TO_M68K_CYCLES(0));
 //	m68k_execute(USEC_TO_M68K_CYCLES(timeToNextEvent));
 
 	if (vjs.GPUEnabled)
@@ -2705,6 +2710,7 @@ void	JaguarStepInto(void)
 #else
 #warning "!!! Need to verify the Jaguar Step Into function !!!"
 #endif // _MSC_VER
+		return cycles;
 }
 
 
