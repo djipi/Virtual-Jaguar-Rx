@@ -2612,20 +2612,20 @@ void JaguarExecuteNew(void)
 // Step over function
 int JaguarStepOver(int depth)
 {
-	bool exit;
-	int cycles;
+	bool exit = !depth;
+	int cycles = 0;
 	//bool case55 = false;
 	//uint32_t m68kSR;
 
-	if (!depth)
-	{
-		cycles = 0;
-		exit = true;
-	}
-	else
-	{
-		exit = false;
-	}
+//	if (!depth)
+//	{
+//		cycles = 0;
+//		exit = true;
+//	}
+//	else
+//	{
+//		exit = false;
+//	}
 
 	do
 	{
