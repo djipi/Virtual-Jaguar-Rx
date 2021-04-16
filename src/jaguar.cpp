@@ -2681,7 +2681,7 @@ int JaguarStepOver(int depth)
 			break;
 		}
 	}
-	while (!exit);
+	while (!exit && !M68KDebugHaltStatus());
 
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Jaguar Step Over function !!!")
