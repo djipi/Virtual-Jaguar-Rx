@@ -36,7 +36,8 @@ Release 5 (TBA)
 23) Handle number of M68K cycles used when tracing in debugger mode
 -- The cycles are displayed in the emulator status window
 24) Improve the DWARF source line number reporting
-25) Added a #line in the call stack browser window
+25) Added a #line in the call stack window
+26) Add a search feature in the all watches window
 
 Release 4a (15th August 2019)
 -----------------------------

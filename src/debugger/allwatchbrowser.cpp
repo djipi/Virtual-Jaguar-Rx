@@ -37,6 +37,8 @@
 // 
 AllWatchBrowserWindow::AllWatchBrowserWindow(QWidget * parent/*= 0*/) : QWidget(parent, Qt::Dialog),
 layout(new QVBoxLayout),
+symbol(new QLineEdit),
+search(new QPushButton(tr("Search"))),
 #ifdef AW_LAYOUTTEXTS
 text(new QTextBrowser),
 #else
@@ -44,12 +46,13 @@ TableView(new QTableView),
 model(new QStandardItemModel),
 #endif
 NbWatch(0),
+CurrentWatch(0),
 statusbar(new QStatusBar),
 PtrWatchInfo(NULL)
 {
 	setWindowTitle(tr("All Watch"));
 
-	// Set the font
+	// set the font
 	QFont fixedFont("Lucida Console", 8, QFont::Normal);
 	fixedFont.setStyleHint(QFont::TypeWriter);
 
@@ -73,9 +76,20 @@ PtrWatchInfo(NULL)
 	layout->addWidget(TableView);
 #endif
 
-	// Status bar
+	// search bar
+	QHBoxLayout * hbox1 = new QHBoxLayout;
+	symbol->setPlaceholderText("symbol name");
+	hbox1->addWidget(symbol);
+	hbox1->addWidget(search);
+	layout->addLayout(hbox1);
+
+	// status bar
 	layout->addWidget(statusbar);
 	setLayout(layout);
+
+	// connect slot
+	connect(search, SIGNAL(clicked()), this, SLOT(SearchSymbol()));
+	connect(symbol, SIGNAL(cursorPositionChanged(int, int)), this, SLOT(SelectSearchSymbol()));
 }
 
 
@@ -83,6 +97,67 @@ PtrWatchInfo(NULL)
 AllWatchBrowserWindow::~AllWatchBrowserWindow(void)
 {
 	Reset();
+}
+
+
+// Search the symbol in the watch list
+void AllWatchBrowserWindow::SearchSymbol(void)
+{
+	bool found = false;
+	size_t i;
+
+	// user cannot enter symbol to allow the search
+	symbol->setDisabled(true);
+
+	// look for the symbol in the watch list
+	for (i = AW_STARTNUMVARIABLE; (i < NbWatch) && !found; i++)
+	{
+		// check symbol presence
+		if (!symbol->text().compare(PtrWatchInfo[i].PtrVariableName, Qt::CaseSensitive))
+		{
+			found = true;
+		}
+	}
+
+	if (found)
+	{
+		// remove previous highlight
+		if (CurrentWatch)
+		{
+			model->item((int)(CurrentWatch - 1), 0)->setBackground(QColor(255, 255, 255));
+			model->item((int)(CurrentWatch - 1), 1)->setBackground(QColor(255, 255, 255));
+			model->item((int)(CurrentWatch - 1), 2)->setBackground(QColor(255, 255, 255));
+		}
+		// Get the slider maximum position
+		int MaxSlider = TableView->verticalScrollBar()->maximum();		
+		// Number of items displayed in the scroll bar slider
+		int DeltaSlider = (int)NbWatch - MaxSlider;
+		// set the scroll bar
+		TableView->verticalScrollBar()->setSliderPosition((int)i - (DeltaSlider / 2) - 1);
+		// highlight watch symbol
+		CurrentWatch = i;
+		model->item((int)(CurrentWatch - 1), 0)->setBackground(QColor(0xff, 0xfa, 0xcd));
+		model->item((int)(CurrentWatch - 1), 1)->setBackground(QColor(0xff, 0xfa, 0xcd));
+		model->item((int)(CurrentWatch - 1), 2)->setBackground(QColor(0xff, 0xfa, 0xcd));
+		// allow new symbol
+		symbol->setText("");
+	}
+	else
+	{
+		// invalid symbol
+		symbol->setStyleSheet("color: red");
+	}
+
+	// user can enter a symbol
+	symbol->setEnabled(true);
+	symbol->setFocus();
+}
+
+
+//
+void AllWatchBrowserWindow::SelectSearchSymbol(void)
+{
+	symbol->setStyleSheet("color: black");
 }
 
 
@@ -205,12 +280,21 @@ void AllWatchBrowserWindow::RefreshContents(void)
 }
 
 
-// 
+//  Handle keyboard event
 void AllWatchBrowserWindow::keyPressEvent(QKeyEvent * e)
 {
+	// ESC to close / hide the window
 	if (e->key() == Qt::Key_Escape)
 	{
 		hide();
+	}
+	else
+	{
+		// select the 
+		if (e->key() == Qt::Key_Return)
+		{
+			SearchSymbol();
+		}
 	}
 }
 
