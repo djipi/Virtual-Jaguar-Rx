@@ -49,11 +49,12 @@ layout(new QVBoxLayout)
 	layout->addWidget(text);
 #else
 	// Set the new layout with proper identation and readibility
-	model->setColumnCount(4);
+	model->setColumnCount(5);
 	model->setHeaderData(0, Qt::Horizontal, QObject::tr("Function"));
-	model->setHeaderData(1, Qt::Horizontal, QObject::tr("Line"));
-	model->setHeaderData(2, Qt::Horizontal, QObject::tr("Return address"));
-	model->setHeaderData(3, Qt::Horizontal, QObject::tr("Filename"));
+	model->setHeaderData(1, Qt::Horizontal, QObject::tr("#Line"));
+	model->setHeaderData(2, Qt::Horizontal, QObject::tr("Line"));
+	model->setHeaderData(3, Qt::Horizontal, QObject::tr("Return address"));
+	model->setHeaderData(4, Qt::Horizontal, QObject::tr("Filename"));
 	// Information table
 	TableView->setModel(model);
 	TableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -118,16 +119,19 @@ void CallStackBrowserWindow::RefreshContents(void)
 					model->insertRow(NbRaw);
 					// display the function name
 					model->setItem(NbRaw, 0, new QStandardItem(QString("%1").arg((Name = DBGManager_GetFunctionName(ret)) ? Name : "(N/A)")));
+					// display the line number
+					sprintf(msg, "%zi", DBGManager_GetNumLineFromAdr(ret, DBG_NO_TAG));
+					model->setItem(NbRaw, 1, new QStandardItem(QString("%1").arg((msg[0] != '0') ? msg : "(N/A)")));
 					// display the called line
 					FunctionName = QString(Name = DBGManager_GetLineSrcFromAdr(ret, DBG_NO_TAG));
 					//FunctionName.replace("&nbsp;", " ");
 					FunctionName = FunctionName.trimmed();
-					model->setItem(NbRaw, 1, new QStandardItem(QString("%1").arg(Name ? FunctionName : "(N/A)")));
+					model->setItem(NbRaw, 2, new QStandardItem(QString("%1").arg(Name ? FunctionName : "(N/A)")));
 					// display the return address
 					sprintf(msg, "0x%06X", ret);
-					model->setItem(NbRaw, 2, new QStandardItem(QString("%1").arg(msg)));
+					model->setItem(NbRaw, 3, new QStandardItem(QString("%1").arg(msg)));
 					// display the source filename from called source line
-					model->setItem(NbRaw++, 3, new QStandardItem(QString("%1").arg(((Name = DBGManager_GetFullSourceFilenameFromAdr(ret, &FilenameStatus)) && !FilenameStatus) ? Name : "(N/A)")));
+					model->setItem(NbRaw++, 4, new QStandardItem(QString("%1").arg(((Name = DBGManager_GetFullSourceFilenameFromAdr(ret, &FilenameStatus)) && !FilenameStatus) ? Name : "(N/A)")));
 #endif
 				}
 				else
