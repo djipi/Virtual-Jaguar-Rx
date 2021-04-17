@@ -1879,9 +1879,16 @@ size_t DWARFManager_GetNumLineFromAdr(size_t Adr, size_t Tag)
 					{
 						for (size_t k = 0; k < PtrCU[i].PtrSubProgs[j].NbLinesSrc; k++)
 						{
-							if ((PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].StartPC == Adr) && (!Tag || (PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].Tag == Tag)))
+							if (PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].StartPC <= Adr)
 							{
-								return PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].NumLineSrc;
+								if ((PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].StartPC == Adr) && (!Tag || (PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].Tag == Tag)))
+								{
+									return PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].NumLineSrc;
+								}
+							}
+							else
+							{
+								return PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k - 1].NumLineSrc;
 							}
 						}
 					}
