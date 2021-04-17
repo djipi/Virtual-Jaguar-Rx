@@ -48,6 +48,10 @@ class AllWatchBrowserWindow: public QWidget
 	protected:
 		void keyPressEvent(QKeyEvent *);
 
+	protected slots:
+		void SearchSymbol(void);
+		void SelectSearchSymbol(void);
+
 	private:
 		QVBoxLayout *layout;
 #ifdef AW_LAYOUTTEXTS
@@ -59,6 +63,9 @@ class AllWatchBrowserWindow: public QWidget
 		QStatusBar *statusbar;
 		WatchInfo *PtrWatchInfo;
 		size_t NbWatch;
+		QPushButton *search;
+		QLineEdit* symbol;
+		size_t CurrentWatch;
 };
 
 #endif	// __ALLWATCHBROWSER_H__
