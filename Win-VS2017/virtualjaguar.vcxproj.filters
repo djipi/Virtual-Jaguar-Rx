@@ -205,6 +205,9 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_VideoWin.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+	<ClCompile Include="GeneratedFiles\Release\moc_VideoWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_stackbrowser.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>

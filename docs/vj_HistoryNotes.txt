@@ -38,6 +38,7 @@ Release 5 (TBA)
 24) Improve the DWARF source line number reporting
 25) Added a #line in the call stack window
 26) Add a search feature in the all watches window
+27) Added video output display in a specific window
 
 Release 4a (15th August 2019)
 -----------------------------

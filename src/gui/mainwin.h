@@ -22,7 +22,7 @@ class GLWidget;
 class AboutWindow;
 class HelpWindow;
 class FilePickerWindow;
-//class VideoOutputWindow;
+class VideoOutputWindow;
 //class DasmWindow;
 class EmuStatusWindow;
 
@@ -117,10 +117,8 @@ class MainWin: public QMainWindow
 		void DisableAllBreakpoints(void);
 		void ShowSaveDumpAsWin(void);
 		void SelectdasmtabWidget(const int);
-#if 0
 		void ShowVideoOutputWin(void);
-		void ShowDasmWin(void);
-#endif
+		//void ShowDasmWin(void);
 		void ShowCartFilesListWin(void);
 		// Alpine
 		void ShowMemoryBrowserWin(void);
@@ -156,7 +154,7 @@ class MainWin: public QMainWindow
 		M68KDasmBrowserWindow *m68kDasmBrowseWin;
 		RISCDasmBrowserWindow *riscDasmBrowseWin;
 		HWRegsBrowserWindow *hwRegsBrowseWin;
-		//VideoOutputWindow *VideoOutputWin;
+		VideoOutputWindow *VideoOutputWin;
 		AllWatchBrowserWindow *allWatchBrowseWin;
 		LocalBrowserWindow *LocalBrowseWin;
 		CallStackBrowserWindow *CallStackBrowseWin;
@@ -248,7 +246,7 @@ class MainWin: public QMainWindow
 		QAction *traceStepOverAct;
 		QAction *traceStepIntoAct;
 		QAction *restartAct;
-		//QAction *VideoOutputAct;
+		QAction *VideoOutputAct;
 		QAction *heapallocatorBrowseAct;
 		QAction *allWatchBrowseAct;
 		QAction *LocalBrowseAct;

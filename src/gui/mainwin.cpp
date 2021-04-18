@@ -28,7 +28,7 @@
 // JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only, added a HW registers browser and source level tracing
 // JPM  Marc./2020  Added the step over for source level tracing
 //  RG   Jan./2021  Linux build fixes
-// JPM   Apr./2021  Handle number of M68K cycles used in tracing mode
+// JPM   Apr./2021  Handle number of M68K cycles used in tracing mode, added video output display in a window
 //
 
 // FIXED:
@@ -94,7 +94,7 @@
 #include "m68000/m68kinterface.h"
 
 #include "debugger/DBGManager.h"
-//#include "debugger/VideoWin.h"
+#include "debugger/VideoWin.h"
 //#include "debugger/DasmWin.h"
 #include "debugger/SourcesWin.h"
 #include "debugger/m68kDasmWin.h"
@@ -206,7 +206,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	// Windows debugger mode features
 	if (vjs.softTypeDebugger)
 	{
-		//VideoOutputWin = new VideoOutputWindow(this);
+		VideoOutputWin = new VideoOutputWindow(this);
+		//VideoOutputWin->show();
 		//VideoOutputWin->setCentralWidget()
 		//DasmWin = new DasmWindow();
 		//DasmWin = new DasmWindow(this);
@@ -442,9 +443,9 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		saveDumpAsAct->setDisabled(false);
 		connect(saveDumpAsAct, SIGNAL(triggered()), this, SLOT(ShowSaveDumpAsWin()));
 
-		//VideoOutputAct = new QAction(tr("Output Video"), this);
-		//VideoOutputAct->setStatusTip(tr("Shows the output video window"));
-		//connect(VideoOutputAct, SIGNAL(triggered()), this, SLOT(ShowVideoOutputWin()));
+		VideoOutputAct = new QAction(tr("Output Video"), this);
+		VideoOutputAct->setStatusTip(tr("Shows the output video window"));
+		connect(VideoOutputAct, SIGNAL(triggered()), this, SLOT(ShowVideoOutputWin()));
 
 		//DasmAct = new QAction(tr("Disassembly"), this);
 		//DasmAct->setStatusTip(tr("Shows the disassembly window"));
@@ -581,11 +582,9 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugWindowExceptionMenu = debugWindowsMenu->addMenu(tr("&Exception"));
 			debugWindowExceptionMenu->addAction(exceptionVectorTableBrowseAct);
 			debugWindowsMenu->addSeparator();
-#if 0
 			debugWindowOutputMenu = debugWindowsMenu->addMenu(tr("&Output"));
 			debugWindowOutputMenu->addAction(VideoOutputAct);
 			debugWindowsMenu->addSeparator();
-#endif
 			debugWindowsWatchMenu = debugWindowsMenu->addMenu(tr("&Watch"));
 			debugWindowsWatchMenu->addAction(allWatchBrowseAct);
 			debugWindowsMenu->addAction(LocalBrowseAct);
@@ -1189,6 +1188,7 @@ static uint32_t refresh = 0;
 
 	//if (!vjs.softTypeDebugger)
 		videoWidget->updateGL();
+		//vjs.softTypeDebugger ? VideoOutputWin->RefreshContents(videoWidget) : NULL;
 
 	// FPS handling
 	// Approach: We use a ring buffer to store times (in ms) over a given
@@ -1332,6 +1332,7 @@ void MainWin::ToggleRunState(void)
 			}
 
 			videoWidget->updateGL();
+			//vjs.softTypeDebugger ? VideoOutputWin->RefreshContents(videoWidget) : NULL;
 
 			cpuBrowseWin->HoldBPM();
 			cpuBrowseWin->HandleBPMContinue();
@@ -1671,6 +1672,7 @@ void MainWin::FrameAdvance(void)
 	JaguarExecuteNew();
 	//if (!vjs.softTypeDebugger)
 		videoWidget->updateGL();
+		//vjs.softTypeDebugger ? VideoOutputWin->RefreshContents(videoWidget) : NULL;
 	ToggleRunState();
 	// Need to execute 1 frames' worth of DSP thread as well :-/
 
@@ -1863,17 +1865,17 @@ void	MainWin::ShowDasmWin(void)
 
 
 // 
-#if 0
 void MainWin::ShowVideoOutputWin(void)
 {
 	//VideoOutputWindowCentrale = mainWindowCentrale->addSubWindow(videoWidget);
 	//VideoOutputWindowCentrale->setWindowTitle(QString(tr("Video output")));
 	//VideoOutputWindowCentrale->show();
 	//memBrowseWin->show();
-	//VideoOutputWin->show();
+	VideoOutputWin->show();
+	VideoOutputWin->SetupVideo(videoWidget);
+	//VideoOutputWin->adjustSize();
 	//VideoOutputWin->RefreshContents(videoWidget);
 }
-#endif
 
 
 // Resize video window based on zoom factor
@@ -2179,6 +2181,13 @@ void MainWin::ReadUISettings(void)
 		size = settings.value("SaveDumpAsWinSize", QSize(400, 400)).toSize();
 		SaveDumpAsWin->resize(size);
 
+		// save output video UI information
+		pos = settings.value("VideoOutputWinPos", QPoint(200, 200)).toPoint();
+		VideoOutputWin->move(pos);
+		settings.value("VideoOutputWinIsVisible", false).toBool() ? ShowVideoOutputWin() : void();
+		size = settings.value("VideoOutputWinSize", QSize(400, 400)).toSize();
+		VideoOutputWin->resize(size);
+
 		// Breakpoints UI information
 		pos = settings.value("BreakpointsWinPos", QPoint(200, 200)).toPoint();
 		BreakpointsWin->move(pos);
@@ -2411,6 +2420,9 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("SaveDumpAsWinPos", SaveDumpAsWin->pos());
 		settings.setValue("SaveDumpAsWinIsVisible", SaveDumpAsWin->isVisible());
 		settings.setValue("SaveDumpAsWinSize", SaveDumpAsWin->size());
+		settings.setValue("VideoOutputWinPos", VideoOutputWin->pos());
+		settings.setValue("VideoOutputWinIsVisible", VideoOutputWin->isVisible());
+		settings.setValue("VideoOutputWinSize", VideoOutputWin->size());
 
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
@@ -2505,6 +2517,7 @@ void MainWin::DebuggerRefreshWindows(void)
 {
 	if (vjs.softTypeDebugger)
 	{
+		//VideoOutputWin->RefreshContents(videoWidget);
 		FilesrcListWin->RefreshContents();
 		SourcesWin->RefreshContents();
 		m68kDasmWin->RefreshContents();
