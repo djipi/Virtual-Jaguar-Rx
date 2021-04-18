@@ -10,6 +10,7 @@
 // JPM  12/07/2017  Created this file
 // JPM  09/14/2018  Added a status bar, better status report and set information values in a tab
 // JPM  April/2019  Added a sorting filter, tableview unique rows creation
+// JPM  April/2021  Added a search feature.
 //
 
 // STILL TO DO:
