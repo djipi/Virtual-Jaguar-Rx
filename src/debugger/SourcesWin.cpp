@@ -8,8 +8,10 @@
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JPM  08/23/2019  Created this file
+// JPM   Apr./2021  Fixed potential crash with the tabs reset
 
 // STILL TO DO:
+// Use the CloseTab signal's value instead to close the current tab
 //
 
 #include <stdlib.h>
@@ -32,21 +34,21 @@ OldCurrentNumLineSrc(0),
 indexErrorTab(-1),
 sourceErrorTab(0)
 {
-	// Prepare layout
+	// prepare layout
 	sourcestabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	sourcestabWidget->setTabsClosable(true);
 	layout->addWidget(sourcestabWidget);
 
-	// Set layout
+	// set layout
 	setLayout(layout);
 
-	// Connect the signals
+	// connect the signals
 	connect(sourcestabWidget, SIGNAL(currentChanged(const int)), this, SLOT(SelectTab(const int)));
 	connect(sourcestabWidget, SIGNAL(tabCloseRequested(const int)), this, SLOT(CloseTab(const int)));
 }
 
 
-// Close tab
+// Close #tab
 void SourcesWindow::CloseTab(const int)
 {
 	CloseCurrentTab();
@@ -70,37 +72,43 @@ void SourcesWindow::SelectTab(const int)
 
 
 // Sources initialisation
+// Prepare tabs for every available source code file
 void SourcesWindow::Init(void)
 {
 	size_t i, j;
 	char *Ptr, *Ptr1;
 
-	// Get number of sources
+	// get number of sources
 	NbSourcesInfos = DBGManager_GetNbSources();
 	if (NbSourcesInfos)
 	{
-		// Alloc structure for the source informations
+		// alloc structure for the source informations
 		sourcesinfostab = (SourcesInfos *)calloc(NbSourcesInfos, sizeof(SourcesInfos));
 
-		// Fill sources information
+		// fill sources information
 		for (i = 0; i < NbSourcesInfos; i++)
 		{
-			// Get source filename without misguiding information
+			// get source filename without misguiding information
 			Ptr = DBGManager_GetNumSourceFilename(i);
 			Ptr1 = sourcesinfostab[i].Filename = (char *)malloc(strlen(Ptr) + 1);
 			while (((*Ptr == '.') || ((*Ptr == '/') || (*Ptr == '\\'))) && Ptr++);
 			strcpy(Ptr1, Ptr);
-			// Get texts dedicated information
+			// get texts dedicated information
 			for (j = 0; j < 2; j++)
 			{
 				sourcesinfostab[i].NbLinesText[j] = DBGManager_GetSrcNbListPtrFromIndex(i, j);
 			}
 			sourcesinfostab[i].NumLinesUsed = DBGManager_GetSrcNumLinesPtrFromIndex(i, true);
 			sourcesinfostab[i].SourceText = DBGManager_GetSrcListPtrFromIndex(i, false);
-			// Get remaining information
+			// get remaining information
 			sourcesinfostab[i].Language = DBGManager_GetSrcLanguageFromIndex(i);
 			sourcesinfostab[i].IndexTab = -1;
 		}
+	}
+	else
+	{
+		// no source files exist
+		sourcesinfostab = NULL;
 	}
 }
 
@@ -125,11 +133,13 @@ bool SourcesWindow::GetTraceStatus(void)
 }
 
 
-// Check if line has changed
+// Check if the line's number has changed across the tabs
+// Return true in case of the line is different, otherwise return false
 bool SourcesWindow::CheckChangeLine(void)
 {
 	size_t NumLine;
 
+	// get the line number based on the current M68K PC address
 	if (NumLine = DBGManager_GetNumLineFromAdr(m68k_get_reg(NULL, M68K_REG_PC), DBG_NO_TAG))
 	{
 		if (OldCurrentTab == CurrentTab)
@@ -145,14 +155,15 @@ bool SourcesWindow::CheckChangeLine(void)
 			OldCurrentTab = CurrentTab;
 			OldCurrentNumLineSrc = 0;
 		}
-
 	}
 
 	return false;
 }
 
 
-//
+// Refresh tabs
+// Open a new tab for a file source code
+// Set a unique tab for unavailable source code
 void SourcesWindow::RefreshContents(void)
 {
 	size_t m68kPC = m68k_get_reg(NULL, M68K_REG_PC);
@@ -161,21 +172,21 @@ void SourcesWindow::RefreshContents(void)
 	DBGstatus Status;
 	char *Filename;
 
-	// Check valid PC
+	// check valid M68K PC address
 	if (m68kPC && NbSourcesInfos)
 	{
-		// Get source filename pointed by PC address
+		// get source filename pointed by PC address
 		Filename = DBGManager_GetFullSourceFilenameFromAdr(m68kPC, &Status);
 		if (!Status && Filename)
 		{
-			// Look for a new tab
+			// look for a new tab
 			for (i = 0; i < NbSourcesInfos; i++, !index)
 			{
 				if (sourcesinfostab[i].Filename)
 				{
 					if (strstr(Filename, sourcesinfostab[i].Filename))
 					{
-						// Open a new tab for a source code
+						// open a new tab for a source code
 						if (sourcesinfostab[i].IndexTab == -1)
 						{
 							sourcesinfostab[i].IndexTab = index = sourcestabWidget->addTab(sourcesinfostab[i].sourceCtab = new(SourceCWindow), tr(sourcesinfostab[i].Filename));
@@ -193,7 +204,7 @@ void SourcesWindow::RefreshContents(void)
 		}
 		else
 		{
-			// Source file doesn't exist
+			// source file doesn't exist
 			if (indexErrorTab == -1)
 			{
 				indexErrorTab = sourcestabWidget->addTab(sourceErrorTab = new(SourceCWindow), tr("Source file not available"));
@@ -212,15 +223,15 @@ void SourcesWindow::CloseCurrentTab(void)
 	int Index;
 	QString t = sourcestabWidget->tabText((Index = sourcestabWidget->currentIndex()));
 
-	// Check error tab presence
+	// check error tab presence
 	if (indexErrorTab == Index)
 	{
-		// Close the error tab
+		// close the error tab
 		indexErrorTab = -1;
 	}
 	else
 	{
-		// Close source code text tab
+		// close source code text tab
 		while ((i < NbSourcesInfos) && strcmp(sourcesinfostab[i++].Filename, t.toLatin1().data()));
 		sourcesinfostab[(i - 1)].IndexTab = -1;
 	}
@@ -230,10 +241,10 @@ void SourcesWindow::CloseCurrentTab(void)
 }
 
 
-// 
+// Handle keyboard
 void SourcesWindow::keyPressEvent(QKeyEvent * e)
 {
-	// Close/Remove the current tab
+	// close/remove the current tab
 	if (e->key() == Qt::Key_Escape)
 	{
 		CloseCurrentTab();
@@ -241,13 +252,13 @@ void SourcesWindow::keyPressEvent(QKeyEvent * e)
 }
 
 
-// 
+// Reset all source files tab
 void SourcesWindow::Reset(void)
 {
-	// Clear the tabs
+	// clear the tabs
 	sourcestabWidget->clear();
 
-	// Clear tab information
+	// clear tab information
 	while (NbSourcesInfos)
 	{
 		free(sourcesinfostab[--NbSourcesInfos].Filename);

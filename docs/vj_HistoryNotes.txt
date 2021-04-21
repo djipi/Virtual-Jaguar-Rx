@@ -23,7 +23,7 @@ Release 5 (TBA)
 15) Remove Visual Studio 2015 support
 16) Work around fix for a compilation error on Linux
 -- EEPROM directory creation allowed only for Windows at the moment
-17) Show the SR value as a readable form in the CPU browser
+17) Show the SR value as a readable form in the M68K CPU browser
 18) Potential fix to compile on Linux
 -- Added the relative directory path for the Qt include files
 19) Merge the Linux build fixes from @richard42
@@ -39,6 +39,7 @@ Release 5 (TBA)
 25) Added a #line in the call stack window
 26) Add a search feature in the all watches window
 27) Added video output display in a specific window
+28) Fixed potential crash with the debugger tabs reset
 
 Release 4a (15th August 2019)
 -----------------------------
