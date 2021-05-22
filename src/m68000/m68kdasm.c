@@ -318,6 +318,8 @@ void HandleMovem(char * output, uint16_t data, int direction)
 }
 
 
+// Disassemble the M68K line based on the address
+// Append, or not, the line with the ouput pointer and return the number of bytes
 unsigned int M68KDisassemble(char * output, uint32_t addr, unsigned int OpCodes)
 {
 	char f[256], str[256];
@@ -335,26 +337,33 @@ unsigned int M68KDisassemble(char * output, uint32_t addr, unsigned int OpCodes)
 	char instrname[20];
 	const struct mnemolookup * lookup;
 
+	// get the opcode
 	uint32_t opcode = get_iword_1(m68kpc_offset);
 	m68kpc_offset += 2;
 
+	// replace an illegal opcode by the illegal opcode
 	if (cpuFunctionTable[opcode] == IllegalOpcode)
 		opcode = 0x4AFC;
 
+	// point on the opcode information
 	struct instr * dp = table68k + opcode;
 
-	for(lookup=lookuptab; lookup->mnemo!=dp->mnemo; lookup++)
-		;
-
+	// get the instruction name from the opcode
+	for(lookup=lookuptab; lookup->mnemo!=dp->mnemo; lookup++);
 	strcpy(instrname, lookup->name);
+
+	// look for a branching instruction
 	char * ccpt = strstr(instrname, "cc");
 
+	// correct branch naming
 	if (ccpt)
 		strncpy(ccpt, ccnames[dp->cc], 2);
 
+	// keep the instruction name
 	sprintf(f, "%s", instrname);
 	strcat(str, f);
 
+	// set instruction size
 	switch (dp->size)
 	{
 	case sz_byte: strcat(str, ".B\t"); break;
@@ -363,16 +372,16 @@ unsigned int M68KDisassemble(char * output, uint32_t addr, unsigned int OpCodes)
 	default: strcat(str, "\t"); break;
 	}
 
-	// Get source and destination operands (if any)
+	// reset the buffers
 	src[0] = dst[0] = f[0] = 0;
 
+	// get source operand in src
 	if (dp->suse)
-		newpc = m68k_getpc() + m68kpc_offset
-			+ ShowEA(dp->mnemo, dp->sreg, dp->smode, dp->size, src);
+		newpc = m68k_getpc() + m68kpc_offset + ShowEA(dp->mnemo, dp->sreg, dp->smode, dp->size, src);
 
+	// get destination operand in dst
 	if (dp->duse)
-		newpc = m68k_getpc() + m68kpc_offset
-			+ ShowEA(dp->mnemo, dp->dreg, dp->dmode, dp->size, dst);
+		newpc = m68k_getpc() + m68kpc_offset + ShowEA(dp->mnemo, dp->dreg, dp->dmode, dp->size, dst);
 
 	// Handle execptions to the standard rules
 	if (dp->mnemo == i_BSR || dp->mnemo == i_Bcc)
@@ -405,14 +414,8 @@ unsigned int M68KDisassemble(char * output, uint32_t addr, unsigned int OpCodes)
 		strcat(output, f);
 	}
 
-	if (OpCodes)
-	{
-		strcat(output, str);
-	}
-	else
-	{
-		strcpy(output, str);
-	}
+	// add the line to the output
+	OpCodes ? strcat(output, str) : strcpy(output, str);
 
 	return numberOfBytes;
 }
