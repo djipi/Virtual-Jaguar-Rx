@@ -40,6 +40,7 @@ Release 5 (TBA)
 26) Add a search feature in the all watches window
 27) Added video output display in a specific window
 28) Fixed potential crash with the debugger tabs reset
+29) Added a search feature in the All Watch variables window
 
 Release 4a (15th August 2019)
 -----------------------------

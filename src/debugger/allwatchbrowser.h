@@ -26,6 +26,7 @@ class AllWatchBrowserWindow: public QWidget
 {
 	Q_OBJECT
 
+#if 0
 	//
 	typedef struct WatchInfo
 	{
@@ -33,9 +34,11 @@ class AllWatchBrowserWindow: public QWidget
 		size_t addr;
 #endif
 		size_t TypeTag;
+		size_t Adr;
 		char *PtrVariableName;
 		char *PtrVariableBaseTypeName;
 	}S_WatchInfo;
+#endif
 
 	public:
 		AllWatchBrowserWindow(QWidget *parent = 0);
@@ -61,7 +64,8 @@ class AllWatchBrowserWindow: public QWidget
 		QStandardItemModel *model;
 #endif
 		QStatusBar *statusbar;
-		WatchInfo *PtrWatchInfo;
+		//WatchInfo *PtrWatchInfo;
+		void **PtrWatchInfo;
 		size_t NbWatch;
 		QPushButton *search;
 		QLineEdit* symbol;

@@ -114,7 +114,7 @@ void AllWatchBrowserWindow::SearchSymbol(void)
 	for (i = AW_STARTNUMVARIABLE; (i < NbWatch) && !found; i++)
 	{
 		// check symbol presence
-		if (!symbol->text().compare(PtrWatchInfo[i].PtrVariableName, Qt::CaseSensitive))
+		if (!symbol->text().compare(((S_VariablesStruct*)PtrWatchInfo[i])->PtrName, Qt::CaseSensitive))
 		{
 			found = true;
 		}
@@ -181,15 +181,16 @@ void AllWatchBrowserWindow::RefreshContents(void)
 	QString WatchAll;
 	size_t Error = AW_NOERROR;
 	char *PtrValue;
+	//S_VariablesStruct* Var;
 
 	if (isVisible())
 	{
 		if (!NbWatch)
 		{
 			// Pre-catch the information for each global variables
-			if (NbWatch = DBGManager_GetNbGlobalVariables())
+			if (NbWatch = DBGManager_GetNbVariables(NULL))
 			{
-				PtrWatchInfo = (WatchInfo *)calloc(NbWatch, sizeof(WatchInfo));
+				PtrWatchInfo = (void**)calloc(NbWatch, sizeof(S_VariablesStruct*));
 #ifndef AW_LAYOUTTEXTS
 #ifdef AW_SORTINGFILTER
 				TableView->setSortingEnabled(false);
@@ -198,18 +199,18 @@ void AllWatchBrowserWindow::RefreshContents(void)
 #endif
 				for (uint32_t i = AW_STARTNUMVARIABLE; i < NbWatch; i++)
 				{
-					PtrWatchInfo[i].PtrVariableName = DBGManager_GetGlobalVariableName(i + 1);
-					PtrWatchInfo[i].TypeTag = DBGManager_GetGlobalVariableTypeTag(i + 1);
-#ifdef AW_LAYOUTTEXTS
-					PtrWatchInfo[i].addr = DBGManager_GetGlobalVariableAdr(i + 1);
-					if (!strlen(PtrWatchInfo[i].PtrVariableBaseTypeName = DBGManager_GetGlobalVariableTypeName(i + 1)))
+					if ((PtrWatchInfo[i] = (void*)DBGManager_GetInfosVariable(NULL, i + 1)))
 					{
-						PtrWatchInfo[i].PtrVariableBaseTypeName = (char *)"<font color='#ff0000'>N/A</font>";
-					}
+#ifdef AW_LAYOUTTEXTS
+						PtrWatchInfo[i].addr = DBGManager_GetGlobalVariableAdr(i + 1);
+						if (!strlen(PtrWatchInfo[i].PtrVariableBaseTypeName = DBGManager_GetGlobalVariableTypeName(i + 1)))
+						{
+							PtrWatchInfo[i].PtrVariableBaseTypeName = (char *)"<font color='#ff0000'>N/A</font>";
+						}
 #else
-					PtrWatchInfo[i].PtrVariableBaseTypeName = DBGManager_GetGlobalVariableTypeName(i + 1);
-					model->insertRow(i);
+						model->insertRow(i);
 #endif
+					}
 				}
 			}
 		}
@@ -218,7 +219,7 @@ void AllWatchBrowserWindow::RefreshContents(void)
 		{
 			for (uint32_t i = AW_STARTNUMVARIABLE; i < NbWatch; i++)
 			{
-				if ((PtrWatchInfo[i].TypeTag & (DBG_TAG_TYPE_array | DBG_TAG_TYPE_structure)))
+				if (((S_VariablesStruct*)PtrWatchInfo[i])->TypeTag & (DBG_TAG_TYPE_array | DBG_TAG_TYPE_structure))
 				{
 #if defined(AW_SUPPORTARRAY) || defined(AW_SUPPORTSTRUCTURE)
 					//PtrValue = (char *)memcpy(Value, &jaguarMainRAM[PtrWatchInfo[i].addr], 20);
@@ -229,7 +230,7 @@ void AllWatchBrowserWindow::RefreshContents(void)
 				}
 				else
 				{
-					PtrValue = DBGManager_GetGlobalVariableValue(i + 1);
+					PtrValue = DBGManager_GetVariableValueFromAdr(((S_VariablesStruct*)PtrWatchInfo[i])->Addr, ((S_VariablesStruct*)PtrWatchInfo[i])->TypeEncoding, ((S_VariablesStruct*)PtrWatchInfo[i])->TypeByteSize);
 				}
 #ifdef AW_LAYOUTTEXTS
 				if (i)
@@ -239,9 +240,9 @@ void AllWatchBrowserWindow::RefreshContents(void)
 				sprintf(string, "%i : %s | %s | 0x%06X | %s", (i + 1), PtrWatchInfo[i].PtrVariableBaseTypeName, PtrWatchInfo[i].PtrVariableName, (unsigned int)PtrWatchInfo[i].addr, PtrValue ? PtrValue : (char *)"<font color='#ff0000'>N/A</font>");
 				WatchAll += QString(string);
 #else
-				model->setItem(i, 0, new QStandardItem(QString("%1").arg(PtrWatchInfo[i].PtrVariableName)));
+				model->setItem(i, 0, new QStandardItem(QString("%1").arg(((S_VariablesStruct*)PtrWatchInfo[i])->PtrName)));
 				model->setItem(i, 1, new QStandardItem(QString("%1").arg(PtrValue)));
-				model->setItem(i, 2, new QStandardItem(QString("%1").arg(PtrWatchInfo[i].PtrVariableBaseTypeName)));
+				model->setItem(i, 2, new QStandardItem(QString("%1").arg(((S_VariablesStruct*)PtrWatchInfo[i])->PtrTypeName)));
 #endif
 			}
 #ifdef AW_LAYOUTTEXTS
@@ -291,7 +292,7 @@ void AllWatchBrowserWindow::keyPressEvent(QKeyEvent * e)
 	}
 	else
 	{
-		// select the 
+		// search symbol
 		if (e->key() == Qt::Key_Return)
 		{
 			SearchSymbol();
