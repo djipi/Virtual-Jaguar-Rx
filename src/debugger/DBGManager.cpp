@@ -16,6 +16,7 @@
 // JPM   Aug./2019  Added new functions mainly for source text lines
 // JPM  Sept./2019  Support the unsigned/signed short type
 //  RG   Jan./2021  Linux build fixes
+// JPM    May/2021  Code refactoring for the variables
 //
 
 // To Do
@@ -229,6 +230,53 @@ char *DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, DBGstatus *Status)
 }
 
 
+// Get number of variables
+// A NULL address will return the numbre of global variables, otherwise it will return the number of local variables
+size_t DBGManager_GetNbVariables(size_t Adr)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetNbVariables(Adr);
+	}
+	else
+	{
+		return	0;
+	}
+}
+
+
+// Get variable's information
+// A NULL address will return the pointer to the global variable structure, otherwise it will return the local's one
+S_VariablesStruct* DBGManager_GetInfosVariable(size_t Adr, size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return (S_VariablesStruct*)DWARFManager_GetInfosVariable(Adr, Index);
+	}
+	else
+	{
+		return	NULL;
+	}
+}
+
+
+// Get global variable's Address based on his Name
+// Return found Address
+// Return NULL if no Address has been found
+size_t DBGManager_GetGlobalVariableAdrFromName(char *VariableName)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetGlobalVariableAdrFromName(VariableName);
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+
+#if 0
 // Get number of local variables
 // Return 0 if none has been found
 size_t DBGManager_GetNbLocalVariables(size_t Adr)
@@ -257,6 +305,7 @@ size_t DBGManager_GetNbGlobalVariables(void)
 		return	0;
 	}
 }
+#endif
 
 
 // Get address from symbol name
@@ -276,22 +325,7 @@ size_t DBGManager_GetAdrFromSymbolName(char *SymbolName)
 }
 
 
-// Get global variable's Address based on his Name
-// Return found Address
-// Return NULL if no Address has been found
-size_t DBGManager_GetGlobalVariableAdrFromName(char *VariableName)
-{
-	if ((DBGType & DBG_ELFDWARF))
-	{
-		return DWARFManager_GetGlobalVariableAdrFromName(VariableName);
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-
+#if 0
 // Get local variable's type encoding based on his address and Index
 // Return the type encoding found
 // Return 0 if no type encoding has been found
@@ -450,6 +484,71 @@ char *DBGManager_GetGlobalVariableValue(size_t Index)
 }
 
 
+// Get local variable's type name based on his Index
+// Return type name's text pointer found
+// Return NULL if no type name has been found
+char *DBGManager_GetLocalVariableTypeName(size_t Adr, size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetLocalVariableTypeName(Adr, Index);
+	}
+	else
+	{
+		return	NULL;
+	}
+}
+
+
+// Get local variable Op based on his Index
+// Return variable Op's found
+// Return 0 if no variable Op has been found
+size_t DBGManager_GetLocalVariableOp(size_t Adr, size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetLocalVariableOp(Adr, Index);
+	}
+	else
+	{
+		return	0;
+	}
+}
+
+
+// Get local variable name based on his Index
+// Return variable name's text pointer found
+// Return NULL if no variable name has been found
+char *DBGManager_GetLocalVariableName(size_t Adr, size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetLocalVariableName(Adr, Index);
+	}
+	else
+	{
+		return	NULL;
+	}
+}
+
+
+// Get global variable name based on his Index
+// Return variable name's text pointer found
+// Return NULL if no variable name has been found
+char *DBGManager_GetGlobalVariableName(size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetGlobalVariableName(Index);
+	}
+	else
+	{
+		return	NULL;
+	}
+}
+#endif
+
+
 // Get variable value based on his Adresse, Encoding Type and Size
 // Return value as a text pointer
 // Note: Pointer may point on a 0 length text
@@ -570,70 +669,6 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 	}
 
 	return Ptrvalue;
-}
-
-
-// Get local variable's type name based on his Index
-// Return type name's text pointer found
-// Return NULL if no type name has been found
-char *DBGManager_GetLocalVariableTypeName(size_t Adr, size_t Index)
-{
-	if ((DBGType & DBG_ELFDWARF))
-	{
-		return DWARFManager_GetLocalVariableTypeName(Adr, Index);
-	}
-	else
-	{
-		return	NULL;
-	}
-}
-
-
-// Get local variable Op based on his Index
-// Return variable Op's found
-// Return 0 if no variable Op has been found
-size_t DBGManager_GetLocalVariableOp(size_t Adr, size_t Index)
-{
-	if ((DBGType & DBG_ELFDWARF))
-	{
-		return DWARFManager_GetLocalVariableOp(Adr, Index);
-	}
-	else
-	{
-		return	0;
-	}
-}
-
-
-// Get local variable name based on his Index
-// Return variable name's text pointer found
-// Return NULL if no variable name has been found
-char *DBGManager_GetLocalVariableName(size_t Adr, size_t Index)
-{
-	if ((DBGType & DBG_ELFDWARF))
-	{
-		return DWARFManager_GetLocalVariableName(Adr, Index);
-	}
-	else
-	{
-		return	NULL;
-	}
-}
-
-
-// Get global variable name based on his Index
-// Return variable name's text pointer found
-// Return NULL if no variable name has been found
-char *DBGManager_GetGlobalVariableName(size_t Index)
-{
-	if ((DBGType & DBG_ELFDWARF))
-	{
-		return DWARFManager_GetGlobalVariableName(Index);
-	}
-	else
-	{
-		return	NULL;
-	}
 }
 
 

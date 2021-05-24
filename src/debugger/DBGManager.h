@@ -240,6 +240,26 @@ typedef enum {
 DBGOP;
 
 
+// Variables internal structure
+typedef struct VariablesStruct
+{
+	size_t Op;										// Variable's DW_OP
+	union
+	{
+		size_t Addr;								// Variable memory address
+		int Offset;									// Variable stack offset (signed)
+	};
+	char *PtrName;									// Variable's name
+	size_t TypeOffset;								// Offset pointing on the Variable's Type
+	size_t TypeByteSize;							// Variable's Type byte size
+	size_t TypeTag;									// Variable's Type Tag
+	size_t TypeEncoding;							// Variable's Type encoding
+	char *PtrTypeName;								// Variable's Type name
+	size_t NbTabVariables;							// Number of Variable's members
+	VariablesStruct **TabVariables;					// Variable's Members (used for structures at the moment)
+}S_VariablesStruct;
+
+
 // Internal manager
 extern void	DBGManager_Init(void);
 extern void	DBGManager_SetType(size_t DBGTypeSet);
@@ -259,7 +279,6 @@ extern size_t DBGManager_GetSrcNbListPtrFromIndex(size_t Index, bool Used);
 extern size_t *DBGManager_GetSrcNumLinesPtrFromIndex(size_t Index, bool Used);
 
 // General manager
-extern char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t TypeByteSize);
 extern size_t DBGManager_GetSrcLanguageFromIndex(size_t Index);
 
 // Functions manager
@@ -274,6 +293,15 @@ extern char	*DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, DBGstatus *Stat
 extern char *DBGManager_GetNumFullSourceFilename(size_t Index);
 extern char *DBGManager_GetNumSourceFilename(size_t Index);
 
+// Variables manager
+extern size_t DBGManager_GetNbVariables(size_t Adr);
+extern S_VariablesStruct* DBGManager_GetInfosVariable(size_t Adr, size_t Index);
+extern char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t TypeByteSize);
+
+// Global variables manager
+extern size_t DBGManager_GetGlobalVariableAdrFromName(char *VariableName);
+
+#if 0
 // Global variables manager
 extern size_t DBGManager_GetNbGlobalVariables(void);
 extern char *DBGManager_GetGlobalVariableName(size_t Index);
@@ -281,7 +309,6 @@ extern size_t DBGManager_GetGlobalVariableTypeEncoding(size_t Index);
 extern char *DBGManager_GetGlobalVariableTypeName(size_t Index);
 extern size_t DBGManager_GetGlobalVariableTypeByteSize(size_t Index);
 extern size_t DBGManager_GetGlobalVariableAdr(size_t Index);
-extern size_t DBGManager_GetGlobalVariableAdrFromName(char *VariableName);
 extern char *DBGManager_GetGlobalVariableValue(size_t Index);
 extern size_t DBGManager_GetGlobalVariableTypeTag(size_t Index);
 
@@ -294,6 +321,7 @@ extern size_t DBGManager_GetLocalVariableTypeByteSize(size_t Adr, size_t Index);
 extern size_t DBGManager_GetLocalVariableTypeTag(size_t Adr, size_t Index);
 extern size_t DBGManager_GetLocalVariableOp(size_t Adr, size_t Index);
 extern int DBGManager_GetLocalVariableOffset(size_t Adr, size_t Index);
+#endif
 
 
 #endif	// __DBGMANAGER_H__
