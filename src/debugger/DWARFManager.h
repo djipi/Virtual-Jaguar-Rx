@@ -43,18 +43,23 @@ extern char **DWARFManager_GetSrcListPtrFromIndex(size_t Index, bool Used);
 extern size_t DWARFManager_GetSrcNbListPtrFromIndex(size_t Index, bool Used);
 extern size_t *DWARFManager_GetSrcNumLinesPtrFromIndex(size_t Index, bool Used);
 
+// Variables manager
+extern size_t DWARFManager_GetNbVariables(size_t Adr);
+extern void* DWARFManager_GetInfosVariable(size_t Adr, size_t Index);
+
 // Global variables manager
-extern size_t DWARFManager_GetNbGlobalVariables(void);
+extern size_t DWARFManager_GetGlobalVariableAdrFromName(char *VariableName);
+
+#if 0
+// Global variables manager
 extern char *DWARFManager_GetGlobalVariableName(size_t Index);
 extern size_t DWARFManager_GetGlobalVariableTypeEncoding(size_t Index);
 extern char *DWARFManager_GetGlobalVariableTypeName(size_t Index);
 extern size_t DWARFManager_GetGlobalVariableTypeByteSize(size_t Index);
 extern size_t DWARFManager_GetGlobalVariableAdr(size_t Index);
-extern size_t DWARFManager_GetGlobalVariableAdrFromName(char *VariableName);
 extern size_t DWARFManager_GetGlobalVariableTypeTag(size_t Index);
 
 // Local variables manager
-extern size_t DWARFManager_GetNbLocalVariables(size_t Adr);
 extern char *DWARFManager_GetLocalVariableName(size_t Adr, size_t Index);
 extern size_t DWARFManager_GetLocalVariableTypeEncoding(size_t Adr, size_t Index);
 extern char *DWARFManager_GetLocalVariableTypeName(size_t Adr, size_t Index);
@@ -62,6 +67,7 @@ extern size_t DWARFManager_GetLocalVariableTypeByteSize(size_t Adr, size_t Index
 extern size_t DWARFManager_GetLocalVariableTypeTag(size_t Adr, size_t Index);
 extern size_t DWARFManager_GetLocalVariableOp(size_t Adr, size_t Index);
 extern int DWARFManager_GetLocalVariableOffset(size_t Adr, size_t Index);
+#endif
 
 
 #endif	// __DWARFMANAGER_H__

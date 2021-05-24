@@ -43,6 +43,7 @@ Release 5 (TBA)
 29) Added a search feature in the All Watch variables window
 30) Support the structure's members in the Local variables window
 31) Code refactoring for the variables support in debugger mode
+32) Support the structure and union members from the DWARF information
 
 Release 4a (15th August 2019)
 -----------------------------
