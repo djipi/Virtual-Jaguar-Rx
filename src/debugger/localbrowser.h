@@ -7,19 +7,16 @@
 #ifndef __LOCALBROWSER_H__
 #define __LOCALBROWSER_H__
 
-//#define LOCAL_LAYOUTTEXTS						// Use a layout with just texts
-//#define LOCAL_SUPPORTARRAY						// Support array
-//#define LOCAL_SUPPORTSTRUCTURE					// Support structure
+//#define LOCAL_FONTS								// Support for fonts modifications
 
 #include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 // Error code definitions
 #define	LOCAL_NOERROR		0x00
-#define	LOCAL_ERROR			0x80
 #define	LOCAL_WARNING		0x40
+#define	LOCAL_ERROR			0x80
 #define	LOCAL_NOLOCALS		(0x01 | LOCAL_WARNING)
-
 
 // 
 class LocalBrowserWindow: public QWidget
@@ -27,19 +24,13 @@ class LocalBrowserWindow: public QWidget
 	Q_OBJECT
 
 	//
-	typedef struct WatchInfo
+	typedef struct LocalInfo
 	{
-		size_t Op;
 		size_t Adr;
-		int Offset;
-		size_t TypeTag;
-		size_t TypeEncoding;
-		size_t TypeByteSize;
-		char *PtrVariableName;
-		char *PtrVariableBaseTypeName;
 		char *PtrCPURegisterName;
+		void *PtrVariable;
 	}
-	S_WatchInfo;
+	S_LocalInfo;
 
 	public:
 		LocalBrowserWindow(QWidget *parent = 0);
@@ -50,17 +41,15 @@ class LocalBrowserWindow: public QWidget
 		bool UpdateInfos(void);
 
 	protected:
+		QList<QStandardItem *> prepareRow(void* Info);
+		void setValueRow(QStandardItem *Row, size_t Adr, char* Value, void* Info);
 		void keyPressEvent(QKeyEvent *);
 
 	private:
 		QVBoxLayout *layout;
-#ifdef LOCAL_LAYOUTTEXTS
-		QTextBrowser *text;
-#else
-		QTableView *TableView;
+		QTreeView *TableView;
 		QStandardItemModel *model;
-#endif
-		WatchInfo *LocalInfo;
+		S_LocalInfo *LocalInfo;
 		QStatusBar *statusbar;
 		size_t NbLocal;
 		char *FuncName;
