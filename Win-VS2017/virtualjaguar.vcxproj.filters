@@ -205,7 +205,7 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_VideoWin.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-	<ClCompile Include="GeneratedFiles\Release\moc_VideoWin.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_VideoWin.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_stackbrowser.cpp">
@@ -857,6 +857,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\res\tool-hw-regs.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\vj_rx_title_small.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

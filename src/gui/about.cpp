@@ -35,7 +35,7 @@ AboutWindow::AboutWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dialog)
 
 	QString s;
 	s.append(tr(
-		"<img src=':/res/vj_title_small.png' style='float: right'>"
+		"<img src=':/res/vj_rx_title_small.png' style='float: right'>"
 		"<table>"
 		"<tr><td align='right'><b>Version: </b></td><td>"
 		VJ_RELEASE_VERSION " (" VJ_RELEASE_SUBVERSION ") Rx"
@@ -48,7 +48,7 @@ AboutWindow::AboutWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dialog)
 		"<br><br>"
 		"<i>Rx version:<i>"
 		"<br>"
-		"<b>Jean-Paul Mari</b> for the debugger integration, ELF/DWARF format, Win64 & Visual Studio 2015/2017 support"
+		"<b>Jean-Paul Mari</b> for the debugger integration, ELF/DWARF format, Win64 & Visual Studio 2017 support, among additional improvements"
 		"<br><br>"
 		"<i>The Virtual Jaguar team would like to express their gratitude to:</i>"
 		"<br><br>"
@@ -69,6 +69,9 @@ AboutWindow::AboutWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dialog)
 
 void AboutWindow::keyPressEvent(QKeyEvent * e)
 {
-	if (e->key() == Qt::Key_Escape || e->key() == Qt::Key_Return)
+	// close the window
+	if ((e->key() == Qt::Key_Escape) || (e->key() == Qt::Key_Return))
+	{
 		hide();
+	}
 }
