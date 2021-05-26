@@ -594,7 +594,7 @@ void DWARFManager_InitDMI(void)
 													if (PtrCU[NbCU].PtrLoadSrc = Ptr = Ptr1 = (char *)calloc(1, (PtrCU[NbCU].SizeLoadSrc + 2)))
 													{
 														// Read whole file
-#if defined(_WIN32)														
+#if defined(_WIN32)	&& defined(_MSC_VER)													
 														if (fread_s(PtrCU[NbCU].PtrLoadSrc, PtrCU[NbCU].SizeLoadSrc, PtrCU[NbCU].SizeLoadSrc, 1, SrcFile) != 1)
 #else
 														if (fread(PtrCU[NbCU].PtrLoadSrc, PtrCU[NbCU].SizeLoadSrc, 1, SrcFile) != 1)
