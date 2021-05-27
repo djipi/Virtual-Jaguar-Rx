@@ -37,13 +37,15 @@ Release 5 (TBA)
 -- The cycles are displayed in the emulator status window
 24) Improve the DWARF source line number reporting
 25) Added a #line in the call stack window
-26) Add a search feature in the all watches window
-27) Added video output display in a specific window
-28) Fixed potential crash with the debugger tabs reset
-29) Added a search feature in the All Watch variables window
-30) Support the structure's members in the Local variables window
-31) Code refactoring for the variables support in debugger mode
-32) Support the structure and union members from the DWARF information
+26) Added video output display in a specific window
+27) Fixed potential crash with the debugger tabs reset
+28) Added a search feature in the All Watch variables window
+29) Support the structure's members in the Local variables window
+30) Code refactoring for the variables support in debugger mode
+31) Support the structure and union members from the DWARF information
+32) Added a Virtual Jaguar Rx logo in the About window
+33) Fix compilation / link error for MSYS2 / MinGW64
+34) Documentation updates
 
 Release 4a (15th August 2019)
 -----------------------------

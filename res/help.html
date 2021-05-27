@@ -82,7 +82,7 @@
 <p><strong>Insert Cartridge...</strong> does the same as the toolbar button; see the &ldquo;Insert Cartridge&rdquo; toolbar button description for details.</p>
 <p><strong>Use CD Unit</strong> does the same as the toolbar button; see the &ldquo;Use CD Unit&rdquo; toolbar button description for details.</p>
 <p><strong>Configure</strong> launches the Configure dialogue. A full description is given in the &ldquo;Configure Dialog&rdquo; section below.</p>
-<p><strong>Status</strong>&nbsp;launches a window with emulator internal information.</p>
+<p><strong>Status</strong>&nbsp;launches a window with emulator internal information. It includes M68000 cycles counters.</p>
 <p><strong>Exit</strong> quits <em>Virtual Jaguar</em> immediately. You can also quit <em>Virtual Jaguar</em> by pressing <strong>Ctrl</strong> + <strong>Q</strong> on your keyboard.</p>
 <h2>Help Menu</h2>
 <p>This menu has the following options:</p>
@@ -175,12 +175,14 @@
 <p>When started in Debugger mode, a specific tab&nbsp;is made available in the configuration dialogue which gives you the following options:</p>
 <ul>
 <li>Disassembly lines</li>
+<li>Source file search paths</li>
 <li>Display M68000 opcodes</li>
 <li>Display HW labels</li>
 <li>Display source filename</li>
 <li>ELF sections check</li>
 </ul>
 <p><strong>Disassembly lines</strong>&nbsp;represent the number of disassembly lines to display in the M68000 tracing window. This doesn't include the number of source lines displayed.</p>
+<p><strong>Source file search paths</strong>&nbsp;may be used in case of the debugger cannot find files path in the DWARF information.</p>
 <p><strong>Display M68000 opcode</strong>&nbsp;allows or not the opcode display. Can be useful in case of user prefers to see the disassembly only.</p>
 <p><strong>Display HW labels</strong>&nbsp;allows or not the name of the Jaguar hardware registers as reported in the official documentation.</p>
 <p><strong>Display source filename</strong>&nbsp;allows or not the source code filename display depend the disassembly in the M68000 tracing window.</p>
@@ -191,11 +193,13 @@
 <li>ABS to load</li>
 <li>Windows refresh</li>
 <li>Allow writes to cartdridge ROM</li>
+<li>Allow M68000 exception catch</li>
 </ul>
 <p><strong>ROM to load</strong> is the path to a Jaguar executable file that will be loaded into the Jaguar&rsquo;s cartridge memory space at $800000 (Alpine ROM images will load at $802000). As a convenience to coders, this file can be of any length, as long as it fits into the cartridge memory space (a file of this type is treated as an Alpine ROM and is loaded at $802000). The file thus loaded into memory will not be executed.</p>
 <p><strong>ABS to load</strong> is the path to a Jaguar executable file that will be loaded in the Jaguar&rsquo;s main RAM. This file must have valid headers, otherwise <em>Virtual Jaguar</em> won&rsquo;t be able to load it. Assuming the file exists and has the correct headers in it, it will be loaded and run when <em>Virtual Jaguar</em> is first run.</p>
 <p><strong>Windows refresh</strong>&nbsp;is the refresh rate for open windows. The smaller the rate, the faster the refresh window will occur. A 0 value will disable the refresh operations.</p>
 <p><strong>Allow writes to cartdridge ROM</strong>&nbsp;is the option allowing or not the cartdridge ROM writing. If allowed, emulator won't interfere but when turned off the emulator will display a dialog box with proper information, at this point user can allow to continue or stop the code.</p>
+<p><strong>Allow M68000 exception catch</strong>&nbsp;is the option allowing or not the exception catch from the M68000. If allowed, the emulator will display a dialog box with proper information and user will have the choice to continue or to stop the code.</p>
 <p>Also, when in Debugger mode,&nbsp;extra toolbar buttons are defined (also found under the extra &ldquo;Debug&rdquo; menu) and also include the Alpine mode features:</p>
 <ul>
 <li>Restart</li>
@@ -206,6 +210,7 @@
 <li>Delete All Breakpoints</li>
 <li>Disable All Breakpoints</li>
 <li>Exception Vector Table</li>
+<li>Output Video</li>
 <li>All Watch</li>
 <li>Locals</li>
 <li>Call Stack</li>
@@ -230,8 +235,10 @@
 <p>Disable all breakpoints, and also disable BPM.</p>
 <h3>Exception Vector Table</h3>
 <p>Display a partial table of the M68000 exception vectors as reported by Motorola.</p>
+<h3>Output Video</h3>
+<p>Display the video output window.</p>
 <h3>All Watch</h3>
-<p>Display all global variables used by the Jaguar code. It uses the available DWARF debug information.</p>
+<p>Display all global variables used by the Jaguar code. It uses the available DWARF debug information. It has a search feature to look for a specific global variable.</p>
 <h3>Locals</h3>
 <p>Display the local variables of the traced M68000 function.&nbsp;It uses the available DWARF debug information, and the A6 register to point on the stack.</p>
 <h3>Call Stack</h3>
@@ -248,6 +255,8 @@
 <p>In the debugger mode, the main window doesn't display anymore the video output; it is replaced by a source code files viewer and a disassembly window made of tabs to allow tracing / display of code.</p>
 <p><strong>Source code files</strong></p>
 <p>It is available for convenience reason; it display all the filenames found in the DWARF information. It is turned off by default but user can turn it on.</p>
+<p><strong>Sources tab</strong></p>
+<p>This tab is populated by C, or asm, source files following the M68000 program counter (PC). User can trace source code within the tab.</p>
 <p><strong>Disassembly tabs</strong></p>
 <p>There are 3 tabs, each of them is dedicated to a specific processor (M68000, GPU, and DSP). Currently, only the M68000 is tracable, others 2 display only the code pointed by their respective program counter (PC).</p>
 <p>Also, when in Alpine mode, extra toolbar buttons are defined (also found under the extra &ldquo;Debug&rdquo; menu):</p>

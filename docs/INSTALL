@@ -16,9 +16,9 @@ The minimum requirements for compiling Virtual Jaguar from source are:
  o  libcdio v0.90 or higher (optional, for Jaguar CD support)
  o  OpenGL libraries
  o  Qt 5.5.1 or higher
- o  Visual Studio 2015 or 2017 (if any of interest)
+ o  Visual Studio 2017 (if any of interest)
  o  supported OS (WIN64 through msys2/MinGW64, Windows 64 bits); other
-    OSs may work to but you may need to change some items in the Makefile or adapt the Visual Studio project.
+    OSs may work too but you may need to change some items in the Makefile or adapt the Visual Studio project.
  o  cygwin64 support is done but no test has been completed
 
 Previously supported OS (BeOS, Linux, FreeBSD and WIN32 through mingw, MacOS);
@@ -90,4 +90,4 @@ You may have to adapt such files to handle your own development environement,
 usualy to put the right include and library paths will be enough assuming you have all the requirements properly set.
 
 Assuming all went well, you will have either Debug or Release executables.
-You will also need the QT5 & SDL necessary DLLs in the executable directory.
+You will also need the necessary DLLs in the executable directory.

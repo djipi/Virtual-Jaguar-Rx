@@ -1,4 +1,4 @@
-.TH virtualjaguar 1 2018-09-19 Virtualjaguar Rx
+.TH virtualjaguar 1 2021-05-24 Virtualjaguar Rx
 .SH NAME
 virtualjaguar \- An Atari Jaguar emulator
 
@@ -8,12 +8,12 @@ virtualjaguar \- An Atari Jaguar emulator
 .RI [rom image file]
 
 .SH DESCRIPTION
-Virtualjaguar is an emulator for the Atari Jaguar videogame system.
+Virtual Jaguar Rx is an emulator for the Atari Jaguar videogame system. It includes a debugger.
 
 .SH OPTIONS
 .TP
 .B [rom image file]
-Name of file to load;
+Name of file to load
 .TP
 .B \-a, \-\-alpine
 Run in Alpine emulation mode
@@ -27,7 +27,7 @@ Do not use Jaguar BIOS
 .B \-D, \-\-debugger
 Run in Debugger emulation mode
 .TP
-.B , \-\-dram-max
+.B \-\-dram-max
 Set the main ram to 8MB
 .TP
 .B \-g, \-\-gpu
@@ -48,16 +48,19 @@ Show command line help
 .SH SETTINGS
 .TP
 .B \-\-es\-all
-Erase all settings,
+Erase all settings
+.TP
 .B \-\-es\-ui
-Erase UI settings only,
+Erase UI settings only
+.TP
 .B \-\-es\-alpine
-Erase alpine mode settings only,
+Erase alpine mode settings only
+.TP
 .B \-\-es\-debugger
 Erase debugger mode settings only
 
 .SH SOUND
-DSP emulation is needed for audio output;
+DSP emulation is needed for audio output.
 .TP
 .B \-d, \-\-dsp
 Enable DSP emulation
@@ -89,38 +92,47 @@ Do not show emulation of tv static. This can be slow on low end CPUs.
 .TP
 The default key bindings are:
 .TP
-.B Ctrl-Q
-Quit virtualjaguar,
+.B Ctrl+Q
+Quit virtualjaguar
 .TP
-.B Ctrl-I
-Load a new program,
+.B Ctrl+I
+Pick file to load a new program
 .TP
 .B Ctrl+C
-Configure tab,
+Configure tab
 .TP
 .B Ctrl+S
-Emulator status,
+Emulator status
 .TP
 .B Ctrl+Shift+F5
-Restart program,
+Restart program
 .TP
 .B F11
-Step into code,
+Step into code
 .TP
 .B F10
-Step over code,
+Step over code
 .TP
 .B Esc
-Pause emulation,
+Pause emulation
 .TP
 .B F7
-Advance the emulation by a single frame,
+Advance the emulation by a single frame
 .TP
 .B F9
-Toggle full screen mode,
+Toggle full screen mode
 .TP
 .B F8
 Screenshot
+.TP
+.B Ctrl+B
+Function breakpoint
+.TP
+.B Ctrl+Alt+B
+Breakpoints list
+.TP
+.B Ctrl+Shift+F9
+Delete all breakpoints
 
 .SH CONTROLS
 .TP
@@ -128,31 +140,31 @@ The default key bindings for controller 1 are:
 (Key bindings can be changed in the configuration dialog.)
 .TP
 .B S
-Up,
+Up
 .TP
 .B X
-Down,
+Down
 .TP
 .B A
-Left,
+Left
 .TP
 .B D
-Right,
+Right
 .TP
 .B P
-Pause,
+Pause
 .TP
 .B O
-Option,
+Option
 .TP
 .B J
-Button C,
+Button C
 .TP
 .B K
-Button B,
+Button B
 .TP
 .B L
-Button A,
+Button A
 .TP
 .B 1 through 0
 Buttons 1 through 0 on the keypad
