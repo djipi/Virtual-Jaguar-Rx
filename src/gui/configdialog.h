@@ -17,7 +17,7 @@
 
 #define	NEWMODELSBIOSHANDLER				// New Jaguar models and bios usage handler
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 
 class GeneralTab;
 #ifdef NEWMODELSBIOSHANDLER

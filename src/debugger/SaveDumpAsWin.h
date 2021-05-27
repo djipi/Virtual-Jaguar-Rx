@@ -7,7 +7,7 @@
 #ifndef __SAVEDUMPASWIN_H__
 #define __SAVEDUMPASWIN_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 class SaveDumpAsWindow : public QWidget

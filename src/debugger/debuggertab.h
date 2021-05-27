@@ -11,7 +11,7 @@
 #ifndef __DEBUGGERTAB_H__
 #define __DEBUGGERTAB_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 
 class DebuggerTab: public QWidget
 {

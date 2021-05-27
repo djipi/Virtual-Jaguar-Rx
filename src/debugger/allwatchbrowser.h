@@ -11,7 +11,7 @@
 //#define AW_SUPPORTARRAY						// Support array
 //#define AW_SUPPORTSTRUCTURE					// Support structure
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 // Error code definitions
@@ -26,6 +26,7 @@ class AllWatchBrowserWindow: public QWidget
 {
 	Q_OBJECT
 
+#if 0
 	//
 	typedef struct WatchInfo
 	{
@@ -33,9 +34,11 @@ class AllWatchBrowserWindow: public QWidget
 		size_t addr;
 #endif
 		size_t TypeTag;
+		size_t Adr;
 		char *PtrVariableName;
 		char *PtrVariableBaseTypeName;
 	}S_WatchInfo;
+#endif
 
 	public:
 		AllWatchBrowserWindow(QWidget *parent = 0);
@@ -48,6 +51,10 @@ class AllWatchBrowserWindow: public QWidget
 	protected:
 		void keyPressEvent(QKeyEvent *);
 
+	protected slots:
+		void SearchSymbol(void);
+		void SelectSearchSymbol(void);
+
 	private:
 		QVBoxLayout *layout;
 #ifdef AW_LAYOUTTEXTS
@@ -57,8 +64,12 @@ class AllWatchBrowserWindow: public QWidget
 		QStandardItemModel *model;
 #endif
 		QStatusBar *statusbar;
-		WatchInfo *PtrWatchInfo;
+		//WatchInfo *PtrWatchInfo;
+		void **PtrWatchInfo;
 		size_t NbWatch;
+		QPushButton *search;
+		QLineEdit* symbol;
+		size_t CurrentWatch;
 };
 
 #endif	// __ALLWATCHBROWSER_H__

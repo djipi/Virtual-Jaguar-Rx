@@ -4,17 +4,22 @@
 // by Jean-Paul Mari
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
 // JPM   Dec./2016  Created this file, and added the DWARF format support
 // JPM  Sept./2018  Added LEB128 decoding features, and improve the DWARF parsing information
 // JPM   Oct./2018  Improve the DWARF parsing information, and the source file text reading; support the used source lines from DWARF structure, and the search paths for the files
+// JPM   Aug./2019  Added new functions to handle DWARF information, full filename fix
+// JPM   Mar./2020  Fix a random crash when reading the source lines information
+// JPM   Aug./2020  Added a source code file date check
+//  RG   Jan./2021  Linux build fixes
+// JPM   Apr./2021  Support the structure and union members
 //
 
 // To Do
-// To use pointers instead of arrays usage
-// To keep sources text file intact wihtout QT/HTML transformation
+// To use pointers instead of arrays usage (originally done to check if values are set at the right places)
 // 
 
 
@@ -22,17 +27,23 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include <libdwarf.h>
-#include <dwarf.h>
+#include <time.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include "libdwarf.h"
+#include "dwarf.h"
 #include "LEB128.h"
-
+#include "DWARFManager.h"
 
 // Definitions for debugging
-//#define DEBUG_NumCU			0x4d				// CU number to debug or undefine it
-//#define DEBUG_VariableName	"sound_death"				// Variable name to look for or undefine it
-//#define DEBUG_TypeName		"Cbuf_Execute"			// Type name to look for or undefine it
-//#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for or undefine it (not supported)
-//#define DEBUG_Filename		"net_jag.c"			// Filename to look for or undefine it
+//#define DEBUG_NumCU			0x2				// CU number to debug or undefine it
+//#define DEBUG_VariableName	"cvar_vars"				// Variable name to look for or undefine it
+//#define DEBUG_TypeName		"edict_t"			// Type name to look for or undefine it
+//#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for or undefine it (not used / not supported)
+//#define DEBUG_Filename		"crt0"			// Filename to look for or undefine it
+
+// Definitions for handling data
+//#define CONVERT_QT_HML								// Text will be converted as HTML
 
 // Definitions for the variables's typetag
 #define	TypeTag_structure			0x01			// structure
@@ -43,6 +54,7 @@
 #define	TypeTag_typedef				0x20			// typedef
 #define TypeTag_enumeration_type	0x40			// enumeration
 #define TypeTag_subroutine_type		0x80			// subroutine
+#define TypeTag_union				0x100			// union
 
 
 // Source line CU structure
@@ -65,14 +77,17 @@ typedef struct DMIStruct_LineSrc
 // Enumeration structure
 typedef struct EnumerationStruct
 {
-	char *PtrName;							// Enumeration's name
-	size_t value;							// Enumeration's value
+	char *PtrName;									// Enumeration's name
+	size_t value;									// Enumeration's value
 }S_EnumerationStruct;
 
 // Structure members structure
-//typedef struct StructureMembersStruct
-//{
-//}S_StructureMembersStruct;
+typedef struct StructureMembersStruct
+{
+	char *PtrName;									// Structure member's name
+	size_t TypeOffset;								// Structure member's offset on another type
+	size_t DataMemberLocation;						// Structure member's data member
+}S_StructureMembersStruct;
 
 // Base type internal structure
 typedef struct BaseTypeStruct
@@ -83,26 +98,29 @@ typedef struct BaseTypeStruct
 	size_t ByteSize;								// Type's Byte Size
 	size_t Encoding;								// Type's encoding
 	char *PtrName;									// Type's name
-	size_t NbEnumeration;							// Type's enumeration numbers
-	EnumerationStruct *PtrEnumeration;				// Type's enumeration
-//	StructureMembersStruct *PtrStructureMembers;	// Type's structure members
+	size_t NbEnumerations;							// Type's enumeration numbers
+	EnumerationStruct *PtrEnumerations;				// Type's enumeration
+	size_t NbStructureMembers;						// Type's numbers of structure members
+	StructureMembersStruct *PtrStructureMembers;	// Type's structure members
 }S_BaseTypeStruct;
 
 // Variables internal structure
 typedef struct VariablesStruct
 {
-	size_t Op;								// Variable's DW_OP
+	size_t Op;										// Variable's DW_OP
 	union
 	{
-		size_t Addr;						// Variable memory address
-		int Offset;							// Variable stack offset (signed)
+		size_t Addr;								// Variable memory address
+		int Offset;									// Variable stack offset (signed)
 	};
-	char *PtrName;							// Variable's name
-	size_t TypeOffset;						// Offset pointing on the Variable's Type
-	size_t TypeByteSize;					// Variable's Type byte size
-	size_t TypeTag;							// Variable's Type Tag
-	size_t TypeEncoding;					// Variable's Type encoding
-	char *PtrTypeName;						// Variable's Type name
+	char *PtrName;									// Variable's name
+	size_t TypeOffset;								// Offset pointing on the Variable's Type
+	size_t TypeByteSize;							// Variable's Type byte size
+	size_t TypeTag;									// Variable's Type Tag
+	size_t TypeEncoding;							// Variable's Type encoding
+	char *PtrTypeName;								// Variable's Type name
+	size_t NbTabVariables;							// Number of Variable's members
+	VariablesStruct **TabVariables;					// Variable's Members (used for structures at the moment)
 }S_VariablesStruct;
 
 // Sub program internal structure
@@ -125,8 +143,9 @@ typedef struct SubProgStruct
 typedef struct CUStruct
 {
 	size_t Tag;
+	size_t Language;								// Language (C, etc.) used by the source code
 	size_t LowPC, HighPC;							// Memory range for the code
-	char *PtrProducer;								// Pointer to the "Producer" text information (mostly compiler and compilation options used)
+	char *PtrProducer;								// "Producer" text information (mostly compiler and compilation options used)
 	char *PtrSourceFilename;						// Source file name
 	char *PtrSourceFileDirectory;					// Directory of the source file
 	char *PtrFullFilename;							// Pointer to full namefile (directory & filename)
@@ -141,8 +160,13 @@ typedef struct CUStruct
 	size_t NbVariables;								// Variables number
 	VariablesStruct *PtrVariables;					// Pointer to the global variables list structure
 	size_t NbFrames;								// Frames number
-	size_t NbLinesSrc;								// Number of used source lines
-	CUStruct_LineSrc *PtrLinesSrc;					// Pointer to the used source lines list structure
+	size_t NbUsedLinesSrc;							// Number of used source lines
+	size_t LastNumUsedLinesSrc;						// Last number line used
+	CUStruct_LineSrc *PtrUsedLinesSrc;				// Pointer to the used source lines list structure
+	char **PtrUsedLinesLoadSrc;						// Pointer lists to each used source line referenced by the CUStruct_LineSrc structure
+	size_t *PtrUsedNumLines;						// List of the number lines used
+	struct stat _statbuf;							// File information
+	DWARFstatus Status;								// File status
 }S_CUStruct;
 
 
@@ -155,9 +179,10 @@ Dwarf_Debug dbg;
 CUStruct *PtrCU;
 char **ListSearchPaths;
 size_t NbSearchPaths;
+struct stat FileElfExeInfo;
 
 
-//
+// Function declarations
 Dwarf_Handler DWARFManager_ErrorHandler(Dwarf_Ptr perrarg);
 void DWARFManager_InitDMI(void);
 void DWARFManager_CloseDMI(void);
@@ -167,10 +192,15 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables);
 void DWARFManager_SourceFileSearchPathsInit(void);
 void DWARFManager_SourceFileSearchPathsReset(void);
 void DWARFManager_SourceFileSearchPathsClose(void);
+void DWARFManager_ConformSlachesBackslashes(char *Ptr);
+#if 0
+size_t DWARFManager_GetNbGlobalVariables(void);
+size_t DWARFManager_GetNbLocalVariables(size_t Adr);
+#endif
 
 
 //
-Dwarf_Handler DWARFManager_ErrorHandler(Dwarf_Ptr perrarg)
+Dwarf_Handler DWARFManager_ErrorHandler(Dwarf_Ptr /* perrarg */)
 {
 	return	0;
 }
@@ -233,10 +263,11 @@ bool DWARFManager_Close(void)
 
 
 // Dwarf manager Elf init
-int	DWARFManager_ElfInit(Elf *ElfPtr)
+int	DWARFManager_ElfInit(Elf *ElfPtr, struct stat FileElfInfo)
 {
 	if ((LibDwarf = dwarf_elf_init(ElfPtr, DW_DLC_READ, (Dwarf_Handler)DWARFManager_ErrorHandler, errarg, &dbg, &error)) == DW_DLV_OK)
 	{
+		FileElfExeInfo = FileElfInfo;
 		DWARFManager_InitDMI();
 	}
 
@@ -271,21 +302,27 @@ bool DWARFManager_ElfClose(void)
 // Dwarf manager Compilation Units close
 void DWARFManager_CloseDMI(void)
 {
+	// loop on all CU
 	while (NbCU--)
 	{
+		// free pointers
 		free(PtrCU[NbCU].PtrFullFilename);
 		free(PtrCU[NbCU].PtrLoadSrc);
 		free(PtrCU[NbCU].PtrProducer);
 		free(PtrCU[NbCU].PtrSourceFilename);
 		free(PtrCU[NbCU].PtrSourceFileDirectory);
-		free(PtrCU[NbCU].PtrLinesSrc);
+		free(PtrCU[NbCU].PtrUsedLinesSrc);
+		free(PtrCU[NbCU].PtrUsedLinesLoadSrc);
+		free(PtrCU[NbCU].PtrUsedNumLines);
 
+		// free lines from the source code
 		while (PtrCU[NbCU].NbLinesLoadSrc--)
 		{
 			free(PtrCU[NbCU].PtrLinesLoadSrc[PtrCU[NbCU].NbLinesLoadSrc]);
 		}
 		free(PtrCU[NbCU].PtrLinesLoadSrc);
 
+		// free the functions information
 		while (PtrCU[NbCU].NbSubProgs--)
 		{
 			while (PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables--)
@@ -300,20 +337,36 @@ void DWARFManager_CloseDMI(void)
 		}
 		free(PtrCU[NbCU].PtrSubProgs);
 
+		// free the types
 		while (PtrCU[NbCU].NbTypes--)
 		{
 			free(PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrName);
+
+			// free the structure's members
+			while (PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers--)
+			{
+				free(PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers[PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers].PtrName);
+			}
+			free(PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers);
 		}
 		free(PtrCU[NbCU].PtrTypes);
 
+		// free variables
 		while (PtrCU[NbCU].NbVariables--)
 		{
 			free(PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].PtrName);
 			free(PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].PtrTypeName);
+
+			// free the variable's members
+			while (PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].NbTabVariables--)
+			{
+				free(PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].TabVariables[PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].NbTabVariables]);
+			}
 		}
 		free(PtrCU[NbCU].PtrVariables);
 	}
 
+	// free the CU
 	free(PtrCU);
 }
 
@@ -326,12 +379,14 @@ void DWARFManager_InitDMI(void)
 	Dwarf_Attribute	*atlist;
 	Dwarf_Attribute	return_attr1;
 	Dwarf_Half return_tagval, return_attr;
+	Dwarf_Half version, offset_size;
 	Dwarf_Addr return_lowpc, return_highpc, return_lineaddr;
 	Dwarf_Block *return_block;
-	Dwarf_Signed atcnt, cnt;
+	Dwarf_Signed atcnt, cnt, return_value;
 	Dwarf_Die return_sib, return_die, return_sub, return_subdie;
 	Dwarf_Off return_offset;
 	Dwarf_Line *linebuf;
+	Dwarf_Half form;
 	FILE *SrcFile;
 	char *return_string;
 	char *Ptr, *Ptr1;
@@ -341,7 +396,7 @@ void DWARFManager_InitDMI(void)
 	PtrCU = NULL;
 
 	// loop on the available Compilation Unit
-	while (dwarf_next_cu_header(dbg, NULL, NULL, NULL, NULL, &next_cu_header, &error) == DW_DLV_OK)
+	while (dwarf_next_cu_header_b(dbg, NULL, &version, NULL, NULL, &offset_size, NULL, &next_cu_header, &error) == DW_DLV_OK)
 	{
 		// Allocation of an additional Compilation Unit structure in the table
 		if (Ptr = (char *)realloc(PtrCU, ((NbCU + 1) * sizeof(CUStruct))))
@@ -426,6 +481,14 @@ void DWARFManager_InitDMI(void)
 											}
 											break;
 
+											// Language
+										case DW_AT_language:
+											if (dwarf_formudata(atlist[i], &return_uvalue, &error) == DW_DLV_OK)
+											{
+												PtrCU[NbCU].Language = return_uvalue;
+											}
+											break;
+
 										default:
 											break;
 										}
@@ -450,10 +513,12 @@ void DWARFManager_InitDMI(void)
 									PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + strlen((const char *)ListSearchPaths[i]) + 2);
 #if defined(_WIN32)
 									sprintf(PtrCU[NbCU].PtrFullFilename, "%s\\%s", ListSearchPaths[i], PtrCU[NbCU].PtrSourceFilename);
+									if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rb"))
 #else
 									sprintf(PtrCU[NbCU].PtrFullFilename, "%s/%s", ListSearchPaths[i], PtrCU[NbCU].PtrSourceFilename);
+									SrcFile = fopen(PtrCU[NbCU].PtrFullFilename, "rb");
+									if (SrcFile == NULL)
 #endif
-									if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rb"))
 									{
 										PtrCU[NbCU].PtrSourceFileDirectory = (char *)realloc(PtrCU[NbCU].PtrSourceFileDirectory, strlen(ListSearchPaths[i]) + 1);
 										strcpy(PtrCU[NbCU].PtrSourceFileDirectory, ListSearchPaths[i]);
@@ -468,29 +533,28 @@ void DWARFManager_InitDMI(void)
 								}
 							}
 
-							// Create full filename
-							Ptr = PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + strlen(PtrCU[NbCU].PtrSourceFileDirectory) + 2);
-#if defined(_WIN32)
-							sprintf(PtrCU[NbCU].PtrFullFilename, "%s\\%s", PtrCU[NbCU].PtrSourceFileDirectory, PtrCU[NbCU].PtrSourceFilename);
-#else
-							sprintf(PtrCU[NbCU].PtrFullFilename, "%s/%s", PtrCU[NbCU].PtrSourceFileDirectory, PtrCU[NbCU].PtrSourceFilename);
-#endif
-							// Conform slashes and backslashes
-							while (*Ptr)
+							// Conform slashes / backslashes for the filename
+							DWARFManager_ConformSlachesBackslashes(PtrCU[NbCU].PtrSourceFilename);
+
+							// Check if filename contains already the complete directory
+							if (PtrCU[NbCU].PtrSourceFilename[1] == ':')
 							{
-#if defined(_WIN32)
-								if (*Ptr == '/')
-								{
-									*Ptr = '\\';
-								}
-#else
-								if (*Ptr == '\\')
-								{
-									*Ptr = '/';
-								}
-#endif
-								Ptr++;
+								// Copy the filename as the full filename
+								PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + 1);
+								strcpy(PtrCU[NbCU].PtrFullFilename, PtrCU[NbCU].PtrSourceFilename);
 							}
+							else
+							{
+								// Create full filename and Conform slashes / backslashes
+								PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + strlen(PtrCU[NbCU].PtrSourceFileDirectory) + 2);
+#if defined(_WIN32)
+								sprintf(PtrCU[NbCU].PtrFullFilename, "%s\\%s", PtrCU[NbCU].PtrSourceFileDirectory, PtrCU[NbCU].PtrSourceFilename);
+#else
+								sprintf(PtrCU[NbCU].PtrFullFilename, "%s/%s", PtrCU[NbCU].PtrSourceFileDirectory, PtrCU[NbCU].PtrSourceFilename);
+#endif
+							}
+
+							DWARFManager_ConformSlachesBackslashes(PtrCU[NbCU].PtrFullFilename);
 
 							// Directory path clean-up
 #if defined(_WIN32)
@@ -507,65 +571,97 @@ void DWARFManager_InitDMI(void)
 								strcpy((Ptr1 + 1), (Ptr + 4));
 							}
 
-							// Open the source file as a binary file
-							if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rb"))
+							// Get the source file information
+							if (!stat(PtrCU[NbCU].PtrFullFilename, &PtrCU[NbCU]._statbuf))
 							{
-								if (!fseek(SrcFile, 0, SEEK_END))
+								// check the time stamp with the executable
+								if (PtrCU[NbCU]._statbuf.st_mtime <= FileElfExeInfo.st_mtime)
 								{
-									if ((PtrCU[NbCU].SizeLoadSrc = ftell(SrcFile)) > 0)
+									// Open the source file as a binary file
+#if defined(_WIN32)
+									if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rb"))
+#else
+                                    SrcFile = fopen(PtrCU[NbCU].PtrFullFilename, "rb");
+									if (SrcFile == NULL)
+#endif
 									{
-										if (!fseek(SrcFile, 0, SEEK_SET))
+										if (!fseek(SrcFile, 0, SEEK_END))
 										{
-											if (PtrCU[NbCU].PtrLoadSrc = Ptr = Ptr1 = (char *)calloc(1, (PtrCU[NbCU].SizeLoadSrc + 2)))
+											if ((PtrCU[NbCU].SizeLoadSrc = ftell(SrcFile)) > 0)
 											{
-												// Read whole file
-												if (fread_s(PtrCU[NbCU].PtrLoadSrc, PtrCU[NbCU].SizeLoadSrc, PtrCU[NbCU].SizeLoadSrc, 1, SrcFile) != 1)
+												if (!fseek(SrcFile, 0, SEEK_SET))
 												{
-													free(PtrCU[NbCU].PtrLoadSrc);
-													PtrCU[NbCU].PtrLoadSrc = NULL;
-													PtrCU[NbCU].SizeLoadSrc = 0;
-												}
-												else
-												{
-													// Eliminate all carriage return code '\r' (oxd)
-													do
+													if (PtrCU[NbCU].PtrLoadSrc = Ptr = Ptr1 = (char *)calloc(1, (PtrCU[NbCU].SizeLoadSrc + 2)))
 													{
-														if ((*Ptr = *Ptr1) != '\r')
+														// Read whole file
+#if defined(_WIN32)	&& defined(_MSC_VER)													
+														if (fread_s(PtrCU[NbCU].PtrLoadSrc, PtrCU[NbCU].SizeLoadSrc, PtrCU[NbCU].SizeLoadSrc, 1, SrcFile) != 1)
+#else
+														if (fread(PtrCU[NbCU].PtrLoadSrc, PtrCU[NbCU].SizeLoadSrc, 1, SrcFile) != 1)
+#endif
 														{
-															Ptr++;
+															free(PtrCU[NbCU].PtrLoadSrc);
+															PtrCU[NbCU].PtrLoadSrc = NULL;
+															PtrCU[NbCU].SizeLoadSrc = 0;
 														}
-													}
-													while (*Ptr1++);
-
-													// Get back the new text file size
-													PtrCU[NbCU].SizeLoadSrc = strlen(Ptr = PtrCU[NbCU].PtrLoadSrc);
-
-													// Make sure the text file finish with a new line code '\n' (0xa)
-													if (PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc - 1] != '\n')
-													{
-														PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc++] = '\n';
-														PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc] = 0;
-													}
-
-													// Reallocate text file
-													if (PtrCU[NbCU].PtrLoadSrc = Ptr = (char *)realloc(PtrCU[NbCU].PtrLoadSrc, (PtrCU[NbCU].SizeLoadSrc + 1)))
-													{
-														// Count line numbers, based on the new line code '\n' (0xa), and finish each line with 0
-														do
+														else
 														{
-															if (*Ptr == '\n')
+															// Eliminate all carriage return code '\r' (oxd)
+															do
 															{
-																PtrCU[NbCU].NbLinesLoadSrc++;
-																*Ptr = 0;
+																if ((*Ptr = *Ptr1) != '\r')
+																{
+																	Ptr++;
+																}
+															} while (*Ptr1++);
+
+															// Get back the new text file size
+															PtrCU[NbCU].SizeLoadSrc = strlen(Ptr = PtrCU[NbCU].PtrLoadSrc);
+
+															// Make sure the text file finish with a new line code '\n' (0xa)
+															if (PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc - 1] != '\n')
+															{
+																PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc++] = '\n';
+																PtrCU[NbCU].PtrLoadSrc[PtrCU[NbCU].SizeLoadSrc] = 0;
 															}
-														} while (*++Ptr);
+
+															// Reallocate text file
+															if (PtrCU[NbCU].PtrLoadSrc = Ptr = (char *)realloc(PtrCU[NbCU].PtrLoadSrc, (PtrCU[NbCU].SizeLoadSrc + 1)))
+															{
+																// Count line numbers, based on the new line code '\n' (0xa), and finish each line with 0
+																do
+																{
+																	if (*Ptr == '\n')
+																	{
+																		PtrCU[NbCU].NbLinesLoadSrc++;
+																		*Ptr = 0;
+																	}
+																} while (*++Ptr);
+															}
+														}
 													}
 												}
 											}
 										}
+
+										fclose(SrcFile);
+									}
+									else
+									{
+										// Source file doesn't exist
+										PtrCU[NbCU].Status = DWARFSTATUS_NOFILE;
 									}
 								}
-								fclose(SrcFile);
+								else
+								{
+									// Source file is outdated
+									PtrCU[NbCU].Status = DWARFSTATUS_OUTDATEDFILE;
+								}
+							}
+							else
+							{
+								// Source file doesn't have information
+								PtrCU[NbCU].Status = DWARFSTATUS_NOFILEINFO;
 							}
 							break;
 
@@ -575,24 +671,32 @@ void DWARFManager_InitDMI(void)
 					}
 
 					// Get the source lines table located in the CU
-					if (dwarf_srclines(return_sib, &linebuf, &cnt, &error) == DW_DLV_OK)
+					if ((dwarf_srclines(return_sib, &linebuf, &cnt, &error) == DW_DLV_OK) && (PtrCU[NbCU].Status == DWARFSTATUS_OK))
 					{
 						if (cnt)
 						{
-							PtrCU[NbCU].NbLinesSrc = cnt;
-							PtrCU[NbCU].PtrLinesSrc = (CUStruct_LineSrc *)calloc(cnt, sizeof(CUStruct_LineSrc));
+							PtrCU[NbCU].NbUsedLinesSrc = cnt;
+							PtrCU[NbCU].PtrUsedLinesSrc = (CUStruct_LineSrc *)calloc(cnt, sizeof(CUStruct_LineSrc));
+							PtrCU[NbCU].PtrUsedLinesLoadSrc = (char **)calloc(cnt, sizeof(char *));
+							PtrCU[NbCU].PtrUsedNumLines = (size_t *)calloc(cnt, sizeof(size_t));
+
+							// Get the addresses and their source line numbers
 							for (Dwarf_Signed i = 0; i < cnt; i++)
 							{
 								if (dwarf_lineaddr(linebuf[i], &return_lineaddr, &error) == DW_DLV_OK)
 								{
+									// Get the source line number
 									if (dwarf_lineno(linebuf[i], &return_uvalue, &error) == DW_DLV_OK)
 									{
-										PtrCU[NbCU].PtrLinesSrc[i].StartPC = return_lineaddr;
-										PtrCU[NbCU].PtrLinesSrc[i].NumLineSrc = return_uvalue;
+										PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC = return_lineaddr;
+										PtrCU[NbCU].PtrUsedLinesSrc[i].NumLineSrc = return_uvalue;
 									}
 								}
 							}
 						}
+
+						// Release the memory used by the source lines table located in the CU
+						dwarf_srclines_dealloc(dbg, linebuf, cnt);
 					}
 
 					// Check if the CU has child
@@ -694,6 +798,7 @@ void DWARFManager_InitDMI(void)
 
 								case DW_TAG_base_type:
 								case DW_TAG_typedef:
+								case DW_TAG_union_type:
 								case DW_TAG_structure_type:
 								case DW_TAG_pointer_type:
 								case DW_TAG_const_type:
@@ -781,9 +886,123 @@ void DWARFManager_InitDMI(void)
 											dwarf_dealloc(dbg, atlist[i], DW_DLA_ATTR);
 										}
 
-										PtrCU[NbCU].NbTypes++;
-
 										dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
+
+										switch (return_tagval)
+										{
+										case DW_TAG_structure_type:
+										case DW_TAG_union_type:
+											if (dwarf_child(return_die, &return_subdie, &error) == DW_DLV_OK)
+											{
+												do
+												{
+													return_sub = return_subdie;
+													if ((dwarf_tag(return_subdie, &return_tagval, &error) == DW_DLV_OK))
+													{
+														switch (return_tagval)
+														{
+														case DW_TAG_member:
+															if (dwarf_attrlist(return_subdie, &atlist, &atcnt, &error) == DW_DLV_OK)
+															{
+																// Allocate memory for this member
+																PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers = (StructureMembersStruct *)realloc(PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers, ((PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers + 1) * sizeof(StructureMembersStruct)));
+																memset(PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers + PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers, 0, sizeof(StructureMembersStruct));
+
+																for (Dwarf_Signed i = 0; i < atcnt; ++i)
+																{
+																	if (dwarf_whatattr(atlist[i], &return_attr, &error) == DW_DLV_OK)
+																	{
+																		if (dwarf_attr(return_subdie, return_attr, &return_attr1, &error) == DW_DLV_OK)
+																		{
+																			switch (return_attr)
+																			{
+																			case DW_AT_data_member_location:
+																				if (dwarf_whatform(return_attr1, &form, &error) == DW_DLV_OK)
+																				{
+																					if ((form == DW_FORM_data1) || (form == DW_FORM_data2) || (form == DW_FORM_data2) || (form == DW_FORM_data4) || (form == DW_FORM_data8) || (form == DW_FORM_udata))
+																					{
+																						if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+																						{
+																							PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers[PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers].DataMemberLocation = return_uvalue;
+																						}
+																					}
+																					else
+																					{
+																						if (form == DW_FORM_sdata)
+																						{
+																							if (dwarf_formsdata(return_attr1, &return_value, &error) == DW_DLV_OK)
+																							{
+																								PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers[PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers].DataMemberLocation = return_value;
+																							}
+																						}
+																						else
+																						{
+																							if (dwarf_formblock(return_attr1, &return_block, &error) == DW_DLV_OK)
+																							{
+																								switch (return_block->bl_len)
+																								{
+																								case 2:
+																								case 3:
+																								case 4:
+																									PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers[PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers].DataMemberLocation = ReadULEB128((char *)return_block->bl_data + 1);
+																									break;
+
+																								default:
+																									break;
+																								}
+
+																								dwarf_dealloc(dbg, return_block, DW_DLA_BLOCK);
+																							}
+																						}
+																					}
+																				}
+																				break;
+
+																			case DW_AT_type:
+																				//dwarf_whatform(return_attr1, &form, &error);
+																				if (dwarf_global_formref(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+																				{
+																					PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers[PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers].TypeOffset = return_uvalue;
+																				}
+																				break;
+
+																			case DW_AT_name:
+																				if (dwarf_formstring(return_attr1, &return_string, &error) == DW_DLV_OK)
+																				{
+																					PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers[PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers].PtrName = (char *)calloc(strlen(return_string) + 1, 1);
+																					strcpy(PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers[PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers].PtrName, return_string);
+
+																					dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
+																				}
+																				break;
+
+																				// Member's file number
+																			case DW_AT_decl_file:
+																				break;
+
+																				// Member's line number
+																			case DW_AT_decl_line:
+																				break;
+
+																			default:
+																				break;
+																			}
+																		}
+																	}
+																}
+																dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
+
+																PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers++;
+															}
+															break;
+														}
+													}
+												} while (dwarf_siblingof(dbg, return_sub, &return_subdie, &error) == DW_DLV_OK);
+											}
+											break;
+										}
+
+										PtrCU[NbCU].NbTypes++;
 									}
 									break;
 
@@ -877,19 +1096,14 @@ void DWARFManager_InitDMI(void)
 										// Get source line number and associated block of address
 										for (Dwarf_Signed i = 0; i < cnt; ++i)
 										{
-											if (dwarf_lineaddr(linebuf[i], &return_lineaddr, &error) == DW_DLV_OK)
+											// Check the presence of the line in the memory frame
+											if (PtrCU[NbCU].PtrUsedLinesSrc && (PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC >= return_lowpc) && (PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC <= return_highpc))
 											{
-												if (dwarf_lineno(linebuf[i], &return_uvalue, &error) == DW_DLV_OK)
-												{
-													if ((return_lineaddr >= return_lowpc) && (return_lineaddr <= return_highpc))
-													{
-														PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc = (DMIStruct_LineSrc *)realloc(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc, (PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc + 1) * sizeof(DMIStruct_LineSrc));
-														memset((void *)(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc + PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc), 0, sizeof(DMIStruct_LineSrc));
-														PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].StartPC = return_lineaddr;
-														PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].NumLineSrc = return_uvalue;
-														PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc++;
-													}
-												}
+												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc = (DMIStruct_LineSrc *)realloc(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc, (PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc + 1) * sizeof(DMIStruct_LineSrc));
+												memset((void *)(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc + PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc), 0, sizeof(DMIStruct_LineSrc));
+												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].StartPC = PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC;
+												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].NumLineSrc = PtrCU[NbCU].PtrUsedLinesSrc[i].NumLineSrc;
+												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc++;
 											}
 										}
 
@@ -1015,16 +1229,9 @@ void DWARFManager_InitDMI(void)
 						}
 						while (dwarf_siblingof(dbg, return_sib, &return_die, &error) == DW_DLV_OK);
 					}
-
-					// Release the memory used by the source lines
-					for (Dwarf_Signed i = 0; i < cnt; ++i)
-					{
-						dwarf_dealloc(dbg, linebuf[i], DW_DLA_LINE);
-					}
-					dwarf_dealloc(dbg, linebuf, DW_DLA_LIST);
 				}
 
-				// Set the source code lines for QT html/text conformity
+				// Set the source code lines
 				if (PtrCU[NbCU].NbLinesLoadSrc)
 				{
 					if (PtrCU[NbCU].PtrLinesLoadSrc = (char **)calloc(PtrCU[NbCU].NbLinesLoadSrc, sizeof(char *)))
@@ -1035,6 +1242,9 @@ void DWARFManager_InitDMI(void)
 							{
 								if (Ptr = DWARFManager_GetLineSrcFromNumLine(PtrCU[NbCU].PtrLoadSrc, (j + 1)))
 								{
+#ifndef CONVERT_QT_HML
+									strcpy(PtrCU[NbCU].PtrLinesLoadSrc[j], Ptr);
+#else
 									size_t i = 0;
 
 									while (*Ptr)
@@ -1073,6 +1283,7 @@ void DWARFManager_InitDMI(void)
 										}
 										Ptr++;
 									}
+#endif
 								}
 								PtrCU[NbCU].PtrLinesLoadSrc[j] = (char *)realloc(PtrCU[NbCU].PtrLinesLoadSrc[j], strlen(PtrCU[NbCU].PtrLinesLoadSrc[j]) + 1);
 							}
@@ -1117,23 +1328,28 @@ void DWARFManager_InitDMI(void)
 					}
 				}
 
-				// Set information based on used line numbers
-				if (PtrCU[NbCU].PtrLinesSrc)
+				// Check validity between used number lines and number lines in the source file
+				if (PtrCU[NbCU].LastNumUsedLinesSrc <= PtrCU[NbCU].NbLinesLoadSrc)
 				{
-					// Set the line source pointer for each used line numbers
-					if (PtrCU[NbCU].PtrLinesLoadSrc)
+					// Set information based on used line numbers
+					if (PtrCU[NbCU].PtrUsedLinesSrc)
 					{
-						for (size_t i = 0; i < PtrCU[NbCU].NbLinesSrc; i++)
+						// Set the line source pointers for each used line numbers
+						if (PtrCU[NbCU].PtrLinesLoadSrc)
 						{
-							PtrCU[NbCU].PtrLinesSrc[i].PtrLineSrc = PtrCU[NbCU].PtrLinesLoadSrc[PtrCU[NbCU].PtrLinesSrc[i].NumLineSrc - 1];
-						}
+							for (size_t i = 0; i < PtrCU[NbCU].NbUsedLinesSrc; i++)
+							{
+								PtrCU[NbCU].PtrUsedNumLines[i] = PtrCU[NbCU].PtrUsedLinesSrc[i].NumLineSrc - 1;
+								PtrCU[NbCU].PtrUsedLinesLoadSrc[i] = PtrCU[NbCU].PtrUsedLinesSrc[i].PtrLineSrc = PtrCU[NbCU].PtrLinesLoadSrc[PtrCU[NbCU].PtrUsedLinesSrc[i].NumLineSrc - 1];
+							}
 
-						// Setup memory range for the code if CU doesn't have already this information
-						// It is taken from the used lines structure
-						if (!PtrCU[NbCU].LowPC && (!PtrCU[NbCU].HighPC || (PtrCU[NbCU].HighPC == ~0)))
-						{
-							PtrCU[NbCU].LowPC = PtrCU[NbCU].PtrLinesSrc[0].StartPC;
-							PtrCU[NbCU].HighPC = PtrCU[NbCU].PtrLinesSrc[PtrCU[NbCU].NbLinesSrc - 1].StartPC;
+							// Setup memory range for the code if CU doesn't have already this information
+							// It is taken from the used lines structure
+							if (!PtrCU[NbCU].LowPC && (!PtrCU[NbCU].HighPC || (PtrCU[NbCU].HighPC == ~0)))
+							{
+								PtrCU[NbCU].LowPC = PtrCU[NbCU].PtrUsedLinesSrc[0].StartPC;
+								PtrCU[NbCU].HighPC = PtrCU[NbCU].PtrUsedLinesSrc[PtrCU[NbCU].NbUsedLinesSrc - 1].StartPC;
+							}
 						}
 					}
 				}
@@ -1160,32 +1376,53 @@ void DWARFManager_InitDMI(void)
 }
 
 
+// Conform slashes and backslashes
+void DWARFManager_ConformSlachesBackslashes(char *Ptr)
+{
+	while (*Ptr)
+	{
+#if defined(_WIN32)
+		if (*Ptr == '/')
+		{
+			*Ptr = '\\';
+		}
+#else
+		if (*Ptr == '\\')
+		{
+			*Ptr = '/';
+		}
+#endif
+		Ptr++;
+	}
+}
+
+
 // Variables information initialisation
 void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 {
-	size_t j, TypeOffset;
-
 #ifdef DEBUG_VariableName
 	if (PtrVariables->PtrName && !strcmp(PtrVariables->PtrName, DEBUG_VariableName))
 #endif
 	{
 		PtrVariables->PtrTypeName = (char *)calloc(1000, 1);
-		TypeOffset = PtrVariables->TypeOffset;
+		size_t TypeOffset = PtrVariables->TypeOffset;
 
-		for (j = 0; j < PtrCU[NbCU].NbTypes; j++)
+		for (size_t j = 0; j < PtrCU[NbCU].NbTypes; j++)
 		{
 			if (TypeOffset == PtrCU[NbCU].PtrTypes[j].Offset)
 			{
 				switch (PtrCU[NbCU].PtrTypes[j].Tag)
 				{
+					// subroutine / function pointer
 				case DW_TAG_subroutine_type:
 					PtrVariables->TypeTag |= TypeTag_subroutine_type;
 					strcat(PtrVariables->PtrTypeName, " (* ) ()");
 					break;
 
-					// Structure type tag
+					// structure & union type tag
 				case DW_TAG_structure_type:
-					PtrVariables->TypeTag |= TypeTag_structure;
+				case DW_TAG_union_type:
+					PtrVariables->TypeTag |= (PtrCU[NbCU].PtrTypes[j].Tag == DW_TAG_structure_type) ? TypeTag_structure : TypeTag_union;
 					if (!(PtrVariables->TypeTag & TypeTag_typedef))
 					{
 						if (PtrCU[NbCU].PtrTypes[j].PtrName)
@@ -1201,19 +1438,36 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 					{
 						if ((PtrVariables->TypeTag & TypeTag_pointer))
 						{
-							strcat(PtrVariables->PtrTypeName, " *");
+							strcat(PtrVariables->PtrTypeName, "* ");
+						}
+
+						if (PtrVariables->Op)
+						{
+							// fill the structure members
+							PtrVariables->TabVariables = (VariablesStruct**)calloc(PtrCU[NbCU].PtrTypes[j].NbStructureMembers, sizeof(VariablesStruct*));
+							for (size_t i = 0; i < PtrCU[NbCU].PtrTypes[j].NbStructureMembers; i++)
+							{
+								//if (PtrVariables->PtrName != PtrCU[NbCU].PtrTypes[j].PtrStructureMembers[i].PtrName)
+								{
+									PtrVariables->TabVariables[PtrVariables->NbTabVariables] = (VariablesStruct*)calloc(1, sizeof(VariablesStruct));
+									PtrVariables->TabVariables[PtrVariables->NbTabVariables]->PtrName = PtrCU[NbCU].PtrTypes[j].PtrStructureMembers[i].PtrName;
+									PtrVariables->TabVariables[PtrVariables->NbTabVariables]->TypeOffset = PtrCU[NbCU].PtrTypes[j].PtrStructureMembers[i].TypeOffset;
+									PtrVariables->TabVariables[PtrVariables->NbTabVariables]->Offset = (int)PtrCU[NbCU].PtrTypes[j].PtrStructureMembers[i].DataMemberLocation;
+									DWARFManager_InitInfosVariable(PtrVariables->TabVariables[PtrVariables->NbTabVariables++]);
+								}
+							}
 						}
 					}
 					break;
 
-					// Pointer type tag
+					// pointer type tag
 				case DW_TAG_pointer_type:
 					PtrVariables->TypeTag |= TypeTag_pointer;
 					PtrVariables->TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
 					PtrVariables->TypeEncoding = 0x10;
 					if (!(TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
 					{
-						strcat(PtrVariables->PtrTypeName, "void *");
+						strcat(PtrVariables->PtrTypeName, "void* ");
 					}
 					else
 					{
@@ -1284,7 +1538,7 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 					}
 					if ((PtrVariables->TypeTag & TypeTag_pointer))
 					{
-						strcat(PtrVariables->PtrTypeName, " *");
+						strcat(PtrVariables->PtrTypeName, "* ");
 					}
 					else
 					{
@@ -1330,14 +1584,18 @@ char *DWARFManager_GetSymbolnameFromAdr(size_t Adr)
 
 // Get complete source filename based from address
 // Return NULL if no source filename exists
-// Return the existence status (true or false) in Error
-char *DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error)
+// Return the existence status in Status if pointer not NULL
+char *DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, DWARFstatus *Status)
 {
 	for (size_t i = 0; i < NbCU; i++)
 	{
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
-			*Error = PtrCU[i].PtrLoadSrc ? true : false;
+			if (Status)
+			{
+				*Status = PtrCU[i].Status;
+			}
+
 			return PtrCU[i].PtrFullFilename;
 		}
 	}
@@ -1367,6 +1625,114 @@ char *DWARFManager_GetLineSrcFromNumLine(char *PtrSrcFile, size_t NumLine)
 }
 
 
+// Get number of variables
+// A NULL address will return the numbre of global variables, otherwise it will return the number of local variables
+size_t DWARFManager_GetNbVariables(size_t Adr)
+{
+	// check the address
+	if (Adr)
+	{
+		for (size_t i = 0; i < NbCU; i++)
+		{
+			if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
+			{
+				for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
+				{
+					if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
+					{
+						return PtrCU[i].PtrSubProgs[j].NbVariables;
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		size_t NbVariables = 0;
+
+		for (size_t i = 0; i < NbCU; i++)
+		{
+			NbVariables += PtrCU[i].NbVariables;
+		}
+
+		return NbVariables;
+	}
+
+	return 0;
+#if 0
+	return Adr ? DWARFManager_GetNbLocalVariables(Adr) : DWARFManager_GetNbGlobalVariables();
+#endif
+}
+
+
+// Get variable's information
+// A NULL address will return the pointer to the global variable structure, otherwise it will return the local's one
+void* DWARFManager_GetInfosVariable(size_t Adr, size_t Index)
+{
+	// check the address
+	if (Adr)
+	{
+		// get the pointer's information from a local variable
+		for (size_t i = 0; i < NbCU; i++)
+		{
+			if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
+			{
+				for (size_t j = 0; j < PtrCU[i].NbSubProgs; j++)
+				{
+					if ((Adr >= PtrCU[i].PtrSubProgs[j].LowPC) && (Adr < PtrCU[i].PtrSubProgs[j].HighPC))
+					{
+						return &PtrCU[i].PtrSubProgs[j].PtrVariables[Index - 1];
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		// get the pointer's information from a global variable
+		for (size_t i = 0; i < NbCU; i++)
+		{
+			if (PtrCU[i].NbVariables)
+			{
+				if (Index <= PtrCU[i].NbVariables)
+				{
+					return &PtrCU[i].PtrVariables[Index - 1];
+				}
+				else
+				{
+					Index -= PtrCU[i].NbVariables;
+				}
+			}
+		}
+	}
+
+	return NULL;
+}
+
+
+// Get global variable memory address based on his name
+// Return 0 if not found, or will return the first occurence found
+size_t DWARFManager_GetGlobalVariableAdrFromName(char *VariableName)
+{
+	for (size_t i = 0; i < NbCU; i++)
+	{
+		if (PtrCU[i].NbVariables)
+		{
+			for (size_t j = 0; j < PtrCU[i].NbVariables; j++)
+			{
+				if (!strcmp(PtrCU[i].PtrVariables[j].PtrName, VariableName))
+				{
+					return PtrCU[i].PtrVariables[j].Addr;
+				}
+			}
+		}
+	}
+
+	return 0;
+}
+
+
+#if 0
 // Get number of variables referenced by the function range address
 size_t DWARFManager_GetNbLocalVariables(size_t Adr)
 {
@@ -1385,6 +1751,21 @@ size_t DWARFManager_GetNbLocalVariables(size_t Adr)
 	}
 
 	return 0;
+}
+
+
+// Get Compilation Unit / global variables numbers
+// Return number of variables
+size_t DWARFManager_GetNbGlobalVariables(void)
+{
+	size_t NbVariables = 0;
+
+	for (size_t i = 0; i < NbCU; i++)
+	{
+		NbVariables += PtrCU[i].NbVariables;
+	}
+
+	return NbVariables;
 }
 
 
@@ -1545,21 +1926,6 @@ char *DWARFManager_GetLocalVariableTypeName(size_t Adr, size_t Index)
 }
 
 
-// Get Compilation Unit / global variables numbers
-// Return number of variables
-size_t DWARFManager_GetNbGlobalVariables(void)
-{
-	size_t NbVariables = 0;
-
-	for (size_t i = 0; i < NbCU; i++)
-	{
-		NbVariables += PtrCU[i].NbVariables;
-	}
-
-	return NbVariables;
-}
-
-
 // Get global variable type name based on his index (starting from 1)
 // Return NULL if not found
 // May return NULL if there is not type linked to the variable's index
@@ -1676,28 +2042,6 @@ size_t DWARFManager_GetGlobalVariableAdr(size_t Index)
 }
 
 
-// Get global variable memory address based on his name
-// Return 0 if not found, or will return the first occurence found
-size_t DWARFManager_GetGlobalVariableAdrFromName(char *VariableName)
-{
-	for (size_t i = 0; i < NbCU; i++)
-	{
-		if (PtrCU[i].NbVariables)
-		{
-			for (size_t j = 0; j < PtrCU[i].NbVariables; j++)
-			{
-				if (!strcmp(PtrCU[i].PtrVariables[j].PtrName,VariableName))
-				{
-					return PtrCU[i].PtrVariables[j].Addr;
-				}
-			}
-		}
-	}
-
-	return 0;
-}
-
-
 // Get global variable name based on his index (starting from 1)
 // Return name's pointer text found, or will return NULL if no variable can be found
 char *DWARFManager_GetGlobalVariableName(size_t Index)
@@ -1719,6 +2063,7 @@ char *DWARFManager_GetGlobalVariableName(size_t Index)
 
 	return NULL;
 }
+#endif
 
 
 // Get text line from source based on address and his tag
@@ -1787,9 +2132,16 @@ size_t DWARFManager_GetNumLineFromAdr(size_t Adr, size_t Tag)
 					{
 						for (size_t k = 0; k < PtrCU[i].PtrSubProgs[j].NbLinesSrc; k++)
 						{
-							if ((PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].StartPC == Adr) && (!Tag || (PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].Tag == Tag)))
+							if (PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].StartPC <= Adr)
 							{
-								return PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].NumLineSrc;
+								if ((PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].StartPC == Adr) && (!Tag || (PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].Tag == Tag)))
+								{
+									return PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k].NumLineSrc;
+								}
+							}
+							else
+							{
+								return PtrCU[i].PtrSubProgs[j].PtrLinesSrc[k - 1].NumLineSrc;
 							}
 						}
 					}
@@ -1803,11 +2155,11 @@ size_t DWARFManager_GetNumLineFromAdr(size_t Adr, size_t Tag)
 			}
 
 			// Check if a used line is found with the address
-			for (size_t j = 0; j < PtrCU[i].NbLinesSrc; j++)
+			for (size_t j = 0; j < PtrCU[i].NbUsedLinesSrc; j++)
 			{
-				if (PtrCU[i].PtrLinesSrc[j].StartPC == Adr)
+				if (PtrCU[i].PtrUsedLinesSrc[j].StartPC == Adr)
 				{
-					return PtrCU[i].PtrLinesSrc[j].NumLineSrc;
+					return PtrCU[i].PtrUsedLinesSrc[j].NumLineSrc;
 				}
 			}
 		}
@@ -1836,6 +2188,57 @@ char *DWARFManager_GetFunctionName(size_t Adr)
 	}
 
 	return NULL;
+}
+
+
+// Get number of lines of texts source list from source index
+size_t DWARFManager_GetSrcNbListPtrFromIndex(size_t Index, bool Used)
+{
+	if (!Used)
+	{
+		return PtrCU[Index].NbLinesLoadSrc;
+	}
+	else
+	{
+		return PtrCU[Index].NbUsedLinesSrc;
+	}
+}
+
+
+// Get text source line number list pointer from source index
+// Return NULL for the text source used list 
+size_t *DWARFManager_GetSrcNumLinesPtrFromIndex(size_t Index, bool Used)
+{
+	if (Used)
+	{
+		return	PtrCU[Index].PtrUsedNumLines;
+	}
+	else
+	{
+		return NULL;
+	}
+}
+
+
+// Get text source list pointers from source index
+// Return NULL for the text source used list 
+char **DWARFManager_GetSrcListPtrFromIndex(size_t Index, bool Used)
+{
+	if (!Used)
+	{
+		return PtrCU[Index].PtrLinesLoadSrc;
+	}
+	else
+	{
+		return PtrCU[Index].PtrUsedLinesLoadSrc;
+	}
+}
+
+
+// Get source language
+size_t DWARFManager_GetSrcLanguageFromIndex(size_t Index)
+{
+	return PtrCU[Index].Language;
 }
 
 
@@ -1898,15 +2301,22 @@ char *DWARFManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine)
 
 
 // Get number of source code filenames
-size_t DWARFManager_GetNbFullSourceFilename(void)
+size_t DWARFManager_GetNbSources(void)
 {
 	return NbCU;
 }
 
 
-// Get source code filename based on index (starting from 0)
+// Get source code filename, including his directory, based on index (starting from 0)
 char *DWARFManager_GetNumFullSourceFilename(size_t Index)
 {
 	return (PtrCU[Index].PtrFullFilename);
+}
+
+
+// Get source code filename based on index (starting from 0)
+char *DWARFManager_GetNumSourceFilename(size_t Index)
+{
+	return (PtrCU[Index].PtrSourceFilename);
 }
 

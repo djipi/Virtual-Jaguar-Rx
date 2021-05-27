@@ -8,7 +8,7 @@
 #ifndef __CPUBROWSER_H__
 #define __CPUBROWSER_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 class CPUBrowserWindow: public QWidget

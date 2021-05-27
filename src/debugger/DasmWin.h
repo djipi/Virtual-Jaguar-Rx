@@ -11,7 +11,7 @@
 #ifndef __DASMWIN_H__
 #define __DASMWIN_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 //class DasmWindow: public QMdiSubWindow

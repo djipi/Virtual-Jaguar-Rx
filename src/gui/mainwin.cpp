@@ -5,6 +5,8 @@
 //
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
+
 //
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
@@ -23,7 +25,10 @@
 // JPM   Oct./2018  Added search paths in the settings, breakpoints feature, cartridge view menu
 // JPM  11/18/2018  Fix crash with non-debugger mode
 // JPM  April/2019  Added ELF sections check, added a save memory dump
-// JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only
+// JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only, added a HW registers browser and source level tracing
+// JPM  Marc./2020  Added the step over for source level tracing
+//  RG   Jan./2021  Linux build fixes
+// JPM   Apr./2021  Handle number of M68K cycles used in tracing mode, added video output display in a window
 //
 
 // FIXED:
@@ -36,10 +41,10 @@
 //
 // STILL TO BE DONE:
 //
+// - The source file listing do not need to be refresh more than one time
 // - Fix bug in switching between PAL & NTSC in fullscreen mode.
 // - Remove SDL dependencies (sound, mainly) from Jaguar core lib
-// - Fix inconsistency with trailing slashes in paths (eeproms needs one,
-//   software doesn't)
+// - Fix inconsistency with trailing slashes in paths (eeproms needs one, software doesn't)
 //
 // SFDX CODE: S1E9T8H5M23YS
 
@@ -71,6 +76,7 @@
 #include "debug/stackbrowser.h"
 #include "debug/opbrowser.h"
 #include "debug/riscdasmbrowser.h"
+#include "debug/hwregsbrowser.h"
 
 #include "dac.h"
 #include "jaguar.h"
@@ -88,9 +94,10 @@
 #include "m68000/m68kinterface.h"
 
 #include "debugger/DBGManager.h"
-//#include "debugger/VideoWin.h"
+#include "debugger/VideoWin.h"
 //#include "debugger/DasmWin.h"
-#include "debugger/m68KDasmWin.h"
+#include "debugger/SourcesWin.h"
+#include "debugger/m68kDasmWin.h"
 #include "debugger/GPUDasmWin.h"
 #include "debugger/DSPDasmWin.h"
 #include "debugger/memory1browser.h"
@@ -194,11 +201,13 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	opBrowseWin = new OPBrowserWindow(this);
 	m68kDasmBrowseWin = new M68KDasmBrowserWindow(this);
 	riscDasmBrowseWin = new RISCDasmBrowserWindow(this);
+	hwRegsBrowseWin = new HWRegsBrowserWindow(this);
 
 	// Windows debugger mode features
 	if (vjs.softTypeDebugger)
 	{
-		//VideoOutputWin = new VideoOutputWindow(this);
+		VideoOutputWin = new VideoOutputWindow(this);
+		//VideoOutputWin->show();
 		//VideoOutputWin->setCentralWidget()
 		//DasmWin = new DasmWindow();
 		//DasmWin = new DasmWindow(this);
@@ -242,9 +251,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 #endif
 		// Setup disasm tabs
 		dasmtabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-		dasmtabWidget->addTab(m68kDasmWin = new m68KDasmWindow(this), tr("M68000"));
+		dasmtabWidget->addTab(SourcesWin = new SourcesWindow(this), tr("Sources"));
+		dasmtabWidget->setCurrentIndex(dasmtabWidget->addTab(m68kDasmWin = new m68KDasmWindow(this), tr("M68000")));
 		dasmtabWidget->addTab(GPUDasmWin = new GPUDasmWindow(this), tr("GPU"));
 		dasmtabWidget->addTab(DSPDasmWin = new DSPDasmWindow(this), tr("DSP"));
+		connect(dasmtabWidget, SIGNAL(currentChanged(const int)), this, SLOT(SelectdasmtabWidget(const int)));
 #if 1
 		setCentralWidget(dasmtabWidget);
 #endif
@@ -432,9 +443,9 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		saveDumpAsAct->setDisabled(false);
 		connect(saveDumpAsAct, SIGNAL(triggered()), this, SLOT(ShowSaveDumpAsWin()));
 
-		//VideoOutputAct = new QAction(tr("Output Video"), this);
-		//VideoOutputAct->setStatusTip(tr("Shows the output video window"));
-		//connect(VideoOutputAct, SIGNAL(triggered()), this, SLOT(ShowVideoOutputWin()));
+		VideoOutputAct = new QAction(tr("Output Video"), this);
+		VideoOutputAct->setStatusTip(tr("Shows the output video window"));
+		connect(VideoOutputAct, SIGNAL(triggered()), this, SLOT(ShowVideoOutputWin()));
 
 		//DasmAct = new QAction(tr("Disassembly"), this);
 		//DasmAct->setStatusTip(tr("Shows the disassembly window"));
@@ -515,6 +526,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	m68kDasmBrowseAct->setStatusTip(tr("Shows the 68K disassembly browser window"));
 	connect(m68kDasmBrowseAct, SIGNAL(triggered()), this, SLOT(ShowM68KDasmBrowserWin()));
 
+	// HW registers browser window
+	hwRegsBrowseAct = new QAction(QIcon(":/res/tool-hw-regs.png"), tr("HW Registers Browser"), this);
+	hwRegsBrowseAct->setStatusTip(tr("Shows the HW registers browser window"));
+	connect(hwRegsBrowseAct, SIGNAL(triggered()), this, SLOT(ShowHWRegsBrowserWin()));
+
 	// Risc (DSP / GPU) disassembly browser window
 	riscDasmBrowseAct = new QAction(QIcon(":/res/tool-risc-dis.png"), tr("RISC Listing Browser"), this);
 	riscDasmBrowseAct->setStatusTip(tr("Shows the RISC disassembly browser window"));
@@ -566,11 +582,9 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugWindowExceptionMenu = debugWindowsMenu->addMenu(tr("&Exception"));
 			debugWindowExceptionMenu->addAction(exceptionVectorTableBrowseAct);
 			debugWindowsMenu->addSeparator();
-#if 0
 			debugWindowOutputMenu = debugWindowsMenu->addMenu(tr("&Output"));
 			debugWindowOutputMenu->addAction(VideoOutputAct);
 			debugWindowsMenu->addSeparator();
-#endif
 			debugWindowsWatchMenu = debugWindowsMenu->addMenu(tr("&Watch"));
 			debugWindowsWatchMenu->addAction(allWatchBrowseAct);
 			debugWindowsMenu->addAction(LocalBrowseAct);
@@ -592,6 +606,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugWindowsBrowsesMenu->addAction(opBrowseAct);
 			debugWindowsBrowsesMenu->addAction(m68kDasmBrowseAct);
 			debugWindowsBrowsesMenu->addAction(riscDasmBrowseAct);
+			debugWindowsBrowsesMenu->addAction(hwRegsBrowseAct);
 			debugMenu->addSeparator();
 			debugMenu->addAction(pauseAct);
 			debugMenu->addAction(frameAdvanceAct);
@@ -620,6 +635,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugMenu->addAction(opBrowseAct);
 			debugMenu->addAction(m68kDasmBrowseAct);
 			debugMenu->addAction(riscDasmBrowseAct);
+			debugMenu->addAction(hwRegsBrowseAct);
 		}
 	}
 
@@ -676,6 +692,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		debugbar->addAction(opBrowseAct);
 		debugbar->addAction(m68kDasmBrowseAct);
 		debugbar->addAction(riscDasmBrowseAct);
+		debugbar->addAction(hwRegsBrowseAct);
 	}
 
 	// Add actions to the main window, as hiding widgets with them
@@ -845,6 +862,17 @@ void MainWin::SyncUI(void)
 	// Reset the timer to be what was set in the command line (if any):
 //	timer->setInterval(vjs.hardwareTypeNTSC ? 16 : 20);
 	timer->start(vjs.hardwareTypeNTSC ? 16 : 20);
+}
+
+
+// 
+void MainWin::SelectdasmtabWidget(const int Index)
+{
+	// check sources tab
+	if (Index == 0)
+	{
+		SourcesWin->RefreshContents();
+	}
 }
 
 
@@ -1160,6 +1188,7 @@ static uint32_t refresh = 0;
 
 	//if (!vjs.softTypeDebugger)
 		videoWidget->updateGL();
+		//vjs.softTypeDebugger ? VideoOutputWin->RefreshContents(videoWidget) : NULL;
 
 	// FPS handling
 	// Approach: We use a ring buffer to store times (in ms) over a given
@@ -1303,6 +1332,7 @@ void MainWin::ToggleRunState(void)
 			}
 
 			videoWidget->updateGL();
+			//vjs.softTypeDebugger ? VideoOutputWin->RefreshContents(videoWidget) : NULL;
 
 			cpuBrowseWin->HoldBPM();
 			cpuBrowseWin->HandleBPMContinue();
@@ -1325,6 +1355,7 @@ void MainWin::ToggleRunState(void)
 		cpuBrowseWin->UnholdBPM();
 	}
 
+	emuStatusWin->ResetM68KCycles();
 	// Pause/unpause any running/non-running threads...
 	DACPauseAudioThread(!running);
 }
@@ -1470,6 +1501,7 @@ void MainWin::LoadSoftware(QString file)
 	{
 		m68k_set_reg(M68K_REG_A6, 0);
 		m68kDasmWin->SetAddress(jaguarRunAddress);
+		SourcesWin->Init();
 		//pauseAct->setDisabled(false);
 		//pauseAct->setChecked(true);
 		ToggleRunState();
@@ -1534,6 +1566,7 @@ void MainWin::DisableAllBreakpoints(void)
 // Open, or display, the new breakpoint function window
 void MainWin::ShowNewFunctionBreakpointWin(void)
 {
+	NewFunctionBreakpointWin->SetFnctBreakpointWin(BreakpointsWin);
 	NewFunctionBreakpointWin->show();
 	ShowBreakpointsWin();
 }
@@ -1557,7 +1590,18 @@ void MainWin::ShowSaveDumpAsWin(void)
 // Step Into trace
 void MainWin::DebuggerTraceStepInto(void)
 {
-	JaguarStepInto();
+	if (SourcesWin->isVisible() && SourcesWin->GetTraceStatus())
+	{
+		while (!SourcesWin->CheckChangeLine())
+		{
+			emuStatusWin->UpdateM68KCycles(JaguarStepInto());
+		}
+	}
+	else
+	{
+		emuStatusWin->UpdateM68KCycles(JaguarStepInto());
+	}
+
 	videoWidget->updateGL();
 	RefreshWindows();
 #ifdef _MSC_VER
@@ -1577,11 +1621,14 @@ void MainWin::DebuggerRestart(void)
 	m68k_set_reg(M68K_REG_PC, jaguarRunAddress);
 	m68k_set_reg(M68K_REG_SP, vjs.DRAM_size);
 #endif
+	dasmtabWidget->setCurrentIndex(1);		// set focus on the disasm M68K tab
 	m68k_set_reg(M68K_REG_A6, 0);
 	m68k_brk_hitcounts_reset();
+	emuStatusWin->ResetM68KCycles();
 	bpmHitCounts = 0;
 	DebuggerResetWindows();
 	CommonResetWindows();
+	SourcesWin->Init();
 	RefreshWindows();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Restart function !!!")
@@ -1594,7 +1641,18 @@ void MainWin::DebuggerRestart(void)
 // Step Over trace
 void MainWin::DebuggerTraceStepOver(void)
 {
-	JaguarStepOver(0);
+	if (SourcesWin->isVisible() && SourcesWin->GetTraceStatus())
+	{
+		while (!SourcesWin->CheckChangeLine())
+		{
+			emuStatusWin->UpdateM68KCycles(JaguarStepOver(0));
+		}
+	}
+	else
+	{
+		emuStatusWin->UpdateM68KCycles(JaguarStepOver(0));
+	}
+
 	videoWidget->updateGL();
 	RefreshWindows();
 #ifdef _MSC_VER
@@ -1614,6 +1672,7 @@ void MainWin::FrameAdvance(void)
 	JaguarExecuteNew();
 	//if (!vjs.softTypeDebugger)
 		videoWidget->updateGL();
+		//vjs.softTypeDebugger ? VideoOutputWin->RefreshContents(videoWidget) : NULL;
 	ToggleRunState();
 	// Need to execute 1 frames' worth of DSP thread as well :-/
 
@@ -1764,6 +1823,7 @@ void MainWin::ShowCPUBrowserWin(void)
 }
 
 
+// Show the OP browser window
 void MainWin::ShowOPBrowserWin(void)
 {
 	opBrowseWin->show();
@@ -1771,6 +1831,15 @@ void MainWin::ShowOPBrowserWin(void)
 }
 
 
+// Show the HW registers browser window
+void MainWin::ShowHWRegsBrowserWin(void)
+{
+	hwRegsBrowseWin->show();
+	hwRegsBrowseWin->RefreshContents();
+}
+
+
+// Show the M68K browser window
 void MainWin::ShowM68KDasmBrowserWin(void)
 {
 	m68kDasmBrowseWin->show();
@@ -1796,17 +1865,17 @@ void	MainWin::ShowDasmWin(void)
 
 
 // 
-#if 0
 void MainWin::ShowVideoOutputWin(void)
 {
 	//VideoOutputWindowCentrale = mainWindowCentrale->addSubWindow(videoWidget);
 	//VideoOutputWindowCentrale->setWindowTitle(QString(tr("Video output")));
 	//VideoOutputWindowCentrale->show();
 	//memBrowseWin->show();
-	//VideoOutputWin->show();
+	VideoOutputWin->show();
+	VideoOutputWin->SetupVideo(videoWidget);
+	//VideoOutputWin->adjustSize();
 	//VideoOutputWin->RefreshContents(videoWidget);
 }
-#endif
 
 
 // Resize video window based on zoom factor
@@ -1889,6 +1958,7 @@ void MainWin::ReadSettings(void)
 	strcpy(vjs.absROMPath, settings.value("DefaultABS", "").toString().toUtf8().data());
 	vjs.refresh = settings.value("refresh", 60).toUInt();
 	vjs.allowWritesToROM = settings.value("writeROM", false).toBool();
+	vjs.allowM68KExceptionCatch = settings.value("M68KExceptionCatch", false).toBool();
 	settings.endGroup();
 
 	// Read settings from the Keybindings
@@ -2027,6 +2097,13 @@ void MainWin::ReadUISettings(void)
 		size = settings.value("opBrowseWinSize", QSize(400, 400)).toSize();
 		opBrowseWin->resize(size);
 
+		// HW registers UI information
+		pos = settings.value("hwRegsBrowseWinPos", QPoint(200, 200)).toPoint();
+		hwRegsBrowseWin->move(pos);
+		settings.value("hwRegsBrowseWinIsVisible", false).toBool() ? ShowHWRegsBrowserWin() : void();
+		size = settings.value("hwRegsBrowseWinSize", QSize(400, 400)).toSize();
+		hwRegsBrowseWin->resize(size);
+
 		// RISC disassembly UI information
 		pos = settings.value("riscDasmBrowseWinPos", QPoint(200, 200)).toPoint();
 		riscDasmBrowseWin->move(pos);
@@ -2103,6 +2180,13 @@ void MainWin::ReadUISettings(void)
 		settings.value("SaveDumpAsWinIsVisible", false).toBool() ? ShowSaveDumpAsWin() : void();
 		size = settings.value("SaveDumpAsWinSize", QSize(400, 400)).toSize();
 		SaveDumpAsWin->resize(size);
+
+		// save output video UI information
+		pos = settings.value("VideoOutputWinPos", QPoint(200, 200)).toPoint();
+		VideoOutputWin->move(pos);
+		settings.value("VideoOutputWinIsVisible", false).toBool() ? ShowVideoOutputWin() : void();
+		size = settings.value("VideoOutputWinSize", QSize(400, 400)).toSize();
+		VideoOutputWin->resize(size);
 
 		// Breakpoints UI information
 		pos = settings.value("BreakpointsWinPos", QPoint(200, 200)).toPoint();
@@ -2182,12 +2266,13 @@ void MainWin::WriteSettings(void)
 	settings.setValue("DefaultROM", vjs.alpineROMPath);
 	settings.setValue("DefaultABS", vjs.absROMPath);
 	settings.setValue("writeROM", vjs.allowWritesToROM);
+	settings.setValue("M68KExceptionCatch", vjs.allowM68KExceptionCatch);
 	settings.endGroup();
 
 	// Write settings from the Debugger mode
 	settings.beginGroup("debugger");
 	settings.setValue("DisplayHWLabels", vjs.displayHWlabels);
-	settings.setValue("NbrDisasmLines", vjs.nbrdisasmlines);
+	settings.setValue("NbrDisasmLines", (qulonglong) vjs.nbrdisasmlines);
 	settings.setValue("DisasmOpcodes", vjs.disasmopcodes);
 	settings.setValue("displayFullSourceFilename", vjs.displayFullSourceFilename);
 	settings.setValue("ELFSectionsCheck", vjs.ELFSectionsCheck);
@@ -2290,6 +2375,9 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("opBrowseWinPos", opBrowseWin->pos());
 		settings.setValue("opBrowseWinIsVisible", opBrowseWin->isVisible());
 		settings.setValue("opBrowseWinSize", opBrowseWin->size());
+		settings.setValue("hwRegsBrowseWinPos", hwRegsBrowseWin->pos());
+		settings.setValue("hwRegsBrowseWinIsVisible", hwRegsBrowseWin->isVisible());
+		settings.setValue("hwRegsBrowseWinSize", hwRegsBrowseWin->size());
 		settings.setValue("riscDasmBrowseWinPos", riscDasmBrowseWin->pos());
 		settings.setValue("riscDasmBrowseWinIsVisible", riscDasmBrowseWin->isVisible());
 		settings.setValue("m68kDasmBrowseWinPos", m68kDasmBrowseWin->pos());
@@ -2332,6 +2420,9 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("SaveDumpAsWinPos", SaveDumpAsWin->pos());
 		settings.setValue("SaveDumpAsWinIsVisible", SaveDumpAsWin->isVisible());
 		settings.setValue("SaveDumpAsWinSize", SaveDumpAsWin->size());
+		settings.setValue("VideoOutputWinPos", VideoOutputWin->pos());
+		settings.setValue("VideoOutputWinIsVisible", VideoOutputWin->isVisible());
+		settings.setValue("VideoOutputWinSize", VideoOutputWin->size());
 
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
@@ -2357,6 +2448,7 @@ void MainWin::AlpineRefreshWindows(void)
 	opBrowseWin->RefreshContents();
 	riscDasmBrowseWin->RefreshContents();
 	m68kDasmBrowseWin->RefreshContents();
+	hwRegsBrowseWin->RefreshContents();
 }
 
 
@@ -2392,6 +2484,7 @@ void MainWin::DebuggerResetWindows(void)
 		heapallocatorBrowseWin->Reset();
 		BreakpointsWin->Reset();
 		CartFilesListWin->Reset();
+		SourcesWin->Reset();
 		//ResetAlpineWindows();
 	}
 }
@@ -2424,7 +2517,9 @@ void MainWin::DebuggerRefreshWindows(void)
 {
 	if (vjs.softTypeDebugger)
 	{
+		//VideoOutputWin->RefreshContents(videoWidget);
 		FilesrcListWin->RefreshContents();
+		SourcesWin->RefreshContents();
 		m68kDasmWin->RefreshContents();
 		GPUDasmWin->RefreshContents();
 		DSPDasmWin->RefreshContents();

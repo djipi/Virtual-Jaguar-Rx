@@ -24,10 +24,11 @@
 	<file>../../res/tool-op.png</file>
 	<file>../../res/tool-68k-dis.png</file>
 	<file>../../res/tool-risc-dis.png</file>
+	<file>../../res/tool-hw-regs.png</file>
 	<file>../../res/generic.png</file>
 	<file>../../res/cart-blank.png</file>
 	<file>../../res/label-blank.png</file>
-	<file>../../res/vj_title_small.png</file>
+	<file>../../res/vj_rx_title_small.png</file>
 	<file>../../res/controller.png</file>
 	<file>../../res/insert.png</file>
 	<file>../../res/software.png</file>

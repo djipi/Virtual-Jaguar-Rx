@@ -5,12 +5,14 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When        What
-// ---  ----------  -----------------------------------------------------------
-// JPM  08/31/2018  Created this file
-// JPM  09/12/2018  Added a status bar and better status report
-// JPM  10/20/2018  Added the return address information in the call stack
-// JPM  08/09/2019  Prevent crash in case of call stack is out of range
+// Who  When (M/D/Y)  What
+// ---  ------------  -----------------------------------------------------------
+// JPM  08/31/2018    Created this file
+// JPM  09/12/2018    Added a status bar and better status report
+// JPM  10/20/2018    Added the return address information in the call stack
+// JPM  08/09/2019    Prevent crash in case of call stack is out of range
+// JPM  03/16/2020    Modified the layout window and added source filename from the called source line
+// JPM  April/2021    Added a #line information
 
 // STILL TO DO:
 // To set the information display at the right
@@ -48,10 +50,12 @@ layout(new QVBoxLayout)
 	layout->addWidget(text);
 #else
 	// Set the new layout with proper identation and readibility
-	model->setColumnCount(3);
-	model->setHeaderData(0, Qt::Horizontal, QObject::tr("Name"));
-	model->setHeaderData(1, Qt::Horizontal, QObject::tr("Line"));
-	model->setHeaderData(2, Qt::Horizontal, QObject::tr("Return address"));
+	model->setColumnCount(5);
+	model->setHeaderData(0, Qt::Horizontal, QObject::tr("Function"));
+	model->setHeaderData(1, Qt::Horizontal, QObject::tr("#Line"));
+	model->setHeaderData(2, Qt::Horizontal, QObject::tr("Line"));
+	model->setHeaderData(3, Qt::Horizontal, QObject::tr("Return address"));
+	model->setHeaderData(4, Qt::Horizontal, QObject::tr("Filename"));
 	// Information table
 	TableView->setModel(model);
 	TableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -79,14 +83,15 @@ void CallStackBrowserWindow::RefreshContents(void)
 {
 	char msg[1024];
 	size_t Error = CS_NOERROR;
+	DBGstatus FilenameStatus;
 	unsigned int a6, Sa6, ret;
-	char *FuncName;
+	char *Name;
+	size_t NumError = 0;
 #ifdef CS_LAYOUTTEXTS
 	QString CallStack;
 	char string[1024];
 #else
 	int NbRaw = 0;
-	size_t NumError = 0;
 	QString FunctionName;
 #endif
 
@@ -104,26 +109,36 @@ void CallStackBrowserWindow::RefreshContents(void)
 					a6 = GET32(jaguarMainRAM, Sa6);
 					ret = GET32(jaguarMainRAM, Sa6 + 4);
 #ifdef CS_LAYOUTTEXTS
-					sprintf(string, "0x%06X | Ret: 0x%06X | From: %s - 0x%06X | Line: %s", Sa6, ret, (FuncName = DBGManager_GetFunctionName(ret)), (unsigned int)DBGManager_GetAdrFromSymbolName(FuncName), DBGManager_GetLineSrcFromAdr(ret, DBG_NO_TAG));
+					sprintf(string, "0x%06X | Ret: 0x%06X | From: %s - 0x%06X | Line: %s", Sa6, ret, (Name = DBGManager_GetFunctionName(ret)), (unsigned int)DBGManager_GetAdrFromSymbolName(Name), DBGManager_GetLineSrcFromAdr(ret, DBG_NO_TAG));
 					CallStack += QString(string);
 					if (a6)
 					{
 						CallStack += QString("<br>");
 					}
 #else
+					// insert line
 					model->insertRow(NbRaw);
-					model->setItem(NbRaw, 0, new QStandardItem(QString("%1").arg((FuncName = DBGManager_GetFunctionName(ret)) ? FuncName : "(N/A)")));
-					FunctionName = QString(FuncName = DBGManager_GetLineSrcFromAdr(ret, DBG_NO_TAG));
-					FunctionName.replace("&nbsp;", " ");
-					model->setItem(NbRaw, 1, new QStandardItem(QString("%1").arg(FuncName ? FunctionName : "(N/A)")));
+					// display the function name
+					model->setItem(NbRaw, 0, new QStandardItem(QString("%1").arg((Name = DBGManager_GetFunctionName(ret)) ? Name : "(N/A)")));
+					// display the line number
+					sprintf(msg, "%zi", DBGManager_GetNumLineFromAdr(ret, DBG_NO_TAG));
+					model->setItem(NbRaw, 1, new QStandardItem(QString("%1").arg((msg[0] != '0') ? msg : "(N/A)")));
+					// display the called line
+					FunctionName = QString(Name = DBGManager_GetLineSrcFromAdr(ret, DBG_NO_TAG));
+					//FunctionName.replace("&nbsp;", " ");
+					FunctionName = FunctionName.trimmed();
+					model->setItem(NbRaw, 2, new QStandardItem(QString("%1").arg(Name ? FunctionName : "(N/A)")));
+					// display the return address
 					sprintf(msg, "0x%06X", ret);
-					model->setItem(NbRaw++, 2, new QStandardItem(QString("%1").arg(msg)));
+					model->setItem(NbRaw, 3, new QStandardItem(QString("%1").arg(msg)));
+					// display the source filename from called source line
+					model->setItem(NbRaw++, 4, new QStandardItem(QString("%1").arg(((Name = DBGManager_GetFullSourceFilenameFromAdr(ret, &FilenameStatus)) && !FilenameStatus) ? Name : "(N/A)")));
+#endif
 				}
 				else
 				{
 					NumError = 0x1;
 				}
-#endif
 			}
 #ifdef CS_LAYOUTTEXTS
 			text->clear();

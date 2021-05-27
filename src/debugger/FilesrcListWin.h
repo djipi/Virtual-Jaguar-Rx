@@ -7,7 +7,7 @@
 #ifndef __FILESRCLISTWIN_H__
 #define __FILESRCLISTWIN_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 // Error code definitions

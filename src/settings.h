@@ -2,6 +2,7 @@
 // settings.h: Header file
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
@@ -9,6 +10,7 @@
 // JPM  Sept./2018  Added the new Models and BIOS handler, and a screenshot settings
 // JPM  10/10/2018  Added search paths in settings
 // JPM  04/06/2019  Added ELF sections check
+//  RG   Jan./2021  Linux build fix
 //
 
 #ifndef __SETTINGS_H__
@@ -25,6 +27,7 @@
 #define MAX_PATH _MAX_PATH		// Urgh.
 #endif
 #endif
+#include <stdlib.h>
 #include <stdint.h>
 
 #define MaxMemory1BrowserWindow		4
@@ -76,6 +79,7 @@ struct VJSettings
 	uint32_t frameSkip;
 	uint32_t renderType;
 	uint32_t refresh;
+	bool allowM68KExceptionCatch;								// Allow M68K exception catch
 	bool allowWritesToROM;										// Allow writing to ROM cartdridge
 	uint32_t biosType;											// Bios type used
 	uint32_t jaguarModel;										// Jaguar model

@@ -1,7 +1,7 @@
 #ifndef __MODELSBIOSTAB_H__
 #define __MODELSBIOSTAB_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 
 class ModelsBiosTab: public QWidget
 {

@@ -1,7 +1,7 @@
 #ifndef __ALPINETAB_H__
 #define __ALPINETAB_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 
 class AlpineTab: public QWidget
 {
@@ -23,6 +23,7 @@ class AlpineTab: public QWidget
 //		QLineEdit * edit3;
 //		QLineEdit * edit4;
 		QCheckBox * writeROM;
+		QCheckBox * M68KExceptionCatch;
 //		QCheckBox * useDSP;
 //		QCheckBox * useHostAudio;
 //		QCheckBox * useUnknownSoftware;

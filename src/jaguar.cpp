@@ -15,6 +15,10 @@
 // JLH  11/25/2009  Major rewrite of memory subsystem and handlers
 // JPM  09/04/2018  Added the new Models and BIOS handler
 // JPM  10/13/2018  Added breakpoints features
+// JPM   Aug./2019  Fix specific breakpoint for ROM cartridge or unknown memory location writing; added a specific breakpoint for the M68K illegal & unimplemented instruction, unknown exceptions and address error exceptions
+// JPM   Aug./2019  Fix potential emulator freeze after an exception has occured
+// JPM   Feb./2021  Added a specific breakpoint for the M68K bus error exception, and a M68K exception catch detection
+// JPM   Apr./2021  Keep number of M68K cycles used in tracing mode
 //
 
 
@@ -22,8 +26,8 @@
 
 
 #include "jaguar.h"
-#include <QApplication>
-#include <QMessageBox>
+//#include <QApplication>
+#include <QtWidgets/QMessageBox>
 #include <time.h>
 #include <SDL.h>
 #include "SDL_opengl.h"
@@ -125,6 +129,7 @@ uint32_t bpmAddress1;
 S_BrkInfo *brkInfo;
 size_t brkNbr;
 
+bool frameDone;
 
 //
 // Callback function to detect illegal instructions
@@ -1418,6 +1423,26 @@ unsigned int m68k_read_memory_16(unsigned int address)
 }
 
 
+// Alert message in case of exception vector request
+bool m68k_read_exception_vector(unsigned int address, char *text)
+{
+	QString msg;
+	QMessageBox msgBox;
+
+#if 0
+	msg.sprintf("68000 exception\n%s at $%06x", text, pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF]);
+#else
+	msg.sprintf("68000 exception\n$%06x: %s", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], text);
+#endif
+	msgBox.setText(msg);
+	msgBox.setStandardButtons(QMessageBox::Abort);
+	msgBox.setDefaultButton(QMessageBox::Abort);
+	msgBox.exec();
+	return M68KDebugHalt();
+}
+
+
+// Read 4 bytes from memory
 unsigned int m68k_read_memory_32(unsigned int address)
 {
 #ifdef ALPINE_FUNCTIONS
@@ -1436,23 +1461,54 @@ unsigned int m68k_read_memory_32(unsigned int address)
 
 //WriteLog("--> [RM32]\n");
 #ifndef USE_NEW_MMU
-	uint32_t retVal = 0;
+	//uint32_t retVal = 0;
 
-	if ((address >= 0x800000) && (address <= 0xDFFEFE))
+	// check exception vectors access
+	if (vjs.allowM68KExceptionCatch && (address >= 0x8) && (address <= 0x7c))
 	{
-		// Memory Track reading...
-		if (((TOMGetMEMCON1() & 0x0006) == (2 << 1)) && (jaguarMainROMCRC32 == 0xFDF37F47))
+		switch (address)
 		{
-			retVal = MTReadLong(address);
-		}
-		else
-		{
-			retVal = GET32(jaguarMainROM, address - 0x800000);
+		case 0x08:
+			m68k_read_exception_vector(address, "Bus error");
+			break;
+
+		case 0x0c:
+			m68k_read_exception_vector(address, "Address error");
+			break;
+
+		case 0x10:
+			m68k_read_exception_vector(address, "Illegal instruction");
+			break;
+
+		case 0x2c:
+			m68k_read_exception_vector(address, "Unimplemented instruction");
+			break;
+
+		default:
+			m68k_read_exception_vector(address, "Exception not referenced");
+			break;
 		}
 
-		return retVal;
+		frameDone = true;			// Hack to avoid the freeze of the emulator
+	}
+	else
+	{
+		// check ROM or Memory Track access
+		if ((address >= 0x800000) && (address <= 0xDFFEFE))
+		{
+			// Memory Track reading...
+			if (((TOMGetMEMCON1() & 0x0006) == (2 << 1)) && (jaguarMainROMCRC32 == 0xFDF37F47))
+			{
+				return MTReadLong(address);
+			}
+			else
+			{
+				return GET32(jaguarMainROM, address - 0x800000);
+			}
+		}
 	}
 
+	// return value from memory
 	return (m68k_read_memory_16(address) << 16) | m68k_read_memory_16(address + 2);
 #else
 	return MMURead32(address, M68K);
@@ -2533,7 +2589,6 @@ uint8_t * GetRamPtr(void)
 // New Jaguar execution stack
 // This executes 1 frame's worth of code.
 //
-bool frameDone;
 void JaguarExecuteNew(void)
 {
 	frameDone = false;
@@ -2555,24 +2610,26 @@ void JaguarExecuteNew(void)
 
 
 // Step over function
-void	JaguarStepOver(int depth)
+int JaguarStepOver(int depth)
 {
-	bool exit;
+	bool exit = !depth;
+	int cycles = 0;
 	//bool case55 = false;
 	//uint32_t m68kSR;
 
-	if (!depth)
-	{
-		exit = true;
-	}
-	else
-	{
-		exit = false;
-	}
+//	if (!depth)
+//	{
+//		cycles = 0;
+//		exit = true;
+//	}
+//	else
+//	{
+//		exit = false;
+//	}
 
 	do
 	{
-		JaguarStepInto();
+		cycles += JaguarStepInto();
 
 		switch (M68KGetCurrentOpcodeFamily())
 		{
@@ -2609,7 +2666,7 @@ void	JaguarStepOver(int depth)
 			// bsr & jsr
 		case 54:
 		case 52:
-			JaguarStepOver(depth+1);
+			cycles += JaguarStepOver(depth+1);
 			//if (depth)
 			//{
 			//	exit = false;
@@ -2624,22 +2681,24 @@ void	JaguarStepOver(int depth)
 			break;
 		}
 	}
-	while (!exit);
+	while (!exit && !M68KDebugHaltStatus());
 
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Jaguar Step Over function !!!")
 #else
-	#warning "!!! Need to verify the Jaguar Step Over function !!!"
+#warning "!!! Need to verify the Jaguar Step Over function !!!"
 #endif // _MSC_VER
+	return cycles;
 }
 
 
 // Step into function
-void	JaguarStepInto(void)
+int	JaguarStepInto(void)
 {
+	int cycles;
 	//	double timeToNextEvent = GetTimeToNextEvent();
 
-	m68k_execute(USEC_TO_M68K_CYCLES(0));
+	cycles = m68k_execute(USEC_TO_M68K_CYCLES(0));
 //	m68k_execute(USEC_TO_M68K_CYCLES(timeToNextEvent));
 
 	if (vjs.GPUEnabled)
@@ -2651,6 +2710,7 @@ void	JaguarStepInto(void)
 #else
 #warning "!!! Need to verify the Jaguar Step Into function !!!"
 #endif // _MSC_VER
+		return cycles;
 }
 
 

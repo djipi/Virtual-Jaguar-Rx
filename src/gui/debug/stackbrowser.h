@@ -8,7 +8,7 @@
 #ifndef __STACKBROWSER_H__
 #define __STACKBROWSER_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
 class StackBrowserWindow: public QWidget

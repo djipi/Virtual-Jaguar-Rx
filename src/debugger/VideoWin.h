@@ -1,14 +1,14 @@
 //
-// VideoWin.h: Credits where credits are due ;-)
+// VideoWin.h: Video output
 //
-// based on the work from James Hammons
-// (C) 2010 Underground Software
+// by Jean-Paul Mari
+//
 //
 
 #ifndef __VIDEOWIN_H__
 #define __VIDEOWIN_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include <glwidget.h>
 
 class VideoOutputWindow : public QWidget
@@ -22,13 +22,17 @@ class VideoOutputWindow : public QWidget
 	public slots:
 	//		void DefineAllKeys(void);
 		void RefreshContents(GLWidget *Lt);
+		void SetupVideo(GLWidget *Lt);
 
 	protected:
-		//void keyPressEvent(QKeyEvent *);
+		void keyPressEvent(QKeyEvent *);
 
 	private:
-		QHBoxLayout *layout;
-		QLabel * text;
+		QVBoxLayout *layout;
+		QHBoxLayout *hbox1;
+		//QTextBrowser * text;
+		//QStatusBar *statusbar;
+		GLWidget *gl;
 };
 
 #endif	// __VIDEOWIN_H__

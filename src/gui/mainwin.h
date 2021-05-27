@@ -11,7 +11,7 @@
 #define __MAINWIN_H__
 
 //Hrm. uh??? I thought this wasn't the way to do this stuff...???
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 #include "tom.h"
 
 #define RING_BUFFER_SIZE 32
@@ -22,7 +22,7 @@ class GLWidget;
 class AboutWindow;
 class HelpWindow;
 class FilePickerWindow;
-//class VideoOutputWindow;
+class VideoOutputWindow;
 //class DasmWindow;
 class EmuStatusWindow;
 
@@ -33,8 +33,10 @@ class CPUBrowserWindow;
 class OPBrowserWindow;
 class M68KDasmBrowserWindow;
 class RISCDasmBrowserWindow;
+class HWRegsBrowserWindow;
 
 // Debugger
+class SourcesWindow;
 class m68KDasmWindow;
 class GPUDasmWindow;
 class DSPDasmWindow;
@@ -114,10 +116,9 @@ class MainWin: public QMainWindow
 		void DeleteAllBreakpoints(void);
 		void DisableAllBreakpoints(void);
 		void ShowSaveDumpAsWin(void);
-#if 0
+		void SelectdasmtabWidget(const int);
 		void ShowVideoOutputWin(void);
-		void ShowDasmWin(void);
-#endif
+		//void ShowDasmWin(void);
 		void ShowCartFilesListWin(void);
 		// Alpine
 		void ShowMemoryBrowserWin(void);
@@ -125,6 +126,7 @@ class MainWin: public QMainWindow
 		void ShowCPUBrowserWin(void);
 		void ShowOPBrowserWin(void);
 		void ShowM68KDasmBrowserWin(void);
+		void ShowHWRegsBrowserWin(void);
 		void ShowRISCDasmBrowserWin(void);
 
 	private:
@@ -151,7 +153,8 @@ class MainWin: public QMainWindow
 		OPBrowserWindow *opBrowseWin;
 		M68KDasmBrowserWindow *m68kDasmBrowseWin;
 		RISCDasmBrowserWindow *riscDasmBrowseWin;
-		//VideoOutputWindow *VideoOutputWin;
+		HWRegsBrowserWindow *hwRegsBrowseWin;
+		VideoOutputWindow *VideoOutputWin;
 		AllWatchBrowserWindow *allWatchBrowseWin;
 		LocalBrowserWindow *LocalBrowseWin;
 		CallStackBrowserWindow *CallStackBrowseWin;
@@ -161,6 +164,7 @@ class MainWin: public QMainWindow
 		//DasmWindow * DasmWin;
 		QTabWidget *dasmtabWidget;
 		//QDockWidget *dasmtabWidget;
+		SourcesWindow *SourcesWin;
 		m68KDasmWindow *m68kDasmWin;
 		GPUDasmWindow *GPUDasmWin;
 		DSPDasmWindow *DSPDasmWin;
@@ -235,13 +239,14 @@ class MainWin: public QMainWindow
 		QAction *cpuBrowseAct;
 		QAction *opBrowseAct;
 		QAction *m68kDasmBrowseAct;
+		QAction *hwRegsBrowseAct;
 		QAction *riscDasmBrowseAct;
 
 		// Debugger
 		QAction *traceStepOverAct;
 		QAction *traceStepIntoAct;
 		QAction *restartAct;
-		//QAction *VideoOutputAct;
+		QAction *VideoOutputAct;
 		QAction *heapallocatorBrowseAct;
 		QAction *allWatchBrowseAct;
 		QAction *LocalBrowseAct;

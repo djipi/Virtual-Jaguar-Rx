@@ -24,7 +24,7 @@
 #include "app.h"
 
 #include <SDL.h>
-#include <QApplication>
+#include <QtWidgets/QApplication>
 #include "gamepad.h"
 #include "log.h"
 #include "mainwin.h"
@@ -174,7 +174,7 @@ bool ParseCommandLine(int argc, char * argv[])
 		if ((strcmp(argv[i], "--help") == 0) || (strcmp(argv[i], "-h") == 0) || (strcmp(argv[i], "-?") == 0))
 		{
 			printf(
-				"Virtual Jaguar " VJ_RELEASE_VERSION " (" VJ_RELEASE_SUBVERSION ") Rx\n"
+				"Virtual Jaguar " VJ_RELEASE_VERSION " (" VJ_RELEASE_SUBVERSION ") Rx - " __DATE__ "\n"
 				"Based upon Virtual Jaguar core v1.0.0 by David Raingeard.\n"
 				"Based upon the work by James Hammons (Linux/WIN32), Niels Wagenaar (Linux/WIN32),\n"
 				"Carwin Jones (BeOS), and Adam Green (MacOS)\n"

@@ -43,6 +43,7 @@ AR      := $(CROSS)ar
 ARFLAGS := -rs
 
 SDL_CFLAGS = `$(CROSS)sdl-config --cflags`
+QT_CFLAGS = -fPIC -I/usr/include/qt5 -I/usr/include/qt5/QtOpenGL -I/usr/include/qt5/QtWidgets -I/usr/include/qt5/QtGui -I/usr/include/qt5/QtCore
 DEFINES = -D$(SYSTYPE)
 GCC_DEPS = -MMD
 
@@ -95,6 +96,6 @@ obj/libjaguarcore.a: $(OBJS)
 
 obj/%.o: src/%.cpp
 	@echo -e "\033[01;33m***\033[00;32m Compiling $<...\033[00m"
-	$(Q)$(CC) $(GCC_DEPS) $(CXXFLAGS) $(SDL_CFLAGS) $(DEFINES) $(INCS) -c $< -o $@
+	$(Q)$(CC) $(GCC_DEPS) $(CXXFLAGS) $(SDL_CFLAGS) $(QT_CFLAGS) $(DEFINES) $(INCS) -c $< -o $@
 
 -include obj/*.d

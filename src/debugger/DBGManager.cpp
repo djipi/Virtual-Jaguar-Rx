@@ -4,6 +4,7 @@
 // by Jean-Paul Mari
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
@@ -12,6 +13,10 @@
 // JPM              Various efforts to set the DWARF format support
 // JPM  09/15/2018  Support the unsigned char
 // JPM   Oct./2018  Cosmetic changes, added source file search paths, and ELF function name
+// JPM   Aug./2019  Added new functions mainly for source text lines
+// JPM  Sept./2019  Support the unsigned/signed short type
+//  RG   Jan./2021  Linux build fixes
+// JPM    May/2021  Code refactoring for the variables
 //
 
 // To Do
@@ -22,11 +27,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include "libelf/libelf.h"
-#include "libelf/gelf.h"
+#include "libelf.h"
+#include "gelf.h"
 #include "log.h"
 #include "ELFManager.h"
-#include "DwarfManager.h"
+#include "DWARFManager.h"
 #include "DBGManager.h"
 #include "HWLABELManager.h"
 #include "settings.h"
@@ -43,8 +48,10 @@ struct Value
 		bool B;
 		double D;
 		float F;
+		int16_t SS;
 		int32_t SI;
 		int64_t SL;
+		uint16_t US;
 		uint32_t UI;
 		uint64_t UL;
 	};
@@ -210,11 +217,11 @@ size_t DBGManager_GetType(void)
 
 // Get source filename based on the memeory address
 // return NULL if no source filename
-char *DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error)
+char *DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, DBGstatus *Status)
 {
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetFullSourceFilenameFromAdr(Adr, Error);
+		return DWARFManager_GetFullSourceFilenameFromAdr(Adr, (DWARFstatus *)Status);
 	}
 	else
 	{
@@ -223,6 +230,53 @@ char *DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, bool *Error)
 }
 
 
+// Get number of variables
+// A NULL address will return the numbre of global variables, otherwise it will return the number of local variables
+size_t DBGManager_GetNbVariables(size_t Adr)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetNbVariables(Adr);
+	}
+	else
+	{
+		return	0;
+	}
+}
+
+
+// Get variable's information
+// A NULL address will return the pointer to the global variable structure, otherwise it will return the local's one
+S_VariablesStruct* DBGManager_GetInfosVariable(size_t Adr, size_t Index)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return (S_VariablesStruct*)DWARFManager_GetInfosVariable(Adr, Index);
+	}
+	else
+	{
+		return	NULL;
+	}
+}
+
+
+// Get global variable's Address based on his Name
+// Return found Address
+// Return NULL if no Address has been found
+size_t DBGManager_GetGlobalVariableAdrFromName(char *VariableName)
+{
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		return DWARFManager_GetGlobalVariableAdrFromName(VariableName);
+	}
+	else
+	{
+		return 0;
+	}
+}
+
+
+#if 0
 // Get number of local variables
 // Return 0 if none has been found
 size_t DBGManager_GetNbLocalVariables(size_t Adr)
@@ -251,6 +305,7 @@ size_t DBGManager_GetNbGlobalVariables(void)
 		return	0;
 	}
 }
+#endif
 
 
 // Get address from symbol name
@@ -270,22 +325,7 @@ size_t DBGManager_GetAdrFromSymbolName(char *SymbolName)
 }
 
 
-// Get global variable's Address based on his Name
-// Return found Address
-// Return NULL if no Address has been found
-size_t DBGManager_GetGlobalVariableAdrFromName(char *VariableName)
-{
-	if ((DBGType & DBG_ELFDWARF))
-	{
-		return DWARFManager_GetGlobalVariableAdrFromName(VariableName);
-	}
-	else
-	{
-		return 0;
-	}
-}
-
-
+#if 0
 // Get local variable's type encoding based on his address and Index
 // Return the type encoding found
 // Return 0 if no type encoding has been found
@@ -444,121 +484,6 @@ char *DBGManager_GetGlobalVariableValue(size_t Index)
 }
 
 
-// Get variable value based on his Adresse, Encoding Type and Size
-// Return value as a text pointer
-// Note: Pointer may point on a 0 length text
-char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t TypeByteSize)
-{
-	Value V;
-	char *Ptrvalue = value;
-
-	value[0] = 0;
-
-#if 0
-	if (Adr)
-#endif
-	{
-		memset(&V, 0, sizeof(Value));
-#if 0
-		for (uint32_t i = 0; i < TypeByteSize; i++)
-			jaguarMainRAM[Adr + i] = 0;
-			//jaguarMainRAM[Adr + i] = rand();
-		jaguarMainRAM[Adr + TypeByteSize - 1] = 0x10;
-#else
-		for (size_t i = 0, j = TypeByteSize; i < TypeByteSize; i++, j--)
-		{
-			V.Ct[i] = jaguarMainRAM[Adr + j - 1];
-		}
-#endif
-		switch (TypeEncoding)
-		{
-		case DBG_ATE_address:
-			break;
-
-		case DBG_ATE_boolean:
-			sprintf(value, "%s", V.B ? "true" : "false");
-			break;
-
-		case DBG_ATE_complex_float:
-			break;
-
-		case DBG_ATE_float:
-			switch (TypeByteSize)
-			{
-			case 4:
-				sprintf(value, "%F", V.F);
-				break;
-
-			case 8:
-				//V.D = (double)jaguarMainRAM[Adr];
-				//sprintf(value, "%10.10F", V.D);
-				sprintf(value, "%F", V.D);
-				break;
-
-			default:
-				break;
-			}
-			break;
-
-		case DBG_ATE_signed:
-			switch (TypeByteSize)
-			{
-			case 4:
-				sprintf(value, "%i", V.SI);
-				break;
-
-			case 8:
-				sprintf(value, "%i", V.SL);
-				break;
-
-			default:
-				break;
-			}
-			break;
-
-		case DBG_ATE_signed_char:
-			break;
-
-		case DBG_ATE_unsigned:
-			switch (TypeByteSize)
-			{
-			case 4:
-				sprintf(value, "%u", V.UI);
-				break;
-
-			case 8:
-				sprintf(value, "%u", V.UL);
-				break;
-
-			default:
-				break;
-			}
-			break;
-
-		case DBG_ATE_unsigned_char:
-			sprintf(value, "%u", (unsigned int(V.C)));
-			break;
-
-		case DBG_ATE_ptr:
-			switch (TypeByteSize)
-			{
-			case 4:
-				sprintf(value, "0x%06x", V.UI);
-				break;
-
-			default:
-				break;
-			}
-
-		default:
-			break;
-		}
-	}
-
-	return Ptrvalue;
-}
-
-
 // Get local variable's type name based on his Index
 // Return type name's text pointer found
 // Return NULL if no type name has been found
@@ -620,6 +545,130 @@ char *DBGManager_GetGlobalVariableName(size_t Index)
 	{
 		return	NULL;
 	}
+}
+#endif
+
+
+// Get variable value based on his Adresse, Encoding Type and Size
+// Return value as a text pointer
+// Note: Pointer may point on a 0 length text
+char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t TypeByteSize)
+{
+	Value V;
+	char *Ptrvalue = value;
+
+	value[0] = 0;
+
+#if 0
+	if (Adr)
+#endif
+	{
+		memset(&V, 0, sizeof(Value));
+#if 0
+		for (uint32_t i = 0; i < TypeByteSize; i++)
+			jaguarMainRAM[Adr + i] = 0;
+			//jaguarMainRAM[Adr + i] = rand();
+		jaguarMainRAM[Adr + TypeByteSize - 1] = 0x10;
+#else
+		for (size_t i = 0, j = TypeByteSize; i < TypeByteSize; i++, j--)
+		{
+			V.Ct[i] = jaguarMainRAM[Adr + j - 1];
+		}
+#endif
+		switch (TypeEncoding)
+		{
+		case DBG_ATE_address:
+			break;
+
+		case DBG_ATE_boolean:
+			sprintf(value, "%s", V.B ? "true" : "false");
+			break;
+
+		case DBG_ATE_complex_float:
+			break;
+
+		case DBG_ATE_float:
+			switch (TypeByteSize)
+			{
+			case 4:
+				sprintf(value, "%F", V.F);
+				break;
+
+			case 8:
+				//V.D = (double)jaguarMainRAM[Adr];
+				//sprintf(value, "%10.10F", V.D);
+				sprintf(value, "%F", V.D);
+				break;
+
+			default:
+				break;
+			}
+			break;
+
+		case DBG_ATE_signed:
+			switch (TypeByteSize)
+			{
+			case 2:
+				sprintf(value, "%i", V.SS);
+				break;
+
+			case 4:
+				sprintf(value, "%i", V.SI);
+				break;
+
+			case 8:
+				sprintf(value, "%i", V.SL);
+				break;
+
+			default:
+				break;
+			}
+			break;
+
+		case DBG_ATE_signed_char:
+			break;
+
+		case DBG_ATE_unsigned:
+			switch (TypeByteSize)
+			{
+			case 2:
+				sprintf(value, "%u", V.US);
+				break;
+
+			case 4:
+				sprintf(value, "%u", V.UI);
+				break;
+
+			case 8:
+				sprintf(value, "%u", V.UL);
+				break;
+
+			default:
+				break;
+			}
+			break;
+
+		case DBG_ATE_unsigned_char:
+			sprintf(value, "%u", (unsigned int) V.C);
+			break;
+
+		case DBG_ATE_ptr:
+			switch (TypeByteSize)
+			{
+			case 4:
+				sprintf(value, "0x%06x", V.UI);
+				break;
+
+			default:
+				break;
+			}
+
+		default:
+			break;
+		}
+	}
+
+	return Ptrvalue;
 }
 
 
@@ -746,16 +795,30 @@ char *DBGManager_GetLineSrcFromNumLineBaseAdr(size_t Adr, size_t NumLine)
 
 
 // Get number of source code filenames
-size_t DBGManager_GetNbFullSourceFilename(void)
+size_t DBGManager_GetNbSources(void)
 {
 	size_t Nbr = 0;
 
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		Nbr = DWARFManager_GetNbFullSourceFilename();
+		Nbr = DWARFManager_GetNbSources();
 	}
 
 	return Nbr;
+}
+
+
+// Get source code filename based on index
+char *DBGManager_GetNumSourceFilename(size_t Index)
+{
+	char *SourceFilename = NULL;
+
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		SourceFilename = DWARFManager_GetNumSourceFilename(Index);
+	}
+
+	return	SourceFilename;
 }
 
 
@@ -771,3 +834,60 @@ char *DBGManager_GetNumFullSourceFilename(size_t Index)
 
 	return	FullSourceFilename;
 }
+
+
+// Get number of lines of texts source list from source index
+size_t DBGManager_GetSrcNbListPtrFromIndex(size_t Index, bool Used)
+{
+	size_t NbListPtr = 0;
+
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		NbListPtr = DWARFManager_GetSrcNbListPtrFromIndex(Index, Used);
+	}
+
+	return	NbListPtr;
+}
+
+
+// Get pointer to the lines number list from source index
+size_t *DBGManager_GetSrcNumLinesPtrFromIndex(size_t Index, bool Used)
+{
+	size_t *PtrNumLines = NULL;
+
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		PtrNumLines = DWARFManager_GetSrcNumLinesPtrFromIndex(Index, Used);
+	}
+
+	return	PtrNumLines;
+}
+
+
+// Get text source list pointers from source index
+char **DBGManager_GetSrcListPtrFromIndex(size_t Index, bool Used)
+{
+	char **PtrSource = NULL;
+
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		PtrSource = DWARFManager_GetSrcListPtrFromIndex(Index, Used);
+	}
+
+	return	PtrSource;
+}
+
+
+// Get source language
+size_t DBGManager_GetSrcLanguageFromIndex(size_t Index)
+{
+	size_t Language = 0;
+
+	if ((DBGType & DBG_ELFDWARF))
+	{
+		Language = DWARFManager_GetSrcLanguageFromIndex(Index);
+	}
+
+	return	Language;
+}
+

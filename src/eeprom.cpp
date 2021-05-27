@@ -9,14 +9,19 @@
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When        What
-// ---  ----------  ------------------------------------------------------------
-// JLH  01/16/2010  Created this log ;-)
-// JPM  10/11/2017  Directory detection and creation if missing
+// Who  When (MM/DD/YY)  What
+// ---  ---------------  ------------------------------------------------------------
+// JLH  01/16/2010       Created this log ;-)
+// JPM  10/11/2017       EEPROM directory detection and creation if missing
+// JPM  11/18/2020       EEPROM directory creation allowed only for Windows
 //
 
 #include "eeprom.h"
+#if _WIN32 || _WIN64
 #include <direct.h>
+#else
+#define _mkdir(dir) 1
+#endif
 #include <stdlib.h>
 #include <string.h>								// For memset
 #include "jaguar.h"
@@ -114,10 +119,14 @@ void EepromInit(void)
 void EepromReset(void)
 {
 	if (!haveEEPROM)
+	{
 		memset(eeprom_ram, 0xFF, 64 * sizeof(uint16_t));
+	}
 
 	if (!haveCDROMEEPROM)
+	{
 		memset(cdromEEPROM, 0xFF, 64 * sizeof(uint16_t));
+	}
 }
 
 
@@ -173,8 +182,10 @@ void ReadEEPROMFromFile(FILE * file, uint16_t * ram)
 	uint8_t buffer[128];
 	size_t ignored = fread(buffer, 1, 128, file);
 
-	for(int i=0; i<64; i++)
+	for (int i = 0; i < 64; i++)
+	{
 		ram[i] = (buffer[(i * 2) + 0] << 8) | buffer[(i * 2) + 1];
+	}
 }
 
 

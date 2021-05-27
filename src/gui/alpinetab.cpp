@@ -12,6 +12,7 @@
 // ---  ----------  ------------------------------------------------------------
 // JLH  07/15/2011  Created this file
 // JPM  09/03/2018  Depend the platform transform slashes or backslashes
+// JPM   Feb./2021  Added a M68K exception catch check
 //
 
 #include "alpinetab.h"
@@ -59,7 +60,8 @@ AlpineTab::AlpineTab(QWidget * parent/*= 0*/): QWidget(parent)
 	layout4->addLayout(layout3);
 
 	// Checkboxes...
-	writeROM         = new QCheckBox(tr("Allow writes to cartridge ROM"));
+	writeROM = new QCheckBox(tr("Allow writes to cartridge ROM"));
+	M68KExceptionCatch = new QCheckBox(tr("Allow M68000 exception catch"));
 //	useDSP             = new QCheckBox(tr("Enable DSP"));
 //	useHostAudio       = new QCheckBox(tr("Enable audio playback"));
 //	useUnknownSoftware = new QCheckBox(tr("Allow unknown software in file chooser"));
@@ -67,6 +69,7 @@ AlpineTab::AlpineTab(QWidget * parent/*= 0*/): QWidget(parent)
 	//writeROM->setDisabled(true);
 
 	layout4->addWidget(writeROM);
+	layout4->addWidget(M68KExceptionCatch);
 //	layout4->addWidget(useDSP);
 //	layout4->addWidget(useHostAudio);
 //	layout4->addWidget(useUnknownSoftware);
@@ -89,6 +92,7 @@ void AlpineTab::GetSettings(void)
 	edit2->setText(vjs.absROMPath);
 	edit3->setText(v.toString());
 	writeROM->setChecked(vjs.allowWritesToROM);
+	M68KExceptionCatch->setChecked(vjs.allowM68KExceptionCatch);
 }
 
 
@@ -101,6 +105,7 @@ void AlpineTab::SetSettings(void)
 	strcpy(vjs.absROMPath, CheckForSlashes(edit2->text()).toUtf8().data());
 	vjs.refresh = edit3->text().toUInt(&ok, 10);
 	vjs.allowWritesToROM = writeROM->isChecked();
+	vjs.allowM68KExceptionCatch = M68KExceptionCatch->isChecked();
 }
 
 

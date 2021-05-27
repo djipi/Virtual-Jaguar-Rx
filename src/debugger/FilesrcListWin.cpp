@@ -104,7 +104,7 @@ size_t FilesrcListWindow::UpdateInfos(void)
 {
 	size_t Nbr, i;
 
-	Nbr = DBGManager_GetNbFullSourceFilename();
+	Nbr = DBGManager_GetNbSources();
 
 	for (i = 0; i < Nbr; i++)
 	{

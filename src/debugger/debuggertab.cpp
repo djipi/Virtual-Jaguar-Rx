@@ -4,12 +4,14 @@
 // by Jean-Paul Mari
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
 // JPM  Sept./2016  Created this file, and added Soft debugger support
 // JPM  10/09/2018  Added source file search paths
 // JPM  04/06/2019  Added ELF sections check
+//  RG   Jan./2021  Linux build fix
 //
 
 #include "debuggertab.h"
@@ -92,7 +94,7 @@ void DebuggerTab::SetSettings(void)
 // Load / Update the tabs dialog from the settings
 void DebuggerTab::GetSettings(void)
 {
-	QVariant v(vjs.nbrdisasmlines);
+	QVariant v((qulonglong) vjs.nbrdisasmlines);
 	nbrdisasmlines->setText(v.toString());
 	sourcefilesearchpaths->setText(vjs.sourcefilesearchPaths);
 	displayHWlabels->setChecked(vjs.displayHWlabels);

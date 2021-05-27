@@ -71,7 +71,7 @@ void CPUBrowserWindow::RefreshContents(void)
 		// 68K
 		uint32_t m68kPC = m68k_get_reg(NULL, M68K_REG_PC);
 		uint32_t m68kSR = m68k_get_reg(NULL, M68K_REG_SR);
-		sprintf(string, "PC: %06X&nbsp;&nbsp;SR: %04X<br><br>", m68kPC, m68kSR);
+		sprintf(string, "PC: %06X&nbsp;&nbsp;SR: %04X : %c%c%c%c%c%c%c<br><br>", m68kPC, m68kSR, ((m68kSR & 0x8000) ? 'T': '-'), ((m68kSR & 0x2000) ? 'S' : '-'), ((m68kSR & 0x10) ? 'X' : '-'), ((m68kSR & 0x8) ? 'N' : '-'), ((m68kSR & 0x4) ? 'Z' : '-'), ((m68kSR & 0x2) ? 'V' : '-'), ((m68kSR & 0x1) ? 'C' : '-'));
 		s += QString(string);
 		/*
 		SR format:

@@ -1,7 +1,7 @@
 #ifndef __KEYBINDINGSTAB_H__
 #define __KEYBINDINGSTAB_H__
 
-#include <QtWidgets>
+#include <QtWidgets/QtWidgets>
 
 
 //

@@ -7,6 +7,7 @@
 //
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  RG = Richard Goedeken
 //
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
@@ -16,6 +17,9 @@
 // JPM   June/2016  Visual Studio support, ELF format support and Soft debugger support
 // JPM  07/15/2016  DWARF format support
 // JPM  04/06/2019  Added ELF sections check
+// JPM  03/12/2020  Added ELF section types check and new error messages
+// JPM   Aug./2020  ELF executable file information
+//  RG   Jan./2021  Linux build fixes
 //
 
 #include "file.h"
@@ -24,6 +28,8 @@
 #endif // _MSC_VER
 #include <stdarg.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "crc32.h"
 #include "filedb.h"
 #include "eeprom.h"
@@ -33,8 +39,8 @@
 #include "universalhdr.h"
 #include "unzip.h"
 #include "zlib.h"
-#include "libelf/libelf.h"
-#include "libelf/gelf.h"
+#include "libelf.h"
+#include "gelf.h"
 #include "libdwarf.h"
 #include "debugger/ELFManager.h"
 #include "debugger/DBGManager.h"
@@ -146,6 +152,7 @@ bool JaguarLoadFile(char * path)
 	int	DBGType = DBG_NO_TYPE;
 	bool error;
 	int err;
+	struct stat _statbuf;
 
 	jaguarROMSize = JaguarLoadROM(buffer, path);
 
@@ -199,9 +206,13 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 
 		if (PtrELFExe != NULL)
 		{
+			// check the ELF version
 			if ((elf_version(EV_CURRENT) != EV_NONE) && (ElfMem = ELFManager_MemOpen(PtrELFExe, jaguarROMSize)))
 			{
-				if (ELFManager_DwarfInit(ElfMem))
+				// get the file information
+				stat(path, &_statbuf);
+
+				if (ELFManager_DwarfInit(ElfMem, _statbuf))
 				{
 					DBGType |= DBG_ELFDWARF;
 				}
@@ -232,10 +243,10 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 								{
 									switch (PtrGElfShdr->sh_type)
 									{
-									case	SHT_NULL:
+									case SHT_NULL:
 										break;
 
-									case	SHT_PROGBITS:
+									case SHT_PROGBITS:
 										if ((PtrGElfShdr->sh_flags & (SHF_ALLOC | SHF_WRITE | SHF_EXECINSTR)))
 										{
 											if (PtrGElfShdr->sh_addr >= 0x800000)
@@ -252,14 +263,19 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 										{
 											switch (ElfSectionNameType)
 											{
-											case ELF_debug_aranges_TYPE:
-											case ELF_debug_info_TYPE:
+											case ELF_debug_TYPE:
 											case ELF_debug_abbrev_TYPE:
-											case ELF_debug_line_TYPE:
+											case ELF_debug_aranges_TYPE:
 											case ELF_debug_frame_TYPE:
+											case ELF_debug_info_TYPE:
+											case ELF_debug_line_TYPE:
+											case ELF_debug_loc_TYPE:
+											case ELF_debug_macinfo_TYPE:
+											case ELF_debug_pubnames_TYPE:
+											case ELF_debug_pubtypes_TYPE:
 											case ELF_debug_ranges_TYPE:
 											case ELF_debug_str_TYPE:
-											case ELF_debug_loc_TYPE:
+											case ELF_debug_types_TYPE:						
 												break;
 
 											case ELF_heap_TYPE:
@@ -269,27 +285,30 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 												break;
 
 											default:
+												WriteLog("FILE: ELF section %s is not recognized\n", NameSection);
 												error = true;
 												break;
 											}
 										}
 										break;
 
-									case	SHT_NOBITS:
+									case SHT_NOBITS:
 										break;
 
-									case	SHT_STRTAB:
-									case	SHT_SYMTAB:
+									case SHT_STRTAB:
+									case SHT_SYMTAB:
 										while ((error == false) && ((PtrElfData = elf_getdata(PtrElfScn, PtrElfData)) != NULL))
 										{
 											if (!ELFManager_AddTab(PtrElfData, ElfSectionNameType))
 											{
+												WriteLog("FILE: ELF tab cannot be allocated\n");
 												error = true;
 											}
 										}
 										break;
 
 									default:
+										WriteLog("FILE: ELF SHT type %i not recognized\n", PtrGElfShdr->sh_type);
 										error = true;
 										break;
 									}
@@ -297,6 +316,7 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 							}
 						}
 
+						// Set the executable address
 						jaguarRunAddress = (uint32_t)PtrGElfEhdr->e_entry;
 						WriteLog("FILE: Setting up ELF 32bits... Run address: %08X\n", jaguarRunAddress);
 					}
@@ -307,6 +327,7 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 				}
 				else
 				{
+					WriteLog("FILE: Cannot get the number of the ELF sections\n");
 					error = true;
 				}
 			}
