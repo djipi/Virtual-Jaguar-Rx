@@ -29,6 +29,7 @@
 // JPM  Marc./2020  Added the step over for source level tracing
 //  RG   Jan./2021  Linux build fixes
 // JPM   Apr./2021  Handle number of M68K cycles used in tracing mode, added video output display in a window
+// JPM    May/2021  Check missing dll for the tests pattern
 //
 
 // FIXED:
@@ -714,37 +715,51 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	WriteLog("Window creation done\n");
 
 	// Create our test pattern NTSC bitmap
-	WriteLog("Test pattern 1 bitmap\n");
-
 	QImage tempImg(":/res/test-pattern.jpg");
-	QImage tempImgScaled = tempImg.scaled(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT_PAL, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-
-	for(uint32_t y=0; y<VIRTUAL_SCREEN_HEIGHT_PAL; y++)
+	if (!tempImg.isNull())
 	{
-		const QRgb * scanline = (QRgb *)tempImgScaled.constScanLine(y);
+		QImage tempImgScaled = tempImg.scaled(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT_PAL, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
-		for(uint32_t x=0; x<VIRTUAL_SCREEN_WIDTH; x++)
+		for (uint32_t y = 0; y < VIRTUAL_SCREEN_HEIGHT_PAL; y++)
 		{
-			uint32_t pixel = (qRed(scanline[x]) << 24) | (qGreen(scanline[x]) << 16) | (qBlue(scanline[x]) << 8) | 0xFF;
-			testPattern[(y * VIRTUAL_SCREEN_WIDTH) + x] = pixel;
+			const QRgb * scanline = (QRgb *)tempImgScaled.constScanLine(y);
+
+			for (uint32_t x = 0; x < VIRTUAL_SCREEN_WIDTH; x++)
+			{
+				uint32_t pixel = (qRed(scanline[x]) << 24) | (qGreen(scanline[x]) << 16) | (qBlue(scanline[x]) << 8) | 0xFF;
+				testPattern[(y * VIRTUAL_SCREEN_WIDTH) + x] = pixel;
+			}
 		}
+
+		WriteLog("Test pattern 1 bitmap sucessful\n");
+	}
+	else
+	{
+		WriteLog("Test pattern 1 bitmap failed, qjpeg.dll or qjpegd.dll is missing in the imageformats directory\n");
 	}
 
 	// Create our test pattern PAL bitmap
-	WriteLog("Test pattern 2 bitmap\n");
-
 	QImage tempImg2(":/res/test-pattern-pal.jpg");
-	QImage tempImgScaled2 = tempImg2.scaled(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT_PAL, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-
-	for(uint32_t y=0; y<VIRTUAL_SCREEN_HEIGHT_PAL; y++)
+	if (!tempImg2.isNull())
 	{
-		const QRgb * scanline = (QRgb *)tempImgScaled2.constScanLine(y);
+		QImage tempImgScaled2 = tempImg2.scaled(VIRTUAL_SCREEN_WIDTH, VIRTUAL_SCREEN_HEIGHT_PAL, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
-		for(uint32_t x=0; x<VIRTUAL_SCREEN_WIDTH; x++)
+		for (uint32_t y = 0; y < VIRTUAL_SCREEN_HEIGHT_PAL; y++)
 		{
-			uint32_t pixel = (qRed(scanline[x]) << 24) | (qGreen(scanline[x]) << 16) | (qBlue(scanline[x]) << 8) | 0xFF;
-			testPattern2[(y * VIRTUAL_SCREEN_WIDTH) + x] = pixel;
+			const QRgb * scanline = (QRgb *)tempImgScaled2.constScanLine(y);
+
+			for (uint32_t x = 0; x < VIRTUAL_SCREEN_WIDTH; x++)
+			{
+				uint32_t pixel = (qRed(scanline[x]) << 24) | (qGreen(scanline[x]) << 16) | (qBlue(scanline[x]) << 8) | 0xFF;
+				testPattern2[(y * VIRTUAL_SCREEN_WIDTH) + x] = pixel;
+			}
 		}
+
+		WriteLog("Test pattern 2 bitmap sucessful\n");
+	}
+	else
+	{
+		WriteLog("Test pattern 2 bitmap failed, qjpeg.dll or qjpegd.dll is missing in the imageformats directory\n");
 	}
 
 	// Set up timer based loop for animation...

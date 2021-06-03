@@ -1,5 +1,11 @@
-Release 5 (TBA)
----------------
+Release 5a (TBA)
+----------------
+0) Check missing qjpeg's dll for the tests pattern
+
+Release 5 (26th May 2021)
+-------------------------
+Git commit: 0e699c1255f04f5c332632eef475ebcef4200305
+-
 0) Added a date creation stamp in the application command line information
 - This date already appears in the Release 4 executable but was not referenced in his history note
 1) Added a specific breakpoint for the M68K illegal instruction exception
