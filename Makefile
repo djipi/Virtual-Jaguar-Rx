@@ -35,6 +35,11 @@ CXXFLAGS += $(CPPFLAGS)
 CFLAGS += -ffast-math -fomit-frame-pointer
 CXXFLAGS += -ffast-math -fomit-frame-pointer
 
+ifeq "$(findstring Linux,$(OSTYPE))" "Linux"
+CFLAGS += -I/usr/include/libdwarf
+CXXFLAGS += -I/usr/include/libdwarf
+endif
+
 # Flags to pass on to qmake...
 QMAKE_EXTRA += "QMAKE_CFLAGS_RELEASE=$(CFLAGS)"
 QMAKE_EXTRA += "QMAKE_CXXFLAGS_RELEASE=$(CXXFLAGS)"
@@ -44,6 +49,12 @@ QMAKE_EXTRA += "QMAKE_CFLAGS_DEBUG=$(CFLAGS)"
 QMAKE_EXTRA += "QMAKE_CXXFLAGS_DEBUG=$(CXXFLAGS)"
 QMAKE_EXTRA += "QMAKE_LFLAGS_DEBUG=$(LDFLAGS)"
 
+# Add Qt flags on GNU/Linux since core code uses Qt Widgets now
+ifeq "$(findstring Linux,$(OSTYPE))" "Linux"
+CFLAGS += $(shell pkg-config --cflags Qt5Widgets)
+CXXFLAGS += $(shell pkg-config --cflags Qt5Widgets)
+LDFLAGS += $(shell pkg-config --libs Qt5Widgets)
+endif
 
 all: prepare virtualjaguar
 	@echo -e "\033[01;33m***\033[00;32m Success!\033[00m"
