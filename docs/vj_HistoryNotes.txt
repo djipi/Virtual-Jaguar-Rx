@@ -1,6 +1,7 @@
 Release 5a (TBA)
 ----------------
 0) Check missing qjpeg's dll for the tests pattern
+1) Added ELF section names
 
 Release 5 (26th May 2021)
 -------------------------

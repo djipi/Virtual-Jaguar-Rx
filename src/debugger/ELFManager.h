@@ -7,16 +7,18 @@
 typedef enum {
 	ELF_NO_TYPE = -1,
 	ELF_NULL_TYPE = 0,
-	ELF_text_TYPE,
-	ELF_rodata_TYPE,
-	ELF_data_TYPE,
-	ELF_bss_TYPE,
+	ELF_text_TYPE,					// Executable instructions, of a program
+	ELF_rodata_TYPE,				// Read-only data that typically contribute to a non-writable segment in the process image
+	ELF_data_TYPE,					// Initialized data that contribute to the program's memory image
+	ELF_bss_TYPE,					// Data that contributes to the program's memory image as uninitialized
 	ELF_heap_TYPE,
-	ELF_debug_TYPE,
-	ELF_comment_TYPE,
-	ELF_shstrtab_TYPE,
-	ELF_symtab_TYPE,
-	ELF_strtab_TYPE,
+	ELF_debug_TYPE,					// Information for symbolic debugging (the contents are unspecified)
+	ELF_comment_TYPE,				// Version control information
+	ELF_stab_TYPE,					// Debugging information
+	ELF_stabstr_TYPE,				// Strings associated with the debugging infomation contained in the .stab section
+	ELF_shstrtab_TYPE,				// Section names
+	ELF_symtab_TYPE,				// Symbol table
+	ELF_strtab_TYPE,				// Strings that represent the names associated with symbol table entries
 	ELF_debug_abbrev_TYPE,			// Abbreviations used in the .debug_info section
 	ELF_debug_aranges_TYPE,			// Lookup table for mapping addresses to compilation units
 	ELF_debug_frame_TYPE,			// Call frame information

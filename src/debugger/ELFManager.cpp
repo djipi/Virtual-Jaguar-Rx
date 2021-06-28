@@ -13,6 +13,7 @@
 // JPM  10/20/2018  Added function name support from ELF structure
 // JPM  03/13/2020  Added ELF & DWARF .debug* types
 //  RG   Jan./2021  Linux build fixes
+// JPM  06/23/2021  Added ELF section names
 //
 
 #include <stdlib.h>
@@ -55,6 +56,8 @@ ELFSectionType	ELFTabSectionType[] =	{
 	{ ".heap", ELF_heap_TYPE },
 	{ ".debug", ELF_debug_TYPE	},
 	{ ".comment", ELF_comment_TYPE },
+	{ ".stab", ELF_stab_TYPE },
+	{ ".stabstr", ELF_stabstr_TYPE },
 	{ ".shstrtab", ELF_shstrtab_TYPE },
 	{ ".symtab", ELF_symtab_TYPE },
 	{ ".strtab", ELF_strtab_TYPE },

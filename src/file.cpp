@@ -14,12 +14,11 @@
 // JLH  01/16/2010  Created this log ;-)
 // JLH  02/28/2010  Added functions to look inside .ZIP files and handle contents
 // JLH  06/01/2012  Added function to check ZIP file CRCs against file DB
-// JPM   June/2016  Visual Studio support, ELF format support and Soft debugger support
-// JPM  07/15/2016  DWARF format support
+// JPM        2016  Visual Studio support, ELF & DWARF format support, and Soft debugger support
 // JPM  04/06/2019  Added ELF sections check
-// JPM  03/12/2020  Added ELF section types check and new error messages
-// JPM   Aug./2020  ELF executable file information
+// JPM        2020  Added ELF section types check, new error messages and ELF executable file information
 //  RG   Jan./2021  Linux build fixes
+// JPM  06/23/2021  Added ELF sections check
 //
 
 #include "file.h"
@@ -276,6 +275,9 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 											case ELF_debug_ranges_TYPE:
 											case ELF_debug_str_TYPE:
 											case ELF_debug_types_TYPE:						
+												break;
+
+											case ELF_stab_TYPE:
 												break;
 
 											case ELF_heap_TYPE:
