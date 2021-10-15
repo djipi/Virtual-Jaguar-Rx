@@ -2,6 +2,8 @@ Release 5a (TBA)
 ----------------
 0) Check missing qjpeg's dll for the tests pattern
 1) Added ELF section names
+2) Source file path clean up in the DWARF information reader
+-- Useful in case of multiples /./, \.\, \\ or //
 
 Release 5 (26th May 2021)
 -------------------------

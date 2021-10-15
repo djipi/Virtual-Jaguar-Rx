@@ -12,10 +12,10 @@
 // JPM  Sept./2018  Added LEB128 decoding features, and improve the DWARF parsing information
 // JPM   Oct./2018  Improve the DWARF parsing information, and the source file text reading; support the used source lines from DWARF structure, and the search paths for the files
 // JPM   Aug./2019  Added new functions to handle DWARF information, full filename fix
-// JPM   Mar./2020  Fix a random crash when reading the source lines information
-// JPM   Aug./2020  Added a source code file date check
+// JPM   Mar./2020  Fix a random crash when reading the source lines information, and added a source code file date check
 //  RG   Jan./2021  Linux build fixes
 // JPM   Apr./2021  Support the structure and union members
+// JPM   June/2021  Update the source file path clean up
 //
 
 // To Do
@@ -498,16 +498,16 @@ void DWARFManager_InitDMI(void)
 								dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
 							}
 
-							// Check filename presence
+							// check filename presence
 							if (!PtrCU[NbCU].PtrSourceFilename)
 							{
 								PtrCU[NbCU].PtrSourceFilename = (char *)calloc(1, 1);
 							}
 
-							// Check directory presence
+							// check directory presence
 							if (!PtrCU[NbCU].PtrSourceFileDirectory)
 							{
-								// Check if file exists in the search paths
+								// check if file exists in the search paths
 								for (size_t i = 0; i < NbSearchPaths; i++)
 								{
 									PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + strlen((const char *)ListSearchPaths[i]) + 2);
@@ -525,7 +525,7 @@ void DWARFManager_InitDMI(void)
 									}
 								}
 
-								// File directory doesn't exits
+								// file directory doesn't exits
 								if (!PtrCU[NbCU].PtrSourceFileDirectory)
 								{
 									PtrCU[NbCU].PtrSourceFileDirectory = (char *)realloc(PtrCU[NbCU].PtrSourceFileDirectory, 2);
@@ -533,19 +533,19 @@ void DWARFManager_InitDMI(void)
 								}
 							}
 
-							// Conform slashes / backslashes for the filename
+							// conform slashes / backslashes for the filename
 							DWARFManager_ConformSlachesBackslashes(PtrCU[NbCU].PtrSourceFilename);
 
-							// Check if filename contains already the complete directory
+							// check if filename contains already the complete directory
 							if (PtrCU[NbCU].PtrSourceFilename[1] == ':')
 							{
-								// Copy the filename as the full filename
+								// copy the filename as the full filename
 								PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + 1);
 								strcpy(PtrCU[NbCU].PtrFullFilename, PtrCU[NbCU].PtrSourceFilename);
 							}
 							else
 							{
-								// Create full filename and Conform slashes / backslashes
+								// create full filename and Conform slashes / backslashes
 								PtrCU[NbCU].PtrFullFilename = (char *)realloc(PtrCU[NbCU].PtrFullFilename, strlen(PtrCU[NbCU].PtrSourceFilename) + strlen(PtrCU[NbCU].PtrSourceFileDirectory) + 2);
 #if defined(_WIN32)
 								sprintf(PtrCU[NbCU].PtrFullFilename, "%s\\%s", PtrCU[NbCU].PtrSourceFileDirectory, PtrCU[NbCU].PtrSourceFilename);
@@ -554,30 +554,31 @@ void DWARFManager_InitDMI(void)
 #endif
 							}
 
+							// directory path clean-up
 							DWARFManager_ConformSlachesBackslashes(PtrCU[NbCU].PtrFullFilename);
-
-							// Directory path clean-up
 #if defined(_WIN32)
-							while ((Ptr1 = Ptr = strstr(PtrCU[NbCU].PtrFullFilename, "\\..\\")))
+							while ((Ptr = strstr(PtrCU[NbCU].PtrFullFilename, "\\..\\")) || (Ptr = strstr(PtrCU[NbCU].PtrFullFilename, "\\.\\")) || (Ptr = strstr(PtrCU[NbCU].PtrFullFilename, "\\\\")))
 #else
-							while ((Ptr1 = Ptr = strstr(PtrCU[NbCU].PtrFullFilename, "/../")))
+							while ((Ptr = strstr(PtrCU[NbCU].PtrFullFilename, "/../")))
 #endif
 							{
+								Ptr1 = Ptr;
 #if defined(_WIN32)
-								while (*--Ptr1 != '\\');
+								while ((*--Ptr1 != '\\') && (*Ptr1 != ':'));
+								strcpy((Ptr1 + 1), (Ptr + (strstr(Ptr, "\\.\\") ? 2 : (strstr(Ptr, "\\\\") ? 1 : 4))));
 #else
 								while (*--Ptr1 != '/');
-#endif
 								strcpy((Ptr1 + 1), (Ptr + 4));
+#endif
 							}
 
-							// Get the source file information
+							// get the source file information
 							if (!stat(PtrCU[NbCU].PtrFullFilename, &PtrCU[NbCU]._statbuf))
 							{
 								// check the time stamp with the executable
 								if (PtrCU[NbCU]._statbuf.st_mtime <= FileElfExeInfo.st_mtime)
 								{
-									// Open the source file as a binary file
+									// open the source file as a binary file
 #if defined(_WIN32)
 									if (!fopen_s(&SrcFile, PtrCU[NbCU].PtrFullFilename, "rb"))
 #else
@@ -593,7 +594,7 @@ void DWARFManager_InitDMI(void)
 												{
 													if (PtrCU[NbCU].PtrLoadSrc = Ptr = Ptr1 = (char *)calloc(1, (PtrCU[NbCU].SizeLoadSrc + 2)))
 													{
-														// Read whole file
+														// read whole file
 #if defined(_WIN32)	&& defined(_MSC_VER)													
 														if (fread_s(PtrCU[NbCU].PtrLoadSrc, PtrCU[NbCU].SizeLoadSrc, PtrCU[NbCU].SizeLoadSrc, 1, SrcFile) != 1)
 #else
