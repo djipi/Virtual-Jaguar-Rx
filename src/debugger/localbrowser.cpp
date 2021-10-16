@@ -12,6 +12,7 @@
 // JPM  Sept./2018  Added a status bar and better status report, and set information values in a tab
 //  RG   Jan./2021  Linux build fixes
 // JPM    May/2021  Display the structure's members
+// JPM   Oct./2021  Fix a crash for inaccessible memory range, and added an error icon in case of values cannot be read
 //
 
 // STILL TO DO:
@@ -40,7 +41,8 @@ model(new QStandardItemModel),
 NbLocal(0),
 FuncName(NULL),
 LocalInfo(NULL),
-statusbar(new QStatusBar)
+statusbar(new QStatusBar),
+ExRegA6(-1)
 {
 	setWindowTitle(tr("Locals"));
 #ifdef LOCAL_FONTS
@@ -150,20 +152,32 @@ void LocalBrowserWindow::setValueRow(QStandardItem *Row, size_t Adr, char* Value
 		// check if variable has additional variables list (such as structure)
 		if (size_t nb = ((S_VariablesStruct*)Info)->NbTabVariables)
 		{
-			// get the pointer's value
-			Adr = GET32(jagMemSpace, Adr);
-
-			for (size_t i = 0; i < nb; i++)
+			// check the pointer's value
+			if (((Adr = GET32(jagMemSpace, Adr)) >= 4) && (Adr < vjs.DRAM_size))
 			{
-				// do not display arrays
-				if (!((((S_VariablesStruct*)Info)->TabVariables[i]->TypeTag & DBG_TAG_TYPE_array)))
+				// loop on the variables list
+				for (size_t i = 0; i < nb; i++)
 				{
-					// set value in the row
-					Value = DBGManager_GetVariableValueFromAdr(Adr + ((S_VariablesStruct*)Info)->TabVariables[i]->Offset, ((S_VariablesStruct*)Info)->TabVariables[i]->TypeEncoding, ((S_VariablesStruct*)Info)->TabVariables[i]->TypeByteSize);
-					child = Row->child((int)i, 1);
-					child->setText(QString("%1").arg(Value));
-					setValueRow(child, Adr + ((S_VariablesStruct*)Info)->TabVariables[i]->Offset, Value, (void*)((S_VariablesStruct*)Info)->TabVariables[i]);
+					// do not display arrays
+					if (!((((S_VariablesStruct*)Info)->TabVariables[i]->TypeTag & DBG_TAG_TYPE_array)))
+					{
+						// set value in the row
+						Value = DBGManager_GetVariableValueFromAdr(Adr + ((S_VariablesStruct*)Info)->TabVariables[i]->Offset, ((S_VariablesStruct*)Info)->TabVariables[i]->TypeEncoding, ((S_VariablesStruct*)Info)->TabVariables[i]->TypeByteSize);
+						child = Row->child((int)i, 1);
+						child->setText(QString("%1").arg(Value));
+						setValueRow(child, Adr + ((S_VariablesStruct*)Info)->TabVariables[i]->Offset, Value, (void*)((S_VariablesStruct*)Info)->TabVariables[i]);
+					}
+					//else
+					//{
+					//	// display icon for unavailable value
+					//	Row->child((int)i, 1)->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxWarning));
+					//}
 				}
+			}
+			else
+			{
+				// display icon for unavailable value
+				child->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxCritical));
 			}
 		}
 	}
@@ -174,6 +188,7 @@ void LocalBrowserWindow::setValueRow(QStandardItem *Row, size_t Adr, char* Value
 void LocalBrowserWindow::RefreshContents(void)
 {
 	size_t Error = LOCAL_NOERROR;
+	size_t RegA6;
 	QString Local;
 	QString MSG;
 	char Value1[100];
@@ -186,9 +201,10 @@ void LocalBrowserWindow::RefreshContents(void)
 	if (isVisible())
 	{
 		// get local's information
-		if (UpdateInfos())
+		if (UpdateInfos() || (ExRegA6 != m68k_get_reg(NULL, M68K_REG_A6)))
 		{
 			// erase the previous variables list
+			ExRegA6 = RegA6 = m68k_get_reg(NULL, M68K_REG_A6);
 			model->setRowCount(0);
 
 			// loop on the locals found
@@ -207,12 +223,12 @@ void LocalBrowserWindow::RefreshContents(void)
 						if (((((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op >= DBG_OP_breg0) && (((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op <= DBG_OP_breg31)) || (((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op == DBG_OP_fbreg))
 						{
 							// get variable's address
-							LocalInfo[i].Adr = m68k_get_reg(NULL, M68K_REG_A6) + ((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Offset;
+							LocalInfo[i].Adr = RegA6 + ((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Offset;
 							// check variable's parameter op
-							if ((((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op == DBG_OP_fbreg))
-							{
-								LocalInfo[i].Adr += 8;
-							}
+							//if ((((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op == DBG_OP_fbreg))
+							//{
+							//	LocalInfo[i].Adr += 8;
+							//}
 						}
 						else
 						{
@@ -244,35 +260,51 @@ void LocalBrowserWindow::RefreshContents(void)
 			// loop on the locals found
 			for (size_t i = 0; i < NbLocal; i++)
 			{
-				// variable's address must fit in RAM
-				if ((LocalInfo[i].Adr >= 4) && (LocalInfo[i].Adr < vjs.DRAM_size))
+				// check if the local variable is use by the code
+				if (((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op)
 				{
-					// get the variable's value
-					PtrValue = DBGManager_GetVariableValueFromAdr(LocalInfo[i].Adr, ((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->TypeEncoding, ((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->TypeByteSize);
-				}
-				else
-				{
-					// check CPU register's type variable
-					if (LocalInfo[i].PtrCPURegisterName)
+					// variable's address must fit in RAM
+					if ((LocalInfo[i].Adr >= 4) && (LocalInfo[i].Adr < vjs.DRAM_size))
 					{
-						// get the value from register
-						memset(Value1, 0, sizeof(Value1));
-						sprintf(Value1, "0x%x", m68k_get_reg(NULL, (m68k_register_t)((size_t)M68K_REG_D0 + (((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op - DBG_OP_reg0))));
-						PtrValue = Value1;
+						// get the variable's value
+						PtrValue = DBGManager_GetVariableValueFromAdr(LocalInfo[i].Adr, ((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->TypeEncoding, ((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->TypeByteSize);
 					}
 					else
 					{
-						// no value can be found
-						PtrValue = NULL;
+						// check CPU register's type variable
+						if (LocalInfo[i].PtrCPURegisterName)
+						{
+							// get the value from register
+							memset(Value1, 0, sizeof(Value1));
+							sprintf(Value1, "0x%x", m68k_get_reg(NULL, (m68k_register_t)((size_t)M68K_REG_D0 + (((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op - DBG_OP_reg0))));
+							PtrValue = Value1;
+						}
+						else
+						{
+							// no value can be found
+							PtrValue = NULL;
+						}
 					}
-				}
 
-				// do not display arrays
-				if (!(((S_VariablesStruct*)LocalInfo[i].PtrVariable)->TypeTag & DBG_TAG_TYPE_array))
-				{
-					// set the local's variable value
-					model->item((int)i, 1)->setText(QString("%1").arg(PtrValue));
-					setValueRow(model->item((int)i), LocalInfo[i].Adr, PtrValue, (S_VariablesStruct*)(LocalInfo[i].PtrVariable));
+					// display icon for unavailable value
+					if (!PtrValue)
+					{
+						model->item((int)i, 1)->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxCritical));
+					}
+					else
+					{
+						// do not display arrays
+						if (!(((S_VariablesStruct*)LocalInfo[i].PtrVariable)->TypeTag & DBG_TAG_TYPE_array))
+						{
+							// set the local's variable value
+							model->item((int)i, 1)->setText(QString("%1").arg(PtrValue));
+							setValueRow(model->item((int)i), LocalInfo[i].Adr, PtrValue, (S_VariablesStruct*)(LocalInfo[i].PtrVariable));
+						}
+						//else
+						//{
+						//	model->item((int)i, 1)->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxWarning));
+						//}
+					}
 				}
 			}
 

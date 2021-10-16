@@ -53,6 +53,7 @@ class LocalBrowserWindow: public QWidget
 		QStatusBar *statusbar;
 		size_t NbLocal;
 		char *FuncName;
+		size_t ExRegA6;
 };
 
 #endif	// __LOCALBROWSER_H__

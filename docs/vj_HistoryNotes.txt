@@ -5,6 +5,8 @@ Release 5a (TBA)
 2) Source file path clean up in the DWARF information reader
 -- Useful in case of multiples /./, \.\, \\ or //
 3) Project has switched to libdwarf 20210528 library 64bits for VS 2017
+4) Local variables window stability improvements
+-- Fix a crash, and added an error icon, for inaccessible memory range (values cannot be read)
 
 Release 5 (26th May 2021)
 -------------------------
