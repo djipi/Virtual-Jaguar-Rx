@@ -7,6 +7,8 @@ Release 5a (TBA)
 3) Project has switched to libdwarf 20210528 library 64bits for VS 2017
 4) Local variables window stability improvements
 -- Fix a crash, and added an error icon, for inaccessible memory range (values cannot be read)
+5) DWARF information reader fix for local and parameter variables
+-- Support wider offset ranges
 
 Release 5 (26th May 2021)
 -------------------------

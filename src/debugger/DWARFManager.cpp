@@ -16,6 +16,7 @@
 //  RG   Jan./2021  Linux build fixes
 // JPM   Apr./2021  Support the structure and union members
 // JPM   June/2021  Update the source file path clean up
+// JPM   Oct./2021  Support wider offset ranges for local and parameter variables
 //
 
 // To Do
@@ -1144,6 +1145,8 @@ void DWARFManager_InitDMI(void)
 
 																				case 2:
 																				case 3:
+																				case 4:
+																				case 5:
 																					switch (return_tagval)
 																					{
 																					case DW_TAG_variable:
