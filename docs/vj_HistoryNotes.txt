@@ -9,6 +9,7 @@ Release 5a (TBA)
 -- Fix a crash, and added an error icon, for inaccessible memory range (values cannot be read)
 5) DWARF information reader fix for local and parameter variables
 -- Support wider offset ranges
+6) Code will stop after the unknown memory location writing's alert box
 
 Release 5 (26th May 2021)
 -------------------------

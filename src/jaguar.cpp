@@ -1519,15 +1519,22 @@ unsigned int m68k_read_memory_32(unsigned int address)
 // Alert message in case of writing to unknown memory location
 bool m68k_write_unknown_alert(unsigned int address, char *bits, unsigned int value)
 {
-	QString msg;
-	QMessageBox msgBox;
+	if (!M68KDebugHaltStatus())
+	{
+		QString msg;
+		QMessageBox msgBox;
 
-	msg.sprintf("$%06x: Writing at this unknown memory location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
-	msgBox.setText(msg);
-	msgBox.setStandardButtons(QMessageBox::Abort);
-	msgBox.setDefaultButton(QMessageBox::Abort);
-	msgBox.exec();
-	return M68KDebugHalt();
+		msg.sprintf("$%06x: Writing at this unknown memory location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
+		msgBox.setText(msg);
+		msgBox.setStandardButtons(QMessageBox::Abort);
+		msgBox.setDefaultButton(QMessageBox::Abort);
+		msgBox.exec();
+		return M68KDebugHalt();
+	}
+	else
+	{
+		return 1;
+	}
 }
 
 
