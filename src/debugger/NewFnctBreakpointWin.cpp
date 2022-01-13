@@ -81,7 +81,7 @@ void NewFnctBreakpointWindow::AddBreakpointAddress(void)
 {
 	bool ok;
 	size_t len;
-	QString newAddress;
+	QString newAddress, newAddress2;
 	size_t adr;
 	S_BrkInfo Brk;
 
@@ -90,6 +90,15 @@ void NewFnctBreakpointWindow::AddBreakpointAddress(void)
 
 	if ((len = newAddress.size()))
 	{
+		if (newAddress.at(0) == QChar('$'))
+		{
+			newAddress2 = newAddress.right(len - 1);
+			newAddress.resize(len + 1);
+			newAddress = "0x" + newAddress2;
+
+		}
+		
+
 		if ((len > 1) && (newAddress.at(0) == QChar('0')) && (newAddress.at(1) == QChar('x')))
 		{
 			adr = newAddress.toUInt(&ok, 16);
