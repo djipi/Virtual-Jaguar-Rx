@@ -35,3 +35,7 @@ virtualjaguar.WinMerge
 /Win-VS2017/GeneratedFiles/qrc_virtualjaguar.cpp
 /Win-VS2017/My Inspector Results - virtualjaguar
 /Win-VS2019/
+virtualjaguar.vcxproj
+virtualjaguar.vcxproj.filters
+Win-VS2017/jaguarcore/jaguarcore.vcxproj
+Win-VS2017/virtualjaguar.vcxproj

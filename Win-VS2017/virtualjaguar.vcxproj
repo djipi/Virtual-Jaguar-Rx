@@ -60,6 +60,14 @@
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(ProjectName)</TargetName>
     <IgnoreImportLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</IgnoreImportLibrary>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>C:\Qt\5.12.2\msvc2017_64\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Qt\5.12.2\msvc2017_64\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>C:\Qt\5.12.2\msvc2017_64\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Qt\5.12.2\msvc2017_64\lib;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalIncludeDirectories>.;.\..\src;.\..\src\gui;$(QTDIR)\include;C:\SDK\OpenGL\include;C:\SDK\SDL\SDL-1.2.15\include;C:\SDK\DWARF\libdwarf-20210305-VS2017\include;C:\SDK\Elf\libelf-0.8.13\include;C:\SDK\zlib\zlib-1.2.11\include;.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1157,7 +1165,7 @@
   <ImportGroup Label="ExtensionTargets" />
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties MocDir=".\GeneratedFiles\$(ConfigurationName)" UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_x64="$(DefaultQtVersion)" />
+      <UserProperties MocDir=".\GeneratedFiles\$(ConfigurationName)" UicDir=".\GeneratedFiles" RccDir=".\GeneratedFiles" Qt5Version_x0020_x64="5.12.2_msvc2017_64" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>
