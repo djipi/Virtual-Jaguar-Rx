@@ -14,6 +14,9 @@
 // STILL TO DO:
 //
 
+#include "jagdasm.h"
+#include "jaguar.h"
+
 #include "memorybrowser.h"
 #include "memory.h"
 
@@ -66,7 +69,12 @@ void MemoryBrowserWindow::RefreshContents(void)
 
 			for (uint32_t j = 0; j < 16; j++)
 			{
-				sprintf(buf, "%02X ", jaguarMainRAM[memBase + i + j]);
+				if ((memBase + i + j) < 0x800000)
+					sprintf(buf, "%02X ", jaguarMainRAM[memBase + i + j]);
+				else if (((memBase + i + j) >= 0xF10000) && ((memBase + i + j) <= 0xF1FFFE))
+					
+					sprintf(buf, "%02X ", JaguarReadByte(memBase + i + j));
+				
 				strcat(string, buf);
 			}
 
@@ -75,7 +83,11 @@ void MemoryBrowserWindow::RefreshContents(void)
 
 			for (uint32_t j = 0; j < 16; j++)
 			{
-				uint8_t c = jaguarMainRAM[memBase + i + j];
+				uint8_t c;
+				if ((memBase + i + j) < 0x800000)
+					c = jaguarMainRAM[memBase + i + j];
+				else if (((memBase + i + j) >= 0xF10000) && ((memBase + i + j) <= 0xF1FFFE))
+					c = JaguarReadByte(memBase + i + j);
 				sprintf(buf, "&#%i;", c);
 
 				if (c == 0x20)
@@ -113,8 +125,8 @@ void MemoryBrowserWindow::keyPressEvent(QKeyEvent * e)
 	{
 		memBase += 480;
 
-		if (memBase > (0x200000 - 480))
-			memBase = 0x200000 - 480;
+		if (memBase > (0xF1FFFE - 480))
+			memBase = 0xF1FFFE - 480;
 
 		RefreshContents();
 	}
@@ -131,8 +143,8 @@ void MemoryBrowserWindow::keyPressEvent(QKeyEvent * e)
 	{
 		memBase += 16;
 
-		if (memBase > (0x200000 - 480))
-			memBase = 0x200000 - 480;
+		if (memBase > (0xF1FFFE - 480))
+			memBase = 0xF1FFFE - 480;
 
 		RefreshContents();
 	}
