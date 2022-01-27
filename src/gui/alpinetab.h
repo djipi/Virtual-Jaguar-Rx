@@ -17,16 +17,17 @@ class AlpineTab: public QWidget
 		QString CheckForSlashes(QString);
 
 	public:
-		QLineEdit * edit1;
-		QLineEdit * edit2;
-		QLineEdit * edit3;
-//		QLineEdit * edit3;
-//		QLineEdit * edit4;
-		QCheckBox * writeROM;
-		QCheckBox * M68KExceptionCatch;
-//		QCheckBox * useDSP;
-//		QCheckBox * useHostAudio;
-//		QCheckBox * useUnknownSoftware;
+		QLineEdit *edit1;
+		QLineEdit *edit2;
+		QLineEdit *edit3;
+//		QLineEdit *edit3;
+//		QLineEdit *edit4;
+		QCheckBox *writeROM;
+		QCheckBox *M68KExceptionCatch;
+		QCheckBox *WriteUnknownMemoryLocation;
+//		QCheckBox *useDSP;
+//		QCheckBox *useHostAudio;
+//		QCheckBox *useUnknownSoftware;
 };
 
 #endif	// __ALPINETAB_H__
