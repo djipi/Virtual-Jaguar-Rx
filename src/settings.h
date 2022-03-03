@@ -90,6 +90,7 @@ struct VJSettings
 	bool useFastBlitter;
 	bool displayFullSourceFilename;
 	bool ELFSectionsCheck;
+	bool cygdriveDirRemoval;
 	size_t nbrmemory1browserwindow;								// Number of memory browser windows
 	size_t DRAM_size;											// DRAM size
 
