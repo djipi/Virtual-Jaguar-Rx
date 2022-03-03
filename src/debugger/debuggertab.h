@@ -6,6 +6,7 @@
 // JPM  Sept./2016  Created this file, and added Soft debugger support
 // JPM  10/09/2018  Added the source file search paths
 // JPM  04/06/2019  Added ELF sections check
+// JPM  March/2022  Added a '/cygdrive/' directory removal option
 //
 
 #ifndef __DEBUGGERTAB_H__
@@ -33,6 +34,7 @@ class DebuggerTab: public QWidget
 		QCheckBox *disasmopcodes;
 		QCheckBox *displayFullSourceFilename;
 		QCheckBox *ELFSectionsCheck;
+		QCheckBox *cygdriveDirRemoval;
 };
 
 #endif	// __DEBUGGERTAB_H__

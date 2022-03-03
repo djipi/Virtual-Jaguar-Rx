@@ -12,6 +12,7 @@
 // JPM  10/09/2018  Added source file search paths
 // JPM  04/06/2019  Added ELF sections check
 //  RG   Jan./2021  Linux build fix
+// JPM  March/2022  Added a '/cygdrive/' directory removal option
 //
 
 #include "debuggertab.h"
@@ -52,6 +53,7 @@ DebuggerTab::DebuggerTab(QWidget * parent/*= 0*/): QWidget(parent)
 	layout4->addLayout(layout7);
 
 	// Checkboxes
+	cygdriveDirRemoval = new QCheckBox(tr("/cygdrive/ directory reference removal"));
 	displayHWlabels = new QCheckBox(tr("Display HW labels"));
 	disasmopcodes	= new QCheckBox(tr("Display M68000 opcodes"));
 	displayFullSourceFilename = new QCheckBox(tr("Display source filename"));
@@ -60,7 +62,9 @@ DebuggerTab::DebuggerTab(QWidget * parent/*= 0*/): QWidget(parent)
 	displayHWlabels->setDisabled(false);
 	displayFullSourceFilename->setDisabled(false);
 	ELFSectionsCheck->setDisabled(false);
+	cygdriveDirRemoval->setDisabled(true);
 
+	layout4->addWidget(cygdriveDirRemoval);
 	layout4->addWidget(disasmopcodes);
 	layout4->addWidget(displayHWlabels);
 	layout4->addWidget(displayFullSourceFilename);
@@ -88,6 +92,7 @@ void DebuggerTab::SetSettings(void)
 	vjs.disasmopcodes = disasmopcodes->isChecked();
 	vjs.displayFullSourceFilename = displayFullSourceFilename->isChecked();
 	vjs.ELFSectionsCheck = ELFSectionsCheck->isChecked();
+	vjs.cygdriveDirRemoval = cygdriveDirRemoval->isChecked();
 }
 
 
@@ -95,12 +100,14 @@ void DebuggerTab::SetSettings(void)
 void DebuggerTab::GetSettings(void)
 {
 	QVariant v((qulonglong) vjs.nbrdisasmlines);
+
 	nbrdisasmlines->setText(v.toString());
 	sourcefilesearchpaths->setText(vjs.sourcefilesearchPaths);
 	displayHWlabels->setChecked(vjs.displayHWlabels);
 	disasmopcodes->setChecked(vjs.disasmopcodes);
 	displayFullSourceFilename->setChecked(vjs.displayFullSourceFilename);
 	ELFSectionsCheck->setChecked(vjs.ELFSectionsCheck);
+	cygdriveDirRemoval->setChecked(vjs.cygdriveDirRemoval);
 }
 
 
