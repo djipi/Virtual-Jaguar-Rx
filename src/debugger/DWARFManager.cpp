@@ -17,6 +17,7 @@
 // JPM   Apr./2021  Support the structure and union members
 // JPM   June/2021  Update the source file path clean up
 // JPM   Oct./2021  Support wider offset ranges for local and parameter variables
+// JPM  March/2022  Added a '/cygdrive/' directory detection
 //
 
 // To Do
@@ -531,6 +532,20 @@ void DWARFManager_InitDMI(void)
 								{
 									PtrCU[NbCU].PtrSourceFileDirectory = (char *)realloc(PtrCU[NbCU].PtrSourceFileDirectory, 2);
 									strcpy(PtrCU[NbCU].PtrSourceFileDirectory, ".");
+								}
+							}
+							else
+							{
+								// handle the /cygdrive/ presence in the directory filename
+								if (!strncmp(PtrCU[NbCU].PtrSourceFileDirectory, "/cygdrive/", 10))
+								{
+									strcpy(PtrCU[NbCU].PtrSourceFileDirectory, &PtrCU[NbCU].PtrSourceFileDirectory[9]);
+									if ((PtrCU[NbCU].PtrSourceFileDirectory[0] == '/') && (PtrCU[NbCU].PtrSourceFileDirectory[2] == '/') && (PtrCU[NbCU].PtrSourceFileDirectory[1] >= 'a') && (PtrCU[NbCU].PtrSourceFileDirectory[1] <= 'z'))
+									{
+										PtrCU[NbCU].PtrSourceFileDirectory[0] = PtrCU[NbCU].PtrSourceFileDirectory[1];
+										PtrCU[NbCU].PtrSourceFileDirectory[1] = ':';
+										PtrCU[NbCU].PtrSourceFileDirectory = (char*)realloc(PtrCU[NbCU].PtrSourceFileDirectory, strlen(PtrCU[NbCU].PtrSourceFileDirectory) + 1);
+									}
 								}
 							}
 
