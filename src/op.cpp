@@ -13,6 +13,7 @@
 // ---  ----------  -----------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
 // JPM  06/06/2016  Visual Studio support
+// JPM  March/2022  Fix the Object list at $0
 //
 
 #include "op.h"
@@ -487,7 +488,8 @@ int bitmapCounter = 0;
 	uint32_t opCyclesToRun = 30000;					// This is a pulled-out-of-the-air value (will need to be fixed, obviously!)
 
 //	if (op_pointer) WriteLog(" new op list at 0x%.8x halfline %i\n",op_pointer,halfline);
-	while (op_pointer)
+	//while (op_pointer)
+	do
 	{
 // *** BEGIN OP PROCESSOR TESTING ONLY ***
 if (interactiveMode && bitmapCounter == objectPtr)
@@ -606,7 +608,7 @@ if (inhibit && op_start_log)
 bitmapCounter++;
 if (!inhibit)	// For OP testing only!
 // *** END OP PROCESSOR TESTING ONLY ***
-			if (halfline >= ypos && height > 0)
+			if ((halfline >= ypos) && (height > 0))
 			{
 				// Believe it or not, this is what the OP actually does...
 				// which is why they're required to be on a dphrase boundary!
@@ -638,8 +640,10 @@ if (!inhibit)	// For OP testing only!
 
 			// KLUDGE: Seems that memory access is mirrored in the first 8MB of
 			// memory...
-			if (op_pointer > 0x1FFFFF && op_pointer < 0x800000)
+			if ((op_pointer > 0x1FFFFF) && (op_pointer < 0x800000))
+			{
 				op_pointer &= 0xFF1FFFFF;	// Knock out bits 21-23
+			}
 
 			break;
 		}
@@ -836,6 +840,7 @@ OP: Scaled bitmap 4x? 4bpp at 34,? hscale=80 fpix=0 data=000756E8 pitch 1 hflipp
 			default:
 				// Basically, if you do this, the OP does nothing. :-)
 				WriteLog("OP: Unimplemented branch condition %i\n", cc);
+				break;
 			}
 			break;
 		}
@@ -854,6 +859,7 @@ OP: Scaled bitmap 4x? 4bpp at 34,? hscale=80 fpix=0 data=000756E8 pitch 1 hflipp
 		}
 		default:
 			WriteLog("OP: Unknown object type %i\n", (uint8_t)p0 & 0x07);
+			break;
 		}
 
 		// Here is a little sanity check to keep the OP from locking up the
@@ -870,6 +876,7 @@ OP: Scaled bitmap 4x? 4bpp at 34,? hscale=80 fpix=0 data=000756E8 pitch 1 hflipp
 		if (!opCyclesToRun)
 			return;
 	}
+	while (op_pointer);
 }
 
 

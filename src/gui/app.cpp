@@ -23,7 +23,7 @@
 
 #include "app.h"
 
-#include <SDL.h>
+#include "SDL.h"
 #include <QtWidgets/QApplication>
 #include "gamepad.h"
 #include "log.h"
@@ -37,6 +37,7 @@
 #if defined (__GCCWIN32__) || defined (_MSC_VER)
 #undef main
 #include <windows.h>	// Ick, but needed for console redirection on win32 :-O
+#include <fstream>
 #endif
 
 // Function prototypes...
@@ -63,7 +64,7 @@ int main(int argc, char * argv[])
 
 	AttachConsole = (BOOL (WINAPI *)(DWORD))GetProcAddress(LoadLibraryA("kernel32.dll"), "AttachConsole");
 
-	if (AttachConsole != NULL && AttachConsole(((DWORD)-1)))
+	if ((AttachConsole != NULL) && AttachConsole(((DWORD)-1)))
 	{
 		if (_fileno(stdout) == -1)
 			freopen("CONOUT$", "wb", stdout);

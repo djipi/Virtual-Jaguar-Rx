@@ -19,6 +19,7 @@
 // JPM   Aug./2019  Fix potential emulator freeze after an exception has occured
 // JPM   Feb./2021  Added a specific breakpoint for the M68K bus error exception, and a M68K exception catch detection
 // JPM   Apr./2021  Keep number of M68K cycles used in tracing mode
+// JPM   Jan./2022  Added a writes to unknown memory location catch
 //
 
 
@@ -1952,35 +1953,44 @@ void M68K_show_context(void)
 // $700000 worth of address space! (That is, unless the 68K causes a bus
 // error...)
 
+
+// Catch a byte write to an unknown location
 void jaguar_unknown_writebyte(unsigned address, unsigned data, uint32_t who/*=UNKNOWN*/)
 {
-	m68k_write_unknown_alert(address, "8", data);
+	if (!vjs.allowWritesToUnknownLocation)
+	{
+		m68k_write_unknown_alert(address, "8", data);
 #ifdef LOG_UNMAPPED_MEMORY_ACCESSES
-	WriteLog("Jaguar: Unknown byte %02X written at %08X by %s (M68K PC=%06X)\n", data, address, whoName[who], m68k_get_reg(NULL, M68K_REG_PC));
+		WriteLog("Jaguar: Unknown byte %02X written at %08X by %s (M68K PC=%06X)\n", data, address, whoName[who], m68k_get_reg(NULL, M68K_REG_PC));
 #endif
 #ifdef ABORT_ON_UNMAPPED_MEMORY_ACCESS
-//	extern bool finished;
-	finished = true;
-//	extern bool doDSPDis;
-	if (who == DSP)
-		doDSPDis = true;
+		//	extern bool finished;
+		finished = true;
+		//	extern bool doDSPDis;
+		if (who == DSP)
+			doDSPDis = true;
 #endif
+	}
 }
 
 
+// Catch a word/short write to an unknown location
 void jaguar_unknown_writeword(unsigned address, unsigned data, uint32_t who/*=UNKNOWN*/)
 {
-	m68k_write_unknown_alert(address, "16", data);
+	if (!vjs.allowWritesToUnknownLocation)
+	{
+		m68k_write_unknown_alert(address, "16", data);
 #ifdef LOG_UNMAPPED_MEMORY_ACCESSES
-	WriteLog("Jaguar: Unknown word %04X written at %08X by %s (M68K PC=%06X)\n", data, address, whoName[who], m68k_get_reg(NULL, M68K_REG_PC));
+		WriteLog("Jaguar: Unknown word %04X written at %08X by %s (M68K PC=%06X)\n", data, address, whoName[who], m68k_get_reg(NULL, M68K_REG_PC));
 #endif
 #ifdef ABORT_ON_UNMAPPED_MEMORY_ACCESS
-//	extern bool finished;
-	finished = true;
-//	extern bool doDSPDis;
-	if (who == DSP)
-		doDSPDis = true;
+		//	extern bool finished;
+		finished = true;
+		//	extern bool doDSPDis;
+		if (who == DSP)
+			doDSPDis = true;
 #endif
+	}
 }
 
 
