@@ -66,11 +66,12 @@ void JoystickExec(void)
 }
 
 
+// Reset Joystick
 void JoystickReset(void)
 {
-	memset(joystick_ram, 0x00, 4);
-	memset(joypad0Buttons, 0, 21);
-	memset(joypad1Buttons, 0, 21);
+	memset(joystick_ram, 0x00, sizeof(joystick_ram));
+	memset(joypad0Buttons, 0, sizeof(joypad0Buttons));
+	memset(joypad1Buttons, 0, sizeof(joypad1Buttons));
 }
 
 

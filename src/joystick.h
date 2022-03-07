@@ -31,14 +31,14 @@ BUTTON_C = 18,
 BUTTON_OPTION = 19,
 BUTTON_PAUSE = 20, BUTTON_LAST = 20 };
 
-void JoystickInit(void);
-void JoystickReset(void);
-void JoystickDone(void);
+extern void JoystickInit(void);
+extern void JoystickReset(void);
+extern void JoystickDone(void);
 //void JoystickWriteByte(uint32_t, uint8_t);
-void JoystickWriteWord(uint32_t, uint16_t);
+extern void JoystickWriteWord(uint32_t, uint16_t);
 //uint8_t JoystickReadByte(uint32_t);
-uint16_t JoystickReadWord(uint32_t);
-void JoystickExec(void);
+extern uint16_t JoystickReadWord(uint32_t);
+extern void JoystickExec(void);
 
 extern uint8_t joypad0Buttons[];
 extern uint8_t joypad1Buttons[];
@@ -46,4 +46,3 @@ extern bool audioEnabled;
 extern bool joysticksEnabled;
 
 #endif	// __JOYSTICK_H__
-

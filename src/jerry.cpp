@@ -356,19 +356,25 @@ void JERRYI2SCallback(void)
 }
 
 
+// JERRY initialisations
+//
+// Joystick, Memory Track, audio table, interrupts, and DAC
 void JERRYInit(void)
 {
+	// joystick
 	JoystickInit();
+	// memory track
 	MTInit();
+	// wave table audio
 	memcpy(&jerry_ram_8[0xD000], waveTableROM, 0x1000);
-
+	// interrupts
 	JERRYPIT1Prescaler = 0xFFFF;
 	JERRYPIT2Prescaler = 0xFFFF;
 	JERRYPIT1Divider = 0xFFFF;
 	JERRYPIT2Divider = 0xFFFF;
 	jerryInterruptMask = 0x0000;
 	jerryPendingInterrupt = 0x0000;
-
+	// DAC
 	DACInit();
 }
 
