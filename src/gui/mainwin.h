@@ -34,6 +34,7 @@ class OPBrowserWindow;
 class M68KDasmBrowserWindow;
 class RISCDasmBrowserWindow;
 class HWRegsBrowserWindow;
+class BlitterRegsWindow;
 
 // Debugger
 class SourcesWindow;
@@ -101,6 +102,7 @@ class MainWin: public QMainWindow
 		void ToggleFullScreen(void);
 		void ShowEmuStatusWin(void);
 		void MakeScreenshot(void);
+		void ToggleBPBState(void);
 		// Debugger
 		void DebuggerTraceStepOver(void);
 		void DebuggerTraceStepInto(void);
@@ -154,6 +156,7 @@ class MainWin: public QMainWindow
 		M68KDasmBrowserWindow *m68kDasmBrowseWin;
 		RISCDasmBrowserWindow *riscDasmBrowseWin;
 		HWRegsBrowserWindow *hwRegsBrowseWin;
+		BlitterRegsWindow *blitRegsWin;
 		VideoOutputWindow *VideoOutputWin;
 		AllWatchBrowserWindow *allWatchBrowseWin;
 		LocalBrowserWindow *LocalBrowseWin;
@@ -232,6 +235,7 @@ class MainWin: public QMainWindow
 		QAction *fullScreenAct;
 		//QAction *DasmAct;
 		QAction *screenshotAct;
+		QAction *bpbAct;
 
 		// Alpine
 		QAction *memBrowseAct;
@@ -263,6 +267,8 @@ class MainWin: public QMainWindow
 		QIcon powerGreen;
 		QIcon powerRed;
 		QIcon blur;
+		QIcon pauseIcon;
+		QIcon bpbIcon;
 		uint32_t testPattern[VIRTUAL_SCREEN_WIDTH * VIRTUAL_SCREEN_HEIGHT_PAL];
 		uint32_t testPattern2[VIRTUAL_SCREEN_WIDTH * VIRTUAL_SCREEN_HEIGHT_PAL];
 };

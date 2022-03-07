@@ -30,6 +30,7 @@
 //  RG   Jan./2021  Linux build fixes
 // JPM   Apr./2021  Handle number of M68K cycles used in tracing mode, added video output display in a window
 // JPM    May/2021  Check missing dll for the tests pattern
+// JPM   Jan./2022  Added a Blitter cmd breakpoint
 //
 
 // FIXED:
@@ -78,7 +79,7 @@
 #include "debug/opbrowser.h"
 #include "debug/riscdasmbrowser.h"
 #include "debug/hwregsbrowser.h"
-
+#include "blitter.h"
 #include "dac.h"
 #include "jaguar.h"
 #include "log.h"
@@ -93,7 +94,7 @@
 #include "jagcdbios.h"
 #include "joystick.h"
 #include "m68000/m68kinterface.h"
-
+#include "debugger/BlitterRegsWin.h"
 #include "debugger/DBGManager.h"
 #include "debugger/VideoWin.h"
 //#include "debugger/DasmWin.h"
@@ -195,7 +196,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	filePickWin = new FilePickerWindow(this);
 	emuStatusWin = new EmuStatusWindow(this);
 	
-	// Windows alpine mode features
+	// Windows Alpine mode features
 	memBrowseWin = new MemoryBrowserWindow(this);
 	stackBrowseWin = new StackBrowserWindow(this);
 	cpuBrowseWin = new CPUBrowserWindow(this);
@@ -203,8 +204,9 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	m68kDasmBrowseWin = new M68KDasmBrowserWindow(this);
 	riscDasmBrowseWin = new RISCDasmBrowserWindow(this);
 	hwRegsBrowseWin = new HWRegsBrowserWindow(this);
+	blitRegsWin = new BlitterRegsWindow(this);
 
-	// Windows debugger mode features
+	// Windows Debugger mode features
 	if (vjs.softTypeDebugger)
 	{
 		VideoOutputWin = new VideoOutputWindow(this);
@@ -250,12 +252,13 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 #else
 		dasmtabWidget = new QTabWidget(this);
 #endif
-		// Setup disasm tabs
+		// Setup the tabs
 		dasmtabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 		dasmtabWidget->addTab(SourcesWin = new SourcesWindow(this), tr("Sources"));
 		dasmtabWidget->setCurrentIndex(dasmtabWidget->addTab(m68kDasmWin = new m68KDasmWindow(this), tr("M68000")));
 		dasmtabWidget->addTab(GPUDasmWin = new GPUDasmWindow(this), tr("GPU"));
 		dasmtabWidget->addTab(DSPDasmWin = new DSPDasmWindow(this), tr("DSP"));
+		dasmtabWidget->addTab(blitRegsWin, tr("Blitter"));
 		connect(dasmtabWidget, SIGNAL(currentChanged(const int)), this, SLOT(SelectdasmtabWidget(const int)));
 #if 1
 		setCentralWidget(dasmtabWidget);
@@ -286,7 +289,6 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	connect(powerAct, SIGNAL(triggered()), this, SLOT(TogglePowerState()));
 
 	// Pause action
-	QIcon pauseIcon;
 	pauseIcon.addFile(":/res/pause-off.png", QSize(), QIcon::Normal, QIcon::Off);
 	pauseIcon.addFile(":/res/pause-on.png", QSize(), QIcon::Normal, QIcon::On);
 	pauseAct = new QAction(pauseIcon, tr("Pause"), this);
@@ -398,7 +400,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	fullScreenAct->setCheckable(true);
 	connect(fullScreenAct, SIGNAL(triggered()), this, SLOT(ToggleFullScreen()));
 
-	// Actions dedicated to debugger mode
+	// Actions dedicated to Debugger mode
 	if (vjs.softTypeDebugger)
 	{
 		// Restart
@@ -425,16 +427,22 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		traceStepIntoAct->setDisabled(true);
 		connect(traceStepIntoAct, SIGNAL(triggered()), this, SLOT(DebuggerTraceStepInto()));
 
-		// Function breakpoint
+		// Breakpoint on new function window
 		newFunctionBreakpointAct = new QAction(QIcon(""), tr("&Function Breakpoint"), this);
 		newFunctionBreakpointAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBFUNCTIONBREAKPOINT].KBSettingValue)));
 		connect(newFunctionBreakpointAct, SIGNAL(triggered()), this, SLOT(ShowNewFunctionBreakpointWin()));
+
+		// Breakpoints list window
 		BreakpointsAct = new QAction(QIcon(":/res/debug-breakpoints.png"), tr("&Breakpoints"), this);
 		BreakpointsAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBBREAKPOINTS].KBSettingValue)));
 		connect(BreakpointsAct, SIGNAL(triggered()), this, SLOT(ShowBreakpointsWin()));
+
+		// Breakpoints full/all deletion
 		deleteAllBreakpointsAct = new QAction(QIcon(":/res/debug-deleteallbreakpoints.png"), tr("&Delete All Breakpoints"), this);
 		deleteAllBreakpointsAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBDELETEALLBREAKPOINTS].KBSettingValue)));
 		connect(deleteAllBreakpointsAct, SIGNAL(triggered()), this, SLOT(DeleteAllBreakpoints()));
+
+		// Breakpoints full/all disable
 		disableAllBreakpointsAct = new QAction(QIcon(":/res/debug-disableallbreakpoints.png"), tr("&Disable All Breakpoints"), this);
 		connect(disableAllBreakpointsAct, SIGNAL(triggered()), this, SLOT(DisableAllBreakpoints()));
 
@@ -444,6 +452,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		saveDumpAsAct->setDisabled(false);
 		connect(saveDumpAsAct, SIGNAL(triggered()), this, SLOT(ShowSaveDumpAsWin()));
 
+		// Video output
 		VideoOutputAct = new QAction(tr("Output Video"), this);
 		VideoOutputAct->setStatusTip(tr("Shows the output video window"));
 		connect(VideoOutputAct, SIGNAL(triggered()), this, SLOT(ShowVideoOutputWin()));
@@ -502,6 +511,15 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		}
 	}
 
+	// Breakpoint blitter B_CMD action
+	bpbIcon.addFile(":/res/debug-breakpoints-blitcmd-off.png", QSize(), QIcon::Normal, QIcon::Off);
+	bpbIcon.addFile(":/res/debug-breakpoints-blitcmd-on.png", QSize(), QIcon::Normal, QIcon::On);
+	bpbAct = new QAction(bpbIcon, tr("Breakpoint on Blitter"), this);
+	bpbAct->setStatusTip(tr("Toggles the breakpoint on Blitter"));
+	bpbAct->setCheckable(true);
+	//bpbAct->setDisabled(true);
+	connect(bpbAct, SIGNAL(triggered()), this, SLOT(ToggleBPBState()));
+
 	// Memory browser window action
 	memBrowseAct = new QAction(QIcon(":/res/tool-memory.png"), tr("Memory Browser"), this);
 	memBrowseAct->setStatusTip(tr("Shows the Jaguar memory browser window"));
@@ -542,7 +560,6 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	connect(filePickWin, SIGNAL(FilePickerHiding()), this, SLOT(Unpause()));
 
 	// Create menus
-
 	fileMenu = menuBar()->addMenu(tr("&Jaguar"));
 	fileMenu->addAction(powerAct);
 	if (!vjs.softTypeDebugger)
@@ -646,7 +663,6 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	helpMenu->addAction(aboutAct);
 
 	// Create toolbars
-
 	toolbar = addToolBar(tr("System"));
 	toolbar->addAction(powerAct);
 	if (!vjs.softTypeDebugger)
@@ -654,9 +670,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		toolbar->addAction(pauseAct);
 		toolbar->addAction(frameAdvanceAct);
 	}
+	// Add common features for all modes
 	toolbar->addAction(filePickAct);
 	toolbar->addAction(useCDAct);
 	toolbar->addSeparator();
+	// Add the features dedicated to the Alpine mode
 	if (!vjs.softTypeDebugger)
 	{
 		toolbar->addAction(screenshotAct);
@@ -673,6 +691,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	}
 	else
 	{
+		// Add the specific features for the Debugger mode
 		debuggerbar = addToolBar(tr("&Debugger"));
 		debuggerbar->addAction(pauseAct);
 		debuggerbar->addAction(frameAdvanceAct);
@@ -682,8 +701,9 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		debuggerbar->addAction(traceStepOverAct);
 		debuggerbar->addSeparator();
 		debuggerbar->addAction(BreakpointsAct);
+		debuggerbar->addAction(bpbAct);
 	}
-
+	// Add the specific features for the Alpine mode
 	if (vjs.hardwareTypeAlpine)
 	{
 		debugbar = addToolBar(tr("&Debug"));
@@ -694,6 +714,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		debugbar->addAction(m68kDasmBrowseAct);
 		debugbar->addAction(riscDasmBrowseAct);
 		debugbar->addAction(hwRegsBrowseAct);
+		//debugbar->addSeparator();
+		//debugbar->addAction(bpbAct);
 	}
 
 	// Add actions to the main window, as hiding widgets with them
@@ -851,15 +873,16 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 }
 
 
+// Load file
 void MainWin::LoadFile(QString file)
 {
 	LoadSoftware(file);
 }
 
 
+// Set toolbar buttons/menus based on settings read in (sync the UI)...
 void MainWin::SyncUI(void)
 {
-	// Set toolbar buttons/menus based on settings read in (sync the UI)...
 	// (Really, this is to sync command line options passed in)
 	blurAct->setChecked(vjs.glFilter);
 	x1Act->setChecked(zoomLevel == 1);
@@ -1755,6 +1778,7 @@ void MainWin::SetFullScreen(bool state/*= true*/)
 }
 
 
+// Toggle full screen
 void MainWin::ToggleFullScreen(void)
 {
 	fullScreen = !fullScreen;
@@ -1762,7 +1786,7 @@ void MainWin::ToggleFullScreen(void)
 }
 
 
-// 
+// Show the M68000 exception vector table window
 void MainWin::ShowExceptionVectorTableBrowserWin(void)
 {
 	exceptionvectortableBrowseWin->show();
@@ -1770,11 +1794,18 @@ void MainWin::ShowExceptionVectorTableBrowserWin(void)
 }
 
 
-// 
+// Show the local variables window
 void MainWin::ShowLocalBrowserWin(void)
 {
 	LocalBrowseWin->show();
 	LocalBrowseWin->RefreshContents();
+}
+
+
+// Toggle the breakpoint on Blitter B_CMD
+void MainWin::ToggleBPBState(void)
+{
+	bpbActive = !bpbActive;
 }
 
 
