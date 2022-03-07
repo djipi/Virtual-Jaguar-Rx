@@ -59,7 +59,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(QTDIR)\include;C:\SDK\SDL\SDL-1.2.15\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;.\..\..\src;$(QTDIR)\include;C:\SDK\SDL\SDL-1.2.15\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)obj\</ObjectFileName>
@@ -81,7 +81,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;_RELEASE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(QTDIR)\include;C:\SDK\SDL\SDL-1.2.15\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;.\..\..\src;$(QTDIR)\include;C:\SDK\SDL\SDL-1.2.15\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MinimalRebuild>false</MinimalRebuild>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
@@ -99,6 +99,7 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\AJ2\blitter.h" />
     <ClInclude Include="..\..\src\blitter.h" />
     <ClInclude Include="..\..\src\cdintf.h" />
     <ClInclude Include="..\..\src\cdrom.h" />
@@ -130,6 +131,12 @@
     <ClInclude Include="..\..\src\_MSC_VER\config.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\AJ2\blitter.cpp">
+      <AssemblerListingLocation Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)asm\AJ2\</AssemblerListingLocation>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(IntDir)obj\AJ2\</ObjectFileName>
+      <AssemblerListingLocation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)asm\AJ2\</AssemblerListingLocation>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(IntDir)obj\AJ2\</ObjectFileName>
+    </ClCompile>
     <ClCompile Include="..\..\src\blitter.cpp" />
     <ClCompile Include="..\..\src\cdintf.cpp" />
     <ClCompile Include="..\..\src\cdrom.cpp" />

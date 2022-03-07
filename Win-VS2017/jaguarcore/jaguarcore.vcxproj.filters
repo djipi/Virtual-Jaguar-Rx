@@ -22,6 +22,12 @@
     <Filter Include="Source Files\BIOS">
       <UniqueIdentifier>{520c176e-6a0d-4c43-8d17-e7ba997a3b18}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\AJ2">
+      <UniqueIdentifier>{e8abd019-8ee4-4532-94d1-dac4afd1399d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AJ2">
+      <UniqueIdentifier>{b0f6c108-9a8a-446e-b07b-fac49be49c91}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\_MSC_VER\config.h">
@@ -111,6 +117,9 @@
     <ClInclude Include="..\..\src\jagstub2bios.h">
       <Filter>Header Files\BIOS</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\AJ2\blitter.h">
+      <Filter>Header Files\AJ2</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\blitter.cpp">
@@ -196,6 +205,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\jagbios.cpp">
       <Filter>Source Files\BIOS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\AJ2\blitter.cpp">
+      <Filter>Source Files\AJ2</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
