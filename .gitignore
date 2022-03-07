@@ -12,6 +12,7 @@
 /src/m68000/obj/*.d
 /src/m68000/obj/*.o
 *.bak
+Makefile.*
 makefile-qt
 makefile-qt*.*
 object_script.virtualjaguar*.*
@@ -34,4 +35,3 @@ virtualjaguar.WinMerge
 /Win-VS2017/GeneratedFiles/
 /Win-VS2017/GeneratedFiles/qrc_virtualjaguar.cpp
 /Win-VS2017/My Inspector Results - virtualjaguar
-/Win-VS2019/
