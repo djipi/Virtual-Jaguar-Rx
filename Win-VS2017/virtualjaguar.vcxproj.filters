@@ -484,6 +484,15 @@
     <ClCompile Include="..\src\debugger\SourceCWin.cpp">
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\debugger\BlitterRegsWin.cpp">
+      <Filter>Source Files\debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_BlitterRegsWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_BlitterRegsWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -811,6 +820,9 @@
     <CustomBuild Include="..\src\debugger\SourcesWin.h">
       <Filter>Header Files\debugger</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\src\debugger\BlitterRegsWin.h">
+      <Filter>Header Files\debugger</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\res\vj.rc">
@@ -860,6 +872,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\res\vj_rx_title_small.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\debug-breakpoints-blitcmd-off.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\debug-breakpoints-blitcmd-on.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
