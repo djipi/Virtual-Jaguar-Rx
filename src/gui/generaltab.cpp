@@ -12,6 +12,7 @@
 // ---  ----------  ------------------------------------------------------------
 // JLH  06/23/2011  Created this file
 // JPM  Sept./2018  Added a Models & Bios tab, slashes / backslashes formatting, and screenshot path
+// JPM   Jan./2022  Changed the blitter denomination
 //
 
 // STILL TO DO:
@@ -74,7 +75,7 @@ GeneralTab::GeneralTab(QWidget * parent/*= 0*/): QWidget(parent)
 	useFullScreen      = new QCheckBox(tr("Start Virtual Jaguar in full screen"));
 //	useHostAudio       = new QCheckBox(tr("Enable audio playback (requires DSP)"));
 	useUnknownSoftware = new QCheckBox(tr("Show all files in file chooser"));
-	useFastBlitter     = new QCheckBox(tr("Use fast blitter"));
+	useFastBlitter     = new QCheckBox(tr("Use MIDSUMMER blitter MKII"));
 
 #ifndef NEWMODELSBIOSHANDLER
 	layout4->addWidget(useBIOS);
