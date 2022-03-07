@@ -12,6 +12,7 @@
 /src/m68000/obj/*.d
 /src/m68000/obj/*.o
 *.bak
+Makefile.*
 makefile-qt
 makefile-qt*.*
 object_script.virtualjaguar*.*

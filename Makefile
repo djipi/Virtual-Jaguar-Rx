@@ -50,6 +50,8 @@ all: prepare virtualjaguar
 
 obj:
 	@mkdir obj
+	@mkdir obj/rcc
+	@mkdir obj/moc
 
 prepare: obj
 	@echo -e "\033[01;33m***\033[00;32m Preparing to compile Virtual Jaguar...\033[00m"

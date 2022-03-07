@@ -25,9 +25,9 @@ QT        += opengl widgets
 # We stuff all the intermediate crap into obj/ so it won't confuse us mere
 # mortals ;-)
 OBJECTS_DIR = obj
-MOC_DIR     = obj
-RCC_DIR     = obj
-UI_DIR      = obj
+MOC_DIR     = obj/moc
+RCC_DIR     = obj/rcc
+UI_DIR      = obj/ui
 
 # Platform specific defines
 win32     { DEFINES += __GCCWIN32__ }
@@ -36,9 +36,9 @@ else:unix { DEFINES += __GCCUNIX__ }
 
 # SDL (to link statically on Mac)
 macx { LIBS += `sdl-config --static-libs` }
-#else:win32 { LIBS += `$(CROSS)sdl-config --libs` }
+else:win32 { LIBS += `$(CROSS)sdl-config --libs` }
 #else:win32 { LIBS += `$(CROSS)sdl-config --static-libs` -static-libgcc}
-else:win32 { LIBS += `$(CROSS)sdl-config --static-libs` -static -static-libgcc -static-libstdc++ }
+#else:win32 { LIBS += `$(CROSS)sdl-config --static-libs` -static -static-libgcc -static-libstdc++ }
 else { LIBS += `$(CROSS)sdl-config --libs` }
 #else { LIBS += `$(CROSS)sdl-config --static-libs` }
 
@@ -132,6 +132,7 @@ HEADERS = \
 	src/debugger/NewFnctBreakpointWin.h \
 	src/debugger/CartFilesListWin.h \
 	src/debugger/SaveDumpAsWin.h \
+	src/debugger/BlitterRegsWin.h \
 	src/log.h \
 	src/unzip.h \
 	src/crc32.h \
@@ -191,10 +192,10 @@ SOURCES = \
 	src/debugger/NewFnctBreakpointWin.cpp \
 	src/debugger/CartFilesListWin.cpp \
 	src/debugger/SaveDumpAsWin.cpp \
+	src/debugger/BlitterRegsWin.cpp \
 	src/log.cpp \
 	src/unzip.cpp \
 	src/crc32.cpp \
 	src/settings.cpp \
 	src/file.cpp \
 	src/LEB128.cpp
-		

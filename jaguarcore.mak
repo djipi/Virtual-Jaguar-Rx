@@ -50,52 +50,59 @@ GCC_DEPS = -MMD
 INCS := -I./src
 
 OBJS := \
-	obj/blitter.o      \
-	obj/cdintf.o       \
-	obj/cdrom.o        \
-	obj/dac.o          \
-	obj/dsp.o          \
-	obj/eeprom.o       \
-	obj/event.o        \
-	obj/filedb.o       \
-	obj/gpu.o          \
-	obj/jagbios.o      \
-	obj/jagbios2.o     \
-	obj/jagcdbios.o    \
-	obj/jagdevcdbios.o \
-	obj/jagstub1bios.o \
-	obj/jagstub2bios.o \
-	obj/jagdasm.o      \
-	obj/jaguar.o       \
-	obj/jerry.o        \
-	obj/joystick.o     \
-	obj/memory.o       \
-	obj/memtrack.o     \
-	obj/mmu.o          \
-	obj/modelsBIOS.o   \
-	obj/op.o           \
-	obj/state.o        \
-	obj/tom.o          \
-	obj/universalhdr.o \
-	obj/wavetable.o
+	obj/core/AJ2/blitter.o  \
+	obj/core/blitter.o      \
+	obj/core/cdintf.o       \
+	obj/core/cdrom.o        \
+	obj/core/dac.o          \
+	obj/core/dsp.o          \
+	obj/core/eeprom.o       \
+	obj/core/event.o        \
+	obj/core/filedb.o       \
+	obj/core/gpu.o          \
+	obj/core/jagbios.o      \
+	obj/core/jagbios2.o     \
+	obj/core/jagcdbios.o    \
+	obj/core/jagdevcdbios.o \
+	obj/core/jagstub1bios.o \
+	obj/core/jagstub2bios.o \
+	obj/core/jagdasm.o      \
+	obj/core/jaguar.o       \
+	obj/core/jerry.o        \
+	obj/core/joystick.o     \
+	obj/core/memory.o       \
+	obj/core/memtrack.o     \
+	obj/core/mmu.o          \
+	obj/core/modelsBIOS.o   \
+	obj/core/op.o           \
+	obj/core/state.o        \
+	obj/core/tom.o          \
+	obj/core/universalhdr.o \
+	obj/core/wavetable.o
 
 # Targets for convenience sake, not "real" targets
 .PHONY: clean
 
-all: obj obj/libjaguarcore.a
+all: obj objcore objcoreaj2 obj/libjaguarcore.a
 	@echo "Done!"
 
+clean:
+	@rm -f $(OBJS)
+
 obj:
-	@mkdir obj
+	@mkdir -p obj
+objcore:
+	@mkdir -p obj/core
+objcoreaj2:
+	@mkdir -p obj/core/AJ2
 
 # Library rules (might not be cross-platform compatible)
 obj/libjaguarcore.a: $(OBJS) 
 	$(Q)$(AR) $(ARFLAGS) obj/libjaguarcore.a $(OBJS)
 
 # Main source compilation (implicit rules)...
-
-obj/%.o: src/%.cpp
+obj/core/%.o: src/%.cpp
 	@echo -e "\033[01;33m***\033[00;32m Compiling $<...\033[00m"
 	$(Q)$(CC) $(GCC_DEPS) $(CXXFLAGS) $(SDL_CFLAGS) $(QT_CFLAGS) $(DEFINES) $(INCS) -c $< -o $@
 
--include obj/*.d
+-include obj/core/*.d obj/core/AJ2/*.d
