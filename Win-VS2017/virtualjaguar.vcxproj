@@ -80,6 +80,7 @@
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <WarningLevel>Level3</WarningLevel>
       <MinimalRebuild>false</MinimalRebuild>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Qt5PlatformCompositorSupport.lib;qtmain.lib;Qt5OpenGL.lib;shell32.lib;jaguarcore.lib;zlib-1.2.11_vs2017_x64.lib;m68000.lib;gdi32.lib;user32.lib;SDL-1.2.15_vs2017_x64.lib;libelf-0.8.13_vs2017_x64.lib;legacy_stdio_definitions.lib;OpenGL32.lib;libdwarf_x64.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;opengl32.lib;glu32.lib;Ws2_32.lib;imm32.lib;winmm.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -127,6 +128,7 @@
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <SDLCheck>false</SDLCheck>
       <SupportJustMyCode>true</SupportJustMyCode>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Qt5PlatformCompositorSupportd.lib;qtmaind.lib;Qt5OpenGLd.lib;shell32.lib;zlib-1.2.11_vs2017_x64d.lib;SDL-1.2.15_vs2017_x64d.lib;OpenGL32.lib;gdi32.lib;user32.lib;legacy_stdio_definitions.lib;libelf-0.8.13_vs2017_x64d.lib;m68000d.lib;jaguarcored.lib;libdwarf_x64d.lib;Ws2_32.lib;imm32.lib;winmm.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opengl32.lib;glu32.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
