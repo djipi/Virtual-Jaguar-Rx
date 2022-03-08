@@ -8,6 +8,7 @@
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JPM  08/07/2017  Created this file
+// JPM  March/2022  Added hexadecimal's value with $
 //
 
 // STILL TO DO:
@@ -27,7 +28,7 @@ Memory1BrowserWindow::Memory1BrowserWindow(QWidget * parent/*= 0*/): QWidget(par
 	go(new QPushButton(tr("Go"))),
 	memBase(0), memOrigin(0), NumWinOrigin(0)
 {
-	address->setPlaceholderText("0x<value>, decimal value or symbol name");
+	address->setPlaceholderText("$<value>, 0x<value>, decimal value or symbol name");
 
 	QHBoxLayout * hbox1 = new QHBoxLayout;
 	hbox1->addWidget(refresh);
@@ -181,17 +182,29 @@ void Memory1BrowserWindow::GoToAddress(void)
 	QPalette p = address->palette();
 	newAddress = address->text();
 
+	// get the value's length
 	if ((len = newAddress.size()))
 	{
-		if ((len > 1) && (newAddress.at(0) == QChar('0')) && (newAddress.at(1) == QChar('x')))
+		// get the address from hexadecimal's value (0x)
+		if ((len > 2) && (newAddress.at(0) == QChar('0')) && (newAddress.at(1) == QChar('x')))
 		{
-			newmemBase = newAddress.toUInt(&ok, 16);
+			newmemBase = newAddress.mid(2).toUInt(&ok, 16);
 		}
 		else
 		{
+			// get the address from the symbol's name
 			if (!(newmemBase = DBGManager_GetAdrFromSymbolName(newAddress.toLatin1().data())))
 			{
-				newmemBase = newAddress.toUInt(&ok, 10);
+				// get the address from hexadecimal's value ($)
+				if ((len > 1) && (newAddress.at(0) == QChar('$')))
+				{
+					newmemBase = newAddress.mid(1).toUInt(&ok, 16);
+				}
+				else
+				{
+					// get the address from the decimal's value
+					newmemBase = newAddress.toUInt(&ok, 10);
+				}
 			}
 			else
 			{
