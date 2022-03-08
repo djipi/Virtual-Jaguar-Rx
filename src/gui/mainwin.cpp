@@ -26,10 +26,11 @@
 // JPM  11/18/2018  Fix crash with non-debugger mode
 // JPM  April/2019  Added ELF sections check, added a save memory dump
 // JPM   Aug./2019  Update texts descriptions, set cartridge view menu for debugger mode only, added a HW registers browser and source level tracing
-// JPM  Marc./2020  Added the step over for source level tracing
+// JPM  March/2020  Added the step over for source level tracing
 //  RG   Jan./2021  Linux build fixes
 // JPM   Apr./2021  Handle number of M68K cycles used in tracing mode, added video output display in a window
 // JPM    May/2021  Check missing dll for the tests pattern
+// JPM  March/2022  Added cygdrive directory removal setting
 //
 
 // FIXED:
@@ -1965,6 +1966,7 @@ void MainWin::ReadSettings(void)
 	vjs.displayFullSourceFilename = settings.value("displayFullSourceFilename", true).toBool();
 	vjs.ELFSectionsCheck = settings.value("ELFSectionsCheck", false).toBool();
 	vjs.nbrmemory1browserwindow = settings.value("NbrMemory1BrowserWindow", MaxMemory1BrowserWindow).toUInt();
+	vjs.cygdriveDirRemoval = settings.value("cygdriveDirRemoval", false).toBool();
 	settings.endGroup();
 
 	// Read settings from the Alpine mode
@@ -2296,6 +2298,7 @@ void MainWin::WriteSettings(void)
 	settings.setValue("NbrMemory1BrowserWindow", (unsigned int)vjs.nbrmemory1browserwindow);
 	settings.setValue("DefaultROM", vjs.debuggerROMPath);
 	settings.setValue("SourceFileSearchPaths", vjs.sourcefilesearchPaths);
+	settings.setValue("cygdriveDirRemoval", vjs.cygdriveDirRemoval);
 	settings.endGroup();
 
 	// Write settings from the Keybindings
