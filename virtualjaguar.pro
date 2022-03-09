@@ -94,6 +94,7 @@ HEADERS = \
 	src/gui/generaltab.h \
 	src/gui/modelsbiostab.h \	
 	src/gui/keybindingstab.h \
+	src/gui/exceptionstab.h \
 	src/gui/glwidget.h \
 	src/gui/help.h \
 	src/gui/imagedelegate.h \
@@ -153,6 +154,7 @@ SOURCES = \
 	src/gui/generaltab.cpp \
 	src/gui/modelsbiostab.cpp \
 	src/gui/keybindingstab.cpp \
+	src/gui/exceptionstab.cpp \
 	src/gui/glwidget.cpp \
 	src/gui/help.cpp \
 	src/gui/imagedelegate.cpp \

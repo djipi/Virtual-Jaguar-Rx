@@ -11,10 +11,12 @@ Release 5a (TBA)
 -- Support wider offset ranges
 6) Code will stop after the unknown memory location writing's alert box
 7) Added a '/cygdrive/' directory detection and removal option
-8) Fix for the Object list at $0
+8) Fix a legacy issue for the Object list at $0
 9) Fixes and improvements for the HW registers Blitter browser
 10) Added an option to allow, or not, the unknown memory location writing detection
 11) Added hexadecimal's value with $ for the function breakpoint & memory window
+12) Added an exceptions tab in the configuration settings
+--- Exceptions have been removed from the Alpine tab
 
 Release 5 (26th May 2021)
 -------------------------
@@ -318,6 +320,7 @@ Project information
 11) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
 -- Text / License terms are the same
 14) The x86 configuration has been removed in the VS 2017 project
+15) Additional project information can be found at https://github.com/djipi/Virtual-Jaguar-Rx/wiki
 
 
 Download statistics

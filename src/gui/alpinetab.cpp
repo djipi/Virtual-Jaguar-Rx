@@ -14,6 +14,7 @@
 // JPM  09/03/2018  Depend the platform transform slashes or backslashes
 // JPM   Feb./2021  Added a M68K exception catch check
 // JPM   Jan./2022  Added a writes to unknown memory location catch
+// JPM  March/2022  Extracted the exceptions and catches parts to a dedicated tab
 //
 
 #include "alpinetab.h"
@@ -61,18 +62,18 @@ AlpineTab::AlpineTab(QWidget * parent/*= 0*/): QWidget(parent)
 	layout4->addLayout(layout3);
 
 	// Checkboxes...
-	writeROM = new QCheckBox(tr("Allow writes to cartridge ROM"));
-	M68KExceptionCatch = new QCheckBox(tr("Allow M68000 exception catch"));
-	WriteUnknownMemoryLocation = new QCheckBox(tr("Allow writes to unknown memory location"));
+//	writeROM = new QCheckBox(tr("Allow writes to cartridge ROM"));
+//	M68KExceptionCatch = new QCheckBox(tr("Allow M68000 exception catch"));
+//	WriteUnknownMemoryLocation = new QCheckBox(tr("Allow writes to unknown memory location"));
 //	useDSP             = new QCheckBox(tr("Enable DSP"));
 //	useHostAudio       = new QCheckBox(tr("Enable audio playback"));
 //	useUnknownSoftware = new QCheckBox(tr("Allow unknown software in file chooser"));
 // Currently, this is unused, so let's signal this to the user:
 	//writeROM->setDisabled(true);
 
-	layout4->addWidget(writeROM);
-	layout4->addWidget(M68KExceptionCatch);
-	layout4->addWidget(WriteUnknownMemoryLocation);
+//	layout4->addWidget(writeROM);
+//	layout4->addWidget(M68KExceptionCatch);
+//	layout4->addWidget(WriteUnknownMemoryLocation);
 //	layout4->addWidget(useDSP);
 //	layout4->addWidget(useHostAudio);
 //	layout4->addWidget(useUnknownSoftware);
@@ -94,9 +95,9 @@ void AlpineTab::GetSettings(void)
 	edit1->setText(vjs.alpineROMPath);
 	edit2->setText(vjs.absROMPath);
 	edit3->setText(v.toString());
-	writeROM->setChecked(vjs.allowWritesToROM);
-	M68KExceptionCatch->setChecked(vjs.allowM68KExceptionCatch);
-	WriteUnknownMemoryLocation->setChecked(vjs.allowWritesToUnknownLocation);
+//	writeROM->setChecked(vjs.allowWritesToROM);
+//	M68KExceptionCatch->setChecked(vjs.allowM68KExceptionCatch);
+//	WriteUnknownMemoryLocation->setChecked(vjs.allowWritesToUnknownLocation);
 }
 
 
@@ -108,9 +109,9 @@ void AlpineTab::SetSettings(void)
 	strcpy(vjs.alpineROMPath, CheckForSlashes(edit1->text()).toUtf8().data());
 	strcpy(vjs.absROMPath, CheckForSlashes(edit2->text()).toUtf8().data());
 	vjs.refresh = edit3->text().toUInt(&ok, 10);
-	vjs.allowWritesToROM = writeROM->isChecked();
-	vjs.allowM68KExceptionCatch = M68KExceptionCatch->isChecked();
-	vjs.allowWritesToUnknownLocation = WriteUnknownMemoryLocation->isChecked();
+//	vjs.allowWritesToROM = writeROM->isChecked();
+//	vjs.allowM68KExceptionCatch = M68KExceptionCatch->isChecked();
+//	vjs.allowWritesToUnknownLocation = WriteUnknownMemoryLocation->isChecked();
 }
 
 

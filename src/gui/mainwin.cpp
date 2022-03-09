@@ -1955,6 +1955,9 @@ void MainWin::ReadSettings(void)
 	strcpy(vjs.EEPROMPath, settings.value("EEPROMs", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/eeproms/")).toString().toUtf8().data());
 	strcpy(vjs.ROMPath, settings.value("ROMs", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/software/")).toString().toUtf8().data());
 	strcpy(vjs.screenshotPath, settings.value("Screenshots", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/screenshots/")).toString().toUtf8().data());
+	vjs.allowWritesToROM = settings.value("writeROM", true).toBool();
+	vjs.allowM68KExceptionCatch = settings.value("M68KExceptionCatch", false).toBool();
+	vjs.allowWritesToUnknownLocation = settings.value("WriteUnknownLocation", true).toBool();
 
 	// Read settings from the Debugger mode
 	settings.beginGroup("debugger");
@@ -1974,9 +1977,6 @@ void MainWin::ReadSettings(void)
 	strcpy(vjs.alpineROMPath, settings.value("DefaultROM", "").toString().toUtf8().data());
 	strcpy(vjs.absROMPath, settings.value("DefaultABS", "").toString().toUtf8().data());
 	vjs.refresh = settings.value("refresh", 60).toUInt();
-	vjs.allowWritesToROM = settings.value("writeROM", true).toBool();
-	vjs.allowM68KExceptionCatch = settings.value("M68KExceptionCatch", false).toBool();
-	vjs.allowWritesToUnknownLocation = settings.value("WriteUnknownLocation", true).toBool();
 	settings.endGroup();
 
 	// Read settings from the Keybindings
@@ -2277,15 +2277,15 @@ void MainWin::WriteSettings(void)
 	settings.setValue("EEPROMs", vjs.EEPROMPath);
 	settings.setValue("ROMs", vjs.ROMPath);
 	settings.setValue("Screenshots", vjs.screenshotPath);
+	settings.setValue("writeROM", vjs.allowWritesToROM);
+	settings.setValue("M68KExceptionCatch", vjs.allowM68KExceptionCatch);
+	settings.setValue("WriteUnknownLocation", vjs.allowWritesToUnknownLocation);
 
 	// Write settings from the Alpine mode
 	settings.beginGroup("alpine");
 	settings.setValue("refresh", vjs.refresh);
 	settings.setValue("DefaultROM", vjs.alpineROMPath);
 	settings.setValue("DefaultABS", vjs.absROMPath);
-	settings.setValue("writeROM", vjs.allowWritesToROM);
-	settings.setValue("M68KExceptionCatch", vjs.allowM68KExceptionCatch);
-	settings.setValue("WriteUnknownLocation", vjs.allowWritesToUnknownLocation);
 	settings.endGroup();
 
 	// Write settings from the Debugger mode

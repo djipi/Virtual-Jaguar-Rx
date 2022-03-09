@@ -11,13 +11,12 @@
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
 // JLH  01/29/2010  Created this file
-// JLH  06/23/2011  Added initial implementation
-// JLH  10/14/2011  Fixed possibly missing final slash in paths
-// JPM  06/06/2016  Visual Studio support
-// JPM  06/19/2016  Soft debugger support
+// JLH        2011  Added initial implementation, and fixed possibly missing final slash in paths
+// JPM        2016  Visual Studio, and Soft debugger support
 // JPM  09/  /2017  Added a Keybindings tab
 // JPM  09/03/2018  Added a Models & Bios tab
 //  RG   Jan./2021  Linux build fix
+// JPM  March/2022  Added an exceptions tab
 //
 
 #include "configdialog.h"
@@ -28,6 +27,7 @@
 #include "generaltab.h"
 #include "modelsbiostab.h"
 #include "keybindingstab.h"
+#include "exceptionstab.h"
 #include "settings.h"
 
 
@@ -38,6 +38,7 @@ generalTab(new GeneralTab(this)),
 modelsbiosTab(new ModelsBiosTab),
 #endif
 controllerTab1(new ControllerTab(this)),
+exceptionsTab(new ExceptionsTab(this)),
 keybindingsTab(new KeyBindingsTab(this))
 {
 //	tabWidget = new QTabWidget;
@@ -52,6 +53,7 @@ keybindingsTab(new KeyBindingsTab(this))
 #ifdef NEWMODELSBIOSHANDLER
 	tabWidget->addTab(modelsbiosTab, tr("Models and BIOS"));
 #endif
+	tabWidget->addTab(exceptionsTab, tr("Exceptions"));
 	tabWidget->addTab(controllerTab1, tr("Controllers"));
 //	tabWidget->addTab(controllerTab2, tr("Controller #2"));
 	tabWidget->addTab(keybindingsTab, tr("Key Bindings"));
@@ -78,7 +80,7 @@ keybindingsTab(new KeyBindingsTab(this))
 	mainLayout->addWidget(buttonBox);
 	setLayout(mainLayout);
 
-	setWindowTitle(tr("Virtual Jaguar Settings"));
+	setWindowTitle(tr("Virtual Jaguar Rx Settings"));
 	LoadDialogFromSettings();
 }
 
@@ -97,6 +99,7 @@ void ConfigDialog::LoadDialogFromSettings(void)
 #ifdef NEWMODELSBIOSHANDLER
 	modelsbiosTab->GetSettings();
 #endif
+	exceptionsTab->GetSettings();
 
 	// Alpine tab settings (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
@@ -135,6 +138,7 @@ void ConfigDialog::UpdateVJSettings(void)
 #ifdef NEWMODELSBIOSHANDLER
 	modelsbiosTab->SetSettings();
 #endif
+	exceptionsTab->SetSettings();
 
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
