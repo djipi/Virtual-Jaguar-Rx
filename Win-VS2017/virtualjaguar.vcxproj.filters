@@ -103,9 +103,6 @@
     <ClCompile Include="..\src\gui\configdialog.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\gui\controllerwidget.cpp">
-      <Filter>Source Files\gui</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\gui\filelistmodel.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
@@ -493,6 +490,18 @@
     <ClCompile Include="..\src\gui\exceptionstab.cpp">
       <Filter>Source Files\gui\tab</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\gui\controllerwidget.cpp">
+      <Filter>Source Files\gui\tab</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_romcartbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_romcartbrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\debug\romcartbrowser.cpp">
+      <Filter>Source Files\alpine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -733,9 +742,6 @@
     <CustomBuild Include="..\src\gui\debug\riscdasmbrowser.h">
       <Filter>Header Files\alpine</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\src\gui\controllerwidget.h">
-      <Filter>Header Files\gui</Filter>
-    </CustomBuild>
     <CustomBuild Include="..\src\gui\filethread.h">
       <Filter>Header Files\gui</Filter>
     </CustomBuild>
@@ -823,6 +829,12 @@
     <CustomBuild Include="..\src\gui\exceptionstab.h">
       <Filter>Header Files\gui\tab</Filter>
     </CustomBuild>
+    <CustomBuild Include="..\src\gui\controllerwidget.h">
+      <Filter>Header Files\gui\tab</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\debug\romcartbrowser.h">
+      <Filter>Header Files\alpine</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\res\vj.rc">
@@ -872,6 +884,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="..\res\vj_rx_title_small.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\tool-romcart.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

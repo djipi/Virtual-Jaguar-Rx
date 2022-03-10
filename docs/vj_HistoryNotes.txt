@@ -17,6 +17,7 @@ Release 5a (TBA)
 11) Added hexadecimal's value with $ for the function breakpoint & memory window
 12) Added an exceptions tab in the configuration settings
 --- Exceptions have been removed from the Alpine tab
+13) Added a ROM cartridge browser
 
 Release 5 (26th May 2021)
 -------------------------

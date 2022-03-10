@@ -30,7 +30,7 @@
 //  RG   Jan./2021  Linux build fixes
 // JPM   Apr./2021  Handle number of M68K cycles used in tracing mode, added video output display in a window
 // JPM    May/2021  Check missing dll for the tests pattern
-// JPM  March/2022  Added cygdrive directory removal setting
+// JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser
 //
 
 // FIXED:
@@ -75,6 +75,7 @@
 #include "debug/cpubrowser.h"
 #include "debug/m68kdasmbrowser.h"
 #include "debug/memorybrowser.h"
+#include "debug/romcartbrowser.h"
 #include "debug/stackbrowser.h"
 #include "debug/opbrowser.h"
 #include "debug/riscdasmbrowser.h"
@@ -197,6 +198,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	emuStatusWin = new EmuStatusWindow(this);
 	
 	// Windows alpine mode features
+	romcartBrowseWin = new ROMCartBrowserWindow(this);
 	memBrowseWin = new MemoryBrowserWindow(this);
 	stackBrowseWin = new StackBrowserWindow(this);
 	cpuBrowseWin = new CPUBrowserWindow(this);
@@ -503,6 +505,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		}
 	}
 
+	// ROM browser window action
+	romcartBrowseAct = new QAction(QIcon(":/res/tool-romcart.png"), tr("ROM Cartridge Browser"), this);
+	romcartBrowseAct->setStatusTip(tr("Shows the Jaguar ROM cartridge browser window"));
+	connect(romcartBrowseAct, SIGNAL(triggered()), this, SLOT(ShowROMCartBrowserWin()));
+
 	// Memory browser window action
 	memBrowseAct = new QAction(QIcon(":/res/tool-memory.png"), tr("Memory Browser"), this);
 	memBrowseAct->setStatusTip(tr("Shows the Jaguar memory browser window"));
@@ -609,6 +616,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugWindowsBrowsesMenu->addAction(m68kDasmBrowseAct);
 			debugWindowsBrowsesMenu->addAction(riscDasmBrowseAct);
 			debugWindowsBrowsesMenu->addAction(hwRegsBrowseAct);
+			debugWindowsBrowsesMenu->addAction(romcartBrowseAct);
 			debugMenu->addSeparator();
 			debugMenu->addAction(pauseAct);
 			debugMenu->addAction(frameAdvanceAct);
@@ -638,6 +646,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugMenu->addAction(m68kDasmBrowseAct);
 			debugMenu->addAction(riscDasmBrowseAct);
 			debugMenu->addAction(hwRegsBrowseAct);
+			debugMenu->addAction(romcartBrowseAct);
 		}
 	}
 
@@ -695,6 +704,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		debugbar->addAction(m68kDasmBrowseAct);
 		debugbar->addAction(riscDasmBrowseAct);
 		debugbar->addAction(hwRegsBrowseAct);
+		debugbar->addAction(romcartBrowseAct);
 	}
 
 	// Add actions to the main window, as hiding widgets with them
@@ -1801,6 +1811,13 @@ void MainWin::ShowHeapAllocatorBrowserWin(void)
 }
 
 
+void MainWin::ShowROMCartBrowserWin(void)
+{
+	romcartBrowseWin->show();
+	romcartBrowseWin->RefreshContents();
+}
+
+
 void MainWin::ShowMemoryBrowserWin(void)
 {
 	memBrowseWin->show();
@@ -2091,6 +2108,11 @@ void MainWin::ReadUISettings(void)
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
+		// ROM UI information
+		pos = settings.value("romcartBrowseWinPos", QPoint(200, 200)).toPoint();
+		romcartBrowseWin->move(pos);
+		settings.value("romcartBrowseWinIsVisible", false).toBool() ? ShowROMCartBrowserWin() : void();
+
 		// CPU registers UI information
 		pos = settings.value("cpuBrowseWinPos", QPoint(200, 200)).toPoint();
 		cpuBrowseWin->move(pos);
@@ -2385,6 +2407,8 @@ void MainWin::WriteUISettings(void)
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
+		settings.setValue("romcartBrowseWinPos", romcartBrowseWin->pos());
+		settings.setValue("romcartBrowseWinIsVisible", romcartBrowseWin->isVisible());
 		settings.setValue("cpuBrowseWinPos", cpuBrowseWin->pos());
 		settings.setValue("cpuBrowseWinIsVisible", cpuBrowseWin->isVisible());
 		settings.setValue("memBrowseWinPos", memBrowseWin->pos());
@@ -2459,7 +2483,7 @@ void MainWin::WriteUISettings(void)
 }
 
 
-// Refresh alpine debug windows
+// Refresh Alpine debug windows
 void MainWin::AlpineRefreshWindows(void)
 {
 	cpuBrowseWin->RefreshContents();

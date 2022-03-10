@@ -110,6 +110,7 @@ HEADERS = \
 	src/gui/debug/riscdasmbrowser.h \
 	src/gui/debug/stackbrowser.h \
 	src/gui/debug/hwregsbrowser.h \
+	src/gui/debug/romcartbrowser.h \
 	src/debugger/debuggertab.h \
 	src/debugger/DasmWin.h \
 	src/debugger/m68kDasmWin.h \
@@ -170,6 +171,7 @@ SOURCES = \
 	src/gui/debug/riscdasmbrowser.cpp \
 	src/gui/debug/stackbrowser.cpp \
 	src/gui/debug/hwregsbrowser.cpp \
+	src/gui/debug/romcartbrowser.cpp \
 	src/debugger/debuggertab.cpp \
 	src/debugger/DasmWin.cpp \
 	src/debugger/m68kDasmWin.cpp \

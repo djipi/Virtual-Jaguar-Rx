@@ -27,6 +27,7 @@ class VideoOutputWindow;
 class EmuStatusWindow;
 
 // Alpine
+class ROMCartBrowserWindow;
 class MemoryBrowserWindow;
 class StackBrowserWindow;
 class CPUBrowserWindow;
@@ -121,6 +122,7 @@ class MainWin: public QMainWindow
 		//void ShowDasmWin(void);
 		void ShowCartFilesListWin(void);
 		// Alpine
+		void ShowROMCartBrowserWin(void);
 		void ShowMemoryBrowserWin(void);
 		void ShowStackBrowserWin(void);
 		void ShowCPUBrowserWin(void);
@@ -148,6 +150,7 @@ class MainWin: public QMainWindow
 		FilePickerWindow *filePickWin;
 		EmuStatusWindow *emuStatusWin;
 		MemoryBrowserWindow *memBrowseWin;
+		ROMCartBrowserWindow *romcartBrowseWin;
 		StackBrowserWindow *stackBrowseWin;
 		CPUBrowserWindow *cpuBrowseWin;
 		OPBrowserWindow *opBrowseWin;
@@ -235,6 +238,7 @@ class MainWin: public QMainWindow
 
 		// Alpine
 		QAction *memBrowseAct;
+		QAction *romcartBrowseAct;
 		QAction *stackBrowseAct;
 		QAction *cpuBrowseAct;
 		QAction *opBrowseAct;
