@@ -886,6 +886,12 @@
     <Image Include="..\res\vj_rx_title_small.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="..\res\tool-gpu-ram.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\tool-dsp-ram.png">
+      <Filter>Resource Files</Filter>
+    </Image>
     <Image Include="..\res\tool-romcart.png">
       <Filter>Resource Files</Filter>
     </Image>
