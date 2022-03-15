@@ -123,7 +123,7 @@ class MainWin: public QMainWindow
 		void ShowCartFilesListWin(void);
 		// Alpine
 		void ShowROMCartBrowserWin(void);
-		void ShowMemoryBrowserWin(void);
+		void ShowMemoryBrowserWin(const int);
 		void ShowStackBrowserWin(void);
 		void ShowCPUBrowserWin(void);
 		void ShowOPBrowserWin(void);
@@ -149,7 +149,14 @@ class MainWin: public QMainWindow
 		HelpWindow *helpWin;
 		FilePickerWindow *filePickWin;
 		EmuStatusWindow *emuStatusWin;
-		MemoryBrowserWindow *memBrowseWin;
+		SaveDumpAsWindow *SaveDumpAsWin;
+		QTimer *timer;
+		bool running;
+		int zoomLevel;
+		bool powerButtonOn;
+		bool showUntunedTankCircuit;
+		// Alpine
+		MemoryBrowserWindow *memBrowseWin[3];
 		ROMCartBrowserWindow *romcartBrowseWin;
 		StackBrowserWindow *stackBrowseWin;
 		CPUBrowserWindow *cpuBrowseWin;
@@ -157,6 +164,7 @@ class MainWin: public QMainWindow
 		M68KDasmBrowserWindow *m68kDasmBrowseWin;
 		RISCDasmBrowserWindow *riscDasmBrowseWin;
 		HWRegsBrowserWindow *hwRegsBrowseWin;
+		// Debugger
 		VideoOutputWindow *VideoOutputWin;
 		AllWatchBrowserWindow *allWatchBrowseWin;
 		LocalBrowserWindow *LocalBrowseWin;
@@ -175,12 +183,6 @@ class MainWin: public QMainWindow
 		BreakpointsWindow *BreakpointsWin;
 		NewFnctBreakpointWindow *NewFunctionBreakpointWin;
 		CartFilesListWindow *CartFilesListWin;
-		SaveDumpAsWindow *SaveDumpAsWin;
-		QTimer *timer;
-		bool running;
-		int zoomLevel;
-		bool powerButtonOn;
-		bool showUntunedTankCircuit;
 
 	public:
 		bool cartridgeLoaded;
@@ -237,7 +239,7 @@ class MainWin: public QMainWindow
 		QAction *screenshotAct;
 
 		// Alpine
-		QAction *memBrowseAct;
+		QAction *memBrowseAct[3];
 		QAction *romcartBrowseAct;
 		QAction *stackBrowseAct;
 		QAction *cpuBrowseAct;

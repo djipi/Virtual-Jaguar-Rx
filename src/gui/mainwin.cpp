@@ -30,7 +30,7 @@
 //  RG   Jan./2021  Linux build fixes
 // JPM   Apr./2021  Handle number of M68K cycles used in tracing mode, added video output display in a window
 // JPM    May/2021  Check missing dll for the tests pattern
-// JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser
+// JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser
 //
 
 // FIXED:
@@ -80,7 +80,6 @@
 #include "debug/opbrowser.h"
 #include "debug/riscdasmbrowser.h"
 #include "debug/hwregsbrowser.h"
-
 #include "dac.h"
 #include "jaguar.h"
 #include "log.h"
@@ -191,23 +190,26 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 	setWindowTitle(title);
 
-	// Windows common features
+	// windows common features
 	aboutWin = new AboutWindow(this);
 	helpWin = new HelpWindow(this);
 	filePickWin = new FilePickerWindow(this);
 	emuStatusWin = new EmuStatusWindow(this);
 	
-	// Windows alpine mode features
+	// windows alpine mode features
 	romcartBrowseWin = new ROMCartBrowserWindow(this);
-	memBrowseWin = new MemoryBrowserWindow(this);
 	stackBrowseWin = new StackBrowserWindow(this);
 	cpuBrowseWin = new CPUBrowserWindow(this);
 	opBrowseWin = new OPBrowserWindow(this);
 	m68kDasmBrowseWin = new M68KDasmBrowserWindow(this);
 	riscDasmBrowseWin = new RISCDasmBrowserWindow(this);
 	hwRegsBrowseWin = new HWRegsBrowserWindow(this);
+	for (int i = 0; i < 3; i++)
+	{
+		memBrowseWin[i] = new MemoryBrowserWindow(this, i);
+	}
 
-	// Windows debugger mode features
+	// windows debugger mode features
 	if (vjs.softTypeDebugger)
 	{
 		VideoOutputWin = new VideoOutputWindow(this);
@@ -487,7 +489,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 		// Memory windows
 		mem1BrowseAct = (QAction **)calloc(vjs.nbrmemory1browserwindow, sizeof(QAction));
-		QSignalMapper *signalMapper = new QSignalMapper(this);
+		QSignalMapper *signalMapperMemory1 = new QSignalMapper(this);
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to do the memory desalocation for mem1BrowseAct !!!")
 #else
@@ -499,21 +501,34 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			sprintf(MB, "Memory %i", (unsigned int)(i+1));
 			mem1BrowseAct[i] = new QAction(QIcon(":/res/debug-memory.png"), tr(MB), this);
 			mem1BrowseAct[i]->setStatusTip(tr("Shows a Jaguar memory browser window"));
-			connect(mem1BrowseAct[i], SIGNAL(triggered()), signalMapper, SLOT(map()));
-			signalMapper->setMapping(mem1BrowseAct[i], (int)i);
-			connect(signalMapper, SIGNAL(mapped(int)), this, SLOT(ShowMemory1BrowserWin(int)));
+			connect(mem1BrowseAct[i], SIGNAL(triggered()), signalMapperMemory1, SLOT(map()));
+			signalMapperMemory1->setMapping(mem1BrowseAct[i], (int)i);
+			connect(signalMapperMemory1, SIGNAL(mapped(int)), this, SLOT(ShowMemory1BrowserWin(int)));
 		}
+	}
+
+	// Memory browser window action
+	memBrowseAct[0] = new QAction(QIcon(":/res/tool-memory.png"), tr("Memory Browser"), this);
+	memBrowseAct[0]->setStatusTip(tr("Shows the Jaguar memory browser window"));
+	// DSP memory browwer window action
+	memBrowseAct[1] = new QAction(QIcon(":/res/tool-dsp-ram.png"), tr("DSP Memory Browser"), this);
+	memBrowseAct[1]->setStatusTip(tr("Shows the Jaguar DSP memory browser window"));
+	// GPU memory browser window action
+	memBrowseAct[2] = new QAction(QIcon(":/res/tool-gpu-ram.png"), tr("GPU Memory Browser"), this);
+	memBrowseAct[2]->setStatusTip(tr("Shows the Jaguar GPU memory browser window"));
+	// RISC memory browser window action
+	QSignalMapper *signalMapperMemory = new QSignalMapper(this);
+	for (int i = 0; i < 3; i++)
+	{
+		connect(memBrowseAct[i], SIGNAL(triggered()), signalMapperMemory, SLOT(map()));
+		signalMapperMemory->setMapping(memBrowseAct[i], i);
+		connect(signalMapperMemory, SIGNAL(mapped(int)), this, SLOT(ShowMemoryBrowserWin(int)));
 	}
 
 	// ROM browser window action
 	romcartBrowseAct = new QAction(QIcon(":/res/tool-romcart.png"), tr("ROM Cartridge Browser"), this);
 	romcartBrowseAct->setStatusTip(tr("Shows the Jaguar ROM cartridge browser window"));
 	connect(romcartBrowseAct, SIGNAL(triggered()), this, SLOT(ShowROMCartBrowserWin()));
-
-	// Memory browser window action
-	memBrowseAct = new QAction(QIcon(":/res/tool-memory.png"), tr("Memory Browser"), this);
-	memBrowseAct->setStatusTip(tr("Shows the Jaguar memory browser window"));
-	connect(memBrowseAct, SIGNAL(triggered()), this, SLOT(ShowMemoryBrowserWin()));
 
 	// Stack browser window action
 	stackBrowseAct = new QAction(QIcon(":/res/tool-stack.png"), tr("Stack Browser"), this);
@@ -550,7 +565,6 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	connect(filePickWin, SIGNAL(FilePickerHiding()), this, SLOT(Unpause()));
 
 	// Create menus
-
 	fileMenu = menuBar()->addMenu(tr("&Jaguar"));
 	fileMenu->addAction(powerAct);
 	if (!vjs.softTypeDebugger)
@@ -609,7 +623,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			}
 			debugWindowsMenu->addSeparator();
 			debugWindowsBrowsesMenu = debugWindowsMenu->addMenu(tr("&Browsers"));
-			debugWindowsBrowsesMenu->addAction(memBrowseAct);
+			debugWindowsBrowsesMenu->addAction(memBrowseAct[0]);
 			debugWindowsBrowsesMenu->addAction(stackBrowseAct);
 			debugWindowsBrowsesMenu->addAction(cpuBrowseAct);
 			debugWindowsBrowsesMenu->addAction(opBrowseAct);
@@ -617,6 +631,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugWindowsBrowsesMenu->addAction(riscDasmBrowseAct);
 			debugWindowsBrowsesMenu->addAction(hwRegsBrowseAct);
 			debugWindowsBrowsesMenu->addAction(romcartBrowseAct);
+			debugWindowsBrowsesMenu->addAction(memBrowseAct[1]);
+			debugWindowsBrowsesMenu->addAction(memBrowseAct[2]);
 			debugMenu->addSeparator();
 			debugMenu->addAction(pauseAct);
 			debugMenu->addAction(frameAdvanceAct);
@@ -639,7 +655,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		else
 		{
 			// Create alpine menu
-			debugMenu->addAction(memBrowseAct);
+			debugMenu->addAction(memBrowseAct[0]);
 			debugMenu->addAction(stackBrowseAct);
 			debugMenu->addAction(cpuBrowseAct);
 			debugMenu->addAction(opBrowseAct);
@@ -647,6 +663,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugMenu->addAction(riscDasmBrowseAct);
 			debugMenu->addAction(hwRegsBrowseAct);
 			debugMenu->addAction(romcartBrowseAct);
+			debugMenu->addAction(memBrowseAct[1]);
+			debugMenu->addAction(memBrowseAct[2]);
 		}
 	}
 
@@ -656,7 +674,6 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	helpMenu->addAction(aboutAct);
 
 	// Create toolbars
-
 	toolbar = addToolBar(tr("System"));
 	toolbar->addAction(powerAct);
 	if (!vjs.softTypeDebugger)
@@ -697,7 +714,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	if (vjs.hardwareTypeAlpine)
 	{
 		debugbar = addToolBar(tr("&Debug"));
-		debugbar->addAction(memBrowseAct);
+		debugbar->addAction(memBrowseAct[0]);
 		debugbar->addAction(stackBrowseAct);
 		debugbar->addAction(cpuBrowseAct);
 		debugbar->addAction(opBrowseAct);
@@ -705,6 +722,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		debugbar->addAction(riscDasmBrowseAct);
 		debugbar->addAction(hwRegsBrowseAct);
 		debugbar->addAction(romcartBrowseAct);
+		debugbar->addAction(memBrowseAct[1]);
+		debugbar->addAction(memBrowseAct[2]);
 	}
 
 	// Add actions to the main window, as hiding widgets with them
@@ -1818,10 +1837,11 @@ void MainWin::ShowROMCartBrowserWin(void)
 }
 
 
-void MainWin::ShowMemoryBrowserWin(void)
+// Memory (M68K DRAM, GPU & DSP) browser window
+void MainWin::ShowMemoryBrowserWin(int NumWin)
 {
-	memBrowseWin->show();
-	memBrowseWin->RefreshContents();
+	memBrowseWin[NumWin]->show();
+	memBrowseWin[NumWin]->RefreshContents();
 }
 
 
@@ -2081,8 +2101,8 @@ void MainWin::ReadSettings(void)
 void MainWin::ReadUISettings(void)
 {
 	QPoint pos;
-	char mem1Name[100];
-	size_t i;
+	char Name[100];
+	int i;
 	QSize size;
 
 	// Point on the emulator settings
@@ -2119,9 +2139,14 @@ void MainWin::ReadUISettings(void)
 		settings.value("cpuBrowseWinIsVisible", false).toBool() ? ShowCPUBrowserWin() : void();
 
 		// Memory browser UI information
-		pos = settings.value("memBrowseWinPos", QPoint(200, 200)).toPoint();
-		memBrowseWin->move(pos);
-		settings.value("memBrowseWinIsVisible", false).toBool() ? ShowMemoryBrowserWin() : void();
+		for (i = 0; i < 3; i++)
+		{
+			sprintf(Name, "memBrowseWinPos[%i]", i);
+			pos = settings.value(Name, QPoint(200, 200)).toPoint();
+			memBrowseWin[i]->move(pos);
+			sprintf(Name, "memBrowseWinIsVisible[%i]", i);
+			settings.value(Name, false).toBool() ? ShowMemoryBrowserWin(i) : void();
+		}
 
 		// Stack browser UI information
 		pos = settings.value("stackBrowseWinPos", QPoint(200, 200)).toPoint();
@@ -2244,13 +2269,13 @@ void MainWin::ReadUISettings(void)
 		// Memories browser UI information
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
-			sprintf(mem1Name, "mem1BrowseWinPos[%i]", (unsigned int)i);
-			pos = settings.value(mem1Name, QPoint(200, 200)).toPoint();
+			sprintf(Name, "mem1BrowseWinPos[%i]", (unsigned int)i);
+			pos = settings.value(Name, QPoint(200, 200)).toPoint();
 			mem1BrowseWin[i]->move(pos);
-			sprintf(mem1Name, "mem1BrowseWinIsVisible[%i]", (unsigned int)i);
-			settings.value(mem1Name, false).toBool() ? ShowMemory1BrowserWin((int)i) : void();
-			sprintf(mem1Name, "mem1BrowseWinSize[%i]", (unsigned int)i);
-			size = settings.value(mem1Name, QSize(400, 400)).toSize();
+			sprintf(Name, "mem1BrowseWinIsVisible[%i]", (unsigned int)i);
+			settings.value(Name, false).toBool() ? ShowMemory1BrowserWin((int)i) : void();
+			sprintf(Name, "mem1BrowseWinSize[%i]", (unsigned int)i);
+			size = settings.value(Name, QSize(400, 400)).toSize();
 			mem1BrowseWin[i]->resize(size);
 		}
 	}
@@ -2385,8 +2410,8 @@ void MainWin::WriteSettings(void)
 // Save the UI settings
 void MainWin::WriteUISettings(void)
 {
-	char mem1Name[100];
-	size_t i;
+	char Name[100];
+	int i;
 
 	// Point on the emulator settings
 	QSettings settings("Underground Software", "Virtual Jaguar");
@@ -2407,23 +2432,36 @@ void MainWin::WriteUISettings(void)
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
+		// ROM cartridge browser window
 		settings.setValue("romcartBrowseWinPos", romcartBrowseWin->pos());
 		settings.setValue("romcartBrowseWinIsVisible", romcartBrowseWin->isVisible());
+		// CPU & RISC registers display window
 		settings.setValue("cpuBrowseWinPos", cpuBrowseWin->pos());
 		settings.setValue("cpuBrowseWinIsVisible", cpuBrowseWin->isVisible());
-		settings.setValue("memBrowseWinPos", memBrowseWin->pos());
-		settings.setValue("memBrowseWinIsVisible", memBrowseWin->isVisible());
+		// Memory browser window
+		for (i = 0; i < 3; i++)
+		{
+			sprintf(Name, "memBrowseWinPos[%i]", i);
+			settings.setValue(Name, memBrowseWin[i]->pos());
+			sprintf(Name, "memBrowseWinIsVisible[%i]", i);
+			settings.setValue(Name, memBrowseWin[i]->isVisible());
+		}
+		// Stack browser window
 		settings.setValue("stackBrowseWinPos", stackBrowseWin->pos());
 		settings.setValue("stackBrowseWinIsVisible", stackBrowseWin->isVisible());
 		settings.setValue("stackBrowseWinSize", stackBrowseWin->size());
+		// OP (Object Processor) browser window
 		settings.setValue("opBrowseWinPos", opBrowseWin->pos());
 		settings.setValue("opBrowseWinIsVisible", opBrowseWin->isVisible());
 		settings.setValue("opBrowseWinSize", opBrowseWin->size());
+		// HW registers browser window
 		settings.setValue("hwRegsBrowseWinPos", hwRegsBrowseWin->pos());
 		settings.setValue("hwRegsBrowseWinIsVisible", hwRegsBrowseWin->isVisible());
 		settings.setValue("hwRegsBrowseWinSize", hwRegsBrowseWin->size());
+		// RISC disassembly browser window
 		settings.setValue("riscDasmBrowseWinPos", riscDasmBrowseWin->pos());
 		settings.setValue("riscDasmBrowseWinIsVisible", riscDasmBrowseWin->isVisible());
+		// M68K disassembly browser window
 		settings.setValue("m68kDasmBrowseWinPos", m68kDasmBrowseWin->pos());
 		settings.setValue("m68kDasmBrowseWinIsVisible", m68kDasmBrowseWin->isVisible());
 	}
@@ -2470,12 +2508,12 @@ void MainWin::WriteUISettings(void)
 
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
 		{
-			sprintf(mem1Name, "mem1BrowseWinPos[%i]", (unsigned int)i);
-			settings.setValue(mem1Name, mem1BrowseWin[i]->pos());
-			sprintf(mem1Name, "mem1BrowseWinIsVisible[%i]", (unsigned int)i);
-			settings.setValue(mem1Name, mem1BrowseWin[i]->isVisible());
-			sprintf(mem1Name, "mem1BrowseWinSize[%i]", (unsigned int)i);
-			settings.setValue(mem1Name, mem1BrowseWin[i]->size());
+			sprintf(Name, "mem1BrowseWinPos[%i]", i);
+			settings.setValue(Name, mem1BrowseWin[i]->pos());
+			sprintf(Name, "mem1BrowseWinIsVisible[%i]", i);
+			settings.setValue(Name, mem1BrowseWin[i]->isVisible());
+			sprintf(Name, "mem1BrowseWinSize[%i]", i);
+			settings.setValue(Name, mem1BrowseWin[i]->size());
 		}
 	}
 
@@ -2487,7 +2525,10 @@ void MainWin::WriteUISettings(void)
 void MainWin::AlpineRefreshWindows(void)
 {
 	cpuBrowseWin->RefreshContents();
-	memBrowseWin->RefreshContents();
+	for (size_t i = 0; i < 3; i++)
+	{
+		memBrowseWin[i]->RefreshContents();
+	}
 	stackBrowseWin->RefreshContents();
 	opBrowseWin->RefreshContents();
 	riscDasmBrowseWin->RefreshContents();

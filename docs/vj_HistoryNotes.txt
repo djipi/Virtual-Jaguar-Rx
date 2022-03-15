@@ -17,7 +17,9 @@ Release 5a (TBA)
 11) Added hexadecimal's value with $ for the function breakpoint & memory window
 12) Added an exceptions tab in the configuration settings
 --- Exceptions have been removed from the Alpine tab
-13) Added a ROM cartridge browser
+13) Added a ROM cartridge browser for the Alpine and Debugger mode
+14) Added GPU & DSP memory browser windows for the Alpine and Debugger mode
+--- Include a legacy issue fix, to prevent user to set an address outside a memory zone
 
 Release 5 (26th May 2021)
 -------------------------
