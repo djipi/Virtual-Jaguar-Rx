@@ -97,6 +97,7 @@
 <ul>
 <li>General</li>
 <li>Models and BIOS</li>
+<li>Exceptions</li>
 <li>Controllers</li>
 <li>Key Bindings</li>
 </ul>
@@ -128,7 +129,7 @@
 <h3>Show all files in file chooser</h3>
 <p>Normally the &ldquo;Insert Cartridge...&rdquo; dialogue will ignore any files it encounters that it doesn&rsquo;t know how to deal with. You can override this behavior by checking this option. However, this will <strong>not</strong> cause <em>Virtual Jaguar</em> to be able to load such files.</p>
 <h3>Use fast blitter</h3>
-<p>Checking this option will force <em>Virtual Jaguar</em> to use the older, less compatible yet faster blitter. Some games will <strong>not</strong> work properly with this option checked!</p>
+<p>Checking this option will force <em>Virtual Jaguar</em> to use the older, less compatible yet faster blitter. Some games will <strong>not</strong> work properly with this option checked.</p>
 <h2>Models and Bios Tab</h2>
 <p>Under the Models and Bios tab, there are the following options:</p>
 <ul>
@@ -142,6 +143,16 @@
 <p>Selecting this option will cause the emulated Jaguar to run with the built-in system BIOS upon powering on. This is usually not necessary, but some games will not run correctly without it. Note that this option will only affect cartridge images; also, it won't take effect until the virtual machine has been power cycled.</p>
 <h3>Developer BIOS</h3>
 <p>Selecting this option will cause the emulated Jaguar to run with the built-in developer BIOS upon powering on. This option has been set mostly for testing purposes. Note that this option will only affect cartridge images; also, it won't take effect until the virtual machine has been power cycled.</p>
+<h2>Exceptions Tab</h2>
+<p>Under the Exceptions tab, there are the following options:</p>
+<ul>
+<li>Allow writes to cartdridge ROM</li>
+<li>Allow M68000 exception catch</li>
+<li>Allow writes to unknown memory location</li>
+</ul>
+<p><strong>Allow writes to cartdridge ROM</strong>&nbsp;is the option allowing or not the cartdridge ROM writing. If allowed, emulator won't interfere but when turned off the emulator will display a dialog box with proper information, at this point user can allow to continue or stop the code.</p>
+<p><strong>Allow M68000 exception catch</strong>&nbsp;is the option allowing or not the exception catch from the M68000. If allowed, the emulator will display a dialog box with proper information and user will have the choice to continue or to stop the code.</p>
+<p><strong>Allow writes to unknown memory location</strong>&nbsp;is the option allowing or not the exception catch from writing to an unknown memory location. If allowed, the emulator will display a dialog box with proper information and will stop the code.</p>
 <h2>Controllers Tab</h2>
 <p>Under the Controller tab, there are the following options:</p>
 <ul>
@@ -174,6 +185,7 @@
 <p><em>Virtual Jaguar</em> has 2 modes available that makes it more convenient for developers to use. In order to use a mode, you must start <em>Virtual Jaguar</em> with the --alpine or --debugger option.</p>
 <p>When started in Debugger mode, a specific tab&nbsp;is made available in the configuration dialogue which gives you the following options:</p>
 <ul>
+<li>/cygdrive/ directory reference removal</li>
 <li>Disassembly lines</li>
 <li>Source file search paths</li>
 <li>Display M68000 opcodes</li>
@@ -181,25 +193,22 @@
 <li>Display source filename</li>
 <li>ELF sections check</li>
 </ul>
+<p><strong>/cygdrive/ directory reference removal</strong>&nbsp;allows to handle or not sources compiled with a cygwin gcc M68K compiler.</p>
 <p><strong>Disassembly lines</strong>&nbsp;represent the number of disassembly lines to display in the M68000 tracing window. This doesn't include the number of source lines displayed.</p>
 <p><strong>Source file search paths</strong>&nbsp;may be used in case of the debugger cannot find files path in the DWARF information.</p>
 <p><strong>Display M68000 opcode</strong>&nbsp;allows or not the opcode display. Can be useful in case of user prefers to see the disassembly only.</p>
 <p><strong>Display HW labels</strong>&nbsp;allows or not the name of the Jaguar hardware registers as reported in the official documentation.</p>
 <p><strong>Display source filename</strong>&nbsp;allows or not the source code filename display depend the disassembly in the M68000 tracing window.</p>
-<p><strong>ELF sections check</strong>&nbsp;allows or not potential unknown ELF section, it will stop, or not stop, the sections decoding.</p>
+<p><strong>ELF sections check</strong>&nbsp;allows or not potential unknown ELF section; it will stop, or not stop, the sections decoding.</p>
 <p>When started in Alpine mode, or in Debugger mode, a specific tab is made available in the configuration dialogue which gives you the following options:</p>
 <ul>
 <li>ROM to load</li>
 <li>ABS to load</li>
 <li>Windows refresh</li>
-<li>Allow writes to cartdridge ROM</li>
-<li>Allow M68000 exception catch</li>
 </ul>
 <p><strong>ROM to load</strong> is the path to a Jaguar executable file that will be loaded into the Jaguar&rsquo;s cartridge memory space at $800000 (Alpine ROM images will load at $802000). As a convenience to coders, this file can be of any length, as long as it fits into the cartridge memory space (a file of this type is treated as an Alpine ROM and is loaded at $802000). The file thus loaded into memory will not be executed.</p>
 <p><strong>ABS to load</strong> is the path to a Jaguar executable file that will be loaded in the Jaguar&rsquo;s main RAM. This file must have valid headers, otherwise <em>Virtual Jaguar</em> won&rsquo;t be able to load it. Assuming the file exists and has the correct headers in it, it will be loaded and run when <em>Virtual Jaguar</em> is first run.</p>
 <p><strong>Windows refresh</strong>&nbsp;is the refresh rate for open windows. The smaller the rate, the faster the refresh window will occur. A 0 value will disable the refresh operations.</p>
-<p><strong>Allow writes to cartdridge ROM</strong>&nbsp;is the option allowing or not the cartdridge ROM writing. If allowed, emulator won't interfere but when turned off the emulator will display a dialog box with proper information, at this point user can allow to continue or stop the code.</p>
-<p><strong>Allow M68000 exception catch</strong>&nbsp;is the option allowing or not the exception catch from the M68000. If allowed, the emulator will display a dialog box with proper information and user will have the choice to continue or to stop the code.</p>
 <p>Also, when in Debugger mode,&nbsp;extra toolbar buttons are defined (also found under the extra &ldquo;Debug&rdquo; menu) and also include the Alpine mode features:</p>
 <ul>
 <li>Restart</li>
@@ -240,7 +249,7 @@
 <h3>All Watch</h3>
 <p>Display all global variables used by the Jaguar code. It uses the available DWARF debug information. It has a search feature to look for a specific global variable.</p>
 <h3>Locals</h3>
-<p>Display the local variables of the traced M68000 function.&nbsp;It uses the available DWARF debug information, and the A6 register to point on the stack.</p>
+<p>Display the local variables of the traced M68000 function.&nbsp;It uses the available DWARF debug information, and the A6 register to point on the stack. An icon error will be displayed in case of values cannot be read. A variable used as register will have his name in blue</p>
 <h3>Call Stack</h3>
 <p>Display the M68000 call stack functions.&nbsp;It uses the available DWARF debug information, and the A6 register to point on the stack.</p>
 <h3>Heap Allocator</h3>
@@ -268,13 +277,16 @@
 <li>M68K Disassembly Browser</li>
 <li>RISC Disassembly Browser</li>
 <li>HW Registers Browser</li>
+<li>ROM Cartridge Browser</li>
+<li>DSP Memory Browser</li>
+<li>GPU Memory Browser</li>
 </ul>
 <h3>Memory Browser</h3>
-<p>This window lets you inspect <em>Virtual Jaguar</em>&rsquo;s emulated memory space. The <strong>PgDn</strong> key will advance the top of the window&rsquo;s memory location by 480 bytes, and <strong>PgUp</strong> will go back by the same amount. The <strong>Plus (+)</strong> key will advance the top of the window&rsquo;s memory location by 16 bytes, and <strong>Minus (-)</strong> will go back by the same amount. Entering a memory location, in hexadecimal, in the edit field and pressing the <strong>Go</strong> button will display memory from that location. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
+<p>This window lets you inspect <em>Virtual Jaguar</em>&rsquo;s emulated main memory space. The <strong>PgDn</strong> key will advance the top of the window&rsquo;s memory location by 480 bytes, and <strong>PgUp</strong> will go back by the same amount. The <strong>Plus (+)</strong> key will advance the top of the window&rsquo;s memory location by 16 bytes, and <strong>Minus (-)</strong> will go back by the same amount. Entering a memory location, in hexadecimal, in the edit field and pressing the <strong>Go</strong> button will display memory from that location. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
 <h3>Stack Browser</h3>
 <p>This window lets you inspect <em>Virtual Jaguar</em>&rsquo;s emulated memory stack (SP) space. The <strong>PgDn</strong> key will advance the top of the window&rsquo;s memory location by 480 bytes, and <strong>PgUp</strong> will go back by the same amount. The <strong>Plus (+)</strong> key will advance the top of the window&rsquo;s memory location by 16 bytes, and <strong>Minus (-)</strong> will go back by the same amount. Entering a memory location, in hexadecimal, in the edit field and pressing the <strong>Go</strong> button will display memory from that location. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
 <h3>CPU Browser</h3>
-<p>This window shows the state of the various CPUs in the emulated Jaguar; a memory breakpoint (read &Aacute; write) can also be set via the BPM setting. The window can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
+<p>This window shows the state of the various CPUs in the emulated Jaguar; a memory breakpoint (read &amp; write) can also be set via the BPM setting. The window can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
 <h3>OP Browser</h3>
 <p>This window shows the current state of object list that the Object Processor is pointing to. Note that most of the time, this will likely show an object list that has had its objects processed. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
 <h3>M68K Disassembly Browser</h3>
@@ -283,6 +295,12 @@
 <p>This window provides a disassembly of RISC opcodes. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
 <h3>HW Registers Browser</h3>
 <p>This window provides a list of the hardware registers content; for the moment, only the blitter is displayed. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
+<h3>ROM Cartridge Browser</h3>
+<p>This window lets you inspect the ROM cartridge space. A 6MB size is selected by defaut, but can be changed to 1MB, 2MB, and 4MB. The <strong>PgDn</strong> key will advance the top of the window&rsquo;s memory location by 480 bytes, and <strong>PgUp</strong> will go back by the same amount. The <strong>Plus (+)</strong> key will advance the top of the window&rsquo;s memory location by 16 bytes, and <strong>Minus (-)</strong> will go back by the same amount. Entering a memory location, in hexadecimal, in the edit field and pressing the <strong>Go</strong> button will display memory from that location. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
+<h3>DSP Memory Browser</h3>
+<p>This window lets you inspect <em>Virtual Jaguar</em>&rsquo;s DSP emulated memory space. The <strong>PgDn</strong> key will advance the top of the window&rsquo;s memory location by 480 bytes, and <strong>PgUp</strong> will go back by the same amount. The <strong>Plus (+)</strong> key will advance the top of the window&rsquo;s memory location by 16 bytes, and <strong>Minus (-)</strong> will go back by the same amount. Entering a memory location, in hexadecimal, in the edit field and pressing the <strong>Go</strong> button will display memory from that location. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
+<h3>GPU Memory Browser</h3>
+<p>This window lets you inspect <em>Virtual Jaguar</em>&rsquo;s GPU emulated memory space. The <strong>PgDn</strong> key will advance the top of the window&rsquo;s memory location by 480 bytes, and <strong>PgUp</strong> will go back by the same amount. The <strong>Plus (+)</strong> key will advance the top of the window&rsquo;s memory location by 16 bytes, and <strong>Minus (-)</strong> will go back by the same amount. Entering a memory location, in hexadecimal, in the edit field and pressing the <strong>Go</strong> button will display memory from that location. It can be dismissed by clicking on the &ldquo;X&rdquo; in the upper corner of the dialog, or by pressing the <strong>Esc</strong> key on your keyboard.</p>
 <p>The aforementioned options will only work when <em>Virtual Jaguar</em> is run in Alpine or Debugger mode, that is, when the --alpine or --debugger flag is passed in. If you do not pass such flag, <em>Virtual Jaguar</em> will run as it normally does, i.e., as a stock Jaguar, and nothing will be loaded by default.</p>
 <h2>For The Curious</h2>
 <p>If you&rsquo;re wondering why some cartridges have labels in the &ldquo;Insert Cartridge...&rdquo; dialogue and some don&rsquo;t, read on...</p>

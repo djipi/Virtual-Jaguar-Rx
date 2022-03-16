@@ -584,9 +584,6 @@
     <None Include="..\res\generic.png">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="..\res\help.html">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="..\res\homebrew-file.png">
       <Filter>Resource Files</Filter>
     </None>
@@ -714,6 +711,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="..\docs\vj_HistoryNotes.txt">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="..\res\help.html">
       <Filter>Docs</Filter>
     </None>
   </ItemGroup>

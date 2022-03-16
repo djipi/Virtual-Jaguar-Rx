@@ -1,5 +1,5 @@
-Release 5a (TBA)
-----------------
+pre-Release 5a (15th March 2022)
+--------------------------------
 0) Check missing qjpeg's dll for the tests pattern
 1) Added ELF section names
 2) Source file path clean up in the DWARF information reader
@@ -20,6 +20,7 @@ Release 5a (TBA)
 13) Added a ROM cartridge browser for the Alpine and Debugger mode
 14) Added GPU & DSP memory browser windows for the Alpine and Debugger mode
 --- Include a legacy issue fix, to prevent user to set an address outside a memory zone
+15) Documentation updates
 
 Release 5 (26th May 2021)
 -------------------------
