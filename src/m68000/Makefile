@@ -61,7 +61,7 @@ obj/%.o: obj/%.c
 
 # Generated code
 
-obj/cpuemu.c: obj/gencpu
+obj/cpuemu.c: obj/gencpu obj/cpustbl.c
 obj/cpustbl.c: obj/gencpu
 	@echo -e "\033[01;33m***\033[00;32m Generating cpuemu.c...\033[00m"
 	@cd obj && ./gencpu
