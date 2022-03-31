@@ -19,8 +19,8 @@ extern uint8_t jagMemSpace[];
 
 extern uint8_t * jaguarMainRAM;
 extern uint8_t * jaguarMainROM;
-extern uint8_t * gpuRAM;
-extern uint8_t * dspRAM;
+//extern uint8_t * gpuRAM;
+//extern uint8_t * dspRAM;
 
 #if 1
 extern uint32_t & butch, & dscntrl;

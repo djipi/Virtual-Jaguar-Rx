@@ -34,8 +34,8 @@ uint8_t jagMemSpace[0xF20000];					// The entire memory space of the Jaguar...!
 uint8_t * jaguarMainRAM = &jagMemSpace[0x000000];
 uint8_t * jaguarMainROM = &jagMemSpace[0x800000];
 uint8_t * cdRAM         = &jagMemSpace[0xDFFF00];
-uint8_t * gpuRAM        = &jagMemSpace[0xF03000];
-uint8_t * dspRAM        = &jagMemSpace[0xF1B000];
+//uint8_t * gpuRAM        = &jagMemSpace[0xF03000];
+//uint8_t * dspRAM        = &jagMemSpace[0xF1B000];
 
 #if 0
 union Word
