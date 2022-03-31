@@ -1,5 +1,11 @@
+pre-Release 5a hotfix (30th March 2022)
+---------------------------------------
+0) Fix to display GPU and DSP memory browser contents
+
 pre-Release 5a (15th March 2022)
 --------------------------------
+Git commit: 7160602eda33df0e85e85c19f1f344a88ef502dc
+-
 0) Check missing qjpeg's dll for the tests pattern
 1) Added ELF section names
 2) Source file path clean up in the DWARF information reader

@@ -13,6 +13,8 @@
 #include <QtWidgets/QtWidgets>
 #include <stdint.h>
 #include "memory.h"
+#include "dsp.h"
+#include "gpu.h"
 
 class MemoryBrowserWindow: public QWidget
 {
@@ -28,8 +30,8 @@ class MemoryBrowserWindow: public QWidget
 
 	raminfo MemTypeInfo[3] = {
 		{ (char*)"Main Memory Browser", 0x000000, 0x200000 /* 0x1fffff */, jaguarMainRAM },
-		{ (char*)"DSP Memory Browser", 0xf1b000, 0xf1d000 /* 0xf1cfff */, dspRAM  },
-		{ (char*)"GPU Memory Browser", 0xf03000, 0xf04000 /* 0xf03fff */, gpuRAM  }
+		{ (char*)"DSP Memory Browser", 0xf1b000, 0xf1d000 /* 0xf1cfff */, dsp_ram_8  },
+		{ (char*)"GPU Memory Browser", 0xf03000, 0xf04000 /* 0xf03fff */, gpu_ram_8  }
 	};
 
 	public:
