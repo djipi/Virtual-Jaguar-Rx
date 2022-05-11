@@ -11,6 +11,7 @@
 /src/m68000/obj/*.exe
 /src/m68000/obj/*.d
 /src/m68000/obj/*.o
+/src/m68000/obj/*
 *.bak
 virtualjaguar
 Makefile.*
