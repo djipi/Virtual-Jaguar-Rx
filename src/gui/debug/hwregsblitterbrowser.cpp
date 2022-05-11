@@ -137,7 +137,7 @@ void HWRegsBlitterBrowserWindow::RefreshContents(void)
 {
 	char string[1024];
 	unsigned int i;
-	ULONGLONG value;
+	/* ULONGLONG */ unsigned long long value;
 
 	if (isVisible())
 	{

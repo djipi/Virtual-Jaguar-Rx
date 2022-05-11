@@ -1,5 +1,11 @@
+WiP 5b (TBA)
+------------
+0) Fix compilation error with gcc
+
 pre-Release 5a hotfix (30th March 2022)
 ---------------------------------------
+Git commit: 1f015230599f601430ca6339d046f346926b0a34
+-
 0) Fix to display GPU and DSP memory browser contents
 
 pre-Release 5a (15th March 2022)
