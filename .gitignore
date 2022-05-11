@@ -12,12 +12,13 @@
 /src/m68000/obj/*.d
 /src/m68000/obj/*.o
 *.bak
+virtualjaguar
 Makefile.*
 makefile-qt
 makefile-qt*.*
 object_script.virtualjaguar*.*
 .qmake.stash
-virtualjaguar.WinMerge
+*WinMerge
 /Win-VS2015/
 /Win-VS2017/m68000/m68000.vcxproj.user
 /Win-VS2017/jaguarcore/jaguarcore.vcxproj.user
