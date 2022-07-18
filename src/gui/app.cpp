@@ -31,6 +31,8 @@
 #include "profile.h"
 #include "settings.h"
 #include "version.h"
+#include <iostream>
+#include <cstdio>
 #include "debugger/DBGManager.h"
 
 // Apparently on win32, SDL is hijacking main from Qt. So let's do this:
@@ -193,8 +195,8 @@ bool ParseCommandLine(int argc, char * argv[])
 				"   --pal         -p  PAL mode\n"
 				"   --ntsc        -n  NTSC mode\n"
 				"   --dram-max        Set DRAM size to 8MB\n"
-				"   --bios        -b  Boot using Jaguar BIOS\n"
-				"   --no-bios         Do not use Jaguar BIOS\n"
+				"   --bios        -b  Boot using Atari Jaguar BIOS\n"
+				"   --no-bios         Do not use Atari Jaguar BIOS\n"
 				"   --gpu         -g  Enable GPU\n"
 				"   --no-gpu          Disable GPU\n"
 				"   --dsp         -d  Enable DSP\n"

@@ -5,10 +5,12 @@
 // (C) 2013 Underground Software
 //
 // JLH = James Hammons <jlhamm@acm.org>
+// bs42= 42Bastian <github>
 //
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JLH  01/22/2012  Created this file
+// bs42  July/2022  Start of RISC disassembly moved to F03000
 //
 
 // STILL TO DO:

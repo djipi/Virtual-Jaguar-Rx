@@ -63,7 +63,7 @@ obj:
 	@mkdir obj
 
 prepare: obj
-	@echo -e "\033[01;33m***\033[00;32m Preparing to compile Virtual Jaguar...\033[00m"
+	@echo -e "\033[01;33m***\033[00;32m Preparing to compile Virtual Jaguar Rx...\033[00m"
 	@echo "#define VJ_RELEASE_VERSION \"v2.1.3\"" > src/version.h
 	@echo "#define VJ_RELEASE_SUBVERSION \"Final\"" >> src/version.h
 	@echo "#define VJ_REMOVE_DEV_CODE" >> src/version.h
@@ -71,7 +71,7 @@ prepare: obj
 #	@echo "#define VJ_RELEASE_SUBVERSION \"2.1.4 Prerelease\"" >> src/version.h
 
 virtualjaguar: sources libs makefile-qt
-	@echo -e "\033[01;33m***\033[00;32m Making Virtual Jaguar GUI...\033[00m"
+	@echo -e "\033[01;33m***\033[00;32m Making Virtual Jaguar Rx GUI...\033[00m"
 	$(Q)$(MAKE) -f makefile-qt CROSS=$(CROSS) V="$(V)"
 
 makefile-qt: virtualjaguar.pro
@@ -93,7 +93,7 @@ obj/libjaguarcore.a: jaguarcore.mak sources
 sources: src/*.h src/*.cpp src/m68000/*.c src/m68000/*.h
 
 clean:
-	@echo -ne "\033[01;33m***\033[00;32m Cleaning out the garbage...\033[00m"
+	@echo -ne "\033[01;33m***\033[00;32m Cleaning out the build...\033[00m"
 	@-rm -rf ./obj
 	@-rm -rf ./src/m68000/obj
 	@-rm -rf makefile-qt

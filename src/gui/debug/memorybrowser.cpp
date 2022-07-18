@@ -6,11 +6,13 @@
 //
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+// bs42= 42Bastian <github>
 //
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JLH  08/14/2012  Created this file
 // JPM  March/2022  Modified to support the GPU & DSP memory browser window
+// bs42  July/2022  GPU memory browser in longs as reading/writing is long only
 //
 
 // STILL TO DO:
@@ -26,6 +28,7 @@ MemoryBrowserWindow::MemoryBrowserWindow(QWidget * parent/*= 0*/, int Type): QWi
 	refresh(new QPushButton(tr("Refresh"))),
 	go(new QPushButton(tr("Go"))),
 	address(new QLineEdit),
+	memtype(Type),
 	memmin(MemTypeInfo[Type].memmin),
 	memmax(MemTypeInfo[Type].memmax),
 	memzone(MemTypeInfo[Type].memzone),
@@ -86,7 +89,14 @@ void MemoryBrowserWindow::RefreshContents(void)
 			// second step to append 16 bytes (hexdecimal) vale in the text line
 			for (uint32_t j = 0; j < 16; j++)
 			{
-				sprintf(buf, "%02X%c", memzone[memBase - memmin + i + j], ((j & 3) == 3) ? ' ' : 0);
+				if (!memtype)
+				{
+					sprintf(buf, "%02X ", memzone[memBase - memmin + i + j]);
+				}
+				else
+				{
+					sprintf(buf, "%02X%c", memzone[memBase - memmin + i + j], ((j & 3) == 3) ? ' ' : 0);
+				}
 				strcat(string, buf);
 			}
 

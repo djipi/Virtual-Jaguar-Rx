@@ -2,6 +2,9 @@ WiP 5b (TBA)
 ------------
 0) Fix compilation error with gcc
 1) Added the save state patch from PvtLewis (from Atari Age's forum)
+2) Compilation warning fixes for the M68000 project
+3) Merged convience fixes #64 from 42Bastian
+-- start of RISC disassembly moved to F03000, GPU memory browser in longs, and fixed object list display
 
 pre-Release 5a hotfix (30th March 2022)
 ---------------------------------------

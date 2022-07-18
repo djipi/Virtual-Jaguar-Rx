@@ -60,6 +60,7 @@ class MemoryBrowserWindow: public QWidget
 		int32_t memmin;
 		int32_t memBase;
 		uint8_t *memzone;
+		int memtype;
 };
 
 #endif	// __MEMORYBROWSER_H__
