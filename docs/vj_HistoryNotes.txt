@@ -1,6 +1,7 @@
 WiP 5b (TBA)
 ------------
 0) Fix compilation error with gcc
+1) Added the save state patch from PvtLewis (from Atari Age's forum)
 
 pre-Release 5a hotfix (30th March 2022)
 ---------------------------------------
@@ -306,7 +307,7 @@ Known issues
 16) Some ASCII characters may be not displayed correctly
 -- Probably depend how the text is displayed, this is related to the Qt/HTML encoding done when reading DWARF file
 17) Potential legacy crash when leaving emulator in pause mode for a long period of time
--- Need much investigation
+-- Need more investigations
 
 Cosmetic / UX issues
 ====================

@@ -13,6 +13,10 @@
 
 #include "sysdeps.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Special flags */
 #define SPCFLAG_DEBUGGER      0x001
 #define SPCFLAG_STOP          0x002
@@ -56,7 +60,7 @@ struct regstruct
 	uint32_t interruptCycles;
 };
 
-extern struct regstruct regs, lastint_regs;
+extern struct regstruct regs;	// , lastint_regs;
 
 #define m68k_dreg(r, num) ((r).regs[(num)])
 #define m68k_areg(r, num) (((r).regs + 8)[(num)])
@@ -93,5 +97,9 @@ extern struct regstruct regs, lastint_regs;
 } while (0)
 
 #define COPY_CARRY (SET_XFLG(GET_CFLG))
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	// __CPUDEFS_H__

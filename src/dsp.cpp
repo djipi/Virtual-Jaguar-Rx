@@ -6,14 +6,19 @@
 // Extensive cleanups/rewrites by James Hammons
 // (C) 2010 Underground Software
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
 //
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
 // JLH  11/26/2011  Added fixes for LOAD/STORE alignment issues
 // JPM  06/06/2016  Visual Studio support
+// JPM  March/2022  Added the save state patch from PvtLewis
 //
 
 #include "dsp.h"
@@ -28,7 +33,7 @@
 #include "log.h"
 #include "m68000/m68kinterface.h"
 //#include "memory.h"
-
+#include "state.h"
 
 // Seems alignment in loads & stores was off...
 #define DSP_CORRECT_ALIGNMENT
@@ -436,7 +441,7 @@ uint8_t dsp_ram_8[0x2000];
 static uint32_t dsp_in_exec = 0;
 static uint32_t dsp_releaseTimeSlice_flag = 0;
 
-FILE * dsp_fp;
+//FILE * dsp_fp;
 
 #ifdef DSP_DEBUG_CC
 // Comparison core vars (used only for core comparison! :-)
@@ -445,6 +450,11 @@ static uint8_t ram1[0x2000], ram2[0x2000];
 static uint32_t regs1[64], regs2[64];
 static uint32_t ctrl1[14], ctrl2[14];
 #endif
+
+uint32_t pcQueue1[0x400];
+uint32_t pcQPtr1 = 0;
+static uint32_t prevR1;
+
 
 // Private function prototypes
 
@@ -1305,6 +1315,170 @@ void DSPDumpRegisters(void)
 	}
 }
 
+//uint32_t pcQueue1[0x400];
+//uint32_t pcQPtr1 = 0;
+//static uint32_t prevR1;
+
+size_t dsp_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+
+#ifndef NEW_SCOREBOARD
+#error "Save states require NEW_SCOREBOARD"
+#endif
+	DUMPARR8(scoreboard);
+	DUMP8(plPtrFetch);
+	DUMP8(plPtrRead);
+	DUMP8(plPtrExec);
+	DUMP8(plPtrWrite);
+
+	for (int pipeline_idx = 0; pipeline_idx < sizeof(pipeline)/sizeof(pipeline[0]); pipeline_idx++)
+	{
+		PipelineStage *ps = &pipeline[pipeline_idx];
+		DUMP16(ps->instruction);
+		DUMP8(ps->opcode);
+		DUMP8(ps->operand1);
+		DUMP8(ps->operand2);
+		DUMP32(ps->reg1);
+		DUMP32(ps->reg2);
+		DUMP32(ps->areg1);
+		DUMP32(ps->areg2);
+		DUMP32(ps->result);
+		DUMP8(ps->writebackRegister);
+		DUMP32(ps->address);
+		DUMP32(ps->value);
+		DUMP8(ps->type);
+	}
+
+	DUMPBOOL(IMASKCleared);
+
+	DUMP32(dsp_pc);
+	DUMP64(dsp_acc);
+	DUMP32(dsp_remain);
+	DUMP32(dsp_modulo);
+	DUMP32(dsp_flags);
+	DUMP32(dsp_matrix_control);
+	DUMP32(dsp_pointer_to_matrix);
+	DUMP32(dsp_data_organization);
+	DUMP32(dsp_control);
+	DUMP32(dsp_div_control);
+	DUMP8(dsp_flag_z);
+	DUMP8(dsp_flag_n);
+	DUMP8(dsp_flag_c);
+	DUMP32(dsp_opcode_first_parameter);
+	DUMP32(dsp_opcode_second_parameter);
+	DUMPARR8(dsp_branch_condition_table);
+	DUMPARR16(mirror_table);
+	DUMP32(dsp_in_exec);
+	DUMP32(dsp_releaseTimeSlice_flag);
+
+	DUMPARR32(pcQueue1);
+	DUMP32(pcQPtr1);
+
+	uint32_t whichreg = (dsp_reg == dsp_reg_bank_0 ? 0 : 1);
+	DUMP32(whichreg);
+  
+	DUMPARR32(dsp_reg_bank_0);
+	DUMPARR32(dsp_reg_bank_1);
+
+	DUMPARR8(dsp_ram_8);
+
+	return total_dumped;
+}
+
+bool dsp_ok_to_save(void)
+{
+	WriteLog("checking DSP interrupt: %d\n", (dsp_flags & IMASK));
+	WriteLog("checking dsp_in_exec: %u\n", dsp_in_exec);
+	return (dsp_in_exec == 0) && ((dsp_flags & IMASK) == 0);
+}
+
+bool dsp_ok_to_load(void)
+{
+	WriteLog("checking DSP interrupt: %d\n", (dsp_flags & IMASK));
+	WriteLog("checking dsp_in_exec: %u\n", dsp_in_exec);
+	return (dsp_in_exec == 0) && ((dsp_flags & IMASK) == 0);
+}
+
+size_t dsp_load(FILE *fp)
+{
+	//WriteLog("DSP interrupt: %d\n", (dsp_flags & IMASK));
+	//WriteLog("dsp_in_exec: %u\n", dsp_in_exec);
+	//WriteLog("DSP_RUNNING: %u\n", DSP_RUNNING);
+	//DSPDumpRegisters();
+	//DSPDumpDisassembly();
+
+	size_t total_loaded = 0;
+
+	LOADARR8(scoreboard);
+	LOAD8(plPtrFetch);
+	LOAD8(plPtrRead);
+	LOAD8(plPtrExec);
+	LOAD8(plPtrWrite);
+
+	for (int pipeline_idx = 0; pipeline_idx < sizeof(pipeline)/sizeof(pipeline[0]); pipeline_idx++)
+	{
+		PipelineStage *ps = &pipeline[pipeline_idx];
+		LOAD16(ps->instruction);
+		LOAD8(ps->opcode);
+		LOAD8(ps->operand1);
+		LOAD8(ps->operand2);
+		LOAD32(ps->reg1);
+		LOAD32(ps->reg2);
+		LOAD32(ps->areg1);
+		LOAD32(ps->areg2);
+		LOAD32(ps->result);
+		LOAD8(ps->writebackRegister);
+		LOAD32(ps->address);
+		LOAD32(ps->value);
+		LOAD8(ps->type);
+	}
+
+	LOADBOOL(IMASKCleared);
+
+	LOAD32(dsp_pc);
+	LOAD64(dsp_acc);
+	LOAD32(dsp_remain);
+	LOAD32(dsp_modulo);
+	LOAD32(dsp_flags);
+	LOAD32(dsp_matrix_control);
+	LOAD32(dsp_pointer_to_matrix);
+	LOAD32(dsp_data_organization);
+	LOAD32(dsp_control);
+	LOAD32(dsp_div_control);
+	LOAD8(dsp_flag_z);
+	LOAD8(dsp_flag_n);
+	LOAD8(dsp_flag_c);
+	LOAD32(dsp_opcode_first_parameter);
+	LOAD32(dsp_opcode_second_parameter);
+	LOADARR8(dsp_branch_condition_table);
+	LOADARR16(mirror_table);
+	LOAD32(dsp_in_exec);
+	LOAD32(dsp_releaseTimeSlice_flag);
+
+	LOADARR32(pcQueue1);
+	LOAD32(pcQPtr1);
+
+	uint32_t whichreg;
+	LOAD32(whichreg);
+	if (whichreg == 0)
+	{
+		dsp_reg = dsp_reg_bank_0;
+		dsp_alternate_reg = dsp_reg_bank_1;
+	}
+	else
+	{
+		dsp_alternate_reg = dsp_reg_bank_0;
+		dsp_reg = dsp_reg_bank_1;
+	}
+
+	LOADARR32(dsp_reg_bank_0);
+	LOADARR32(dsp_reg_bank_1);
+
+	LOADARR8(dsp_ram_8);
+
+	return total_loaded;
+}
 
 void DSPDone(void)
 {
@@ -3167,9 +3341,6 @@ F1B016: NOP    [NCZ:001]
 F1B1FC: MOVEI  #$00F1A100, R01 [NCZ:001, R01=00F1A100] -> [NCZ:001, R01=00F1A100]
 */
 
-uint32_t pcQueue1[0x400];
-uint32_t pcQPtr1 = 0;
-static uint32_t prevR1;
 //Let's try a 3 stage pipeline....
 //Looks like 3 stage is correct, otherwise bad things happen...
 void DSPExecP2(int32_t cycles)

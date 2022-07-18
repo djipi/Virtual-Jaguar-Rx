@@ -6,14 +6,19 @@
 // Cleanups/enhancements by James Hammons
 // (C) 2010 Underground Software
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
 //
-// Who  When (MM/DD/YY)  What
-// ---  ---------------  ------------------------------------------------------------
-// JLH  01/16/2010       Created this log ;-)
-// JPM  10/11/2017       EEPROM directory detection and creation if missing
-// JPM  11/18/2020       EEPROM directory creation allowed only for Windows
+// Who  (MM/DD/YY)  What
+// ---  ----------  ------------------------------------------------------------
+// JLH  01/16/2010  Created this log ;-)
+// JPM  10/11/2017  EEPROM directory detection and creation if missing
+// JPM  11/18/2020  EEPROM directory creation allowed only for Windows
+// JPM  March/2022  Added the save state patch from PvtLewis
 //
 
 #include "eeprom.h"
@@ -27,6 +32,7 @@
 #include "jaguar.h"
 #include "log.h"
 #include "settings.h"
+#include "state.h"
 
 #define eeprom_LOG
 
@@ -67,6 +73,60 @@ static char cdromEEPROMFilename[MAX_PATH];
 static bool haveEEPROM = false;
 static bool haveCDROMEEPROM = false;
 
+size_t eeprom_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+
+	DUMP16(jerry_ee_state);
+	DUMP16(jerry_ee_op);
+	DUMP16(jerry_ee_rstate);
+	DUMP16(jerry_ee_address_data);
+	DUMP16(jerry_ee_address_cnt);
+	DUMP16(jerry_ee_data);
+	DUMP16(jerry_ee_data_cnt);
+	DUMP16(jerry_writes_enabled);
+	DUMP16(jerry_ee_direct_jump);
+
+	return total_dumped;
+}
+
+size_t eeprom_load(FILE *fp)
+{
+	size_t total_loaded = 0;
+
+	LOAD16(jerry_ee_state);
+	LOAD16(jerry_ee_op);
+	LOAD16(jerry_ee_rstate);
+	LOAD16(jerry_ee_address_data);
+	LOAD16(jerry_ee_address_cnt);
+	LOAD16(jerry_ee_data);
+	LOAD16(jerry_ee_data_cnt);
+	LOAD16(jerry_writes_enabled);
+	LOAD16(jerry_ee_direct_jump);
+
+	return total_loaded;
+}
+
+size_t eeprom2_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+
+	DUMPARR16(eeprom_ram);
+	DUMPARR16(cdromEEPROM);
+
+	return total_dumped;
+}
+
+size_t eeprom2_load(FILE *fp)
+{
+	size_t total_loaded = 0;
+
+	LOADARR16(eeprom_ram);
+	LOADARR16(cdromEEPROM);
+
+	return total_loaded;
+}
+
 
 // EEPROM initialisations
 void EepromInit(void)
@@ -82,6 +142,7 @@ void EepromInit(void)
 	{
 		// Handle regular cartridge EEPROM
 		sprintf(eeprom_filename, "%s%08X.eeprom", vjs.EEPROMPath, (unsigned int)jaguarMainROMCRC32);
+		sprintf(cdromEEPROMFilename, "%scdrom.eeprom", vjs.EEPROMPath);
 		fp = fopen(eeprom_filename, "rb");
 
 		if (fp)

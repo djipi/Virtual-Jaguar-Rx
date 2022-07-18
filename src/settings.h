@@ -1,6 +1,9 @@
 //
 // settings.h: Header file
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //  RG = Richard Goedeken
 //
@@ -11,6 +14,7 @@
 // JPM  10/10/2018  Added search paths in settings
 // JPM  04/06/2019  Added ELF sections check
 //  RG   Jan./2021  Linux build fix
+// JPM  March/2022  Added the save state patch from PvtLewis
 //
 
 #ifndef __SETTINGS_H__
@@ -88,6 +92,7 @@ struct VJSettings
 	bool disasmopcodes;
 	bool displayHWlabels;
 	bool useFastBlitter;
+	bool compressSaveStates;
 	bool displayFullSourceFilename;
 	bool ELFSectionsCheck;
 	bool cygdriveDirRemoval;
@@ -109,6 +114,7 @@ struct VJSettings
 	char alpineROMPath[MAX_PATH];
 	char debuggerROMPath[MAX_PATH];
 	char absROMPath[MAX_PATH];
+	char SaveStatePath[MAX_PATH];
 	char screenshotPath[MAX_PATH];
 	char sourcefilesearchPaths[4096];
 };

@@ -6,12 +6,24 @@
 //
 // Modified by Jean-Paul Mari
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
+// JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
+//
+// Who  When        What
+// ---  ----------  -------------------------------------------------------------
+// JPM  March/2022  Added the save state patch from PvtLewis
+//
 
 #ifndef __MAINWIN_H__
 #define __MAINWIN_H__
 
 //Hrm. uh??? I thought this wasn't the way to do this stuff...???
 #include <QtWidgets/QtWidgets>
+#include "state.h"
 #include "tom.h"
 
 #define RING_BUFFER_SIZE 32
@@ -130,6 +142,22 @@ class MainWin: public QMainWindow
 		void ShowM68KDasmBrowserWin(void);
 		void ShowHWRegsBrowserWin(void);
 		void ShowRISCDasmBrowserWin(void);
+#if defined(SAVESTATEPATCH_PvtLewis)
+		void msSleep(int ms);
+		void DumpCommand(void);
+		void LoadCommand(void);
+		void LoadCommandTimer(void);
+		void SaveSlot0Command(void);
+		void SaveSlot1Command(void);
+		void SaveSlot2Command(void);
+		void SaveSlot3Command(void);
+		void SaveSlot4Command(void);
+		void SaveSlot5Command(void);
+		void SaveSlot6Command(void);
+		void SaveSlot7Command(void);
+		void SaveSlot8Command(void);
+		void SaveSlot9Command(void);
+#endif
 
 	private:
 		void HandleKeys(QKeyEvent *, bool);
@@ -214,6 +242,21 @@ class MainWin: public QMainWindow
 		QToolBar * toolbar;
 		QToolBar * debugbar;
 		QToolBar * debuggerbar;
+#if defined(SAVESTATEPATCH_PvtLewis)
+		QMenu * toolsMenu;
+		QAction * dumpAct;
+		QAction * loadAct;
+		QAction * saveSlot0Act;
+		QAction * saveSlot1Act;
+		QAction * saveSlot2Act;
+		QAction * saveSlot3Act;
+		QAction * saveSlot4Act;
+		QAction * saveSlot5Act;
+		QAction * saveSlot6Act;
+		QAction * saveSlot7Act;
+		QAction * saveSlot8Act;
+		QAction * saveSlot9Act;
+#endif
 
 		QActionGroup * zoomActs;
 		QActionGroup * tvTypeActs;

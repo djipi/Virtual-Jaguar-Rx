@@ -8,14 +8,20 @@
 // Cleanups, endian wrongness, and bad ASM amelioration by James Hammons
 // (C) 2010 Underground Software
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
 //
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
 // JLH  11/26/2011  Added fixes for LOAD/STORE alignment issues
 // JPM  06/06/2016  Visual Studio support
+// JPM  March/2022  Added the save state patch from PvtLewis
+//
 
 //
 // Note: Endian wrongness probably stems from the MAME origins of this emu and
@@ -37,7 +43,7 @@
 #include "m68000/m68kinterface.h"
 //#include "memory.h"
 #include "tom.h"
-
+#include "state.h"
 
 // Seems alignment in loads & stores was off...
 #define GPU_CORRECT_ALIGNMENT
@@ -1118,6 +1124,86 @@ void GPUDumpMemory(void)
 	for(int i=0; i<0xFFF; i+=4)
 		WriteLog("\t%08X: %02X %02X %02X %02X\n", 0xF03000+i, gpu_ram_8[i],
 			gpu_ram_8[i+1], gpu_ram_8[i+2], gpu_ram_8[i+3]);
+}
+
+size_t gpu_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+
+	DUMP32(gpu_pc);
+	DUMP32(gpu_acc);
+	DUMP32(gpu_remain);
+	DUMP32(gpu_hidata);
+	DUMP32(gpu_flags);
+	DUMP32(gpu_matrix_control);
+	DUMP32(gpu_pointer_to_matrix);
+	DUMP32(gpu_data_organization);
+	DUMP32(gpu_control);
+	DUMP32(gpu_div_control);
+	DUMP8(gpu_flag_z);
+	DUMP8(gpu_flag_n);
+	DUMP8(gpu_flag_c);
+	DUMP32(gpu_instruction);
+	DUMP32(gpu_opcode_first_parameter);
+	DUMP32(gpu_opcode_second_parameter);
+	DUMPARR32(gpu_opcode_use);
+	DUMP32(gpu_in_exec);
+	DUMP32(gpu_releaseTimeSlice_flag);
+
+	uint32_t whichreg = (gpu_reg == gpu_reg_bank_0 ? 0 : 1);
+	DUMP32(whichreg);
+
+	DUMPARR32(gpu_reg_bank_0);
+	DUMPARR32(gpu_reg_bank_1);
+
+	DUMPARR8(gpu_ram_8);
+
+	return total_dumped;
+}
+
+size_t gpu_load(FILE *fp)
+{
+	size_t total_loaded = 0;
+
+	LOAD32(gpu_pc);
+	LOAD32(gpu_acc);
+	LOAD32(gpu_remain);
+	LOAD32(gpu_hidata);
+	LOAD32(gpu_flags);
+	LOAD32(gpu_matrix_control);
+	LOAD32(gpu_pointer_to_matrix);
+	LOAD32(gpu_data_organization);
+	LOAD32(gpu_control);
+	LOAD32(gpu_div_control);
+	LOAD8(gpu_flag_z);
+	LOAD8(gpu_flag_n);
+	LOAD8(gpu_flag_c);
+	LOAD32(gpu_instruction);
+	LOAD32(gpu_opcode_first_parameter);
+	LOAD32(gpu_opcode_second_parameter);
+	LOADARR32(gpu_opcode_use);
+	LOAD32(gpu_in_exec);
+	LOAD32(gpu_releaseTimeSlice_flag);
+
+	uint32_t whichreg;
+	LOAD32(whichreg);
+	if (whichreg == 0)
+	{
+		gpu_reg = gpu_reg_bank_0;
+		gpu_alternate_reg = gpu_reg_bank_1;
+	}
+	else
+	{
+		gpu_alternate_reg = gpu_reg_bank_0;
+		gpu_reg = gpu_reg_bank_1;
+	}
+
+	LOADARR32(gpu_reg_bank_0);
+	LOADARR32(gpu_reg_bank_1);
+
+	LOADARR8(gpu_ram_8);
+
+	return total_loaded;
 }
 
 

@@ -3,10 +3,13 @@
 // by James Hammons
 // (C) 2009 Underground Software
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //  RG = Richard Goedeken
-
+//  PL = PvtLewis <from Atari Age>
 //
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
@@ -30,7 +33,7 @@
 //  RG   Jan./2021  Linux build fixes
 // JPM   Apr./2021  Handle number of M68K cycles used in tracing mode, added video output display in a window
 // JPM    May/2021  Check missing dll for the tests pattern
-// JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser
+// JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser, added and slightly modified the save state patch from PvtLewis
 //
 
 // FIXED:
@@ -55,8 +58,8 @@
 //#define DEBUGFOO			// Various tool debugging... but not used
 //#define DEBUGTP			// Toolpalette debugging... but not used
 
+#include "state.h"
 #include "mainwin.h"
-
 #include "SDL.h"
 #include "app.h"
 #include "about.h"
@@ -94,7 +97,6 @@
 #include "jagcdbios.h"
 #include "joystick.h"
 #include "m68000/m68kinterface.h"
-
 #include "debugger/DBGManager.h"
 #include "debugger/VideoWin.h"
 //#include "debugger/DasmWin.h"
@@ -672,6 +674,117 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	helpMenu = menuBar()->addMenu(tr("&Help"));
 	helpMenu->addAction(helpAct);
 	helpMenu->addAction(aboutAct);
+	
+#if defined(SAVESTATEPATCH_PvtLewis)
+	toolsMenu = menuBar()->addMenu(tr("&Tools"));
+	dumpAct = new QAction(QIcon(":/res/software.png"), tr("&Dump Save State..."), this);
+	dumpAct->setStatusTip(tr("Dump Save State"));
+	dumpAct->setShortcut(QKeySequence(tr("F5")));
+	dumpAct->setShortcutContext(Qt::ApplicationShortcut);
+	connect(dumpAct, SIGNAL(triggered()), this, SLOT(DumpCommand()));
+	loadAct = new QAction(QIcon(":/res/software.png"), tr("&Load Save State..."), this);
+	loadAct->setStatusTip(tr("Load Save State"));
+	loadAct->setShortcut(QKeySequence(tr("F8")));
+	loadAct->setShortcutContext(Qt::ApplicationShortcut);
+	connect(loadAct, SIGNAL(triggered()), this, SLOT(LoadCommand()));
+	saveSlot0Act = new QAction(QIcon(":/res/software.png"), tr("&Save Slot 0..."), this);
+	saveSlot0Act->setStatusTip(tr("Load Save State"));
+	saveSlot0Act->setShortcut(QKeySequence(tr("Shift+0")));
+	saveSlot0Act->setShortcutContext(Qt::ApplicationShortcut);
+	saveSlot0Act->setCheckable(true);
+	saveSlot0Act->setChecked(true);
+	connect(saveSlot0Act, SIGNAL(triggered()), this, SLOT(SaveSlot0Command()));
+	saveSlot1Act = new QAction(QIcon(":/res/software.png"), tr("&Save Slot 1..."), this);
+	saveSlot1Act->setStatusTip(tr("Load Save State"));
+	saveSlot1Act->setShortcut(QKeySequence(tr("Shift+1")));
+	saveSlot1Act->setShortcutContext(Qt::ApplicationShortcut);
+	saveSlot1Act->setCheckable(true);
+	saveSlot1Act->setChecked(false);
+	connect(saveSlot1Act, SIGNAL(triggered()), this, SLOT(SaveSlot1Command()));
+	saveSlot2Act = new QAction(QIcon(":/res/software.png"), tr("&Save Slot 2..."), this);
+	saveSlot2Act->setStatusTip(tr("Load Save State"));
+	saveSlot2Act->setShortcut(QKeySequence(tr("Shift+2")));
+	saveSlot2Act->setShortcutContext(Qt::ApplicationShortcut);
+	saveSlot2Act->setCheckable(true);
+	saveSlot2Act->setChecked(false);
+	connect(saveSlot2Act, SIGNAL(triggered()), this, SLOT(SaveSlot2Command()));
+	saveSlot3Act = new QAction(QIcon(":/res/software.png"), tr("&Save Slot 3..."), this);
+	saveSlot3Act->setStatusTip(tr("Load Save State"));
+	saveSlot3Act->setShortcut(QKeySequence(tr("Shift+3")));
+	saveSlot3Act->setShortcutContext(Qt::ApplicationShortcut);
+	saveSlot3Act->setCheckable(true);
+	saveSlot3Act->setChecked(false);
+	connect(saveSlot3Act, SIGNAL(triggered()), this, SLOT(SaveSlot3Command()));
+	saveSlot4Act = new QAction(QIcon(":/res/software.png"), tr("&Save Slot 4..."), this);
+	saveSlot4Act->setStatusTip(tr("Load Save State"));
+	saveSlot4Act->setShortcut(QKeySequence(tr("Shift+4")));
+	saveSlot4Act->setShortcutContext(Qt::ApplicationShortcut);
+	saveSlot4Act->setCheckable(true);
+	saveSlot4Act->setChecked(false);
+	connect(saveSlot4Act, SIGNAL(triggered()), this, SLOT(SaveSlot4Command()));
+	saveSlot5Act = new QAction(QIcon(":/res/software.png"), tr("&Save Slot 5..."), this);
+	saveSlot5Act->setStatusTip(tr("Load Save State"));
+	saveSlot5Act->setShortcut(QKeySequence(tr("Shift+5")));
+	saveSlot5Act->setShortcutContext(Qt::ApplicationShortcut);
+	saveSlot5Act->setCheckable(true);
+	saveSlot5Act->setChecked(false);
+	connect(saveSlot5Act, SIGNAL(triggered()), this, SLOT(SaveSlot5Command()));
+	saveSlot6Act = new QAction(QIcon(":/res/software.png"), tr("&Save Slot 6..."), this);
+	saveSlot6Act->setStatusTip(tr("Load Save State"));
+	saveSlot6Act->setShortcut(QKeySequence(tr("Shift+6")));
+	saveSlot6Act->setShortcutContext(Qt::ApplicationShortcut);
+	saveSlot6Act->setCheckable(true);
+	saveSlot6Act->setChecked(false);
+	connect(saveSlot6Act, SIGNAL(triggered()), this, SLOT(SaveSlot6Command()));
+	saveSlot7Act = new QAction(QIcon(":/res/software.png"), tr("&Save Slot 7..."), this);
+	saveSlot7Act->setStatusTip(tr("Load Save State"));
+	saveSlot7Act->setShortcut(QKeySequence(tr("Shift+7")));
+	saveSlot7Act->setShortcutContext(Qt::ApplicationShortcut);
+	saveSlot7Act->setCheckable(true);
+	saveSlot7Act->setChecked(false);
+	connect(saveSlot7Act, SIGNAL(triggered()), this, SLOT(SaveSlot7Command()));
+	saveSlot8Act = new QAction(QIcon(":/res/software.png"), tr("&Save Slot 8..."), this);
+	saveSlot8Act->setStatusTip(tr("Load Save State"));
+	saveSlot8Act->setShortcut(QKeySequence(tr("Shift+8")));
+	saveSlot8Act->setShortcutContext(Qt::ApplicationShortcut);
+	saveSlot8Act->setCheckable(true);
+	saveSlot8Act->setChecked(false);
+	connect(saveSlot8Act, SIGNAL(triggered()), this, SLOT(SaveSlot8Command()));
+	saveSlot9Act = new QAction(QIcon(":/res/software.png"), tr("&Save Slot 9..."), this);
+	saveSlot9Act->setStatusTip(tr("Load Save State"));
+	saveSlot9Act->setShortcut(QKeySequence(tr("Shift+9")));
+	saveSlot9Act->setShortcutContext(Qt::ApplicationShortcut);
+	saveSlot9Act->setCheckable(true);
+	saveSlot9Act->setChecked(false);
+	connect(saveSlot9Act, SIGNAL(triggered()), this, SLOT(SaveSlot9Command()));
+
+	toolsMenu->addAction(dumpAct);
+	toolsMenu->addAction(loadAct);
+	toolsMenu->addAction(saveSlot0Act);
+	toolsMenu->addAction(saveSlot1Act);
+	toolsMenu->addAction(saveSlot2Act);
+	toolsMenu->addAction(saveSlot3Act);
+	toolsMenu->addAction(saveSlot4Act);
+	toolsMenu->addAction(saveSlot5Act);
+	toolsMenu->addAction(saveSlot6Act);
+	toolsMenu->addAction(saveSlot7Act);
+	toolsMenu->addAction(saveSlot8Act);
+	toolsMenu->addAction(saveSlot9Act);
+
+        // Add to the main window so that they work in full screen mode
+	this->addAction(dumpAct);
+	this->addAction(loadAct);
+	this->addAction(saveSlot0Act);
+	this->addAction(saveSlot1Act);
+	this->addAction(saveSlot2Act);
+	this->addAction(saveSlot3Act);
+	this->addAction(saveSlot4Act);
+	this->addAction(saveSlot5Act);
+	this->addAction(saveSlot6Act);
+	this->addAction(saveSlot7Act);
+	this->addAction(saveSlot8Act);
+	this->addAction(saveSlot9Act);
+#endif
 
 	// Create toolbars
 	toolbar = addToolBar(tr("System"));
@@ -1465,6 +1578,216 @@ void MainWin::ShowHelpWin(void)
 	helpWin->show();
 }
 
+#if defined(SAVESTATEPATCH_PvtLewis)
+extern volatile bool dac_load_state;
+extern volatile bool dac_dump_state;
+
+#ifdef Q_OS_WIN
+#include <windows.h> // for Sleep
+#endif
+void MainWin::msSleep(int ms)
+{
+#ifdef Q_OS_WIN
+    Sleep(uint(ms));
+#else
+    struct timespec ts = { ms / 1000, (ms % 1000) * 1000 * 1000 };
+    nanosleep(&ts, NULL);
+#endif
+}
+
+void MainWin::DumpCommand(void)
+{
+  if (!vjs.DSPEnabled) {
+    // Calling ToggleRunState is not necessary, just using it for the screen flash
+    ToggleRunState();
+    DumpSaveState();
+    ToggleRunState();
+  } else {
+    dac_dump_state = true;
+    int ctr = 0;
+    while (dac_dump_state) {
+      msSleep(1);
+      ctr++;
+      if (ctr > 1000) {
+        break;
+      }
+    }
+    // Calling ToggleRunState is not necessary, just using it for the screen flash
+    ToggleRunState();
+    DumpSaveState();
+    ToggleRunState();
+  }
+}
+
+void MainWin::LoadCommandTimer(void)
+{
+  LoadSaveState();
+}
+
+void MainWin::LoadCommand(void)
+{
+  if (CanTryToLoadSaveState() == -1) {
+    return;
+  }
+
+  if (!vjs.DSPEnabled) {
+    LoadSaveState();
+  } else {
+    dac_load_state = true;
+    int ctr = 0;
+    while (dac_load_state) {
+      msSleep(1);
+      ctr++;
+      if (ctr > 1000) {
+        break;
+      }
+    }
+    LoadSaveState();
+  }
+}
+
+extern int save_slot;
+void MainWin::SaveSlot0Command(void)
+{
+  saveSlot0Act->setChecked(true);
+  saveSlot1Act->setChecked(false);
+  saveSlot2Act->setChecked(false);
+  saveSlot3Act->setChecked(false);
+  saveSlot4Act->setChecked(false);
+  saveSlot5Act->setChecked(false);
+  saveSlot6Act->setChecked(false);
+  saveSlot7Act->setChecked(false);
+  saveSlot8Act->setChecked(false);
+  saveSlot9Act->setChecked(false);
+  save_slot = 0;
+}
+void MainWin::SaveSlot1Command(void)
+{
+  saveSlot0Act->setChecked(false);
+  saveSlot1Act->setChecked(true);
+  saveSlot2Act->setChecked(false);
+  saveSlot3Act->setChecked(false);
+  saveSlot4Act->setChecked(false);
+  saveSlot5Act->setChecked(false);
+  saveSlot6Act->setChecked(false);
+  saveSlot7Act->setChecked(false);
+  saveSlot8Act->setChecked(false);
+  saveSlot9Act->setChecked(false);
+  save_slot = 1;
+}
+void MainWin::SaveSlot2Command(void)
+{
+  saveSlot0Act->setChecked(false);
+  saveSlot1Act->setChecked(false);
+  saveSlot2Act->setChecked(true);
+  saveSlot3Act->setChecked(false);
+  saveSlot4Act->setChecked(false);
+  saveSlot5Act->setChecked(false);
+  saveSlot6Act->setChecked(false);
+  saveSlot7Act->setChecked(false);
+  saveSlot8Act->setChecked(false);
+  saveSlot9Act->setChecked(false);
+  save_slot = 2;
+}
+void MainWin::SaveSlot3Command(void)
+{
+  saveSlot0Act->setChecked(false);
+  saveSlot1Act->setChecked(false);
+  saveSlot2Act->setChecked(false);
+  saveSlot3Act->setChecked(true);
+  saveSlot4Act->setChecked(false);
+  saveSlot5Act->setChecked(false);
+  saveSlot6Act->setChecked(false);
+  saveSlot7Act->setChecked(false);
+  saveSlot8Act->setChecked(false);
+  saveSlot9Act->setChecked(false);
+  save_slot = 3;
+}
+void MainWin::SaveSlot4Command(void)
+{
+  saveSlot0Act->setChecked(false);
+  saveSlot1Act->setChecked(false);
+  saveSlot2Act->setChecked(false);
+  saveSlot3Act->setChecked(false);
+  saveSlot4Act->setChecked(true);
+  saveSlot5Act->setChecked(false);
+  saveSlot6Act->setChecked(false);
+  saveSlot7Act->setChecked(false);
+  saveSlot8Act->setChecked(false);
+  saveSlot9Act->setChecked(false);
+  save_slot = 4;
+}
+void MainWin::SaveSlot5Command(void)
+{
+  saveSlot0Act->setChecked(false);
+  saveSlot1Act->setChecked(false);
+  saveSlot2Act->setChecked(false);
+  saveSlot3Act->setChecked(false);
+  saveSlot4Act->setChecked(false);
+  saveSlot5Act->setChecked(true);
+  saveSlot6Act->setChecked(false);
+  saveSlot7Act->setChecked(false);
+  saveSlot8Act->setChecked(false);
+  saveSlot9Act->setChecked(false);
+  save_slot = 5;
+}
+void MainWin::SaveSlot6Command(void)
+{
+  saveSlot0Act->setChecked(false);
+  saveSlot1Act->setChecked(false);
+  saveSlot2Act->setChecked(false);
+  saveSlot3Act->setChecked(false);
+  saveSlot4Act->setChecked(false);
+  saveSlot5Act->setChecked(false);
+  saveSlot6Act->setChecked(true);
+  saveSlot7Act->setChecked(false);
+  saveSlot8Act->setChecked(false);
+  saveSlot9Act->setChecked(false);
+  save_slot = 6;
+}
+void MainWin::SaveSlot7Command(void)
+{
+  saveSlot0Act->setChecked(false);
+  saveSlot1Act->setChecked(false);
+  saveSlot2Act->setChecked(false);
+  saveSlot3Act->setChecked(false);
+  saveSlot4Act->setChecked(false);
+  saveSlot5Act->setChecked(false);
+  saveSlot6Act->setChecked(false);
+  saveSlot7Act->setChecked(true);
+  saveSlot8Act->setChecked(false);
+  saveSlot9Act->setChecked(false);
+  save_slot = 7;
+}
+void MainWin::SaveSlot8Command(void)
+{
+  saveSlot0Act->setChecked(false);
+  saveSlot1Act->setChecked(false);
+  saveSlot2Act->setChecked(false);
+  saveSlot3Act->setChecked(false);
+  saveSlot4Act->setChecked(false);
+  saveSlot5Act->setChecked(false);
+  saveSlot6Act->setChecked(false);
+  saveSlot7Act->setChecked(false);
+  saveSlot8Act->setChecked(true);
+  saveSlot9Act->setChecked(false);
+  save_slot = 8;
+}
+void MainWin::SaveSlot9Command(void)
+{
+  saveSlot0Act->setChecked(false);
+  saveSlot1Act->setChecked(false);
+  saveSlot2Act->setChecked(false);
+  saveSlot3Act->setChecked(false);
+  saveSlot4Act->setChecked(false);
+  saveSlot5Act->setChecked(false);
+  saveSlot6Act->setChecked(false);
+  saveSlot7Act->setChecked(false);
+  saveSlot8Act->setChecked(false);
+  saveSlot9Act->setChecked(true);
+  save_slot = 9;
+}
+#endif
 
 void MainWin::InsertCart(void)
 {
@@ -1968,35 +2291,43 @@ void MainWin::ReadSettings(void)
 	QSettings settings("Underground Software", "Virtual Jaguar");
 
 	//zoomLevel = settings.value("zoom", 2).toInt();
-	allowUnknownSoftware = settings.value("showUnknownSoftware", false).toBool();
 	lastEditedProfile = settings.value("lastEditedProfile", 0).toInt();
 
 	vjs.useJoystick = settings.value("useJoystick", false).toBool();
 	vjs.joyport = settings.value("joyport", 0).toInt();
 	vjs.hardwareTypeNTSC = settings.value("hardwareTypeNTSC", true).toBool();
 	vjs.frameSkip = settings.value("frameSkip", 0).toInt();
-	vjs.useJaguarBIOS = settings.value("useJaguarBIOS", false).toBool();
-	vjs.useRetailBIOS = settings.value("useRetailBIOS", false).toBool();
-	vjs.useDevBIOS = settings.value("useDevBIOS", false).toBool();
-	vjs.GPUEnabled = settings.value("GPUEnabled", true).toBool();
-	vjs.DSPEnabled = settings.value("DSPEnabled", true).toBool();
 	vjs.audioEnabled = settings.value("audioEnabled", true).toBool();
 	vjs.usePipelinedDSP = settings.value("usePipelinedDSP", false).toBool();
-	vjs.fullscreen = settings.value("fullscreen", false).toBool();
 	vjs.useOpenGL = settings.value("useOpenGL", true).toBool();
 	vjs.glFilter = settings.value("glFilterType", 1).toInt();
 	vjs.renderType = settings.value("renderType", 0).toInt();
+
+	// read the BIOS & console model settings
 	vjs.biosType = settings.value("biosType", BT_M_SERIES).toInt();
 	vjs.jaguarModel = settings.value("jaguarModel", JAG_M_SERIES).toInt();
-	vjs.useFastBlitter = settings.value("useFastBlitter", false).toBool();
+	vjs.useJaguarBIOS = settings.value("useJaguarBIOS", false).toBool();
+	vjs.useRetailBIOS = settings.value("useRetailBIOS", false).toBool();
+	vjs.useDevBIOS = settings.value("useDevBIOS", false).toBool();
+
+	// read the general settings
+	vjs.compressSaveStates = settings.value("compressSaveStates", true).toBool();
+	strcpy(vjs.SaveStatePath, settings.value("SaveStates", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/savestates/")).toString().toUtf8().data());
 	strcpy(vjs.EEPROMPath, settings.value("EEPROMs", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/eeproms/")).toString().toUtf8().data());
 	strcpy(vjs.ROMPath, settings.value("ROMs", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/software/")).toString().toUtf8().data());
 	strcpy(vjs.screenshotPath, settings.value("Screenshots", QStandardPaths::writableLocation(QStandardPaths::DataLocation).append("/screenshots/")).toString().toUtf8().data());
+	vjs.fullscreen = settings.value("fullscreen", false).toBool();
+	vjs.GPUEnabled = settings.value("GPUEnabled", true).toBool();
+	vjs.DSPEnabled = settings.value("DSPEnabled", true).toBool();
+	allowUnknownSoftware = settings.value("showUnknownSoftware", false).toBool();
+
+	// read the exceptions settings
 	vjs.allowWritesToROM = settings.value("writeROM", true).toBool();
 	vjs.allowM68KExceptionCatch = settings.value("M68KExceptionCatch", false).toBool();
 	vjs.allowWritesToUnknownLocation = settings.value("WriteUnknownLocation", true).toBool();
+	vjs.useFastBlitter = settings.value("useFastBlitter", false).toBool();
 
-	// Read settings from the Debugger mode
+	// read settings from the Debugger mode
 	settings.beginGroup("debugger");
 	strcpy(vjs.debuggerROMPath, settings.value("DefaultROM", "").toString().toUtf8().data());
 	strcpy(vjs.sourcefilesearchPaths, settings.value("SourceFileSearchPaths", "").toString().toUtf8().data());
@@ -2009,14 +2340,14 @@ void MainWin::ReadSettings(void)
 	vjs.cygdriveDirRemoval = settings.value("cygdriveDirRemoval", false).toBool();
 	settings.endGroup();
 
-	// Read settings from the Alpine mode
+	// read settings from the Alpine mode
 	settings.beginGroup("alpine");
 	strcpy(vjs.alpineROMPath, settings.value("DefaultROM", "").toString().toUtf8().data());
 	strcpy(vjs.absROMPath, settings.value("DefaultABS", "").toString().toUtf8().data());
 	vjs.refresh = settings.value("refresh", 60).toUInt();
 	settings.endGroup();
 
-	// Read settings from the Keybindings
+	// read settings from the Keybindings
 	settings.beginGroup("keybindings");
 	for (i = 0; i < KB_END; i++)
 	{
@@ -2024,8 +2355,10 @@ void MainWin::ReadSettings(void)
 	}
 	settings.endGroup();
 
+#if 0
 	// Write important settings to the log file
 	WriteLog("MainWin: Paths\n");
+	WriteLog("SaveStatePath = \"%s\"\n", vjs.SaveStatePath);
 	WriteLog("           EEPROMPath = \"%s\"\n", vjs.EEPROMPath);
 	WriteLog("              ROMPath = \"%s\"\n", vjs.ROMPath);
 	WriteLog("        AlpineROMPath = \"%s\"\n", vjs.alpineROMPath);
@@ -2035,6 +2368,7 @@ void MainWin::ReadSettings(void)
 	WriteLog("SourceFileSearchPaths = \"%s\"\n", vjs.sourcefilesearchPaths);
 	WriteLog("MainWin: Misc.\n");
 	WriteLog("   Pipelined DSP = %s\n", (vjs.usePipelinedDSP ? "ON" : "off"));
+#endif
 
 #if 0
 	// Keybindings in order of U, D, L, R, C, B, A, Op, Pa, 0-9, #, *
@@ -2298,44 +2632,52 @@ void MainWin::WriteSettings(void)
 	//settings.setValue("cartLoadPos", filePickWin->pos());
 
 	//settings.setValue("zoom", zoomLevel);
-	settings.setValue("showUnknownSoftware", allowUnknownSoftware);
 	settings.setValue("lastEditedProfile", lastEditedProfile);
 
 	settings.setValue("useJoystick", vjs.useJoystick);
 	settings.setValue("joyport", vjs.joyport);
 	settings.setValue("hardwareTypeNTSC", vjs.hardwareTypeNTSC);
 	settings.setValue("frameSkip", vjs.frameSkip);
-	settings.setValue("useJaguarBIOS", vjs.useJaguarBIOS);
-	settings.setValue("useRetailBIOS", vjs.useRetailBIOS);
-	settings.setValue("useDevBIOS", vjs.useDevBIOS);
-	settings.setValue("GPUEnabled", vjs.GPUEnabled);
-	settings.setValue("DSPEnabled", vjs.DSPEnabled);
 	settings.setValue("audioEnabled", vjs.audioEnabled);
 	settings.setValue("usePipelinedDSP", vjs.usePipelinedDSP);
-	settings.setValue("fullscreen", vjs.fullscreen);
 	settings.setValue("useOpenGL", vjs.useOpenGL);
 	settings.setValue("glFilterType", vjs.glFilter);
 	settings.setValue("renderType", vjs.renderType);
-	settings.setValue("jaguarModel", vjs.jaguarModel);
-	settings.setValue("biosType", vjs.biosType);
-	settings.setValue("useFastBlitter", vjs.useFastBlitter);
 	//settings.setValue("JagBootROM", vjs.jagBootPath);
 	//settings.setValue("CDBootROM", vjs.CDBootPath);
+
+	// write the BIOS & console model settings
+	settings.setValue("jaguarModel", vjs.jaguarModel);
+	settings.setValue("biosType", vjs.biosType);
+	settings.setValue("useJaguarBIOS", vjs.useJaguarBIOS);
+	settings.setValue("useRetailBIOS", vjs.useRetailBIOS);
+	settings.setValue("useDevBIOS", vjs.useDevBIOS);
+
+	// write the general settings
+	settings.setValue("SaveStates", vjs.SaveStatePath);
+	settings.setValue("compressSaveStates", vjs.compressSaveStates);
 	settings.setValue("EEPROMs", vjs.EEPROMPath);
 	settings.setValue("ROMs", vjs.ROMPath);
 	settings.setValue("Screenshots", vjs.screenshotPath);
+	settings.setValue("GPUEnabled", vjs.GPUEnabled);
+	settings.setValue("DSPEnabled", vjs.DSPEnabled);
+	settings.setValue("fullscreen", vjs.fullscreen);
+	settings.setValue("showUnknownSoftware", allowUnknownSoftware);
+	settings.setValue("useFastBlitter", vjs.useFastBlitter);
+
+	// write the exceptions settings 
 	settings.setValue("writeROM", vjs.allowWritesToROM);
 	settings.setValue("M68KExceptionCatch", vjs.allowM68KExceptionCatch);
 	settings.setValue("WriteUnknownLocation", vjs.allowWritesToUnknownLocation);
 
-	// Write settings from the Alpine mode
+	// write settings from the Alpine mode
 	settings.beginGroup("alpine");
 	settings.setValue("refresh", vjs.refresh);
 	settings.setValue("DefaultROM", vjs.alpineROMPath);
 	settings.setValue("DefaultABS", vjs.absROMPath);
 	settings.endGroup();
 
-	// Write settings from the Debugger mode
+	// write settings from the Debugger mode
 	settings.beginGroup("debugger");
 	settings.setValue("DisplayHWLabels", vjs.displayHWlabels);
 	settings.setValue("NbrDisasmLines", (qulonglong) vjs.nbrdisasmlines);
@@ -2348,7 +2690,7 @@ void MainWin::WriteSettings(void)
 	settings.setValue("cygdriveDirRemoval", vjs.cygdriveDirRemoval);
 	settings.endGroup();
 
-	// Write settings from the Keybindings
+	// write settings from the Keybindings
 	settings.beginGroup("keybindings");
 	for (i = 0; i < KB_END; i++)
 	{

@@ -6,12 +6,18 @@
 // Rewritten by James Hammons
 // (C) 2010 Underground Software
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
 //
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
 // JLH  04/30/2012  Changed SDL audio handler to run JERRY
+// JPM  March/2022  Added the save state patch from PvtLewis
 //
 
 // Need to set up defaults that the BIOS sets for the SSI here in DACInit()... !!! FIX !!!
@@ -52,7 +58,7 @@
 #include "m68000/m68kinterface.h"
 //#include "memory.h"
 #include "settings.h"
-
+#include "state.h"
 
 //#define DEBUG_DAC
 
@@ -84,6 +90,68 @@ static bool SDLSoundInitialized;
 
 void SDLSoundCallback(void * userdata, Uint8 * buffer, int length);
 void DSPSampleCallback(void);
+
+static Uint8 * sampleBuffer = NULL;
+static int bufferIndex = 0;
+static int numberOfSamples = 0;
+static bool bufferDone = false;
+
+
+size_t dac_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+
+#if 0
+	DUMPINT(bufferIndex);
+	DUMPBOOL(bufferDone);
+	DUMPINT(numberOfSamples);
+	int length = numberOfSamples * 2;
+	if (fwrite(sampleBuffer, 1, length, fp) != length)
+	{
+		WriteLog("DUMP sampleBuffer error\n");
+		return -1;
+	}
+	total_dumped += length;
+#endif
+
+	return total_dumped;
+}
+
+size_t dac_load(FILE *fp)
+{
+size_t total_loaded = 0;
+
+#if 0 // we shouldn't be touching the current sample buffer
+	LOADINT(bufferIndex);
+	LOADBOOL(bufferDone);
+	LOADINT(numberOfSamples);
+	//DACReset();
+	char tmpbuf[4096*4];
+	int length = numberOfSamples * 2;
+	if (length > sizeof(tmpbuf))
+	{
+		length = sizeof(tmpbuf);
+	}
+	if (fread(tmpbuf, 1, length, fp) != length)
+	{
+		WriteLog("LOAD sampleBuffer error\n");
+		return -1;
+	}
+	total_loaded += length;
+	if (bufferIndex == numberOfSamples)
+	{
+		bufferDone = true;
+	}
+	if (!bufferDone && sampleBuffer != NULL)
+	{
+		memcpy(sampleBuffer, tmpbuf, length);
+	}
+
+	WriteLog("dac_load index: %d   done: %d   numberOfSamples: %d   length: %d\n", bufferIndex, bufferDone, numberOfSamples, length);
+#endif
+
+	return total_loaded;
+}
 
 
 //
@@ -174,12 +242,14 @@ void DACDone(void)
 // Note: The samples are packed in the buffer in 16 bit left/16 bit right pairs.
 //       Also, length is the length of the buffer in BYTES
 //
-static Uint8 * sampleBuffer;
-static int bufferIndex = 0;
-static int numberOfSamples = 0;
-static bool bufferDone = false;
+
+volatile bool dac_load_state = false;
+volatile bool dac_dump_state = false;
+
 void SDLSoundCallback(void * userdata, Uint8 * buffer, int length)
 {
+	WriteLog("SDLSoundCallback called: length: %d  load: %d  dump: %d\n", length, dac_load_state, dac_dump_state);
+
 	// 1st, check to see if the DSP is running. If not, fill the buffer with L/RXTD and exit.
 
 	if (!DSPIsRunning())
@@ -227,22 +297,44 @@ void SDLSoundCallback(void * userdata, Uint8 * buffer, int length)
 		HandleNextEvent(EVENT_JERRY);
 	}
 	while (!bufferDone);
+
+	if (dac_load_state)
+	{
+		dac_load_state = false;
+	}
+	else
+	{
+		if (dac_dump_state)
+		{
+			dac_dump_state = false;
+		}
+	}
 }
 
 
 void DSPSampleCallback(void)
 {
-	((uint16_t *)sampleBuffer)[bufferIndex + 0] = ltxd;
-	((uint16_t *)sampleBuffer)[bufferIndex + 1] = rtxd;
-	bufferIndex += 2;
-
-	if (bufferIndex == numberOfSamples)
+	if (bufferIndex >= numberOfSamples)
 	{
 		bufferDone = true;
-		return;
+		//return;
 	}
+	else
+	{
+		((uint16_t *)sampleBuffer)[bufferIndex + 0] = ltxd;
+		((uint16_t *)sampleBuffer)[bufferIndex + 1] = rtxd;
+		bufferIndex += 2;
 
-	SetCallbackTime(DSPSampleCallback, 1000000.0 / (double)DAC_AUDIO_RATE, EVENT_JERRY);
+		if (bufferIndex == numberOfSamples)
+		{
+			bufferDone = true;
+			//return;
+		}
+		else
+		{
+			SetCallbackTime(DSPSampleCallback, 1000000.0 / (double)DAC_AUDIO_RATE, EVENT_JERRY);
+		}
+	}
 }
 
 
@@ -334,4 +426,3 @@ uint16_t DACReadWord(uint32_t offset, uint32_t who/*= UNKNOWN*/)
 
 	return 0xFFFF;	// May need SSTAT as well... (but may be a Jaguar II only feature)
 }
-

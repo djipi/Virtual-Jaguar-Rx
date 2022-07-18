@@ -5,11 +5,17 @@
 // GCC/SDL port by Niels Wagenaar (Linux/WIN32) and Carwin Jones (BeOS)
 // Cleanups/rewrites/fixes by James Hammons
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
 //
 // WHO  WHEN        WHAT
 // ---  ----------  -----------------------------------------------------------
 // JLH  11/25/2009  Major rewrite of memory subsystem and handlers
+// JPM  March/2022  Added the save state patch from PvtLewis
 //
 
 // ------------------------------------------------------------
@@ -169,6 +175,7 @@
 #include "tom.h"
 //#include "memory.h"
 #include "wavetable.h"
+#include "state.h"
 
 //Note that 44100 Hz requires samples every 22.675737 usec.
 //#define JERRY_DEBUG
@@ -219,6 +226,46 @@ void JERRYResetI2S(void);
 void JERRYPIT1Callback(void);
 void JERRYPIT2Callback(void);
 void JERRYI2SCallback(void);
+
+size_t jerry_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+
+	DUMP32(JERRYPIT1Prescaler);
+	DUMP32(JERRYPIT1Divider);
+	DUMP32(JERRYPIT2Prescaler);
+	DUMP32(JERRYPIT2Divider);
+	DUMPS32(jerry_timer_1_counter);
+	DUMPS32(jerry_timer_2_counter);
+	DUMPS32(JERRYI2SInterruptTimer);
+	DUMP32(jerryI2SCycles);
+	DUMP32(jerryIntPending);
+	DUMP16(jerryInterruptMask);
+	DUMP16(jerryPendingInterrupt);
+	DUMPARR8(jerry_ram_8);
+
+	return total_dumped;
+}
+
+size_t jerry_load(FILE *fp)
+{
+	size_t total_loaded = 0;
+  
+	LOAD32(JERRYPIT1Prescaler);
+	LOAD32(JERRYPIT1Divider);
+	LOAD32(JERRYPIT2Prescaler);
+	LOAD32(JERRYPIT2Divider);
+	LOADS32(jerry_timer_1_counter);
+	LOADS32(jerry_timer_2_counter);
+	LOADS32(JERRYI2SInterruptTimer);
+	LOAD32(jerryI2SCycles);
+	LOAD32(jerryIntPending);
+	LOAD16(jerryInterruptMask);
+	LOAD16(jerryPendingInterrupt);
+	LOADARR8(jerry_ram_8);
+
+	return total_loaded;
+}
 
 
 void JERRYResetI2S(void)

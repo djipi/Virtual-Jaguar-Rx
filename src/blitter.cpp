@@ -4,13 +4,18 @@
 // by James Hammons
 // (C) 2010 Underground Software
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
 //
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
 // JPM  06/06/2016  Visual Studio support
+// JPM  March/2022  Added the save state patch from PvtLewis
 //
 
 //
@@ -31,6 +36,7 @@
 #include "log.h"
 //#include "memory.h"
 #include "settings.h"
+#include "state.h"
 
 // Various conditional compilation goodies...
 
@@ -61,6 +67,26 @@ bool logBlit = false;
 // Blitter register RAM (most of it is hidden from the user)
 
 uint8_t blitter_ram[0x100];
+
+
+size_t blitter_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+
+	DUMPARR8(blitter_ram);
+
+	return total_dumped;
+}
+
+size_t blitter_load(FILE *fp)
+{
+	size_t total_loaded = 0;
+  
+	LOADARR8(blitter_ram);
+
+	return total_loaded;
+}
+
 
 // Other crapola
 

@@ -6,14 +6,18 @@
 // Extensive cleanups/fixes/rewrites by James Hammons
 // (C) 2010 Underground Software
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
 //
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
 // JPM  06/06/2016  Visual Studio support
-// JPM  March/2022  Fix the Object list at $0
+// JPM  March/2022  Fix the Object list at $0, added the save state patch from PvtLewis
 //
 
 #include "op.h"
@@ -26,6 +30,7 @@
 #include "m68000/m68kinterface.h"
 #include "memory.h"
 #include "tom.h"
+#include "state.h"
 
 //#define OP_DEBUG
 //#define OP_DEBUG_BMP
@@ -149,6 +154,32 @@ static uint32_t object[8192];
 static uint32_t numberOfObjects;
 //static uint32_t objectLink[8192];
 //static uint32_t numberOfLinks;
+
+
+size_t op_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+
+	DUMPARR32(object);
+	DUMP32(numberOfObjects);
+	DUMP8(objectp_running);
+	DUMP32(op_pointer);
+
+	return total_dumped;
+}
+
+size_t op_load(FILE *fp)
+{
+	size_t total_loaded = 0;
+
+	LOADARR32(object);
+	LOAD32(numberOfObjects);
+	LOAD8(objectp_running);
+	LOAD32(op_pointer);
+
+	return total_loaded;
+}
+
 
 
 void OPDone(void)

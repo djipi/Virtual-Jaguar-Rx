@@ -26,6 +26,7 @@
 #define NEWMODELSBIOSHANDLER				// New Jaguar models and bios usage handler
 
 
+#include "state.h"
 #include "jaguar.h"
 //#include <QApplication>
 #include <QtWidgets/QMessageBox>
@@ -2355,6 +2356,10 @@ void JaguarInit(void)
 	// For randomizing RAM
 	srand((unsigned int)time(NULL));
 
+#if defined(SAVESTATEPATCH_PvtLewis)
+	// zero the entire memory space for a better compression ratio
+	//memset(jagMemSpace, 0x00, 0xF20000);
+#endif
 	// Contents of local RAM are quasi-stable; we simulate this by randomizing RAM contents
 	for(uint32_t i=0; i<vjs.DRAM_size; i+=4)
 		*((uint32_t *)(&jaguarMainRAM[i])) = rand();
