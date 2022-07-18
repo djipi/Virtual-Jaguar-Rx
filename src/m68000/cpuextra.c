@@ -8,6 +8,7 @@
 
 #include "cpuextra.h"
 #include "cpudefs.h"
+#include "m68kinterface.h"
 #include "inlines.h"
 
 
@@ -149,7 +150,7 @@ unsigned long CPUFUNC(op_4e72_5)(uint32_t opcode) /* STOP */
 void WriteLog(const char * text, ...);
 void Exception(int nr, uint32_t oldpc, int ExceptionSource)
 {
-	uint32_t currpc = m68k_getpc(), newpc;
+	uint32_t currpc = m68k_getpc();		// , newpc;
 
 // Need to figure out how to report this stuff without using printf on stdout :-/
 #if 0

@@ -13,6 +13,7 @@
 #include <string.h>
 #include "cpudefs.h"
 #include "cpuextra.h"
+#include "m68kinterface.h"
 #include "inlines.h"
 #include "readcpu.h"
 

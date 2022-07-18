@@ -19,6 +19,7 @@
  *
  * Adaptation to Hatari and better cpu timings by Thomas Huth
  * Adaptation to Virtual Jaguar by James Hammons
+ * Compilation warning fix in the generated files by Jean-Paul Mari
  *
  * This file is distributed under the GNU Public License, version 3 or at
  * your option any later version. Read the file GPLv3 for details.
@@ -1578,7 +1579,7 @@ static void gen_opcode (unsigned long int opcode)
 	fill_prefetch_0 ();
 	printf ("\treturn 10;\n");
 	printf ("didnt_jump:;\n");
-	need_endlabel = 1;
+	//need_endlabel = 1;
 	insn_n_cycles = (curi->size == sz_byte) ? 8 : 12;
 	break;
     case i_LEA:
@@ -1639,7 +1640,7 @@ static void gen_opcode (unsigned long int opcode)
         printf ("\t\t}\n");
 	printf ("\t}\n");
 	insn_n_cycles = 12;
-	need_endlabel = 1;
+	//need_endlabel = 1;
 	break;
     case i_Scc:
 	genamode (curi->smode, "srcreg", curi->size, "src", 2, 0);
@@ -2528,6 +2529,7 @@ static void generate_includes(FILE * f)
 //JLH:no	fprintf(f, "#include \"newcpu.h\"\n");
 	fprintf(f, "#include \"cpudefs.h\"\n");
 	fprintf(f, "#include \"cpuextra.h\"\n");
+	fprintf(f, "#include \"m68kinterface.h\"\n");
 	fprintf(f, "#include \"inlines.h\"\n");
 	fprintf(f, "#include \"cputbl.h\"\n");
 	fprintf(f, "#define CPUFUNC(x) x##_ff\n"
