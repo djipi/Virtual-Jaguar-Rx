@@ -86,7 +86,7 @@ void MemoryBrowserWindow::RefreshContents(void)
 			// second step to append 16 bytes (hexdecimal) vale in the text line
 			for (uint32_t j = 0; j < 16; j++)
 			{
-				sprintf(buf, "%02X ", memzone[memBase - memmin + i + j]);
+				sprintf(buf, "%02X%c", memzone[memBase - memmin + i + j], ((j & 3) == 3) ? ' ' : 0);
 				strcat(string, buf);
 			}
 
