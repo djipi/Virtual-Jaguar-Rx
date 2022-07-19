@@ -84,6 +84,7 @@ int main(int argc, char * argv[])
 	vjs.hardwareTypeAlpine = false;
 	vjs.softTypeDebugger = false;
 	vjs.DRAM_size = 0x200000;
+	vjs.full_raz = false;
 	// This is stuff we pass into the mainWindow...
 //	noUntunedTankPlease = false;
 
@@ -206,6 +207,7 @@ bool ParseCommandLine(int argc, char * argv[])
 				"   --no-blur         Disable GL bilinear filtering\n"
 				"   --log         -l  Create and use log file\n"
 				"   --no-log          Do not use log file (default)\n"
+				"   --full-raz        Fill the entire system space with 0\n"
 				"   --help        -h  Show this message\n"
 				"                 -?  Show this message\n"
 				"   --es-all          Erase all settings\n"
@@ -287,6 +289,13 @@ bool ParseCommandLine(int argc, char * argv[])
 		{
 			printf("DRAM size set at 8 MBytes.\n");
 			vjs.DRAM_size = 0x800000;
+		}
+
+		// 
+		if (strcmp(argv[i], "--full-raz") == 0)
+		{
+			printf("Set to 0 the entire system space.\n");
+			vjs.full_raz = true;
 		}
 
 		// Check for filename

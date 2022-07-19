@@ -92,12 +92,13 @@ struct VJSettings
 	bool disasmopcodes;
 	bool displayHWlabels;
 	bool useFastBlitter;
-	bool compressSaveStates;
+	bool compressSaveStates;									// Save States compression
 	bool displayFullSourceFilename;
 	bool ELFSectionsCheck;
 	bool cygdriveDirRemoval;
 	size_t nbrmemory1browserwindow;								// Number of memory browser windows
-	size_t DRAM_size;											// DRAM size
+	size_t DRAM_size;											// DRAM size (2MB or 8MB)
+	bool full_raz;												// Reset to 0 of the entire system at start of the emulator
 
 	// Keybindings in order of U, D, L, R, C, B, A, Op, Pa, 0-9, #, *
 	uint32_t p1KeyBindings[21];

@@ -6,6 +6,7 @@ WiP 5b (TBA)
 3) Merged convience fixes #64 from 42Bastian
 -- start of RISC disassembly moved to F03000, GPU memory browser in longs, and fixed object list display
 4) Fix parameter's address pointer and update icons usage for the Local variables window
+5) Added a command line option to fill the entire system space with 0
 
 pre-Release 5a hotfix (30th March 2022)
 ---------------------------------------
