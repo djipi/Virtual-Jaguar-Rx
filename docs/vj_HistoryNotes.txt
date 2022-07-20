@@ -1,12 +1,15 @@
 WiP 5b (TBA)
 ------------
+Git commit: 
+-
 0) Fix compilation error with gcc
 1) Added the save state patch from PvtLewis (from Atari Age's forum)
-2) Compilation warning fixes for the M68000 project
+2) Compilation warning fixes for the M68K project
 3) Merged convience fixes #64 from 42Bastian
--- start of RISC disassembly moved to F03000, GPU memory browser in longs, and fixed object list display
+-- Start of RISC disassembly moved to F03000, GPU memory browser in longs, and fixed object list display
 4) Fix parameter's address pointer and update icons usage for the Local variables window
 5) Added a command line option to fill the entire system space with 0
+6) M68K disassembly display the Bcc's logic result only when the line match with current PC
 
 pre-Release 5a hotfix (30th March 2022)
 ---------------------------------------
