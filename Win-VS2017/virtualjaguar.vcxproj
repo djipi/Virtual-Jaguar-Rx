@@ -129,6 +129,7 @@
       <SDLCheck>false</SDLCheck>
       <SupportJustMyCode>true</SupportJustMyCode>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <OmitDefaultLibName>false</OmitDefaultLibName>
     </ClCompile>
     <Link>
       <AdditionalDependencies>Qt5PlatformCompositorSupportd.lib;qtmaind.lib;Qt5OpenGLd.lib;shell32.lib;zlib-1.2.11_vs2017_x64d.lib;SDL-1.2.15_vs2017_x64d.lib;OpenGL32.lib;gdi32.lib;user32.lib;legacy_stdio_definitions.lib;libelf-0.8.13_vs2017_x64d.lib;m68000d.lib;jaguarcored.lib;libdwarf_x64d.lib;Ws2_32.lib;imm32.lib;winmm.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opengl32.lib;glu32.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -932,6 +933,14 @@
     <None Include="..\docs\TODO" />
     <None Include="..\docs\virtualjaguar.1" />
     <None Include="..\docs\WHATSNEW" />
+    <None Include="..\LICENSE">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\README.md">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="..\res\alpine-file.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

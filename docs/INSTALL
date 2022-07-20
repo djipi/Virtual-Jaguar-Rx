@@ -6,22 +6,22 @@ Virtual Jaguar v2.1.3 Rx Qt release INSTALL
 REQUIREMENTS:
 -------------
 
-The minimum requirements for compiling Virtual Jaguar from source are:
+The minimum requirements for compiling Virtual Jaguar Rx from source are:
 
  o  GCC v4.4.x or higher
  o  SDL v1.2.15
  o  zlib v1.2.8 or higher
  o  libelf 0.8.13
- o  libdwarf 1.41
+ o  libdwarf 20210528
  o  libcdio v0.90 or higher (optional, for Jaguar CD support)
  o  OpenGL libraries
  o  Qt 5.5.1 or higher
  o  Visual Studio 2017 (if any of interest)
- o  supported OS (WIN64 through msys2/MinGW64, Windows 64 bits); other
+ o  supported OS (WIN64 through msys2/MinGW64, Windows 64 bits, Linux); other
     OSs may work too but you may need to change some items in the Makefile or adapt the Visual Studio project.
  o  cygwin64 support is done but no test has been completed
 
-Previously supported OS (BeOS, Linux, FreeBSD and WIN32 through mingw, MacOS);
+Previously supported OS (BeOS, FreeBSD and WIN32 through mingw, MacOS);
 other OSs may work to but you may need to change some items in the Makefile.
 
 
@@ -29,7 +29,7 @@ COMPILING:
 ----------
 
 Assuming that you meet the minimum software requirements, you can compile
-Virtual Jaguar by issuing the following command in the directory where you
+the emulator by issuing the following command in the directory where you
 decompressed the source:
 
 make
@@ -41,7 +41,7 @@ smaller binary.
 That's it! You can now start the emulator with ./virtualjaguar. See the built
 in help (Help|Contents) for more info.
 
-For even more info, go to http://icculus.org/virtualjaguar.
+For additional info, go to https://github.com/djipi/Virtual-Jaguar-Rx/wiki.
 
 
 NOTES FOR COMPILING UNDER MAC OSX:
@@ -69,7 +69,7 @@ sudo make install
 
 Be forewarned that it will use around 20 GB of disk space to build, and another
 20 GB for the install! Once libsdl and Qt have been made and installed, you can
-now go into the folder where the Virtual Jaguar source is and do:
+now go into the folder where the Virtual Jaguar Rx source is and do:
 
 make
 

@@ -1,4 +1,4 @@
-.TH virtualjaguar 1 2021-05-24 Virtualjaguar Rx
+.TH virtualjaguar 1 2022-07-19 Virtualjaguar Rx
 .SH NAME
 virtualjaguar \- An Atari Jaguar emulator
 
@@ -19,16 +19,19 @@ Name of file to load
 Run in Alpine emulation mode
 .TP
 .B \-b, \-\-bios
-Boot using Jaguar BIOS
+Boot using Atari Jaguar BIOS
 .TP
 .B \-\-no\-bios
-Do not use Jaguar BIOS
+Do not use Atari Jaguar BIOS
 .TP
 .B \-D, \-\-debugger
 Run in Debugger emulation mode
 .TP
 .B \-\-dram-max
 Set the main ram to 8MB
+.TP
+.B \-\-full-raz
+Start the entire system space with 0
 .TP
 .B \-g, \-\-gpu
 Enable GPU emulation
@@ -182,6 +185,9 @@ Virtualjaguar log file. Only written if the log option (\-l or
 \-\-log) is given. If the file cannot be opened, the log it sent to
 standard output instead. The log file is overwritten on startup. Note
 that the file is written to the current directory.
+.PP
+.B ${XDG_DATA_HOME}/virtualjaguar/savestates/ (typically ~/.local/share/data/virtualjaguar/savestates/)
+Save States will be save in this directory.
 .PP
 .B ${XDG_DATA_HOME}/virtualjaguar/screenshots/ (typically ~/.local/share/data/virtualjaguar/screenshots/)
 Screenshots will be save in this directory.

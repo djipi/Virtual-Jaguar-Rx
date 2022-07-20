@@ -716,6 +716,8 @@
     <None Include="..\res\help.html">
       <Filter>Docs</Filter>
     </None>
+    <None Include="..\LICENSE" />
+    <None Include="..\README.md" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\debugger\VideoWin.h">
