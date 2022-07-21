@@ -10,6 +10,7 @@
 // ---  ----------  ------------------------------------------------------------
 // JPM  06/19/2016  Soft debugger support
 // JPM  09/03/2018  Added a Models & Bios tab
+// JPM  March/2022  Added an exceptions tab
 //
 
 #ifndef __CONFIGDIALOG_H__
@@ -27,6 +28,7 @@ class ControllerTab;
 class AlpineTab;
 class DebuggerTab;
 class KeyBindingsTab;
+class ExceptionsTab;
 
 
 class ConfigDialog: public QDialog
@@ -55,6 +57,7 @@ class ConfigDialog: public QDialog
 		KeyBindingsTab *keybindingsTab;
 		AlpineTab *alpineTab;
 		DebuggerTab *debuggerTab;
+		ExceptionsTab *exceptionsTab;
 };
 
 #endif	// __CONFIGDIALOG_H__

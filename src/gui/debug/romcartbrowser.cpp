@@ -1,48 +1,49 @@
 //
-// memorybrowser.cpp - Jaguar memory browser
+// romcartbrowser.cpp - Jaguar ROM cartridge browser
 //
-// by James Hammons
-// (C) 2012 Underground Software
-//
-// JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
-// bs42= 42Bastian <github>
 //
 // Who  When        What
-// ---  ----------  -------------------------------------------------------------
-// JLH  08/14/2012  Created this file
-// JPM  March/2022  Modified to support the GPU & DSP memory browser window
-// bs42  July/2022  GPU memory browser in longs as reading/writing is long only
+// ---  ----------  -----------------------------------------------------------
+// JPM  March/2022  Created this file
 //
 
 // STILL TO DO:
 //
 
-#include "memorybrowser.h"
-//#include "memory.h"
+#include "romcartbrowser.h"
+#include "memory.h"
 
 
-MemoryBrowserWindow::MemoryBrowserWindow(QWidget * parent/*= 0*/, int Type): QWidget(parent, Qt::Dialog),
+ROMCartBrowserWindow::ROMCartBrowserWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dialog),
 //	layout(new QVBoxLayout), text(new QTextBrowser),
-	layout(new QVBoxLayout), text(new QLabel),
-	refresh(new QPushButton(tr("Refresh"))),
-	go(new QPushButton(tr("Go"))),
+	layout(new QVBoxLayout),
+	text(new QLabel),
+	reset(new QPushButton(tr("Reset"))),
 	address(new QLineEdit),
-	memtype(Type),
-	memmin(MemTypeInfo[Type].memmin),
-	memmax(MemTypeInfo[Type].memmax),
-	memzone(MemTypeInfo[Type].memzone),
-	memBase(memmin)
+	go(new QPushButton(tr("Go"))),
+	romcartsize(ROMCART_6MB),
+	listromcartsize(new QComboBox),
+	memBase(0x800000)
 {
-	// mem information setup
-	setWindowTitle(tr(MemTypeInfo[Type].WindowTitle));
+	// display title
+	setWindowTitle(tr("ROM Cartridge Browser"));
 
+	// set the ROM cartridge size list (default 6MB)
+	listromcartsize->addItem("1 MB", QVariant(ROMCART_1MB));
+	listromcartsize->addItem("2 MB", QVariant(ROMCART_2MB));
+	listromcartsize->addItem("4 MB", QVariant(ROMCART_4MB));
+	listromcartsize->addItem("6 MB", QVariant(ROMCART_6MB));
+	listromcartsize->setCurrentIndex(ROMCART_6MB);
 	// entry mask for the address (in hexadecimal)
 	address->setInputMask("hhhhhh");
+	// allow keyboard action on the text display
+	text->setFocusPolicy(Qt::WheelFocus);
 
 	// layout creation
 	QHBoxLayout * hbox1 = new QHBoxLayout;
-	hbox1->addWidget(refresh);
+	hbox1->addWidget(listromcartsize);
+	hbox1->addWidget(reset);
 	hbox1->addWidget(address);
 	hbox1->addWidget(go);
 	// Need to set the size as well...
@@ -56,23 +57,52 @@ MemoryBrowserWindow::MemoryBrowserWindow(QWidget * parent/*= 0*/, int Type): QWi
 	// set layout
 	setLayout(layout);
 	layout->addWidget(text);
-//	layout->addWidget(refresh);
+	//layout->addWidget(reset);
 	layout->addLayout(hbox1);
 
-	connect(refresh, SIGNAL(clicked()), this, SLOT(RefreshContents()));
+	connect(reset, SIGNAL(clicked()), this, SLOT(ResetAddress()));
 	connect(go, SIGNAL(clicked()), this, SLOT(GoToAddress()));
 	connect(address, SIGNAL(returnPressed()), this, SLOT(GoToAddress()));
+	connect(listromcartsize, SIGNAL(currentIndexChanged(int)), this, SLOT(CurrentIndexRomCartSize(int)));
+	//connect(text, SIGNAL(wheel(QWheelEvent*)), this, SLOT(wheel(QWheelEvent*)));
 }
 
 
 //
-MemoryBrowserWindow::~MemoryBrowserWindow(void)
+ROMCartBrowserWindow::~ROMCartBrowserWindow(void)
 {
 }
 
 
+#if 0
+//
+void ROMCartBrowserWindow::wheel(QWheelEvent* e)
+{
+
+}
+#endif
+
+
+//
+void ROMCartBrowserWindow::CurrentIndexRomCartSize(int index)
+{
+	romcartsize = index;
+	CheckMaxRomCartSize();
+	RefreshContents();
+}
+
+
+//
+void ROMCartBrowserWindow::ResetAddress(void)
+{
+	memBase = 0x800000;
+	romcartsize = ROMCART_6MB;
+	RefreshContents();
+}
+
+
 // Display a window of 480 bytes 
-void MemoryBrowserWindow::RefreshContents(void)
+void ROMCartBrowserWindow::RefreshContents(void)
 {
 	char string[1024], buf[64];
 	QString memDump;
@@ -89,14 +119,7 @@ void MemoryBrowserWindow::RefreshContents(void)
 			// second step to append 16 bytes (hexdecimal) vale in the text line
 			for (uint32_t j = 0; j < 16; j++)
 			{
-				if (!memtype)
-				{
-					sprintf(buf, "%02X ", memzone[memBase - memmin + i + j]);
-				}
-				else
-				{
-					sprintf(buf, "%02X%c", memzone[memBase - memmin + i + j], ((j & 3) == 3) ? ' ' : 0);
-				}
+				sprintf(buf, "%02X ", jaguarMainROM[(memBase - 0x800000) + i + j]);
 				strcat(string, buf);
 			}
 
@@ -108,7 +131,7 @@ void MemoryBrowserWindow::RefreshContents(void)
 			for (uint32_t j = 0; j < 16; j++)
 			{
 				// get the char and check alphanumeric vs 'special' character
-				uint8_t c = memzone[memBase - memmin + i + j];
+				uint8_t c = jaguarMainROM[(memBase - 0x800000) + i + j];
 				
 				if (c == 0x20)
 				{
@@ -142,29 +165,14 @@ void MemoryBrowserWindow::RefreshContents(void)
 
 #if 0
 //
-void MemoryBrowserWindow::wheelEvent(QMouseEvent *e)
+void ROMCartBrowserWindow::wheelEvent(QMouseEvent *e)
 {
 }
 #endif
 
 
-// 
-void MemoryBrowserWindow::CheckMemZone(void)
-{
-	if (memBase < memmax)
-	{
-		if (memBase < (memmax - 480))
-		{
-			return;
-		}
-	}
-
-	memBase = memmax - 480;
-}
-
-
-// 
-void MemoryBrowserWindow::keyPressEvent(QKeyEvent * e)
+//
+void ROMCartBrowserWindow::keyPressEvent(QKeyEvent * e)
 {
 #if 0
 	if (e->key() == Qt::Key_Enter)
@@ -184,9 +192,9 @@ void MemoryBrowserWindow::keyPressEvent(QKeyEvent * e)
 			{
 				memBase -= 480;
 
-				if (memBase < memmin)
+				if (memBase < 0x800000)
 				{
-					memBase = memmin;
+					memBase = 0x800000;
 				}
 
 				RefreshContents();
@@ -196,7 +204,7 @@ void MemoryBrowserWindow::keyPressEvent(QKeyEvent * e)
 				if (e->key() == Qt::Key_PageDown)
 				{
 					memBase += 480;
-					CheckMemZone();
+					CheckMaxRomCartSize();
 					RefreshContents();
 				}
 				else
@@ -205,9 +213,9 @@ void MemoryBrowserWindow::keyPressEvent(QKeyEvent * e)
 					{
 						memBase -= 16;
 
-						if (memBase < memmin)
+						if (memBase < 0x800000)
 						{
-							memBase = memmin;
+							memBase = 0x800000;
 						}
 
 						RefreshContents();
@@ -217,21 +225,21 @@ void MemoryBrowserWindow::keyPressEvent(QKeyEvent * e)
 						if (e->key() == Qt::Key_Down || e->key() == Qt::Key_Equal)
 						{
 							memBase += 16;
-							CheckMemZone();
+							CheckMaxRomCartSize();
 							RefreshContents();
 						}
 						else
 						{
 							if (e->key() == Qt::Key_Home)
 							{
-								memBase = memmin;
+								memBase = 0x800000;
 								RefreshContents();
 							}
 							else
 							{
 								if (e->key() == Qt::Key_End)
 								{
-									memBase = memmax - 480;
+									memBase = (TabMaxSize[romcartsize] - 480);
 									RefreshContents();
 								}
 							}
@@ -244,22 +252,36 @@ void MemoryBrowserWindow::keyPressEvent(QKeyEvent * e)
 }
 
 
+//
+void ROMCartBrowserWindow::CheckMaxRomCartSize(void)
+{
+	if (memBase < TabMaxSize[romcartsize])
+	{
+		if (memBase < (TabMaxSize[romcartsize] - 480))
+		{
+			return;
+		}
+	}
+
+	memBase = (TabMaxSize[romcartsize] - 480);
+}
+
+
 // 
-void MemoryBrowserWindow::GoToAddress(void)
+void ROMCartBrowserWindow::GoToAddress(void)
 {
 	bool ok;
 
 	// get the new address
-	int32_t newmemBase = address->text().toUInt(&ok, 16);
+	uint32_t newmemBase = address->text().toUInt(&ok, 16);
 	
 	// check address validity
-	if (ok && (newmemBase >= memmin))
+	if (ok && (newmemBase >= 0x800000))
 	{
-		// check the address fitting in the memory zone
+		// check the address fitting in the ROM cartridge size
 		memBase = newmemBase;
-		CheckMemZone();
+		CheckMaxRomCartSize();
 		// refresh content
 		RefreshContents();
 	}
 }
-

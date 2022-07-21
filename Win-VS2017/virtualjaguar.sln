@@ -12,6 +12,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "m68000", "m68000\m68000.vcxproj", "{07D0EDD9-BED6-4325-8EF6-6B788CC86A48}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jaguarcore", "jaguarcore\jaguarcore.vcxproj", "{D3EDE1F0-828A-4E36-883C-42645DE7AF00}"
+	ProjectSection(ProjectDependencies) = postProject
+		{07D0EDD9-BED6-4325-8EF6-6B788CC86A48} = {07D0EDD9-BED6-4325-8EF6-6B788CC86A48}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

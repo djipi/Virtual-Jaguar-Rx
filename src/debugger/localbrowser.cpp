@@ -13,6 +13,7 @@
 //  RG   Jan./2021  Linux build fixes
 // JPM    May/2021  Display the structure's members
 // JPM   Oct./2021  Fix a crash for inaccessible memory range, and added an error icon in case of values cannot be read
+// JPM   July/2022  Optional column to display the variable's offset, fix parameter's address pointer and update icons usage
 //
 
 // STILL TO DO:
@@ -51,10 +52,13 @@ ExRegA6(-1)
 	fixedFont.setStyleHint(QFont::TypeWriter);
 #endif
 	// Set the new layout with proper identation and readibility
-	model->setColumnCount(3);
-	model->setHeaderData(0, Qt::Horizontal, QObject::tr("Name"));
-	model->setHeaderData(1, Qt::Horizontal, QObject::tr("Value"));
-	model->setHeaderData(2, Qt::Horizontal, QObject::tr("Type"));
+	model->setColumnCount(LOCAL_NBUI);
+	model->setHeaderData(LOCAL_UINAME, Qt::Horizontal, QObject::tr("Name"));
+	model->setHeaderData(LOCAL_UIVALUE, Qt::Horizontal, QObject::tr("Value"));
+	model->setHeaderData(LOCAL_UITYPE, Qt::Horizontal, QObject::tr("Type"));
+#ifdef LOCAL_UIA6OFFSET
+	model->setHeaderData(LOCAL_UIA6OFFSET, Qt::Horizontal, QObject::tr("A6_Offset"));
+#endif
 	// Information table
 	TableView->setModel(model);
 	TableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -127,7 +131,11 @@ bool LocalBrowserWindow::UpdateInfos(void)
 QList<QStandardItem *> LocalBrowserWindow::prepareRow(void* Info)
 {
 	// set the list
+#ifdef LOCAL_UIA6OFFSET
+	QList<QStandardItem *> ptrRow = { new QStandardItem(((S_VariablesStruct*)Info)->PtrName), new QStandardItem(""), new QStandardItem(((S_VariablesStruct*)Info)->PtrTypeName), new QStandardItem(QString("%1").arg(((S_VariablesStruct*)Info)->Offset)) };
+#else
 	QList<QStandardItem *> ptrRow = { new QStandardItem(((S_VariablesStruct*)Info)->PtrName), new QStandardItem(""), new QStandardItem(((S_VariablesStruct*)Info)->PtrTypeName) };
+#endif
 
 	// check if variable has additional variables (such as structure)
 	if (size_t nb = ((S_VariablesStruct*)Info)->NbTabVariables)
@@ -146,15 +154,18 @@ QList<QStandardItem *> LocalBrowserWindow::prepareRow(void* Info)
 // Set the values of each line in accordance of the rows created from prepareRow() function
 void LocalBrowserWindow::setValueRow(QStandardItem *Row, size_t Adr, char* Value, void* Info)
 {
-	QStandardItem *child = Row->child(0, 1);
+	QStandardItem *child = Row->child(0, LOCAL_UINAME);
 	if (child)
 	{
 		// check if variable has additional variables list (such as structure)
 		if (size_t nb = ((S_VariablesStruct*)Info)->NbTabVariables)
 		{
-			// check the pointer's value
+			// check the pointer's value fit in RAM
 			if (((Adr = GET32(jagMemSpace, Adr)) >= 4) && (Adr < vjs.DRAM_size))
 			{
+				// remove any previous set icon
+				child->setIcon(QIcon());
+
 				// loop on the variables list
 				for (size_t i = 0; i < nb; i++)
 				{
@@ -163,15 +174,16 @@ void LocalBrowserWindow::setValueRow(QStandardItem *Row, size_t Adr, char* Value
 					{
 						// set value in the row
 						Value = DBGManager_GetVariableValueFromAdr(Adr + ((S_VariablesStruct*)Info)->TabVariables[i]->Offset, ((S_VariablesStruct*)Info)->TabVariables[i]->TypeEncoding, ((S_VariablesStruct*)Info)->TabVariables[i]->TypeByteSize);
-						child = Row->child((int)i, 1);
+						child = Row->child((int)i, LOCAL_UIVALUE);
 						child->setText(QString("%1").arg(Value));
 						setValueRow(child, Adr + ((S_VariablesStruct*)Info)->TabVariables[i]->Offset, Value, (void*)((S_VariablesStruct*)Info)->TabVariables[i]);
 					}
-					//else
-					//{
-					//	// display icon for unavailable value
-					//	Row->child((int)i, 1)->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxWarning));
-					//}
+					else
+					{
+						// display icon for not supported type tag
+						child = Row->child((int)i, LOCAL_UITYPE);
+						child->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxWarning));
+					}
 				}
 			}
 			else
@@ -225,10 +237,10 @@ void LocalBrowserWindow::RefreshContents(void)
 							// get variable's address
 							LocalInfo[i].Adr = RegA6 + ((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Offset;
 							// check variable's parameter op
-							//if ((((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op == DBG_OP_fbreg))
-							//{
-							//	LocalInfo[i].Adr += 8;
-							//}
+							if ((((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op == DBG_OP_fbreg))
+							{
+								LocalInfo[i].Adr += 8;		// 4 bytes from the PC return, and 4 bytes from the A6 pushed to stack (link A6)
+							}
 						}
 						else
 						{
@@ -236,19 +248,25 @@ void LocalBrowserWindow::RefreshContents(void)
 							if ((((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op >= DBG_OP_reg0) && (((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op <= DBG_OP_reg31))
 							{
 								// set color text for a register type variable
-								model->item((int)i, 0)->setForeground(QColor(0, 0, 0xfe));
-								model->item((int)i, 1)->setForeground(QColor(0, 0, 0xfe));
-								model->item((int)i, 2)->setForeground(QColor(0, 0, 0xfe));
+								model->item((int)i, LOCAL_UINAME)->setForeground(QColor(0, 0, 0xfe));
+								model->item((int)i, LOCAL_UIVALUE)->setForeground(QColor(0, 0, 0xfe));
+								model->item((int)i, LOCAL_UITYPE)->setForeground(QColor(0, 0, 0xfe));
 								// get the register's name
 								LocalInfo[i].PtrCPURegisterName = (char *)CPURegName[(((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op - DBG_OP_reg0)];
 							}
+						}
+
+						// display icon for not supported type tag
+						if ((((S_VariablesStruct*)LocalInfo[i].PtrVariable)->TypeTag & DBG_TAG_TYPE_array))
+						{
+							model->item((int)i, LOCAL_UITYPE)->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxWarning));
 						}
 					}
 					else
 					{
 						// set color text for unused variable (no need to set it for the value's field as no values will be displayed)
-						model->item((int)i, 0)->setForeground(QColor(0xc8, 0xc8, 0xc8));
-						model->item((int)i, 2)->setForeground(QColor(0xc8, 0xc8, 0xc8));
+						model->item((int)i, LOCAL_UINAME)->setForeground(QColor(0xc8, 0xc8, 0xc8));
+						model->item((int)i, LOCAL_UITYPE)->setForeground(QColor(0xc8, 0xc8, 0xc8));
 					}
 				}
 			}
@@ -289,21 +307,26 @@ void LocalBrowserWindow::RefreshContents(void)
 					// display icon for unavailable value
 					if (!PtrValue)
 					{
-						model->item((int)i, 1)->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxCritical));
+						model->item((int)i, LOCAL_UINAME)->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxCritical));
 					}
 					else
 					{
 						// do not display arrays
 						if (!(((S_VariablesStruct*)LocalInfo[i].PtrVariable)->TypeTag & DBG_TAG_TYPE_array))
 						{
+							// remove any previous set icon
+							model->item((int)i, LOCAL_UINAME)->setIcon(QIcon());
 							// set the local's variable value
-							model->item((int)i, 1)->setText(QString("%1").arg(PtrValue));
+							model->item((int)i, LOCAL_UIVALUE)->setText(QString("%1").arg(PtrValue));
 							setValueRow(model->item((int)i), LocalInfo[i].Adr, PtrValue, (S_VariablesStruct*)(LocalInfo[i].PtrVariable));
 						}
-						//else
-						//{
-						//	model->item((int)i, 1)->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxWarning));
-						//}
+#if 0
+						else
+						{
+							// display icon for not supported type tag
+							model->item((int)i, LOCAL_UITYPE)->setIcon(this->style()->standardIcon(QStyle::SP_MessageBoxWarning));
+						}
+#endif
 					}
 				}
 			}

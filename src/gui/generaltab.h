@@ -22,6 +22,7 @@ class GeneralTab: public QWidget
 		QLineEdit *edit3;
 		QLineEdit *edit4;
 		QLineEdit *edit5;
+		QLineEdit *edit6;
 #ifndef NEWMODELSBIOSHANDLER
 		QCheckBox *useBIOS;
 #endif

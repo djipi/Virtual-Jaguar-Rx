@@ -1,5 +1,6 @@
 #include "cpudefs.h"
 #include "cpuextra.h"
+#include "m68kinterface.h"
 #include "inlines.h"
 #include "cputbl.h"
 #define CPUFUNC(x) x##_ff
@@ -12743,7 +12744,6 @@ unsigned long CPUFUNC(op_50c8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel842: ;
 return 12;
 }
 unsigned long CPUFUNC(op_50d0_4)(uint32_t opcode) /* Scc */
@@ -13372,7 +13372,6 @@ unsigned long CPUFUNC(op_51c8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel877: ;
 return 12;
 }
 unsigned long CPUFUNC(op_51d0_4)(uint32_t opcode) /* Scc */
@@ -13473,7 +13472,6 @@ unsigned long CPUFUNC(op_52c8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel886: ;
 return 12;
 }
 unsigned long CPUFUNC(op_52d0_4)(uint32_t opcode) /* Scc */
@@ -13574,7 +13572,6 @@ unsigned long CPUFUNC(op_53c8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel895: ;
 return 12;
 }
 unsigned long CPUFUNC(op_53d0_4)(uint32_t opcode) /* Scc */
@@ -13675,7 +13672,6 @@ unsigned long CPUFUNC(op_54c8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel904: ;
 return 12;
 }
 unsigned long CPUFUNC(op_54d0_4)(uint32_t opcode) /* Scc */
@@ -13776,7 +13772,6 @@ unsigned long CPUFUNC(op_55c8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel913: ;
 return 12;
 }
 unsigned long CPUFUNC(op_55d0_4)(uint32_t opcode) /* Scc */
@@ -13877,7 +13872,6 @@ unsigned long CPUFUNC(op_56c8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel922: ;
 return 12;
 }
 unsigned long CPUFUNC(op_56d0_4)(uint32_t opcode) /* Scc */
@@ -13978,7 +13972,6 @@ unsigned long CPUFUNC(op_57c8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel931: ;
 return 12;
 }
 unsigned long CPUFUNC(op_57d0_4)(uint32_t opcode) /* Scc */
@@ -14079,7 +14072,6 @@ unsigned long CPUFUNC(op_58c8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel940: ;
 return 12;
 }
 unsigned long CPUFUNC(op_58d0_4)(uint32_t opcode) /* Scc */
@@ -14180,7 +14172,6 @@ unsigned long CPUFUNC(op_59c8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel949: ;
 return 12;
 }
 unsigned long CPUFUNC(op_59d0_4)(uint32_t opcode) /* Scc */
@@ -14281,7 +14272,6 @@ unsigned long CPUFUNC(op_5ac8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel958: ;
 return 12;
 }
 unsigned long CPUFUNC(op_5ad0_4)(uint32_t opcode) /* Scc */
@@ -14382,7 +14372,6 @@ unsigned long CPUFUNC(op_5bc8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel967: ;
 return 12;
 }
 unsigned long CPUFUNC(op_5bd0_4)(uint32_t opcode) /* Scc */
@@ -14483,7 +14472,6 @@ unsigned long CPUFUNC(op_5cc8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel976: ;
 return 12;
 }
 unsigned long CPUFUNC(op_5cd0_4)(uint32_t opcode) /* Scc */
@@ -14584,7 +14572,6 @@ unsigned long CPUFUNC(op_5dc8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel985: ;
 return 12;
 }
 unsigned long CPUFUNC(op_5dd0_4)(uint32_t opcode) /* Scc */
@@ -14685,7 +14672,6 @@ unsigned long CPUFUNC(op_5ec8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel994: ;
 return 12;
 }
 unsigned long CPUFUNC(op_5ed0_4)(uint32_t opcode) /* Scc */
@@ -14786,7 +14772,6 @@ unsigned long CPUFUNC(op_5fc8_4)(uint32_t opcode) /* DBcc */
 		}
 	}
 }}}m68k_incpc(4);
-endlabel1003: ;
 return 12;
 }
 unsigned long CPUFUNC(op_5fd0_4)(uint32_t opcode) /* Scc */
@@ -14872,7 +14857,6 @@ unsigned long CPUFUNC(op_6000_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1011: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6001_4)(uint32_t opcode) /* Bcc */
@@ -14885,7 +14869,6 @@ unsigned long CPUFUNC(op_6001_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1012: ;
 return 8;
 }
 unsigned long CPUFUNC(op_60ff_4)(uint32_t opcode) /* Bcc */
@@ -14939,7 +14922,6 @@ unsigned long CPUFUNC(op_6200_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1017: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6201_4)(uint32_t opcode) /* Bcc */
@@ -14952,7 +14934,6 @@ unsigned long CPUFUNC(op_6201_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1018: ;
 return 8;
 }
 unsigned long CPUFUNC(op_62ff_4)(uint32_t opcode) /* Bcc */
@@ -14981,7 +14962,6 @@ unsigned long CPUFUNC(op_6300_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1020: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6301_4)(uint32_t opcode) /* Bcc */
@@ -14994,7 +14974,6 @@ unsigned long CPUFUNC(op_6301_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1021: ;
 return 8;
 }
 unsigned long CPUFUNC(op_63ff_4)(uint32_t opcode) /* Bcc */
@@ -15023,7 +15002,6 @@ unsigned long CPUFUNC(op_6400_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1023: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6401_4)(uint32_t opcode) /* Bcc */
@@ -15036,7 +15014,6 @@ unsigned long CPUFUNC(op_6401_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1024: ;
 return 8;
 }
 unsigned long CPUFUNC(op_64ff_4)(uint32_t opcode) /* Bcc */
@@ -15065,7 +15042,6 @@ unsigned long CPUFUNC(op_6500_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1026: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6501_4)(uint32_t opcode) /* Bcc */
@@ -15078,7 +15054,6 @@ unsigned long CPUFUNC(op_6501_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1027: ;
 return 8;
 }
 unsigned long CPUFUNC(op_65ff_4)(uint32_t opcode) /* Bcc */
@@ -15107,7 +15082,6 @@ unsigned long CPUFUNC(op_6600_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1029: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6601_4)(uint32_t opcode) /* Bcc */
@@ -15120,7 +15094,6 @@ unsigned long CPUFUNC(op_6601_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1030: ;
 return 8;
 }
 unsigned long CPUFUNC(op_66ff_4)(uint32_t opcode) /* Bcc */
@@ -15149,7 +15122,6 @@ unsigned long CPUFUNC(op_6700_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1032: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6701_4)(uint32_t opcode) /* Bcc */
@@ -15162,7 +15134,6 @@ unsigned long CPUFUNC(op_6701_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1033: ;
 return 8;
 }
 unsigned long CPUFUNC(op_67ff_4)(uint32_t opcode) /* Bcc */
@@ -15191,7 +15162,6 @@ unsigned long CPUFUNC(op_6800_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1035: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6801_4)(uint32_t opcode) /* Bcc */
@@ -15204,7 +15174,6 @@ unsigned long CPUFUNC(op_6801_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1036: ;
 return 8;
 }
 unsigned long CPUFUNC(op_68ff_4)(uint32_t opcode) /* Bcc */
@@ -15233,7 +15202,6 @@ unsigned long CPUFUNC(op_6900_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1038: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6901_4)(uint32_t opcode) /* Bcc */
@@ -15246,7 +15214,6 @@ unsigned long CPUFUNC(op_6901_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1039: ;
 return 8;
 }
 unsigned long CPUFUNC(op_69ff_4)(uint32_t opcode) /* Bcc */
@@ -15275,7 +15242,6 @@ unsigned long CPUFUNC(op_6a00_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1041: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6a01_4)(uint32_t opcode) /* Bcc */
@@ -15288,7 +15254,6 @@ unsigned long CPUFUNC(op_6a01_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1042: ;
 return 8;
 }
 unsigned long CPUFUNC(op_6aff_4)(uint32_t opcode) /* Bcc */
@@ -15317,7 +15282,6 @@ unsigned long CPUFUNC(op_6b00_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1044: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6b01_4)(uint32_t opcode) /* Bcc */
@@ -15330,7 +15294,6 @@ unsigned long CPUFUNC(op_6b01_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1045: ;
 return 8;
 }
 unsigned long CPUFUNC(op_6bff_4)(uint32_t opcode) /* Bcc */
@@ -15359,7 +15322,6 @@ unsigned long CPUFUNC(op_6c00_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1047: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6c01_4)(uint32_t opcode) /* Bcc */
@@ -15372,7 +15334,6 @@ unsigned long CPUFUNC(op_6c01_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1048: ;
 return 8;
 }
 unsigned long CPUFUNC(op_6cff_4)(uint32_t opcode) /* Bcc */
@@ -15401,7 +15362,6 @@ unsigned long CPUFUNC(op_6d00_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1050: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6d01_4)(uint32_t opcode) /* Bcc */
@@ -15414,7 +15374,6 @@ unsigned long CPUFUNC(op_6d01_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1051: ;
 return 8;
 }
 unsigned long CPUFUNC(op_6dff_4)(uint32_t opcode) /* Bcc */
@@ -15443,7 +15402,6 @@ unsigned long CPUFUNC(op_6e00_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1053: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6e01_4)(uint32_t opcode) /* Bcc */
@@ -15456,7 +15414,6 @@ unsigned long CPUFUNC(op_6e01_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1054: ;
 return 8;
 }
 unsigned long CPUFUNC(op_6eff_4)(uint32_t opcode) /* Bcc */
@@ -15485,7 +15442,6 @@ unsigned long CPUFUNC(op_6f00_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(4);
-endlabel1056: ;
 return 12;
 }
 unsigned long CPUFUNC(op_6f01_4)(uint32_t opcode) /* Bcc */
@@ -15498,7 +15454,6 @@ unsigned long CPUFUNC(op_6f01_4)(uint32_t opcode) /* Bcc */
 	return 10;
 didnt_jump:;
 }}m68k_incpc(2);
-endlabel1057: ;
 return 8;
 }
 unsigned long CPUFUNC(op_6fff_4)(uint32_t opcode) /* Bcc */

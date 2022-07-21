@@ -5,10 +5,12 @@
 // (C) 2013 Underground Software
 //
 // JLH = James Hammons <jlhamm@acm.org>
+// bs42= 42Bastian <github>
 //
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JLH  01/22/2012  Created this file
+// bs42  July/2022  Start of RISC disassembly moved to F03000
 //
 
 // STILL TO DO:
@@ -29,7 +31,7 @@ RISCDasmBrowserWindow::RISCDasmBrowserWindow(QWidget * parent/*= 0*/): QWidget(p
 	address(new QLineEdit),
 	gpu(new QRadioButton(tr("GPU"))),
 	dsp(new QRadioButton(tr("DSP"))),
-	memBase(0x4000)
+	memBase(0xf03000)
 {
 	setWindowTitle(tr("RISC Disassembly Browser"));
 

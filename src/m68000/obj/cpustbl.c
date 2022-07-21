@@ -1,5 +1,6 @@
 #include "cpudefs.h"
 #include "cpuextra.h"
+#include "m68kinterface.h"
 #include "inlines.h"
 #include "cputbl.h"
 #define CPUFUNC(x) x##_ff

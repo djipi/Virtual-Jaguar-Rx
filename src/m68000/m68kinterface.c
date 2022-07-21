@@ -4,19 +4,29 @@
 // by James Hammons
 // (C) 2011 Underground Software
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
 //
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JLH  10/28/2011  Created this file ;-)
+// JPM       /201?  Added M68k debug flag handler
+// JPM  March/2022  Added the save state patch from PvtLewis
 //
 
-#include "m68kinterface.h"
+#include <stdio.h>
+
 //#include <pthread.h>
+#include "../state.h"
 #include "cpudefs.h"
-#include "inlines.h"
 #include "cpuextra.h"
 #include "readcpu.h"
+#include "m68kinterface.h"
+#include "inlines.h"
 
 // Exception Vectors handled by emulation
 #define EXCEPTION_BUS_ERROR                2 /* This one is not emulated! */
@@ -65,6 +75,41 @@ cpuop_func * cpuFunctionTable[65536];
 static int checkForIRQToHandle = 0;
 //static pthread_mutex_t executionLock = PTHREAD_MUTEX_INITIALIZER;
 static int IRQLevelToHandle = 0;
+
+size_t m68k_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+  
+	DUMPS32(initialCycles);
+	DUMPINT(checkForIRQToHandle);
+	DUMPINT(IRQLevelToHandle);
+	DUMP16(last_op_for_exception_3);
+	DUMP32(last_addr_for_exception_3);
+	DUMP32(last_fault_for_exception_3);
+	DUMPINT(OpcodeFamily);
+	DUMPINT(BusCyclePenalty);
+	DUMPINT(CurrentInstrCycles);
+
+	return total_dumped;
+}
+
+size_t m68k_load(FILE *fp)
+{
+	size_t total_loaded = 0;
+
+	LOADS32(initialCycles);
+	LOADINT(checkForIRQToHandle);
+	LOADINT(IRQLevelToHandle);
+	LOAD16(last_op_for_exception_3);
+	LOAD32(last_addr_for_exception_3);
+	LOAD32(last_fault_for_exception_3);
+	LOADINT(OpcodeFamily);
+	LOADINT(BusCyclePenalty);
+	LOADINT(CurrentInstrCycles);
+
+	return total_loaded;
+}
+
 
 #if 0
 #define ADD_CYCLES(A)    m68ki_remaining_cycles += (A)
@@ -685,8 +730,8 @@ unsigned int m68k_disassemble(char * str_buff, unsigned int pc, unsigned int cpu
 }
 #endif
 
-int m68k_cycles_run(void) {}              /* Number of cycles run so far */
-int m68k_cycles_remaining(void) {}        /* Number of cycles left */
+//int m68k_cycles_run(void) {}              /* Number of cycles run so far */
+//int m68k_cycles_remaining(void) {}        /* Number of cycles left */
 //void m68k_modify_timeslice(int cycles) {} /* Modify cycles left */
 //void m68k_end_timeslice(void) {}          /* End timeslice now */
 

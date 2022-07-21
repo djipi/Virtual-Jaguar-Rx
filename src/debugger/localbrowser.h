@@ -12,6 +12,13 @@
 #include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
+// UI positions
+#define LOCAL_UINAME		0
+#define LOCAL_UIVALUE		1
+#define LOCAL_UITYPE		2
+//#define LOCAL_UIA6OFFSET	3
+#define LOCAL_NBUI			3		// Number of UI's column to display
+
 // Error code definitions
 #define	LOCAL_NOERROR		0x00
 #define	LOCAL_WARNING		0x40

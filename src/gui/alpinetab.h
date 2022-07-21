@@ -22,9 +22,9 @@ class AlpineTab: public QWidget
 		QLineEdit *edit3;
 //		QLineEdit *edit3;
 //		QLineEdit *edit4;
-		QCheckBox *writeROM;
-		QCheckBox *M68KExceptionCatch;
-		QCheckBox *WriteUnknownMemoryLocation;
+//		QCheckBox *writeROM;
+//		QCheckBox *M68KExceptionCatch;
+//		QCheckBox *WriteUnknownMemoryLocation;
 //		QCheckBox *useDSP;
 //		QCheckBox *useHostAudio;
 //		QCheckBox *useUnknownSoftware;

@@ -35,6 +35,11 @@ CXXFLAGS += $(CPPFLAGS)
 CFLAGS += -ffast-math -fomit-frame-pointer
 CXXFLAGS += -ffast-math -fomit-frame-pointer
 
+ifeq "$(findstring Linux,$(OSTYPE))" "Linux"
+CFLAGS += -I/usr/include/libdwarf
+CXXFLAGS += -I/usr/include/libdwarf
+endif
+
 # Flags to pass on to qmake...
 QMAKE_EXTRA += "QMAKE_CFLAGS_RELEASE=$(CFLAGS)"
 QMAKE_EXTRA += "QMAKE_CXXFLAGS_RELEASE=$(CXXFLAGS)"
@@ -44,6 +49,12 @@ QMAKE_EXTRA += "QMAKE_CFLAGS_DEBUG=$(CFLAGS)"
 QMAKE_EXTRA += "QMAKE_CXXFLAGS_DEBUG=$(CXXFLAGS)"
 QMAKE_EXTRA += "QMAKE_LFLAGS_DEBUG=$(LDFLAGS)"
 
+# Add Qt flags on GNU/Linux since core code uses Qt Widgets now
+ifeq "$(findstring Linux,$(OSTYPE))" "Linux"
+CFLAGS += $(shell pkg-config --cflags Qt5Widgets)
+CXXFLAGS += $(shell pkg-config --cflags Qt5Widgets)
+LDFLAGS += $(shell pkg-config --libs Qt5Widgets)
+endif
 
 all: prepare virtualjaguar
 	@echo -e "\033[01;33m***\033[00;32m Success!\033[00m"
@@ -52,7 +63,7 @@ obj:
 	@mkdir obj
 
 prepare: obj
-	@echo -e "\033[01;33m***\033[00;32m Preparing to compile Virtual Jaguar...\033[00m"
+	@echo -e "\033[01;33m***\033[00;32m Preparing to compile Virtual Jaguar Rx...\033[00m"
 	@echo "#define VJ_RELEASE_VERSION \"v2.1.3\"" > src/version.h
 	@echo "#define VJ_RELEASE_SUBVERSION \"Final\"" >> src/version.h
 	@echo "#define VJ_REMOVE_DEV_CODE" >> src/version.h
@@ -60,7 +71,7 @@ prepare: obj
 #	@echo "#define VJ_RELEASE_SUBVERSION \"2.1.4 Prerelease\"" >> src/version.h
 
 virtualjaguar: sources libs makefile-qt
-	@echo -e "\033[01;33m***\033[00;32m Making Virtual Jaguar GUI...\033[00m"
+	@echo -e "\033[01;33m***\033[00;32m Making Virtual Jaguar Rx GUI...\033[00m"
 	$(Q)$(MAKE) -f makefile-qt CROSS=$(CROSS) V="$(V)"
 
 makefile-qt: virtualjaguar.pro
@@ -82,7 +93,7 @@ obj/libjaguarcore.a: jaguarcore.mak sources
 sources: src/*.h src/*.cpp src/m68000/*.c src/m68000/*.h
 
 clean:
-	@echo -ne "\033[01;33m***\033[00;32m Cleaning out the garbage...\033[00m"
+	@echo -ne "\033[01;33m***\033[00;32m Cleaning out the build...\033[00m"
 	@-rm -rf ./obj
 	@-rm -rf ./src/m68000/obj
 	@-rm -rf makefile-qt

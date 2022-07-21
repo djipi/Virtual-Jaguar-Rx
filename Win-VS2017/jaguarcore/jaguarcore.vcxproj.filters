@@ -22,33 +22,33 @@
     <Filter Include="Source Files\BIOS">
       <UniqueIdentifier>{520c176e-6a0d-4c43-8d17-e7ba997a3b18}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Tom">
+      <UniqueIdentifier>{ef784642-9ca2-4df1-83dd-1f8f21844db6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Jerry">
+      <UniqueIdentifier>{6d932a42-f68b-474b-b1bb-f8f213fe6315}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Jerry">
+      <UniqueIdentifier>{e6ea29a3-8b35-4b35-a533-3b090fb21a24}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tom">
+      <UniqueIdentifier>{6c774964-658f-4530-b65a-843cb1ac2972}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\_MSC_VER\config.h">
       <Filter>Header Files\_MSC_VER</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\blitter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\cdintf.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\dsp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\jaguar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\tom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\mmu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\cdrom.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\dac.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\eeprom.h">
@@ -60,16 +60,7 @@
     <ClInclude Include="..\..\src\event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\gpu.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\jagdasm.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\jerry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\joystick.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\memory.h">
@@ -78,16 +69,10 @@
     <ClInclude Include="..\..\src\memtrack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\op.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\state.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\universalhdr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\wavetable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\modelsBIOS.h">
@@ -111,21 +96,39 @@
     <ClInclude Include="..\..\src\jagstub2bios.h">
       <Filter>Header Files\BIOS</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\dac.h">
+      <Filter>Header Files\Jerry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\dsp.h">
+      <Filter>Header Files\Jerry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\jerry.h">
+      <Filter>Header Files\Jerry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\joystick.h">
+      <Filter>Header Files\Jerry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\wavetable.h">
+      <Filter>Header Files\Jerry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\blitter.h">
+      <Filter>Header Files\Tom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\gpu.h">
+      <Filter>Header Files\Tom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\tom.h">
+      <Filter>Header Files\Tom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\op.h">
+      <Filter>Header Files\Tom</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\blitter.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cdintf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\cdrom.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\dac.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\dsp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\eeprom.cpp">
@@ -137,19 +140,10 @@
     <ClCompile Include="..\..\src\filedb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\gpu.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\jagdasm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\jaguar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\jerry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\joystick.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\memory.cpp">
@@ -161,19 +155,10 @@
     <ClCompile Include="..\..\src\mmu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\op.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\state.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\tom.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\universalhdr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\wavetable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\modelsBIOS.cpp">
@@ -196,6 +181,33 @@
     </ClCompile>
     <ClCompile Include="..\..\src\jagbios.cpp">
       <Filter>Source Files\BIOS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\blitter.cpp">
+      <Filter>Source Files\Tom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\gpu.cpp">
+      <Filter>Source Files\Tom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\op.cpp">
+      <Filter>Source Files\Tom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\tom.cpp">
+      <Filter>Source Files\Tom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\jerry.cpp">
+      <Filter>Source Files\Jerry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\joystick.cpp">
+      <Filter>Source Files\Jerry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\dsp.cpp">
+      <Filter>Source Files\Jerry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\dac.cpp">
+      <Filter>Source Files\Jerry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\wavetable.cpp">
+      <Filter>Source Files\Jerry</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

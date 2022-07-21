@@ -21,10 +21,13 @@
 	<file>../../res/tool-memory.png</file>
 	<file>../../res/tool-stack.png</file>
 	<file>../../res/tool-cpu.png</file>
+	<file>../../res/tool-dsp-ram.png</file>
+	<file>../../res/tool-gpu-ram.png</file>
 	<file>../../res/tool-op.png</file>
 	<file>../../res/tool-68k-dis.png</file>
 	<file>../../res/tool-risc-dis.png</file>
 	<file>../../res/tool-hw-regs.png</file>
+	<file>../../res/tool-romcart.png</file>
 	<file>../../res/generic.png</file>
 	<file>../../res/cart-blank.png</file>
 	<file>../../res/label-blank.png</file>

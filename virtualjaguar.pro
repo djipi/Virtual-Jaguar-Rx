@@ -94,6 +94,7 @@ HEADERS = \
 	src/gui/generaltab.h \
 	src/gui/modelsbiostab.h \	
 	src/gui/keybindingstab.h \
+	src/gui/exceptionstab.h \
 	src/gui/glwidget.h \
 	src/gui/help.h \
 	src/gui/imagedelegate.h \
@@ -109,6 +110,7 @@ HEADERS = \
 	src/gui/debug/riscdasmbrowser.h \
 	src/gui/debug/stackbrowser.h \
 	src/gui/debug/hwregsbrowser.h \
+	src/gui/debug/romcartbrowser.h \
 	src/debugger/debuggertab.h \
 	src/debugger/DasmWin.h \
 	src/debugger/m68kDasmWin.h \
@@ -153,6 +155,7 @@ SOURCES = \
 	src/gui/generaltab.cpp \
 	src/gui/modelsbiostab.cpp \
 	src/gui/keybindingstab.cpp \
+	src/gui/exceptionstab.cpp \
 	src/gui/glwidget.cpp \
 	src/gui/help.cpp \
 	src/gui/imagedelegate.cpp \
@@ -168,6 +171,7 @@ SOURCES = \
 	src/gui/debug/riscdasmbrowser.cpp \
 	src/gui/debug/stackbrowser.cpp \
 	src/gui/debug/hwregsbrowser.cpp \
+	src/gui/debug/romcartbrowser.cpp \
 	src/debugger/debuggertab.cpp \
 	src/debugger/DasmWin.cpp \
 	src/debugger/m68kDasmWin.cpp \

@@ -4,11 +4,17 @@
 // by James Hammons
 // (C) 2010 Underground Software
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
 //
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
+// JPM  March/2022  Added the save state patch from PvtLewis
 //
 
 //
@@ -19,9 +25,10 @@
 
 #include "event.h"
 
+#include <string.h>
 #include <stdint.h>
 #include "log.h"
-
+#include "state.h"
 
 //#define EVENT_LIST_SIZE       512
 #define EVENT_LIST_SIZE       32
@@ -45,6 +52,7 @@ struct Event
 	int eventType;
 	double eventTime;
 	void (* timerCallback)(void);
+	uint32_t timerCallbackType;
 };
 
 
@@ -53,6 +61,180 @@ static Event eventListJERRY[EVENT_LIST_SIZE];
 static uint32_t nextEvent;
 static uint32_t nextEventJERRY;
 static uint32_t numberOfEvents;
+
+extern void DSPSampleCallback(void);
+extern void HalflineCallback(void);
+extern void JERRYPIT1Callback(void);
+extern void JERRYPIT2Callback(void);
+extern void JERRYI2SCallback(void);
+extern void TOMPITCallback(void);
+#define TR_DSPSampleCallback 0x101
+#define TR_HalflineCallback  0x201
+#define TR_JERRYPIT1Callback 0x301
+#define TR_JERRYPIT2Callback 0x302
+#define TR_JERRYI2SCallback  0x303
+#define TR_TOMPITCallback    0x401
+
+size_t events_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+
+//#define TRANSLATE_DUMP(_x) do { if (tr_eventList[i].timerCallback == _x) { tr_eventList[i].timerCallback = (void(*)())TR_##_x; goto next; } } while (0)
+//#define TRANSLATE_LOAD(_x) do { if (tr_eventList[i].timerCallback == (void(*)())TR_##_x) { tr_eventList[i].timerCallback = _x; goto next; } } while (0)
+//#define TRANSLATE_DUMP_JERRY(_x) do { if (tr_eventListJERRY[i].timerCallback == _x) { tr_eventListJERRY[i].timerCallback = (void(*)())TR_##_x; goto nextJERRY; } } while (0)
+//#define TRANSLATE_LOAD_JERRY(_x) do { if (tr_eventListJERRY[i].timerCallback == (void(*)())TR_##_x) { tr_eventListJERRY[i].timerCallback = _x; goto nextJERRY; } } while (0)
+#define TRANSLATE_DUMP(_x) do { if (tr_eventList[i].timerCallback == _x) { tr_eventList[i].timerCallbackType = TR_##_x; goto next; } } while (0)
+#define TRANSLATE_LOAD(_x) do { if (tr_eventList[i].timerCallbackType == TR_##_x) { tr_eventList[i].timerCallback = _x; goto next; } } while (0)
+#define TRANSLATE_DUMP_JERRY(_x) do { if (tr_eventListJERRY[i].timerCallback == _x) { tr_eventListJERRY[i].timerCallbackType = TR_##_x; goto nextJERRY; } } while (0)
+#define TRANSLATE_LOAD_JERRY(_x) do { if (tr_eventListJERRY[i].timerCallbackType == TR_##_x) { tr_eventListJERRY[i].timerCallback = _x; goto nextJERRY; } } while (0)
+
+	Event tr_eventList[EVENT_LIST_SIZE];
+	Event tr_eventListJERRY[EVENT_LIST_SIZE];
+	memcpy(tr_eventList, eventList, sizeof(tr_eventList));
+	memcpy(tr_eventListJERRY, eventListJERRY, sizeof(tr_eventListJERRY));
+
+	for (uint32_t i = 0; i < EVENT_LIST_SIZE; i++)
+	{
+	TRANSLATE_DUMP(DSPSampleCallback);
+	TRANSLATE_DUMP(HalflineCallback);
+	TRANSLATE_DUMP(JERRYPIT1Callback);
+	TRANSLATE_DUMP(JERRYPIT2Callback);
+	TRANSLATE_DUMP(JERRYI2SCallback);
+	TRANSLATE_DUMP(TOMPITCallback);
+next: {}
+	}
+
+	for (uint32_t i = 0; i < EVENT_LIST_SIZE; i++)
+	{
+		TRANSLATE_DUMP_JERRY(DSPSampleCallback);
+		TRANSLATE_DUMP_JERRY(HalflineCallback);
+		TRANSLATE_DUMP_JERRY(JERRYPIT1Callback);
+		TRANSLATE_DUMP_JERRY(JERRYPIT2Callback);
+		TRANSLATE_DUMP_JERRY(JERRYI2SCallback);
+		TRANSLATE_DUMP_JERRY(TOMPITCallback);
+nextJERRY: {}
+	}
+
+	for (uint32_t i = 0; i < EVENT_LIST_SIZE; i++)
+	{
+		Event *event = &tr_eventList[i];
+		DUMPBOOL(event->valid);
+		DUMPINT(event->eventType);
+		if (event->valid)
+		{
+			DUMPDOUBLE(event->eventTime);
+		}
+		//uint32_t callback = ((unsigned long)event->timerCallback) & 0xffffffff;
+		//DUMP32(callback);
+		DUMP32(event->timerCallbackType);
+		//WriteLog("event dumped %d %d %f %p %u\n", event->valid, event->eventType, event->eventTime, event->timerCallback, event->timerCallbackType);
+	}
+
+	for (uint32_t i = 0; i < EVENT_LIST_SIZE; i++)
+	{
+		Event *event = &tr_eventListJERRY[i];
+		DUMPBOOL(event->valid);
+		DUMPINT(event->eventType);
+		if (event->valid)
+		{
+			DUMPDOUBLE(event->eventTime);
+		}
+		//uint32_t callback = ((unsigned long)event->timerCallback) & 0xffffffff;
+		//DUMP32(callback);
+		DUMP32(event->timerCallbackType);
+		//WriteLog("event dumped %d %d %f %p %u\n", event->valid, event->eventType, event->eventTime, event->timerCallback, event->timerCallbackType);
+	}
+
+	DUMP32(nextEvent);
+	DUMP32(nextEventJERRY);
+	DUMP32(numberOfEvents);
+
+	return total_dumped;
+}
+
+size_t events_load(FILE *fp)
+{
+	size_t total_loaded = 0;
+
+	Event tr_eventList[EVENT_LIST_SIZE];
+	Event tr_eventListJERRY[EVENT_LIST_SIZE];
+
+	for (uint32_t i = 0; i < EVENT_LIST_SIZE; i++)
+	{
+		Event *event = &tr_eventList[i];
+		LOADBOOL(event->valid);
+		LOADINT(event->eventType);
+		if (event->valid)
+		{
+			LOADDOUBLE(event->eventTime);
+		}
+		//uint32_t callback;
+		//LOAD32(callback);
+		//event->timerCallback = (void(*)())callback;
+		LOAD32(event->timerCallbackType);
+		event->timerCallback = NULL;
+	}
+
+	for (uint32_t i = 0; i < EVENT_LIST_SIZE; i++)
+	{
+		Event *event = &tr_eventListJERRY[i];
+		LOADBOOL(event->valid);
+		LOADINT(event->eventType);
+		if (event->valid)
+		{
+			LOADDOUBLE(event->eventTime);
+		}
+		//uint32_t callback;
+		//LOAD32(callback);
+		//event->timerCallback = (void(*)())callback;
+		LOAD32(event->timerCallbackType);
+		event->timerCallback = NULL;
+	}
+
+	for (uint32_t i = 0; i < EVENT_LIST_SIZE; i++)
+	{
+		TRANSLATE_LOAD(DSPSampleCallback);
+		TRANSLATE_LOAD(HalflineCallback);
+		TRANSLATE_LOAD(JERRYPIT1Callback);
+		TRANSLATE_LOAD(JERRYPIT2Callback);
+		TRANSLATE_LOAD(JERRYI2SCallback);
+		TRANSLATE_LOAD(TOMPITCallback);
+next: {}
+	}
+
+	for (uint32_t i = 0; i < EVENT_LIST_SIZE; i++)
+	{
+		TRANSLATE_LOAD_JERRY(DSPSampleCallback);
+		TRANSLATE_LOAD_JERRY(HalflineCallback);
+		TRANSLATE_LOAD_JERRY(JERRYPIT1Callback);
+		TRANSLATE_LOAD_JERRY(JERRYPIT2Callback);
+		TRANSLATE_LOAD_JERRY(JERRYI2SCallback);
+		TRANSLATE_LOAD_JERRY(TOMPITCallback);
+nextJERRY: {}
+	}
+
+	//for (uint32_t i = 0; i < EVENT_LIST_SIZE; i++) {
+	//  Event *event = &tr_eventList[i];
+	//  WriteLog("event loaded %d %d %f %p %u\n", event->valid, event->eventType, event->eventTime, event->timerCallback, event->timerCallbackType);
+	//}
+	//for (uint32_t i = 0; i < EVENT_LIST_SIZE; i++) {
+	//  Event *event = &tr_eventListJERRY[i];
+	//  WriteLog("event loaded %d %d %f %p %u\n", event->valid, event->eventType, event->eventTime, event->timerCallback, event->timerCallbackType);
+	//}
+
+	memcpy(eventList, tr_eventList, sizeof(eventList));
+	memcpy(eventListJERRY, tr_eventListJERRY, sizeof(eventListJERRY));
+	LOAD32(nextEvent);
+	LOAD32(nextEventJERRY);
+	LOAD32(numberOfEvents);
+
+	return total_loaded;
+}
+
+void EventsReload(void)
+{
+	WriteLog("numberOfEvents: %u\n", (unsigned int)(numberOfEvents & 0xffffff));
+}
 
 
 void InitializeEventList(void)

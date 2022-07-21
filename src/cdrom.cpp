@@ -6,15 +6,21 @@
 // Extensive rewrites/cleanups/fixes by James Hammons
 // (C) 2010 Underground Software
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
 //
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
+// JPM  March/2022  Added the save state patch from PvtLewis
 //
 
 #include "cdrom.h"
-
+#include "state.h"
 #include <string.h>									// For memset, etc.
 //#include "jaguar.h"									// For GET32/SET32 macros
 //#include "m68k.h"	//???
@@ -185,6 +191,41 @@ static uint32_t min, sec, frm, block;
 static uint8_t cdBuf[2352 + 96];
 static uint32_t cdBufPtr = 2352;
 //Also need to set up (save/restore) the CD's NVRAM
+
+
+size_t cdrom_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+
+	DUMP16(cdCmd);
+	DUMP16(cdPtr);
+	DUMP32(min);
+	DUMP32(sec);
+	DUMP32(frm);
+	DUMP32(block);
+	DUMPARR8(cdBuf);
+	DUMP32(cdBufPtr);
+	DUMPARR8(cdRam);
+
+	return total_dumped;
+}
+
+size_t cdrom_load(FILE *fp)
+{
+	size_t total_loaded = 0;
+
+	LOAD16(cdCmd);
+	LOAD16(cdPtr);
+	LOAD32(min);
+	LOAD32(sec);
+	LOAD32(frm);
+	LOAD32(block);
+	LOADARR8(cdBuf);
+	LOAD32(cdBufPtr);
+	LOADARR8(cdRam);
+
+	return total_loaded;
+}
 
 
 //extern bool GetRawTOC(void);

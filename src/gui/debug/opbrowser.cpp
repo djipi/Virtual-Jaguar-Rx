@@ -5,10 +5,12 @@
 // (C) 2012 Underground Software
 //
 // JLH = James Hammons <jlhamm@acm.org>
+// bs42= 42Bastian <github>
 //
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JLH  12/01/2012  Created this file
+// bs42  July/2022  Fixed object list display: GPU and STOP have no link
 //
 
 // STILL TO DO:
@@ -117,9 +119,13 @@ void OPBrowserWindow::DiscoverObjects(uint32_t address)
 				// recursion on the not-taken objects
 				DiscoverObjects(address + 8);
 		}
-
-		// Get the next object...
-		address = link;
+		if (objectType == 2 || objectType == 4) {
+			address += 8;
+		}
+		else {
+			// Get the next object...
+			address = link;
+		}
 	}
 	while (objectType != 4);
 }
@@ -145,7 +151,12 @@ void OPBrowserWindow::DumpObjectList(QString & list)
 		uint32_t lo = JaguarReadLong(address + 4, OP);
 		uint8_t objectType = lo & 0x07;
 		uint32_t link = ((hi << 11) | (lo >> 21)) & 0x3FFFF8;
-		sprintf(buf, "<br>%06X: %08X %08X %s -> %06X", address, hi, lo, opType[objectType], link);
+		if (objectType != 2 && objectType != 4) {
+			sprintf(buf, "<br>%06X: %08X %08X %s -> %06X", address, hi, lo, opType[objectType], link);
+		}
+		else {
+			sprintf(buf, "<br>%06X: %08X %08X %s", address, hi, lo, opType[objectType]);
+		}
 		list += QString(buf);
 
 		if (objectType == 3)

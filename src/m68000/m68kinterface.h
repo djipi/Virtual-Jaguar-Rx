@@ -4,6 +4,8 @@
 // by James Hammons
 // (C) 2011 Underground Software
 //
+// Modified by Jean-Paul Mari
+//
 // Most of these functions are in place to help make it easy to replace the
 // Musashi core with my bastardized UAE one. :-)
 //
@@ -69,24 +71,27 @@ typedef enum
  */
 #define M68K_INT_ACK_SPURIOUS      0xFFFFFFFE
 
-void m68k_set_cpu_type(unsigned int);
-void m68k_pulse_reset(void);
-int m68k_execute(int num_cycles);
-void m68k_set_irq(unsigned int int_level);
+extern void m68k_set_cpu_type(unsigned int);
+extern void m68k_pulse_reset(void);
+extern int m68k_execute(int num_cycles);
+extern void m68k_set_irq(unsigned int int_level);
+extern size_t m68k_dump(FILE *fp);
+extern size_t m68k_load(FILE *fp);
+
 
 // Functions that MUST be implemented by the user:
 
 // Read from anywhere
-unsigned int m68k_read_memory_8(unsigned int address);
-unsigned int m68k_read_memory_16(unsigned int address);
-unsigned int m68k_read_memory_32(unsigned int address);
+extern unsigned int m68k_read_memory_8(unsigned int address);
+extern unsigned int m68k_read_memory_16(unsigned int address);
+extern unsigned int m68k_read_memory_32(unsigned int address);
 
 // Write to anywhere
-void m68k_write_memory_8(unsigned int address, unsigned int value);
-void m68k_write_memory_16(unsigned int address, unsigned int value);
-void m68k_write_memory_32(unsigned int address, unsigned int value);
+extern void m68k_write_memory_8(unsigned int address, unsigned int value);
+extern void m68k_write_memory_16(unsigned int address, unsigned int value);
+extern void m68k_write_memory_32(unsigned int address, unsigned int value);
 
-int irq_ack_handler(int);
+extern int irq_ack_handler(int);
 
 // Convenience functions
 
@@ -94,46 +99,46 @@ int irq_ack_handler(int);
 // NB: This must be implemented by the user!
 #define M68K_HOOK_FUNCTION
 #ifdef M68K_HOOK_FUNCTION
-void M68KInstructionHook(void);
+extern void M68KInstructionHook(void);
 #endif
 
 
-int M68KGetCurrentOpcodeFamily(void);
+extern int M68KGetCurrentOpcodeFamily(void);
 
 
 // Functions to allow debugging
-int M68KDebugHalt(void);
-void M68KDebugResume(void);
-int M68KDebugHaltStatus(void);
+extern int M68KDebugHalt(void);
+extern void M68KDebugResume(void);
+extern int M68KDebugHaltStatus(void);
 
 /* Peek at the internals of a CPU context.  This can either be a context
  * retrieved using m68k_get_context() or the currently running context.
  * If context is NULL, the currently running CPU context will be used.
  */
-unsigned int m68k_get_reg(void * context, m68k_register_t reg);
+extern unsigned int m68k_get_reg(void * context, m68k_register_t reg);
 
 /* Poke values into the internals of the currently running CPU context */
-void m68k_set_reg(m68k_register_t reg, unsigned int value);
+extern void m68k_set_reg(m68k_register_t reg, unsigned int value);
 
 // Dummy functions, for now...
 
 /* Check if an instruction is valid for the specified CPU type */
-unsigned int m68k_is_valid_instruction(unsigned int instruction, unsigned int cpu_type);
+extern unsigned int m68k_is_valid_instruction(unsigned int instruction, unsigned int cpu_type);
 
 /* Disassemble 1 instruction using the epecified CPU type at pc.  Stores
  * disassembly in str_buff and returns the size of the instruction in bytes.
  */
-unsigned int m68k_disassemble(char * str_buff, unsigned int pc, unsigned int cpu_type, unsigned int OpCodes);
+extern unsigned int m68k_disassemble(char * str_buff, unsigned int pc, unsigned int cpu_type, unsigned int OpCodes);
 
 /* These functions let you read/write/modify the number of cycles left to run
  * while m68k_execute() is running.
  * These are useful if the 68k accesses a memory-mapped port on another device
  * that requires immediate processing by another CPU.
  */
-int m68k_cycles_run(void);              // Number of cycles run so far
-int m68k_cycles_remaining(void);        // Number of cycles left
-void m68k_modify_timeslice(int cycles); // Modify cycles left
-void m68k_end_timeslice(void);          // End timeslice now
+//int m68k_cycles_run(void);              // Number of cycles run so far
+//int m68k_cycles_remaining(void);        // Number of cycles left
+extern void m68k_modify_timeslice(int cycles); // Modify cycles left
+extern void m68k_end_timeslice(void);          // End timeslice now
 
 // Breakpoints functions
 extern void m68k_brk_init(void);

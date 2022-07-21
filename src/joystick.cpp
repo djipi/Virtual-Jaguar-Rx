@@ -6,13 +6,18 @@
 // Extensive rewrite by James Hammons
 // (C) 2013 Underground Software
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
 //
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
 // JPM  06/06/2016  Visual Studio support
+// JPM  March/2022  Added the save state patch from PvtLewis
 //
 
 #include "joystick.h"
@@ -21,6 +26,7 @@
 #include "jaguar.h"
 #include "log.h"
 #include "settings.h"
+#include "state.h"
 
 // Global vars
 
@@ -48,6 +54,79 @@ extern bool doDSPDis, doGPUDis;
 bool blitterSingleStep = false;
 bool bssGo = false;
 bool bssHeld = false;
+
+
+size_t joystick_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+
+	DUMPBOOL(audioEnabled);
+	DUMPBOOL(joysticksEnabled);
+	DUMPBOOL(GUIKeyHeld);
+	DUMPINT(gpu_start_log);
+	DUMPINT(op_start_log);
+	DUMPINT(blit_start_log);
+	DUMPINT(effect_start);
+	DUMPINT(effect_start2);
+	DUMPINT(effect_start3);
+	DUMPINT(effect_start4);
+	DUMPINT(effect_start5);
+	DUMPINT(effect_start6);
+	DUMPBOOL(interactiveMode);
+	DUMPBOOL(iLeft);
+	DUMPBOOL(iRight);
+	DUMPBOOL(iToggle);
+	DUMPBOOL(keyHeld1);
+	DUMPBOOL(keyHeld2);
+	DUMPBOOL(keyHeld3);
+	DUMPINT(objectPtr);
+	DUMPBOOL(startMemLog);
+	DUMPBOOL(blitterSingleStep);
+	DUMPBOOL(bssGo);
+	DUMPBOOL(bssHeld);
+  
+	DUMPARR8(joystick_ram);
+	DUMPARR8(joypad0Buttons);
+	DUMPARR8(joypad1Buttons);
+
+	return total_dumped;
+}
+
+size_t joystick_load(FILE *fp)
+{
+	size_t total_loaded = 0;
+
+	LOADBOOL(audioEnabled);
+	LOADBOOL(joysticksEnabled);
+	LOADBOOL(GUIKeyHeld);
+	LOADINT(gpu_start_log);
+	LOADINT(op_start_log);
+	LOADINT(blit_start_log);
+	LOADINT(effect_start);
+	LOADINT(effect_start2);
+	LOADINT(effect_start3);
+	LOADINT(effect_start4);
+	LOADINT(effect_start5);
+	LOADINT(effect_start6);
+	LOADBOOL(interactiveMode);
+	LOADBOOL(iLeft);
+	LOADBOOL(iRight);
+	LOADBOOL(iToggle);
+	LOADBOOL(keyHeld1);
+	LOADBOOL(keyHeld2);
+	LOADBOOL(keyHeld3);
+	LOADINT(objectPtr);
+	LOADBOOL(startMemLog);
+	LOADBOOL(blitterSingleStep);
+	LOADBOOL(bssGo);
+	LOADBOOL(bssHeld);
+  
+	LOADARR8(joystick_ram);
+	LOADARR8(joypad0Buttons);
+	LOADARR8(joypad1Buttons);
+
+	return total_loaded;
+}
 
 
 void JoystickInit(void)

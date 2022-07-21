@@ -21,7 +21,8 @@
 
 #include <ctype.h>
 #include <string.h>
-
+#include <stdio.h>
+#include "m68kinterface.h"
 #include "readcpu.h"
 
 int nr_cpuop_funcs;

@@ -26,6 +26,7 @@
 #define NEWMODELSBIOSHANDLER				// New Jaguar models and bios usage handler
 
 
+#include "state.h"
 #include "jaguar.h"
 //#include <QApplication>
 #include <QtWidgets/QMessageBox>
@@ -2347,34 +2348,42 @@ void JaguarSetScreenPitch(uint32_t pitch)
 }
 
 
-//
-// Jaguar console initialization
-//
+// Atari Jaguar initialization
 void JaguarInit(void)
 {
 	// For randomizing RAM
 	srand((unsigned int)time(NULL));
 
-	// Contents of local RAM are quasi-stable; we simulate this by randomizing RAM contents
-	for(uint32_t i=0; i<vjs.DRAM_size; i+=4)
-		*((uint32_t *)(&jaguarMainRAM[i])) = rand();
+	// zero the entire system space (better compression ratio for the save states)
+	if (vjs.full_raz)
+	{
+		memset(jagMemSpace, 0x00, 0xF20000);
+	}
+	else
+	{
+		// Contents of local RAM are quasi-stable; we simulate this by randomizing RAM contents
+		for (uint32_t i = 0; i < vjs.DRAM_size; i += 4)
+		{
+			*((uint32_t *)(&jaguarMainRAM[i])) = rand();
+		}
+	}
 
 #ifdef CPU_DEBUG_MEMORY
 	memset(readMem, 0x00, 0x400000);
 	memset(writeMemMin, 0xFF, 0x400000);
 	memset(writeMemMax, 0x00, 0x400000);
 #endif
-//	memset(jaguarMainRAM, 0x00, 0x200000);
-//	memset(jaguar_mainRom, 0xFF, 0x200000);	// & set it to all Fs...
-//	memset(jaguar_mainRom, 0x00, 0x200000);	// & set it to all 0s...
-//NOTE: This *doesn't* fix FlipOut...
-//Or does it? Hmm...
-//Seems to want $01010101... Dunno why. Investigate!
-//	memset(jaguarMainROM, 0x01, 0x600000);	// & set it to all 01s...
-//	memset(jaguar_mainRom, 0xFF, 0x600000);	// & set it to all Fs...
+	//	memset(jaguarMainRAM, 0x00, 0x200000);
+	//	memset(jaguar_mainRom, 0xFF, 0x200000);	// & set it to all Fs...
+	//	memset(jaguar_mainRom, 0x00, 0x200000);	// & set it to all 0s...
+	//NOTE: This *doesn't* fix FlipOut...
+	//Or does it? Hmm...
+	//Seems to want $01010101... Dunno why. Investigate!
+	//	memset(jaguarMainROM, 0x01, 0x600000);	// & set it to all 01s...
+	//	memset(jaguar_mainRom, 0xFF, 0x600000);	// & set it to all Fs...
 	lowerField = false;							// Reset the lower field flag
 //temp, for crappy crap that sux
-memset(jaguarMainRAM + 0x804, 0xFF, 4);
+	memset(jaguarMainRAM + 0x804, 0xFF, 4);
 
 	m68k_pulse_reset();							// Need to do this so UAE disasm doesn't segfault on exit
 	GPUInit();
@@ -2389,22 +2398,33 @@ memset(jaguarMainRAM + 0x804, 0xFF, 4);
 //New timer based code stuffola...
 void HalflineCallback(void);
 void RenderCallback(void);
+
+
+// Atari Jaguar reset
 void JaguarReset(void)
 {
-	// Only problem with this approach: It wipes out RAM loaded files...!
-	// Contents of local RAM are quasi-stable; we simulate this by randomizing RAM contents
-	for (uint32_t i = 8; i < vjs.DRAM_size; i += 4)
+	// zero the entire system space (better compression ratio for the save states)
+	if (vjs.full_raz)
 	{
-		*((uint32_t *)(&jaguarMainRAM[i])) = rand();
+		memset(jagMemSpace, 0x00, 0xF20000);
+	}
+	else
+	{
+		// Only problem with this approach: It wipes out RAM loaded files...!
+		// Contents of local RAM are quasi-stable; we simulate this by randomizing RAM contents
+		for (uint32_t i = 8; i < vjs.DRAM_size; i += 4)
+		{
+			*((uint32_t *)(&jaguarMainRAM[i])) = rand();
+		}
 	}
 
 	// New timer base code stuffola...
 	InitializeEventList();
-//Need to change this so it uses the single RAM space and load the BIOS
-//into it somewhere...
-//Also, have to change this here and in JaguarReadXX() currently
-	// Only use the system BIOS if it's available...! (it's always available now!)
-	// AND only if a jaguar cartridge has been inserted.
+	//Need to change this so it uses the single RAM space and load the BIOS
+	//into it somewhere...
+	//Also, have to change this here and in JaguarReadXX() currently
+		// Only use the system BIOS if it's available...! (it's always available now!)
+		// AND only if a jaguar cartridge has been inserted.
 #ifndef NEWMODELSBIOSHANDLER
 	if (vjs.useJaguarBIOS && jaguarCartInserted && !vjs.hardwareTypeAlpine && !vjs.softTypeDebugger)
 	{
@@ -2420,13 +2440,13 @@ void JaguarReset(void)
 		SET32(jaguarMainRAM, 4, jaguarRunAddress);
 	}
 
-//	WriteLog("jaguar_reset():\n");
+	//	WriteLog("jaguar_reset():\n");
 	TOMReset();
 	JERRYReset();
 	GPUReset();
 	DSPReset();
 	CDROMReset();
-    m68k_pulse_reset();								// Reset the 68000
+	m68k_pulse_reset();								// Reset the 68000
 	WriteLog("Jaguar: 68K reset. PC=%06X SP=%08X\n", m68k_get_reg(NULL, M68K_REG_PC), m68k_get_reg(NULL, M68K_REG_A7));
 	lowerField = false;								// Reset the lower field flag
 //	SetCallbackTime(ScanlineCallback, 63.5555);

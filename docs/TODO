@@ -3,11 +3,6 @@ Stuff to add/fix for the next release of Virtual Jaguar
 
 - Fix VC behavior to match what a real Jaguar does. Still not sure just what
   the heck is going on there. [Shamus]
-- It would be nice to have the emulator pick up where you last left off, or at
-  least give you the option of continuing from your last session. This would
-  require save states, 'natch. ;-) [Shamus]
-- It would be nice to have "save states" for instant save/load capability.
-  [Shamus]
 - Cycle accuracy for GPU/DSP/OP/Blitter. [Shamus]
 - Need to propagate blitter fixes in the A1 <- A2 direction to the A1 -> A2
   direction and the GPU fixes to various instructions to the DSP. [Shamus]
@@ -17,7 +12,7 @@ Stuff to add/fix for the next release of Virtual Jaguar
 - Need to fix timing in the OP. As it is now, it gives a false impression of
   how much it's capable of. [Shamus]
 - Fix coming out of fullscreen on Win32. As of now, it doesn't restore the
-  window position correctly [CJ]
+  window position correctly [CJ] [Cannot Reproduce or Neen More Information - Flynn]
 - Fix the Tripper Getem ROM so that it works. It has some tight coupling
   between the M68K and the DSP that causes the DSP to starve itself; fixing
   this will probably fix a bunch of other timing related issues as well.
@@ -27,6 +22,11 @@ Stuff to add/fix for the next release of Virtual Jaguar
 Stuff that was added/fixed
 --------------------------
 
+- It would be nice to have the emulator pick up where you last left off, or at
+  least give you the option of continuing from your last session. This would
+  require save states, 'natch. ;-) [Shamus] [DONE--Flynn]
+- It would be nice to have "save states" for instant save/load capability.
+  [Shamus] [DONE--Flynn]
 - In emulator screenshots. [Shamus] [DONE--Flynn]
 - Create an EEPROMs directory (or whatever is in EEPROMPath[]) if it doesn't
   already exist. [Shamus] [DONE--Flynn]

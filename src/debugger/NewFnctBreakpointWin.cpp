@@ -9,6 +9,7 @@
 // ---  ----------  -----------------------------------------------------------
 // JPM  10/19/2018  Created this file
 // JPM  March/2021  Breakpoint list window refresh
+// JPM  March/2022  Added hexadecimal's value with $
 //
 
 // STILL TO DO:
@@ -31,7 +32,7 @@ add(new QPushButton(tr("Add")))
 {
 	setWindowTitle(tr("New function breakpoint"));
 
-	address->setPlaceholderText("0x<value>, decimal value or symbol name");
+	address->setPlaceholderText("$<value>, 0x<value>, decimal value or symbol name");
 
 	QHBoxLayout * hbox1 = new QHBoxLayout;
 	hbox1->addWidget(address);
@@ -88,17 +89,29 @@ void NewFnctBreakpointWindow::AddBreakpointAddress(void)
 	memset(&Brk, 0, sizeof(Brk));
 	newAddress = address->text();
 
+	// get the value's length
 	if ((len = newAddress.size()))
 	{
-		if ((len > 1) && (newAddress.at(0) == QChar('0')) && (newAddress.at(1) == QChar('x')))
+		// get the address from hexadecimal's value (0x)
+		if ((len > 2) && (newAddress.at(0) == QChar('0')) && (newAddress.at(1) == QChar('x')))
 		{
-			adr = newAddress.toUInt(&ok, 16);
+			adr = newAddress.mid(2).toUInt(&ok, 16);
 		}
 		else
 		{
+			// get the address from the symbol's name
 			if (!(adr = DBGManager_GetAdrFromSymbolName(newAddress.toLatin1().data())))
 			{
-				adr = newAddress.toUInt(&ok, 10);
+				// get the address from hexadecimal's value ($)
+				if ((len > 1) && (newAddress.at(0) == QChar('$')))
+				{
+					adr = newAddress.mid(1).toUInt(&ok, 16);
+				}
+				else
+				{
+					// get the address from the decimal's value
+					adr = newAddress.toUInt(&ok, 10);
+				}
 			}
 			else
 			{

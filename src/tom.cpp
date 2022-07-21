@@ -6,14 +6,19 @@
 // Cleanups, endian wrongness amelioration, and extensive fixes by James Hammons
 // (C) 2010 Underground Software
 //
+// Patches
+// https://atariage.com/forums/topic/243174-save-states-for-virtual-jaguar-patch/
+//
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//  PL = PvtLewis <from Atari Age>
 //
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
 // JLH  01/20/2011  Change rendering to RGBA, removed unnecessary code
 // JPM  06/06/2016  Visual Studio support
+// JPM  March/2022  Added the save state patch from PvtLewis
 //
 // Note: TOM has only a 16K memory space
 //
@@ -266,6 +271,7 @@
 //#include "memory.h"
 #include "op.h"
 #include "settings.h"
+#include "state.h"
 
 #define NEW_TIMER_SYSTEM
 
@@ -355,6 +361,46 @@ uint32_t tomTimerDivider;
 int32_t tomTimerCounter;
 uint16_t tom_jerry_int_pending, tom_timer_int_pending, tom_object_int_pending,
 	tom_gpu_int_pending, tom_video_int_pending;
+
+
+size_t tom_dump(FILE *fp)
+{
+	size_t total_dumped = 0;
+	
+	DUMP32(tomWidth);
+	DUMP32(tomHeight);
+	DUMP32(tomTimerPrescaler);
+	DUMP32(tomTimerDivider);
+	DUMPS32(tomTimerCounter);
+	DUMP16(tom_jerry_int_pending);
+	DUMP16(tom_timer_int_pending);
+	DUMP16(tom_object_int_pending);
+	DUMP16(tom_gpu_int_pending);
+	DUMP16(tom_video_int_pending);
+	DUMPARR8(tomRam8);
+
+	return total_dumped;
+}
+
+size_t tom_load(FILE *fp)
+{
+	size_t total_loaded = 0;
+
+	LOAD32(tomWidth);
+	LOAD32(tomHeight);
+	LOAD32(tomTimerPrescaler);
+	LOAD32(tomTimerDivider);
+	LOADS32(tomTimerCounter);
+	LOAD16(tom_jerry_int_pending);
+	LOAD16(tom_timer_int_pending);
+	LOAD16(tom_object_int_pending);
+	LOAD16(tom_gpu_int_pending);
+	LOAD16(tom_video_int_pending);
+	LOADARR8(tomRam8);
+
+	return total_loaded;
+}
+
 
 // These are set by the "user" of the Jaguar core lib, since these are
 // OS/system dependent.

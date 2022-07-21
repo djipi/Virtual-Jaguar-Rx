@@ -18,26 +18,26 @@ typedef struct BrkInfo
 	size_t HitCounts;			// Hit counts
 }S_BrkInfo;
 
-void JaguarSetScreenBuffer(uint32_t * buffer);
-void JaguarSetScreenPitch(uint32_t pitch);
+extern void JaguarSetScreenBuffer(uint32_t * buffer);
+extern void JaguarSetScreenPitch(uint32_t pitch);
 extern void JaguarInit(void);
 extern void JaguarReset(void);
 extern void JaguarDone(void);
 
 // Memory functions
-uint8_t JaguarReadByte(uint32_t offset, uint32_t who = UNKNOWN);
-uint16_t JaguarReadWord(uint32_t offset, uint32_t who = UNKNOWN);
-uint32_t JaguarReadLong(uint32_t offset, uint32_t who = UNKNOWN);
-void JaguarWriteByte(uint32_t offset, uint8_t data, uint32_t who = UNKNOWN);
-void JaguarWriteWord(uint32_t offset, uint16_t data, uint32_t who = UNKNOWN);
-void JaguarWriteLong(uint32_t offset, uint32_t data, uint32_t who = UNKNOWN);
+extern uint8_t JaguarReadByte(uint32_t offset, uint32_t who = UNKNOWN);
+extern uint16_t JaguarReadWord(uint32_t offset, uint32_t who = UNKNOWN);
+extern uint32_t JaguarReadLong(uint32_t offset, uint32_t who = UNKNOWN);
+extern void JaguarWriteByte(uint32_t offset, uint8_t data, uint32_t who = UNKNOWN);
+extern void JaguarWriteWord(uint32_t offset, uint16_t data, uint32_t who = UNKNOWN);
+extern void JaguarWriteLong(uint32_t offset, uint32_t data, uint32_t who = UNKNOWN);
 
-bool JaguarInterruptHandlerIsValid(uint32_t i);
-void JaguarDasm(uint32_t offset, uint32_t qt);
+extern bool JaguarInterruptHandlerIsValid(uint32_t i);
+extern void JaguarDasm(uint32_t offset, uint32_t qt);
 
-void JaguarExecuteNew(void);
-int JaguarStepInto(void);
-int JaguarStepOver(int depth);
+extern void JaguarExecuteNew(void);
+extern int JaguarStepInto(void);
+extern int JaguarStepOver(int depth);
 
 // Exports from JAGUAR.CPP
 
@@ -66,7 +66,7 @@ extern size_t brkNbr;
 
 //Temp debug stuff (will go away soon, so don't depend on these)
 
-void DumpMainMemory(void);
-uint8_t * GetRamPtr(void);
+extern void DumpMainMemory(void);
+extern uint8_t * GetRamPtr(void);
 
 #endif	// __JAGUAR_H__

@@ -13,6 +13,7 @@
 #include <string.h>
 #include "cpudefs.h"
 #include "cpuextra.h"
+#include "m68kinterface.h"
 #include "inlines.h"
 #include "readcpu.h"
 
@@ -395,7 +396,8 @@ unsigned int M68KDisassemble(char * output, uint32_t addr, unsigned int OpCodes)
 
 	strcat(str, f);
 
-	if (ccpt)
+	// display logic result only for current PC
+	if (ccpt && !pcOffsetSave)
 	{
 		sprintf(f, " (%s)", (cctrue(dp->cc) ? "true" : "false"));
 		strcat(str, f);

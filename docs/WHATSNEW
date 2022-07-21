@@ -1,3 +1,23 @@
+Virtual Jaguar v2.1.3 R5a GCC/Qt
+--------------------------------
+
+* Check missing qjpeg's dll for the tests pattern
+* Stability & improvements for the debugger mode
+- Added ELF section names
+- Source file path clean up in the DWARF information reader
+- Local variables window stability improvements
+- DWARF information reader fix for local and parameter variables
+- Added a '/cygdrive/' directory detection and removal option
+- Added hexadecimal's value with $ for the function breakpoint & memory window
+* Added an exceptions tab in the configuration settings
+* Fixes and improvements for the HW registers Blitter browser
+* Fix a legacy issue for the Object list at $0
+* Added an option to allow, or not, the unknown memory location writing detection
+* Added a ROM cartridge browser for the Alpine and Debugger mode
+* Added GPU & DSP memory browser windows for the Alpine and Debugger mode
+* Legacy issue fix, to prevent user to set an address outside a memory zone
+
+
 Virtual Jaguar v2.1.3 R5 GCC/Qt
 -------------------------------
 
