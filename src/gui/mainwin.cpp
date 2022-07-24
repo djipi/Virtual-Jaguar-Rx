@@ -34,6 +34,7 @@
 // JPM   Apr./2021  Handle number of M68K cycles used in tracing mode, added video output display in a window
 // JPM    May/2021  Check missing dll for the tests pattern
 // JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser, added and slightly modified the save state patch from PvtLewis
+// JPM   July/2022  Added JERRY's exceptions settings
 //
 
 // FIXED:
@@ -2320,12 +2321,14 @@ void MainWin::ReadSettings(void)
 	vjs.GPUEnabled = settings.value("GPUEnabled", true).toBool();
 	vjs.DSPEnabled = settings.value("DSPEnabled", true).toBool();
 	allowUnknownSoftware = settings.value("showUnknownSoftware", false).toBool();
+	vjs.useFastBlitter = settings.value("useFastBlitter", false).toBool();
 
 	// read the exceptions settings
 	vjs.allowWritesToROM = settings.value("writeROM", true).toBool();
 	vjs.allowM68KExceptionCatch = settings.value("M68KExceptionCatch", false).toBool();
 	vjs.allowWritesToUnknownLocation = settings.value("WriteUnknownLocation", true).toBool();
-	vjs.useFastBlitter = settings.value("useFastBlitter", false).toBool();
+	vjs.AllowJERRYUnkwnRegsCatch = settings.value("JERRYUnkwnRegsCatch", false).toBool();
+	vjs.AllowJERRYWriteWaveTable = settings.value("JERRYWriteWaveTable", true).toBool();
 
 	// read settings from the Debugger mode
 	settings.beginGroup("debugger");
@@ -2669,6 +2672,8 @@ void MainWin::WriteSettings(void)
 	settings.setValue("writeROM", vjs.allowWritesToROM);
 	settings.setValue("M68KExceptionCatch", vjs.allowM68KExceptionCatch);
 	settings.setValue("WriteUnknownLocation", vjs.allowWritesToUnknownLocation);
+	settings.setValue("JERRYUnkwnRegsCatch", vjs.AllowJERRYUnkwnRegsCatch);
+	settings.setValue("JERRYWriteWaveTable", vjs.AllowJERRYWriteWaveTable);
 
 	// write settings from the Alpine mode
 	settings.beginGroup("alpine");

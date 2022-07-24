@@ -1,7 +1,13 @@
+pre-Release 5c (TBA)
+--------------------
+Git commit:
+- 
+0) Added JERRY's exceptions settings
+
 pre-Release 5b (20th July 2022)
 -------------------------------
-Git commit: 
--
+Git commit: 351dc419d114719a4f240c616640d5c0ea520a04
+- 
 0) Fix compilation error with gcc
 1) Added the save state patch from PvtLewis (from Atari Age's forum)
 2) Compilation warning fixes for the M68K project

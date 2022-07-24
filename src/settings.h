@@ -86,6 +86,8 @@ struct VJSettings
 	bool allowM68KExceptionCatch;								// Allow M68K exception catch
 	bool allowWritesToROM;										// Allow writes to ROM cartdridge
 	bool allowWritesToUnknownLocation;							// Allow writes to unknown memory location
+	bool AllowJERRYWriteWaveTable;
+	bool AllowJERRYUnkwnRegsCatch;
 	uint32_t biosType;											// Bios type used
 	uint32_t jaguarModel;										// Jaguar model
 	size_t nbrdisasmlines;										// Number of lines to show in the M68K tracing window

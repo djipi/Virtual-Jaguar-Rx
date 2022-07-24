@@ -14,20 +14,13 @@ class ExceptionsTab: public QWidget
 		void GetSettings(void);
 
 	private:
-//		QString CheckForSlashes(QString);
 
 	public:
-//		QLineEdit *edit1;
-//		QLineEdit *edit2;
-//		QLineEdit *edit3;
-//		QLineEdit *edit3;
-//		QLineEdit *edit4;
 		QCheckBox *writeROM;
 		QCheckBox *M68KExceptionCatch;
 		QCheckBox *WriteUnknownMemoryLocation;
-//		QCheckBox *useDSP;
-//		QCheckBox *useHostAudio;
-//		QCheckBox *useUnknownSoftware;
+		QCheckBox *JERRYUnkwnRegsCatch;
+		QCheckBox *JERRYAllowWriteWaveTable;
 };
 
 #endif	// __EXCEPTIONSTAB_H__
