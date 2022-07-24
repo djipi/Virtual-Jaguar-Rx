@@ -17,6 +17,7 @@
 //
 
 // STILL TO DO:
+// To fix the crash when the --full-raz option is set and the number of variables are found during local first initialisation
 // Feature to list the pointer(s) in the code using the allocation
 // To set the information display at the right
 // To support the array
