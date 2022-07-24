@@ -502,6 +502,15 @@
     <ClCompile Include="..\src\gui\debug\romcartbrowser.cpp">
       <Filter>Source Files\alpine</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_hwregsjerrybrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_hwregsjerrybrowser.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\debug\hwregsjerrybrowser.cpp">
+      <Filter>Source Files\alpine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -835,6 +844,9 @@
       <Filter>Header Files\gui\tab</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\gui\debug\romcartbrowser.h">
+      <Filter>Header Files\alpine</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\debug\hwregsjerrybrowser.h">
       <Filter>Header Files\alpine</Filter>
     </CustomBuild>
   </ItemGroup>

@@ -8,6 +8,7 @@
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JPM  08/20/2019  Created this file
+// JPM   July/2022  Added Jerry registers
 //
 
 // STILL TO DO:
@@ -21,22 +22,28 @@ HWRegsBrowserWindow::HWRegsBrowserWindow(QWidget * parent/*= 0*/) : QWidget(pare
 layout(new QVBoxLayout),
 //statusbar(new QStatusBar),
 hwregstabWidget(new QTabWidget),
-hwregsblitterWin(new HWRegsBlitterBrowserWindow)
+hwregsblitterWin(new HWRegsBlitterBrowserWindow),
+hwregsjerryWin(new HWRegsJerryBrowserWindow)
 {
 	setWindowTitle(tr("Hardware Registers Browser"));
 
-	// Set the font
+	// set the font
 	QFont fixedFont("Lucida Console", 8, QFont::Normal);
 	fixedFont.setStyleHint(QFont::TypeWriter);
 
-	//
+	// set the Blitter tab
 	hwregstabWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	hwregstabWidget->addTab(hwregsblitterWin, tr("Blitter"));
-	layout->addWidget(hwregstabWidget);
+	// set the Jerry tab
+	hwregstabWidget->addTab(hwregsjerryWin, tr("Jerry"));
 
-	// Status bar
-	//layout->addWidget(statusbar);
+	// set layout
+	layout->addWidget(hwregstabWidget);
+	// status bar
 	setLayout(layout);
+
+	// connect the signals
+	connect(hwregstabWidget, SIGNAL(currentChanged(const int)), this, SLOT(RefreshContents()));
 }
 
 
@@ -57,6 +64,7 @@ void HWRegsBrowserWindow::Reset(void)
 void HWRegsBrowserWindow::RefreshContents(void)
 {
 	hwregsblitterWin->RefreshContents();
+	hwregsjerryWin->RefreshContents();
 }
 
 

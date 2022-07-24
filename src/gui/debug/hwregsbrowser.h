@@ -10,6 +10,10 @@
 #include <QtWidgets/QtWidgets>
 #include <stdint.h>
 #include "hwregsblitterbrowser.h"
+#include "hwregsjerrybrowser.h"
+
+
+enum hwregsaccess { hwregsnull, hwregsro, hwregswo, hwregsrw };
 
 
 // 
@@ -29,10 +33,10 @@ protected:
 	void keyPressEvent(QKeyEvent *);
 
 private:
-	//QStatusBar *statusbar;
 	QVBoxLayout *layout;
 	QTabWidget *hwregstabWidget;
 	HWRegsBlitterBrowserWindow *hwregsblitterWin;
+	HWRegsJerryBrowserWindow *hwregsjerryWin;
 };
 
 
