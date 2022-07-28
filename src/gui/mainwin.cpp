@@ -34,7 +34,7 @@
 // JPM   Apr./2021  Handle number of M68K cycles used in tracing mode, added video output display in a window
 // JPM    May/2021  Check missing dll for the tests pattern
 // JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser, added and slightly modified the save state patch from PvtLewis
-// JPM   July/2022  Added JERRY's exceptions settings
+// JPM   July/2022  Added JERRY's exceptions settings, an Interrupt browser
 //
 
 // FIXED:
@@ -82,6 +82,7 @@
 #include "debug/romcartbrowser.h"
 #include "debug/stackbrowser.h"
 #include "debug/opbrowser.h"
+#include "debug/interuptbrowser.h"
 #include "debug/riscdasmbrowser.h"
 #include "debug/hwregsbrowser.h"
 #include "dac.h"
@@ -204,6 +205,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	stackBrowseWin = new StackBrowserWindow(this);
 	cpuBrowseWin = new CPUBrowserWindow(this);
 	opBrowseWin = new OPBrowserWindow(this);
+	interuptBrowseWin = new InteruptBrowserWindow(this);
 	m68kDasmBrowseWin = new M68KDasmBrowserWindow(this);
 	riscDasmBrowseWin = new RISCDasmBrowserWindow(this);
 	hwRegsBrowseWin = new HWRegsBrowserWindow(this);
@@ -548,6 +550,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	opBrowseAct->setStatusTip(tr("Shows the Jaguar OP browser window"));
 	connect(opBrowseAct, SIGNAL(triggered()), this, SLOT(ShowOPBrowserWin()));
 
+	// Interrupt browser window action
+	interuptBrowseAct = new QAction(QIcon(":/res/tool-interupt.png"), tr("Interrupt Browser"), this);
+	interuptBrowseAct->setStatusTip(tr("Shows the Jaguar interrupt browser window"));
+	connect(interuptBrowseAct, SIGNAL(triggered()), this, SLOT(ShowInteruptBrowserWin()));
+
 	// M68000 disassembly browser window
 	m68kDasmBrowseAct = new QAction(QIcon(":/res/tool-68k-dis.png"), tr("68K Listing Browser"), this);
 	m68kDasmBrowseAct->setStatusTip(tr("Shows the 68K disassembly browser window"));
@@ -630,6 +637,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugWindowsBrowsesMenu->addAction(stackBrowseAct);
 			debugWindowsBrowsesMenu->addAction(cpuBrowseAct);
 			debugWindowsBrowsesMenu->addAction(opBrowseAct);
+			debugWindowsBrowsesMenu->addAction(interuptBrowseAct);
 			debugWindowsBrowsesMenu->addAction(m68kDasmBrowseAct);
 			debugWindowsBrowsesMenu->addAction(riscDasmBrowseAct);
 			debugWindowsBrowsesMenu->addAction(hwRegsBrowseAct);
@@ -662,6 +670,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugMenu->addAction(stackBrowseAct);
 			debugMenu->addAction(cpuBrowseAct);
 			debugMenu->addAction(opBrowseAct);
+			debugMenu->addAction(interuptBrowseAct);
 			debugMenu->addAction(m68kDasmBrowseAct);
 			debugMenu->addAction(riscDasmBrowseAct);
 			debugMenu->addAction(hwRegsBrowseAct);
@@ -832,6 +841,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		debugbar->addAction(stackBrowseAct);
 		debugbar->addAction(cpuBrowseAct);
 		debugbar->addAction(opBrowseAct);
+		debugbar->addAction(interuptBrowseAct);
 		debugbar->addAction(m68kDasmBrowseAct);
 		debugbar->addAction(riscDasmBrowseAct);
 		debugbar->addAction(hwRegsBrowseAct);
@@ -2193,6 +2203,15 @@ void MainWin::ShowStackBrowserWin(void)
 }
 
 
+// Show the Interruption browser window
+void MainWin::ShowInteruptBrowserWin(void)
+{
+	interuptBrowseWin->show();
+	interuptBrowseWin->RefreshContents();
+}
+
+
+// Show the CPU/GPU/DSP registers browser window
 void MainWin::ShowCPUBrowserWin(void)
 {
 	cpuBrowseWin->show();
@@ -2499,6 +2518,13 @@ void MainWin::ReadUISettings(void)
 		size = settings.value("opBrowseWinSize", QSize(400, 400)).toSize();
 		opBrowseWin->resize(size);
 
+		// Interupt browser UI information
+		pos = settings.value("interuptBrowseWinPos", QPoint(200, 200)).toPoint();
+		interuptBrowseWin->move(pos);
+		settings.value("interuptBrowseWinIsVsible", false).toBool() ? ShowInteruptBrowserWin() : void();
+		size = settings.value("interuptBrowseWinSize", QSize(400, 400)).toSize();
+		interuptBrowseWin->resize(size);
+
 		// HW registers UI information
 		pos = settings.value("hwRegsBrowseWinPos", QPoint(200, 200)).toPoint();
 		hwRegsBrowseWin->move(pos);
@@ -2801,6 +2827,10 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("opBrowseWinPos", opBrowseWin->pos());
 		settings.setValue("opBrowseWinIsVisible", opBrowseWin->isVisible());
 		settings.setValue("opBrowseWinSize", opBrowseWin->size());
+		// Interupt browser window
+		settings.setValue("interuptBrowseWinPos", interuptBrowseWin->pos());
+		settings.setValue("interuptBrowseWinIsVsible", interuptBrowseWin->isVisible());
+		settings.setValue("interuptBrowseWinSize", interuptBrowseWin->size());
 		// HW registers browser window
 		settings.setValue("hwRegsBrowseWinPos", hwRegsBrowseWin->pos());
 		settings.setValue("hwRegsBrowseWinIsVisible", hwRegsBrowseWin->isVisible());
@@ -2878,6 +2908,7 @@ void MainWin::AlpineRefreshWindows(void)
 	}
 	stackBrowseWin->RefreshContents();
 	opBrowseWin->RefreshContents();
+	interuptBrowseWin->RefreshContents();
 	riscDasmBrowseWin->RefreshContents();
 	m68kDasmBrowseWin->RefreshContents();
 	hwRegsBrowseWin->RefreshContents();

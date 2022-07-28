@@ -214,8 +214,8 @@ int32_t JERRYI2SInterruptTimer = -1;
 uint32_t jerryI2SCycles;
 uint32_t jerryIntPending;
 
-static uint16_t jerryInterruptMask = 0;
-static uint16_t jerryPendingInterrupt = 0;
+uint16_t jerryInterruptMask = 0;
+uint16_t jerryPendingInterrupt = 0;
 
 // Private function prototypes
 
@@ -265,6 +265,30 @@ size_t jerry_load(FILE *fp)
 	LOADARR8(jerry_ram_8);
 
 	return total_loaded;
+}
+
+//
+// Dump all JERRY register values to the log
+//
+void JERRYDumpIORegistersToLog(void)
+{
+	WriteLog("\n\n---------------------------------------------------------------------\n");
+	WriteLog("JERRY I/O Registers\n");
+	WriteLog("---------------------------------------------------------------------\n");
+	WriteLog("F1%04X    (JPIT1): $%04X\n", JPIT1, GET16(jerry_ram_8, JPIT1));
+	WriteLog("F1%04X    (JPIT2): $%04X\n", JPIT2, GET16(jerry_ram_8, JPIT2));
+	WriteLog("F1%04X    (JPIT3): $%04X\n", JPIT3, GET16(jerry_ram_8, JPIT3));
+	WriteLog("F1%04X    (JPIT4): $%04X\n", JPIT4, GET16(jerry_ram_8, JPIT4));
+	WriteLog("F1%04X     (CLK1): $%04X\n", CLK1, GET16(jerry_ram_8, CLK1));
+	WriteLog("F1%04X     (CLK2): $%04X\n", CLK2, GET16(jerry_ram_8, CLK2));
+	WriteLog("F1%04X     (CLK3): $%04X\n", CLK3, GET16(jerry_ram_8, CLK3));
+	WriteLog("F1%04X (JINTCTRL): $%04X\n", JINTCTRL, GET16(jerry_ram_8, JINTCTRL));
+	WriteLog("F1%04X  (ASIDATA): $%04X\n", ASIDATA, GET16(jerry_ram_8, ASIDATA));
+	WriteLog("F1%04X  (ASICTRL): $%04X\n", ASICTRL, GET16(jerry_ram_8, ASICTRL));
+	WriteLog("F1%04X   (ASICLK): $%04X\n", ASICLK, GET16(jerry_ram_8, ASICLK));
+	WriteLog("F1%04X     (SCLK): $%04X\n", SCLK, GET16(jerry_ram_8, SCLK));
+	WriteLog("F1%04X    (SMODE): $%04X\n", SMODE, GET16(jerry_ram_8, SMODE));
+	WriteLog("---------------------------------------------------------------------\n\n\n");
 }
 
 
@@ -471,30 +495,6 @@ void JERRYSetPendingIRQ(int irq)
 	// This is the shadow of INT (it's a split RO/WO register)
 //	jerryIntPending |= (1 << irq);
 	jerryPendingInterrupt |= irq;
-}
-
-//
-// Dump all JERRY register values to the log
-//
-void JERRYDumpIORegistersToLog(void)
-{
-	WriteLog("\n\n---------------------------------------------------------------------\n");
-	WriteLog("JERRY I/O Registers\n");
-	WriteLog("---------------------------------------------------------------------\n");
-	WriteLog("F1%04X    (JPIT1): $%04X\n", JPIT1,    GET16(jerry_ram_8, JPIT1));
-	WriteLog("F1%04X    (JPIT2): $%04X\n", JPIT2,    GET16(jerry_ram_8, JPIT2));
-	WriteLog("F1%04X    (JPIT3): $%04X\n", JPIT3,    GET16(jerry_ram_8, JPIT3));
-	WriteLog("F1%04X    (JPIT4): $%04X\n", JPIT4,    GET16(jerry_ram_8, JPIT4));
-	WriteLog("F1%04X     (CLK1): $%04X\n", CLK1,     GET16(jerry_ram_8, CLK1));
-	WriteLog("F1%04X     (CLK2): $%04X\n", CLK2,     GET16(jerry_ram_8, CLK2));
-	WriteLog("F1%04X     (CLK3): $%04X\n", CLK3,     GET16(jerry_ram_8, CLK3));
-	WriteLog("F1%04X (JINTCTRL): $%04X\n", JINTCTRL, GET16(jerry_ram_8, JINTCTRL));
-	WriteLog("F1%04X  (ASIDATA): $%04X\n", ASIDATA,  GET16(jerry_ram_8, ASIDATA));
-	WriteLog("F1%04X  (ASICTRL): $%04X\n", ASICTRL,  GET16(jerry_ram_8, ASICTRL));
-	WriteLog("F1%04X   (ASICLK): $%04X\n", ASICLK,   GET16(jerry_ram_8, ASICLK));
-	WriteLog("F1%04X     (SCLK): $%04X\n", SCLK,     GET16(jerry_ram_8, SCLK));
-	WriteLog("F1%04X    (SMODE): $%04X\n", SMODE,    GET16(jerry_ram_8, SMODE));
-	WriteLog("---------------------------------------------------------------------\n\n\n");
 }
 
 

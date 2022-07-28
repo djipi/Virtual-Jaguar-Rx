@@ -4,6 +4,7 @@ Git commit:
 - 
 0) Added JERRY's exceptions settings
 1) Added Jerry registers tab in the HW registers browser window
+2) Added an Interrupt browser window
 
 pre-Release 5b (20th July 2022)
 -------------------------------

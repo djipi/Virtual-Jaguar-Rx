@@ -44,6 +44,7 @@ class MemoryBrowserWindow;
 class StackBrowserWindow;
 class CPUBrowserWindow;
 class OPBrowserWindow;
+class InteruptBrowserWindow;
 class M68KDasmBrowserWindow;
 class RISCDasmBrowserWindow;
 class HWRegsBrowserWindow;
@@ -138,6 +139,7 @@ class MainWin: public QMainWindow
 		void ShowMemoryBrowserWin(const int);
 		void ShowStackBrowserWin(void);
 		void ShowCPUBrowserWin(void);
+		void ShowInteruptBrowserWin(void);
 		void ShowOPBrowserWin(void);
 		void ShowM68KDasmBrowserWin(void);
 		void ShowHWRegsBrowserWin(void);
@@ -189,6 +191,7 @@ class MainWin: public QMainWindow
 		StackBrowserWindow *stackBrowseWin;
 		CPUBrowserWindow *cpuBrowseWin;
 		OPBrowserWindow *opBrowseWin;
+		InteruptBrowserWindow* interuptBrowseWin;
 		M68KDasmBrowserWindow *m68kDasmBrowseWin;
 		RISCDasmBrowserWindow *riscDasmBrowseWin;
 		HWRegsBrowserWindow *hwRegsBrowseWin;
@@ -287,6 +290,7 @@ class MainWin: public QMainWindow
 		QAction *stackBrowseAct;
 		QAction *cpuBrowseAct;
 		QAction *opBrowseAct;
+		QAction* interuptBrowseAct;
 		QAction *m68kDasmBrowseAct;
 		QAction *hwRegsBrowseAct;
 		QAction *riscDasmBrowseAct;

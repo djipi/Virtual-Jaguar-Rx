@@ -108,6 +108,7 @@ HEADERS = \
 	src/gui/debug/m68kdasmbrowser.h \
 	src/gui/debug/memorybrowser.h \
 	src/gui/debug/opbrowser.h \
+	src/gui/debug/interuptbrowser.h \
 	src/gui/debug/riscdasmbrowser.h \
 	src/gui/debug/stackbrowser.h \
 	src/gui/debug/hwregsbrowser.h \
@@ -170,6 +171,7 @@ SOURCES = \
 	src/gui/debug/m68kdasmbrowser.cpp \
 	src/gui/debug/memorybrowser.cpp \
 	src/gui/debug/opbrowser.cpp \
+	src/gui/debug/interuptbrowser.cpp \
 	src/gui/debug/riscdasmbrowser.cpp \
 	src/gui/debug/stackbrowser.cpp \
 	src/gui/debug/hwregsbrowser.cpp \
