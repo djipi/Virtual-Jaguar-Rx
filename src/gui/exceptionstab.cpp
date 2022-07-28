@@ -37,7 +37,9 @@ ExceptionsTab::ExceptionsTab(QWidget * parent/*= 0*/): QWidget(parent)
 	QGroupBox *box3 = new QGroupBox("JERRY");
 	QVBoxLayout *boxJERRY = new QVBoxLayout(box3);
 	JERRYAllowWriteWaveTable = new QCheckBox(tr("Allow writes to the JERRY's wave table"));
+	JERRYAllowWriteWaveTable->setDisabled(true);
 	JERRYUnkwnRegsCatch = new QCheckBox(tr("Allow unsupported JERRY's registers catch"));
+	JERRYUnkwnRegsCatch->setDisabled(true);
 
 	// add checkboxes to the layouts
 	boxGeneral->addWidget(writeROM);
