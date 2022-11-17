@@ -1580,7 +1580,7 @@ bool m68k_write_memory_check(unsigned int address, char *bits, unsigned int valu
 #endif
 	{
 		// Rom writing authorisation detection
-		if (!vjs.allowWritesToROM)
+		if (vjs.allowWritesToROM)
 		{
 			// Calcul the end address
 			if (strstr(bits, "32"))
