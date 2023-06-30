@@ -19,7 +19,7 @@
 // JPM        2020  Added ELF section types check, new error messages and ELF executable file information
 //  RG   Jan./2021  Linux build fixes
 // JPM  06/23/2021  Added ELF sections check
-// JPM  06/29/2023  Fix ELF/DWARF available valid information usage
+// JPM  06/29/2023  Fix ELF/DWARF available valid information usage, and added ELF section names
 //
 
 #include "file.h"
@@ -265,15 +265,18 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 											{
 											case ELF_debug_TYPE:
 											case ELF_debug_abbrev_TYPE:
+											case ELF_debug_addr_TYPE:
 											case ELF_debug_aranges_TYPE:
 											case ELF_debug_frame_TYPE:
 											case ELF_debug_info_TYPE:
 											case ELF_debug_line_TYPE:
 											case ELF_debug_loc_TYPE:
+											case ELF_debug_loclists_TYPE:
 											case ELF_debug_macinfo_TYPE:
 											case ELF_debug_pubnames_TYPE:
 											case ELF_debug_pubtypes_TYPE:
 											case ELF_debug_ranges_TYPE:
+											case ELF_debug_rnglists_TYPE:
 											case ELF_debug_str_TYPE:
 											case ELF_debug_types_TYPE:						
 												break;

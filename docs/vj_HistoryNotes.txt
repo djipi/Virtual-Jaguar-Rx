@@ -3,6 +3,7 @@ WiP 5c (TBA)
 Git commit: 
 -
 0) Fix the ELF sections check to allow usage of ELF/DWARF available valid information
+1) Added ELF section names
 
 pre-Release 5b (20th July 2022)
 -------------------------------
