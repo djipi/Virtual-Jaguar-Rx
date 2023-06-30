@@ -19,6 +19,7 @@
 // JPM        2020  Added ELF section types check, new error messages and ELF executable file information
 //  RG   Jan./2021  Linux build fixes
 // JPM  06/23/2021  Added ELF sections check
+// JPM  06/29/2023  Fix ELF/DWARF available valid information usage
 //
 
 #include "file.h"
@@ -288,7 +289,7 @@ WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress
 
 											default:
 												WriteLog("FILE: ELF section %s is not recognized\n", NameSection);
-												error = true;
+												//error = true;
 												break;
 											}
 										}
