@@ -210,10 +210,10 @@
 /*static*/ uint8_t jerry_ram_8[0x10000];
 
 //uint8_t analog_x, analog_y;
-static uint32_t JERRYPIT1Prescaler;
-static uint32_t JERRYPIT1Divider;
-static uint32_t JERRYPIT2Prescaler;
-static uint32_t JERRYPIT2Divider;
+static uint16_t JERRYPIT1Prescaler;
+static uint16_t JERRYPIT1Divider;
+static uint16_t JERRYPIT2Prescaler;
+static uint16_t JERRYPIT2Divider;
 static int32_t jerry_timer_1_counter;
 static int32_t jerry_timer_2_counter;
 //uint32_t JERRYI2SInterruptDivide = 8;
@@ -239,10 +239,10 @@ size_t jerry_dump(FILE *fp)
 {
 	size_t total_dumped = 0;
 
-	DUMP32(JERRYPIT1Prescaler);
-	DUMP32(JERRYPIT1Divider);
-	DUMP32(JERRYPIT2Prescaler);
-	DUMP32(JERRYPIT2Divider);
+	DUMP16(JERRYPIT1Prescaler);
+	DUMP16(JERRYPIT1Divider);
+	DUMP16(JERRYPIT2Prescaler);
+	DUMP16(JERRYPIT2Divider);
 	DUMPS32(jerry_timer_1_counter);
 	DUMPS32(jerry_timer_2_counter);
 	DUMPS32(JERRYI2SInterruptTimer);
@@ -261,10 +261,10 @@ size_t jerry_load(FILE *fp)
 {
 	size_t total_loaded = 0;
   
-	LOAD32(JERRYPIT1Prescaler);
-	LOAD32(JERRYPIT1Divider);
-	LOAD32(JERRYPIT2Prescaler);
-	LOAD32(JERRYPIT2Divider);
+	LOAD16(JERRYPIT1Prescaler);
+	LOAD16(JERRYPIT1Divider);
+	LOAD16(JERRYPIT2Prescaler);
+	LOAD16(JERRYPIT2Divider);
 	LOADS32(jerry_timer_1_counter);
 	LOADS32(jerry_timer_2_counter);
 	LOADS32(JERRYI2SInterruptTimer);
@@ -305,7 +305,7 @@ void JERRYDumpIORegistersToLog(void)
 #endif
 
 
-// I2S Interupt (sound) reset
+// I2S Interupt (local synchronous serial interface) reset
 void JERRYResetI2S(void)
 {
 	//WriteLog("i2s: reseting\n");
