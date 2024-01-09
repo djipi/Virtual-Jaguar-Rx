@@ -328,14 +328,14 @@ void JERRYResetPIT1(void)
 }
 
 
-// Timer 2 reset
+// Timer 2 callback reset
 void JERRYResetPIT2(void)
 {
 	RemoveCallback(JERRYPIT2Callback);
 
-	if (JERRYPIT1Prescaler | JERRYPIT1Divider)
+	if (JERRYPIT2Prescaler | JERRYPIT2Divider)
 	{
-		double usecs = (float)(JERRYPIT2Prescaler + 1) * (float)(JERRYPIT2Divider + 1) * RISC_CYCLE_IN_USEC;
+		double usecs = ((JERRYPIT2Prescaler + 1) & 0xffff) * ((JERRYPIT2Divider + 1) & 0xffff) * RISC_CYCLE_IN_USEC;
 		SetCallbackTime(JERRYPIT2Callback, usecs, EVENT_JERRY);
 	}
 }
