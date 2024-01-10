@@ -19,7 +19,7 @@ class InteruptBrowserWindow: public QWidget
 		void RefreshContents(void);
 
 	private:
-		QCheckBox *jerry[2][4];
+		QCheckBox *jerry[2][6];
 
 	public:
 };

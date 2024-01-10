@@ -17,8 +17,8 @@
 #include "jerry.h"
 
 
-//
-const char* jerrydesc[] = { "External", "DSP", "Timer One (sample rate)", "Timer Two (tempo)" /*, "Asynchronous Serial Interface", "Synchronous Serial Interface"*/ };
+// Jerry's JINTCTRL interupt names
+const char* JINTCTRLdesc[6] = { "External", "DSP", "Timer One (sample rate)", "Timer Two (tempo)", "Asynchronous Serial Interface", "Synchronous Serial Interface" };
 
 
 // 
@@ -42,9 +42,9 @@ InteruptBrowserWindow::InteruptBrowserWindow(QWidget * parent/*= 0*/): QWidget(p
 	for (size_t i = 0; i < 2; i++)
 	{
 		QVBoxLayout *layoutdesc = !i ? layoutSources : layoutPending;
-		for (size_t j = 0; j < 4; j++)
+		for (size_t j = 0; j < 6; j++)
 		{
-			jerry[i][j] = /*i ? new QCheckBox(tr("")) : */ new QCheckBox(tr(jerrydesc[j]));
+			jerry[i][j] = /*i ? new QCheckBox(tr("")) : */ new QCheckBox(tr(JINTCTRLdesc[j]));
 			layoutdesc->addWidget(jerry[i][j]);
 			jerry[i][j]->setEnabled(false);
 		}
@@ -71,7 +71,7 @@ void InteruptBrowserWindow::RefreshContents(void)
 		for (size_t i = 0; i < 2; i++)
 		{
 			size_t v = !i ? jerryInterruptMask : jerryPendingInterrupt;
-			for (size_t j = 0, b = 1; j < 4; j++, b <<= 1)
+			for (size_t j = 0, b = 1; j < 6; j++, b <<= 1)
 			{
 				jerry[i][j]->setChecked(v & b);
 			}
