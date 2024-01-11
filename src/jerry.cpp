@@ -532,7 +532,6 @@ void JERRYSetPendingIRQ(int irq)
 }
 
 
-//
 // JERRY byte access (read)
 //
 // Memory emulation is distributed among arrrays & variables
@@ -546,49 +545,72 @@ uint8_t JERRYReadByte(uint32_t offset, uint32_t who/*=UNKNOWN*/)
 	{
 		return DSPReadByte(offset, who);
 	}
-	else if ((offset >= DSP_WORK_RAM_BASE) && (offset < (DSP_WORK_RAM_BASE + 0x2000)))
-		return DSPReadByte(offset, who);
-	// value from LRXD/RRXD/SSTAT $F1A148/4C/50 (really 16-bit registers...)
-	else if ((offset >= 0xF1A148) && (offset <= 0xF1A153))
-		return DACReadByte(offset, who);
-
-//This is WRONG!
-//	else if (offset >= 0xF10000 && offset <= 0xF10007)
-//This is still wrong. What needs to be returned here are the values being counted down
-//in the jerry_timer_n_counter variables... !!! FIX !!! [DONE]
-
-//This is probably the problem with the new timer code... This is invalid
-//under the new system... !!! FIX !!!
-	else if ((offset >= 0xF10036) && (offset <= 0xF1003D))
+	else
 	{
-WriteLog("JERRY: Unhandled timer read (BYTE) at %08X...\n", offset);
-	}
-//	else if (offset >= 0xF10010 && offset <= 0xF10015)
-//		return clock_byte_read(offset);
-//	else if (offset >= 0xF17C00 && offset <= 0xF17C01)
-//		return anajoy_byte_read(offset);
-	else if ((offset >= 0xF14000) && (offset <= 0xF14003))
-//		return JoystickReadByte(offset) | EepromReadByte(offset);
-	{
-		uint16_t value = JoystickReadWord(offset & 0xFE);
-
-		if (offset & 0x01)
+		// value from DSP's memory
+		if ((offset >= DSP_WORK_RAM_BASE) && (offset < (DSP_WORK_RAM_BASE + 0x2000)))
 		{
-			value &= 0xFF;
+			return DSPReadByte(offset, who);
 		}
 		else
 		{
-			value >>= 8;
+			// value from LRXD/RRXD/SSTAT $F1A148/4C/50 (really 16-bit registers...)
+			if ((offset >= 0xF1A148) && (offset <= 0xF1A153))
+			{
+				return DACReadByte(offset, who);
+			}
+
+		//This is WRONG!
+		//	else if (offset >= 0xF10000 && offset <= 0xF10007)
+		//This is still wrong. What needs to be returned here are the values being counted down
+		//in the jerry_timer_n_counter variables... !!! FIX !!! [DONE]
+
+		//This is probably the problem with the new timer code... This is invalid
+		//under the new system... !!! FIX !!!
+			else
+			{
+				if ((offset >= 0xF10036) && (offset <= 0xF1003D))
+				{
+					WriteLog("JERRY: Unhandled timer read (BYTE) at %08X...\n", offset);
+				}
+				//	else if (offset >= 0xF10010 && offset <= 0xF10015)
+				//		return clock_byte_read(offset);
+				//	else if (offset >= 0xF17C00 && offset <= 0xF17C01)
+				//		return anajoy_byte_read(offset);
+				else
+				{
+					// value from digital inputs (Joystick & Joybuts)
+					if ((offset >= 0xF14000) && (offset <= 0xF14003))
+					{
+						//		return JoystickReadByte(offset) | EepromReadByte(offset);
+						uint16_t value = JoystickReadWord(offset & 0xFE);
+
+						if (offset & 0x01)
+						{
+							value &= 0xFF;
+						}
+						else
+						{
+							value >>= 8;
+						}
+
+						// This is wrong, should only have the lowest bit from $F14001
+						return value | EepromReadByte(offset);
+					}
+					else
+					{
+						if ((offset >= 0xF14000) && (offset <= 0xF1A0FF))
+						{
+							return EepromReadByte(offset);
+						}
+					}
+				}
+
+				// value from the JERRY's memory map
+				return jerry_ram_8[offset & 0xFFFF];
+			}
 		}
-
-		// This is wrong, should only have the lowest bit from $F14001
-		return value | EepromReadByte(offset);
 	}
-	else if ((offset >= 0xF14000) && (offset <= 0xF1A0FF))
-		return EepromReadByte(offset);
-
-	// value from the JERRY's memory
-	return jerry_ram_8[offset & 0xFFFF];
 }
 
 
@@ -605,38 +627,76 @@ uint16_t JERRYReadWord(uint32_t offset, uint32_t who/*=UNKNOWN*/)
 	{
 		return DSPReadWord(offset, who);
 	}
-	else if ((offset >= DSP_WORK_RAM_BASE) && (offset <= (DSP_WORK_RAM_BASE + 0x1FFF)))
-		return DSPReadWord(offset, who);
-	// value from LRXD/RRXD/SSTAT $F1A148/4C/50 (really 16-bit registers...)
-	else if ((offset >= 0xF1A148) && (offset <= 0xF1A153))
-		return DACReadWord(offset, who);
-//This is WRONG!
-//	else if ((offset >= 0xF10000) && (offset <= 0xF10007))
-//This is still wrong. What needs to be returned here are the values being counted down
-//in the jerry_timer_n_counter variables... !!! FIX !!! [DONE]
-	else if ((offset >= 0xF10036) && (offset <= 0xF1003D))
+	else
 	{
-WriteLog("JERRY: Unhandled timer read (WORD) at %08X...\n", offset);
+		if ((offset >= DSP_WORK_RAM_BASE) && (offset <= (DSP_WORK_RAM_BASE + 0x1FFF)))
+		{
+			return DSPReadWord(offset, who);
+		}
+		// value from LRXD/RRXD/SSTAT $F1A148/4C/50 (really 16-bit registers...)
+		else
+		{
+			if ((offset >= 0xF1A148) && (offset <= 0xF1A153))
+			{
+				return DACReadWord(offset, who);
+			}
+			//This is WRONG!
+			//	else if ((offset >= 0xF10000) && (offset <= 0xF10007))
+			//This is still wrong. What needs to be returned here are the values being counted down
+			//in the jerry_timer_n_counter variables... !!! FIX !!! [DONE]
+			else
+			{
+				if ((offset >= 0xF10036) && (offset <= 0xF1003D))
+				{
+					WriteLog("JERRY: Unhandled timer read (WORD) at %08X...\n", offset);
+				}
+				//	else if ((offset >= 0xF10010) && (offset <= 0xF10015))
+				//		return clock_word_read(offset);
+				else
+				{
+					if (offset == 0xF10020)
+					{
+						//		return jerryIntPending;
+						return jerryPendingInterrupt;
+					}
+					//	else if ((offset >= 0xF17C00) && (offset <= 0xF17C01))
+					//		return anajoy_word_read(offset);
+					else
+					{
+						// value from digital inputs (Joystick)
+						if (offset == 0xF14000)
+						{
+							return (JoystickReadWord(offset) & 0xFFFE) | EepromReadWord(offset);
+						}
+						else
+						{
+							// value from digital inputs (Joybuts)
+							if ((offset >= 0xF14002) && (offset < 0xF14003))
+							{
+								return JoystickReadWord(offset);
+							}
+							else
+							{
+								if ((offset >= 0xF14000) && (offset <= 0xF1A0FF))
+								{
+									return EepromReadWord(offset);
+								}
+								else
+								{
+									/*if (offset >= 0xF1D000)
+										WriteLog("JERRY: Reading word at %08X [%04X]...\n", offset, ((uint16_t)jerry_ram_8[(offset+0)&0xFFFF] << 8) | jerry_ram_8[(offset+1)&0xFFFF]);//*/
+								}
+							}
+						}
+					}
+				}
+
+				// value from the Jerry memory map
+				offset &= 0xFFFF;				// Prevent crashing...!
+				return ((uint16_t)jerry_ram_8[offset + 0] << 8) | jerry_ram_8[offset + 1];
+			}
+		}
 	}
-//	else if ((offset >= 0xF10010) && (offset <= 0xF10015))
-//		return clock_word_read(offset);
-	else if (offset == 0xF10020)
-//		return jerryIntPending;
-		return jerryPendingInterrupt;
-//	else if ((offset >= 0xF17C00) && (offset <= 0xF17C01))
-//		return anajoy_word_read(offset);
-	else if (offset == 0xF14000)
-		return (JoystickReadWord(offset) & 0xFFFE) | EepromReadWord(offset);
-	else if ((offset >= 0xF14002) && (offset < 0xF14003))
-		return JoystickReadWord(offset);
-	else if ((offset >= 0xF14000) && (offset <= 0xF1A0FF))
-		return EepromReadWord(offset);
-
-/*if (offset >= 0xF1D000)
-	WriteLog("JERRY: Reading word at %08X [%04X]...\n", offset, ((uint16_t)jerry_ram_8[(offset+0)&0xFFFF] << 8) | jerry_ram_8[(offset+1)&0xFFFF]);//*/
-
-	offset &= 0xFFFF;				// Prevent crashing...!
-	return ((uint16_t)jerry_ram_8[offset+0] << 8) | jerry_ram_8[offset+1];
 }
 
 
@@ -774,9 +834,9 @@ else if (offset == 0xF10014)
 //	WriteLog("JERRY: D_FLAGS+2 word written by %s: %u\n", whoName[who], data);
 else if (offset == 0xF10020)
 	WriteLog("JERRY: JINTCTRL word written by %s: $%04X (%s%s%s%s%s%s)\n", whoName[who], data,
-		(data & 0x01 ? "Extrnl " : ""), (data & 0x02 ? "DSP " : ""),
-		(data & 0x04 ? "Timer0 " : ""), (data & 0x08 ? "Timer1 " : ""),
-		(data & 0x10 ? "ASI " : ""), (data & 0x20 ? "I2S " : ""));
+	(data & 0x01 ? "Extrnl " : ""), (data & 0x02 ? "DSP " : ""),
+	(data & 0x04 ? "Timer0 " : ""), (data & 0x08 ? "Timer1 " : ""),
+	(data & 0x10 ? "ASI " : ""), (data & 0x20 ? "I2S " : ""));
 #endif
 		// write the value to a DSP's control register (except D_MACHI/$F1A120 which is Read Only)
 	if ((offset >= DSP_CONTROL_RAM_BASE) && (offset < (DSP_CONTROL_RAM_BASE + 0x20)))
