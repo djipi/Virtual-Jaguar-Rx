@@ -8,6 +8,7 @@
 // WHO  WHEN        WHAT
 // ---  ----------  ------------------------------------------------------------
 // JPM   July/2022  Created this file
+// JPM   Jan./2024  Added ASI & I2S from JINTCTRL
 //
 
 // STILL TO DO:

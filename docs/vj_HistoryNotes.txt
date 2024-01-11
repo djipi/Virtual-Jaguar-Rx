@@ -5,6 +5,8 @@ Git commit:
 0) Added JERRY's exceptions settings
 1) Added Jerry registers tab in the HW registers browser window
 2) Added an Interrupt browser window
+3) Fix PIT1 and PIT2 types to fit with console HW
+4) Fix PIT1 and PIT2 callback timing calculus
 
 pre-Release 5b (20th July 2022)
 -------------------------------
@@ -308,21 +310,18 @@ Known issues
 -- The application needs to set the SP (Stack) in accordance
 7) The Exception Vector Table window displays only 65 vectors
 -- Missing vectors may be added in future release
-8) User needs to manualy check if the Atari Jaguar executable match his source code files
--- Otherwise, source code and assembly may not match or leads to instabilities
-9) The emulator needs to be restarted in case of the following actions occur
+8) The emulator needs to be restarted in case of the following actions occur
 -- Key bindings changes
 -- BIOS selection changes and without new executable load
-10) In the case of a ROM cartridge writing, and with occuring breakpoint, the PC pointer will point at the next instruction and not at the instruction causing the breakpoint
-11) Emulator will crash in case of wrong address value provided in the memory browser
-12) The RAM access log is limited to the 2MB
-13) In various occasions, global variables may be duplicated or without name in the DWARF information
+9) In the case of a ROM cartridge writing, and with occuring breakpoint, the PC pointer will point at the next instruction and not at the instruction causing the breakpoint
+10) Emulator will crash in case of wrong address value provided in the memory browser
+11) The RAM access log is limited to the 2MB
+12) In various occasions, global variables may be duplicated or without name in the DWARF information
 -- It may come from the Vlink linker and/or GCC 7.1.0 or 8.2.0 compilation with -gdwarf-2 option
-14) Source code disply only assembled code from vasm with option -dwarf
-15) 
-16) Some ASCII characters may be not displayed correctly
+13) Source code disply only assembled code from vasm with option -dwarf
+14) Some ASCII characters may be not displayed correctly
 -- Probably depend how the text is displayed, this is related to the Qt/HTML encoding done when reading DWARF file
-17) Potential legacy crash when leaving emulator in pause mode for a long period of time
+15) Potential legacy crash when leaving emulator in pause mode for a long period of time
 -- Need more investigations
 
 Cosmetic / UX issues

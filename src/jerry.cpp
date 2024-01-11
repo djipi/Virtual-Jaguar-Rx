@@ -16,6 +16,7 @@
 // ---  ----------  -----------------------------------------------------------
 // JLH  11/25/2009  Major rewrite of memory subsystem and handlers
 // JPM  March/2022  Added the save state patch from PvtLewis
+// JPM   Jan./2024  Fix PIT1 & PIT2 types and their callback timing calculus
 //
 
 // STILL TO DO:
