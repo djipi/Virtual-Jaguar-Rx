@@ -16,7 +16,7 @@
 // ---  ----------  -----------------------------------------------------------
 // JLH  11/25/2009  Major rewrite of memory subsystem and handlers
 // JPM  March/2022  Added the save state patch from PvtLewis
-// JPM   Jan./2024  Fix PIT1 & PIT2 types and their callback timing calculus
+// JPM   Jan./2024  Fix PIT1 & PIT2 types, callback timing calculus and partial fix for their read-only registers
 //
 
 // STILL TO DO:
@@ -26,6 +26,7 @@
 // Check the unaligned address (to use an exception check?)
 // JERRY: Unhandled timer read and write
 // Check, and fix, the tests for the offets limits
+// To handle the PIT1 & PIT2 read-only registers
 //
 
 // ------------------------------------------------------------
@@ -878,24 +879,28 @@ else if (offset == 0xF10020)
 	}
 	else if ((offset >= 0xF10000) && (offset <= 0xF10007))
 	{
+		// save value in the read-only registers ($F10036 to $F1003C)
+		jerry_ram_8[(offset + 0x36) & 0xFFFF] = (data >> 8) & 0xFF;
+		jerry_ram_8[(offset + 0x37) & 0xFFFF] = data & 0xFF;
+
 		switch(offset & 0x07)
 		{
-							// Timer 1 Pre-scaler
+			// Timer 1 Pre-scaler
 		case 0:
 			JERRYPIT1Prescaler = data;
 			JERRYResetPIT1();
 			break;
-							// Timer 1 Divider
+			// Timer 1 Divider
 		case 2:
 			JERRYPIT1Divider = data;
 			JERRYResetPIT1();
 			break;
-							// Timer 2 Pre-scaler
+			// Timer 2 Pre-scaler
 		case 4:
 			JERRYPIT2Prescaler = data;
 			JERRYResetPIT2();
 			break;
-							// Timer 2 Divider
+			// Timer 2 Divider
 		case 6:
 			JERRYPIT2Divider = data;
 			JERRYResetPIT2();

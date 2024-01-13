@@ -5,8 +5,9 @@ Git commit:
 0) Added JERRY's exceptions settings
 1) Added Jerry registers tab in the HW registers browser window
 2) Added an Interrupt browser window
-3) Fix PIT1 and PIT2 types to fit with console HW
+3) Fix PIT1 and PIT2 types to fit with console HW requirements
 4) Fix PIT1 and PIT2 callback timing calculus
+5) Partial fix for the PIT1 and PIT2's read-only registers
 
 pre-Release 5b (20th July 2022)
 -------------------------------
