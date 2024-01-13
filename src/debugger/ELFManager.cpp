@@ -14,6 +14,7 @@
 // JPM  03/13/2020  Added ELF & DWARF .debug* types
 //  RG   Jan./2021  Linux build fixes
 // JPM  06/23/2021  Added ELF section names
+// JPM  06/29/2023  Added ELF section names
 //
 
 #include <stdlib.h>
@@ -62,15 +63,18 @@ ELFSectionType	ELFTabSectionType[] =	{
 	{ ".symtab", ELF_symtab_TYPE },
 	{ ".strtab", ELF_strtab_TYPE },
 	{ ".debug_abbrev", ELF_debug_abbrev_TYPE },
+	{ ".debug_addr", ELF_debug_addr_TYPE},
 	{ ".debug_aranges", ELF_debug_aranges_TYPE },
 	{ ".debug_frame", ELF_debug_frame_TYPE },
 	{ ".debug_info", ELF_debug_info_TYPE },
 	{ ".debug_line", ELF_debug_line_TYPE },
 	{ ".debug_loc", ELF_debug_loc_TYPE },
+	{ ".debug_loclists", ELF_debug_loclists_TYPE },
 	{ ".debug_macinfo", ELF_debug_macinfo_TYPE },
 	{ ".debug_pubnames", ELF_debug_pubnames_TYPE },
 	{ ".debug_pubtypes", ELF_debug_pubtypes_TYPE },
 	{ ".debug_ranges", ELF_debug_ranges_TYPE },
+	{ ".debug_rnglists", ELF_debug_rnglists_TYPE },
 	{ ".debug_str", ELF_debug_str_TYPE },
 	{ ".debug_types", ELF_debug_types_TYPE }
 };

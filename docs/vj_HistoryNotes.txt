@@ -1,18 +1,20 @@
-pre-Release 5c (TBA)
---------------------
+WiP 5c (TBA)
+------------
 Git commit:
-- 
-0) Added JERRY's exceptions settings
-1) Added Jerry registers tab in the HW registers browser window
-2) Added an Interrupt browser window
-3) Fix PIT1 and PIT2 types to fit with console HW requirements
-4) Fix PIT1 and PIT2 callback timing calculus
-5) Partial fix for the PIT1 and PIT2's read-only registers
+-
+0) Fix the ELF sections check to allow usage of ELF/DWARF available valid information
+1) Added ELF section names
+2) Added JERRY's exceptions settings
+3) Added Jerry registers tab in the HW registers browser window
+4) Added an Interrupt browser window
+5) Fix PIT1 and PIT2 types to fit with console HW requirements
+6) Fix PIT1 and PIT2 callback timing calculus
+7) Partial fix for the PIT1 and PIT2's read-only registers
 
 pre-Release 5b (20th July 2022)
 -------------------------------
 Git commit: 351dc419d114719a4f240c616640d5c0ea520a04
-- 
+-
 0) Fix compilation error with gcc
 1) Added the save state patch from PvtLewis (from Atari Age's forum)
 2) Compilation warning fixes for the M68K project
