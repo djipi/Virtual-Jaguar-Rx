@@ -13,7 +13,7 @@
 #include "hwregsjerrybrowser.h"
 
 
-typedef enum { hwregsnull, hwregsro, hwregswo, hwregsrw } hwregsaccess;
+typedef enum { hwregsnull = 0x0, hwregsro = 0x1, hwregswo = 0x2, hwregsr = 0x4, hwregsw = 0x8, hwregsrw = (hwregsr | hwregsw) } hwregsaccess;
 
 
 // 
