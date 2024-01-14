@@ -4,6 +4,7 @@ Git commit:
 -
 0) Fix the ELF sections check to allow usage of ELF/DWARF available valid information
 1) Added ELF section names
+2) Added support for SDL2 library 64bits for VS 2017
 
 pre-Release 5b (20th July 2022)
 -------------------------------
@@ -345,7 +346,7 @@ Project information
 4) libdwarf 20210528 library 64bits for VS 2017
 5) Qt 5.12.0 library 64bits for VS 2017
 6) Zlib 1.2.11 library 64bits for VS 2017
-7) SDL 1.2.15 library 64bits for VS 2017
+7) SDL2 2.28.5 library 64bits for VS 2017
 8) The original make files have been modified to follow the requirements and modifications
 9) The 'Rx' word has been added to the emulator name to make distinction with the official version
 10) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
