@@ -92,6 +92,7 @@ struct VJSettings
 	bool disasmopcodes;
 	bool displayHWlabels;
 	bool useFastBlitter;
+	bool useDisplayEmuFPS;										// Show the emulation framerate in the status bar
 	bool compressSaveStates;									// Save States compression
 	bool displayFullSourceFilename;
 	bool ELFSectionsCheck;

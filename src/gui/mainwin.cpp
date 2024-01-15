@@ -34,6 +34,7 @@
 // JPM   Apr./2021  Handle number of M68K cycles used in tracing mode, added video output display in a window
 // JPM    May/2021  Check missing dll for the tests pattern
 // JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser, added and slightly modified the save state patch from PvtLewis
+// JPM   Jan./2024  Use setting for the emulation framerate display
 //
 
 // FIXED:
@@ -1372,7 +1373,7 @@ static uint32_t refresh = 0;
 	uint32_t fpsDecimalPart = framesPerSecond % 10;
 	// If this is updated too frequently to be useful, we can throttle it down
 	// so that it only updates every 10th frame or so
-	statusBar()->showMessage(QString("%1.%2 FPS").arg(fpsIntegerPart).arg(fpsDecimalPart));
+	vjs.useDisplayEmuFPS ? statusBar()->showMessage(QString("%1.%2 FPS").arg(fpsIntegerPart).arg(fpsDecimalPart)) : statusBar()->showMessage(QString("FPS: Off"));
 	oldTimestamp = timestamp;
 
 	if (M68KDebugHaltStatus())
@@ -2320,6 +2321,7 @@ void MainWin::ReadSettings(void)
 	vjs.GPUEnabled = settings.value("GPUEnabled", true).toBool();
 	vjs.DSPEnabled = settings.value("DSPEnabled", true).toBool();
 	allowUnknownSoftware = settings.value("showUnknownSoftware", false).toBool();
+	vjs.useDisplayEmuFPS = settings.value("useDisplayEmuFPS", true).toBool();
 
 	// read the exceptions settings
 	vjs.allowWritesToROM = settings.value("writeROM", true).toBool();
@@ -2664,6 +2666,7 @@ void MainWin::WriteSettings(void)
 	settings.setValue("fullscreen", vjs.fullscreen);
 	settings.setValue("showUnknownSoftware", allowUnknownSoftware);
 	settings.setValue("useFastBlitter", vjs.useFastBlitter);
+	settings.setValue("useDisplayEmuFPS", vjs.useDisplayEmuFPS);
 
 	// write the exceptions settings 
 	settings.setValue("writeROM", vjs.allowWritesToROM);
