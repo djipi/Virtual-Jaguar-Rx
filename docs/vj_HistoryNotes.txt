@@ -4,6 +4,7 @@ Git commit:
 -
 0) Fix the ELF sections check to allow usage of ELF/DWARF available valid information
 1) Added ELF section names
+2) Set optimization for code speed in the VS2017 project
 
 pre-Release 5b (20th July 2022)
 -------------------------------

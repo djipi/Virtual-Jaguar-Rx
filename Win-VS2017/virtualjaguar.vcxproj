@@ -70,7 +70,7 @@
       <DisableSpecificWarnings>4577;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ExceptionHandling>Sync</ExceptionHandling>
       <ObjectFileName>$(IntDir)obj\</ObjectFileName>
-      <Optimization>Full</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_WINDOWS;UNICODE;WIN32;WIN64;__GCCWIN32__;QT_NO_DEBUG;QT_OPENGL_LIB;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
