@@ -19,6 +19,7 @@
 // JPM  Sept./2017  Added the 'Rx' word to the emulator name, updated the credits line, added option (--es-all, --es-ui, --es-alpine & --es-debugger) to support the erase settings
 // JPM   Oct./2018  Added the Rx version's contact in the help text, added timer initialisation in the SDL_Init
 // JPM   Apr./2019  Fixed a command line option duplication
+// JPM   Jan./2024  Added the missing timer for the Quit Sub System
 //
 
 #include "app.h"
@@ -117,7 +118,7 @@ int main(int argc, char * argv[])
 	}
 	else
 	{
-		WriteLog("VJ: SDL (joystick, audio) successfully initialized.\n");
+		WriteLog("VJ: SDL (joystick, audio and timer) successfully initialized.\n");
 		DBGManager_Init();
 		App app(argc, argv);					// Declare an instance of the application
 		Gamepad::AllocateJoysticks();
@@ -127,7 +128,7 @@ int main(int argc, char * argv[])
 		Gamepad::DeallocateJoysticks();
 
 		// Free SDL components last...!
-		SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO);
+		SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER);
 		SDL_Quit();
 	}
 

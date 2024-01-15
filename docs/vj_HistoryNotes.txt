@@ -6,6 +6,7 @@ Git commit:
 1) Added ELF section names
 2) Set optimization for code speed in the VS2017 project
 3) Added a setting for the emulation framerate display
+4) Minor fix for the application's exit
 
 pre-Release 5b (20th July 2022)
 -------------------------------
