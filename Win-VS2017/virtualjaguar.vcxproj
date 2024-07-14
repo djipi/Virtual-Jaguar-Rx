@@ -180,6 +180,7 @@
     <ClCompile Include="..\src\gui\exceptionstab.cpp" />
     <ClCompile Include="..\src\gui\keybindingstab.cpp" />
     <ClCompile Include="..\src\gui\modelsbiostab.cpp" />
+    <ClCompile Include="..\src\gui\stdConsole.cpp" />
     <ClCompile Include="..\src\LEB128.cpp" />
     <ClCompile Include="..\src\log.cpp" />
     <ClCompile Include="..\src\settings.cpp" />
@@ -307,6 +308,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_stackbrowser.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_stdConsole.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_VideoWin.cpp">
@@ -478,6 +482,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_stackbrowser.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_stdConsole.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_VideoWin.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -645,6 +652,16 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_LIB -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-20210528-VS2017\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-IC:\SDK\OpenGL\include" "-I.\GeneratedFiles"</Command>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath);$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_NO_DEBUG -DQT_OPENGL_LIB -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-IC:\SDK\OpenGL\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-20210528-VS2017\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-I.\GeneratedFiles"</Command>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\stdConsole.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_LIB -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-20210528-VS2017\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-IC:\SDK\OpenGL\include" "-I.\GeneratedFiles"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_NO_DEBUG -DQT_OPENGL_LIB -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-IC:\SDK\OpenGL\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-20210528-VS2017\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-I.\GeneratedFiles"</Command>

@@ -5,6 +5,13 @@
 #include <stdint.h>
 #include "memory.h"							// For "UNKNOWN" enum
 
+// Console standard emulation structure
+typedef struct stdConsoleInfo
+{
+	size_t Adr;					// Console standard's emulation value address
+	char BufText[10000];		// Console standard's emulation text buffering
+}S_stdConsoleInfo;
+
 // Breakpoint struture
 typedef struct BrkInfo
 {
@@ -34,7 +41,7 @@ extern void JaguarWriteLong(uint32_t offset, uint32_t data, uint32_t who = UNKNO
 
 extern bool JaguarInterruptHandlerIsValid(uint32_t i);
 extern void JaguarDasm(uint32_t offset, uint32_t qt);
-
+// Execution emulation control
 extern void JaguarExecuteNew(void);
 extern int JaguarStepInto(void);
 extern int JaguarStepOver(int depth);
@@ -49,8 +56,14 @@ extern bool bpmActive, bpmSaveActive;
 extern size_t bpmHitCounts;
 extern uint32_t bpmAddress1;
 extern bool startM68KTracing;
+// Console standard emulation list
+extern S_stdConsoleInfo stdConsoleInfo[];
+// Breakpoint functions list
 extern S_BrkInfo *brkInfo;
 extern size_t brkNbr;
+
+typedef enum { STDCONSOLE_STDIN, STDCONSOLE_STDOUT, STDCONSOLE_STDER }STDCONSOLE;
+extern bool stdConsole_set(STDCONSOLE NumStd, unsigned int adr);
 
 // Various clock rates
 

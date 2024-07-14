@@ -8,6 +8,8 @@ Git commit:
 3) Added a setting for the emulation framerate display
 4) Minor fix for the application's exit
 5) Windows refresh rate placeholder text update in the alpine's configure tab
+6) Added a Console standard emulation
+-- Support only stdout
 
 pre-Release 5b (20th July 2022)
 -------------------------------

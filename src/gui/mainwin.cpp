@@ -17,9 +17,7 @@
 // JLH  12/20/2010  Added settings, menus & toolbars
 // JLH  07/05/2011  Added CD BIOS functionality to GUI
 // JPM   June/2016  Visual Studio support & Soft debugger integration
-// JPM  01/11/2017  Added stack browser
-// JPM   Feb./2017  Added GPU/DSP disassembly
-// JPM  07/12/2017  Added all Watch window
+// JPM        2017  Added stack browser, added GPU/DSP disassembly, added all Watch window
 // JPM   Aug./2017  Added heap allocator and memories window, a restart feature, and a [Not Supported] breakpoints window
 // JPM  Sept./2017  Save position, size & visibility windows status in the settings; added Exception Vector Table window, the 'Rx' word to the emulator window name, and the keybindings in the settings
 // JPM  11/04/2017  Added the local window
@@ -35,6 +33,7 @@
 // JPM    May/2021  Check missing dll for the tests pattern
 // JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser, added and slightly modified the save state patch from PvtLewis
 // JPM   Jan./2024  Use setting for the emulation framerate display
+// JPM  07/14/2024  Added a Console standard emulation window
 //
 
 // FIXED:
@@ -76,6 +75,7 @@
 #include "settings.h"
 #include "version.h"
 #include "emustatus.h"
+#include "stdConsole.h"
 #include "debug/cpubrowser.h"
 #include "debug/m68kdasmbrowser.h"
 #include "debug/memorybrowser.h"
@@ -198,6 +198,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	helpWin = new HelpWindow(this);
 	filePickWin = new FilePickerWindow(this);
 	emuStatusWin = new EmuStatusWindow(this);
+	stdConsoleWin = new stdConsoleWindow(this);
 	
 	// windows alpine mode features
 	romcartBrowseWin = new ROMCartBrowserWindow(this);
@@ -1280,9 +1281,8 @@ void MainWin::Configure(void)
 }
 
 
-//
-// Here's the main emulator loop
-//
+// Main emulator loop no matter if the executable binary is in pause or running
+// The loop won't execute anything in case of the emulator is not running
 void MainWin::Timer(void)
 {
 #if 0
@@ -1294,19 +1294,16 @@ static uint32_t ntscTickCount;
 		timer->start(16 + (ntscTickCount == 0 ? 1 : 0));
 	}
 #endif
-
-	if (!running)
-		return;
-
-	if (showUntunedTankCircuit)
+	// emulator must be running
+	if (running)
 	{
-		// Some machines can't handle this, so we give them the option to disable it. :-)
-		if (!plzDontKillMyComputer)
+		// check executable binary status
+		if (showUntunedTankCircuit)
 		{
-//			if (!vjs.softTypeDebugger)
+			// the executable binary is in pause mode, will make the video screen snowing by user acceptance
+			if (!plzDontKillMyComputer)
 			{
-				// Random hash & trash
-				// We try to simulate an untuned tank circuit here... :-)
+				// fill video screen with random hash & trash, to try to simulate an untuned tank circuit here
 				for (uint32_t x = 0; x < videoWidget->rasterWidth; x++)
 				{
 					for (uint32_t y = 0; y < videoWidget->rasterHeight; y++)
@@ -1316,91 +1313,80 @@ static uint32_t ntscTickCount;
 				}
 			}
 		}
-	}
-	else
-	{
-		// Otherwise, run the Jaguar simulation
-		HandleGamepads();
-		JaguarExecuteNew();
-		//if (!vjs.softTypeDebugger)
+		else
+		{
+			// otherwise, run the Jaguar simulation
+			HandleGamepads();
+			JaguarExecuteNew();
 			videoWidget->HandleMouseHiding();
+			// auto-refresh specfic debug windows, lower refresh value can slow down the emulator
+			static uint32_t refresh = 0;
+			if (refresh++ == vjs.refresh)
+			{
+				if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
+				{
+					AlpineRefreshWindows();
+				}
 
-static uint32_t refresh = 0;
-		// Do autorefresh on debug windows
-		// Have to be careful, too much causes the emulator to slow way down!
-		if (refresh == vjs.refresh)
-		{
-		if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
-		{
-				AlpineRefreshWindows();
-				//memBrowseWin->RefreshContents();
-				//cpuBrowseWin->RefreshContents();
-			}
-			CommonRefreshWindows();
 				refresh = 0;
 			}
-			else
-		{
-				refresh++;
 		}
-	}
 
-	//if (!vjs.softTypeDebugger)
 		videoWidget->updateGL();
-		//vjs.softTypeDebugger ? VideoOutputWin->RefreshContents(videoWidget) : NULL;
 
-	// FPS handling
-	// Approach: We use a ring buffer to store times (in ms) over a given
-	// amount of frames, then sum them to figure out the FPS.
-	uint32_t timestamp = SDL_GetTicks();
-	// This assumes the ring buffer size is a power of 2
-//	ringBufferPointer = (ringBufferPointer + 1) & (RING_BUFFER_SIZE - 1);
-	// Doing it this way is better. Ring buffer size can be arbitrary then.
-	ringBufferPointer = (ringBufferPointer + 1) % RING_BUFFER_SIZE;
-	ringBuffer[ringBufferPointer] = timestamp - oldTimestamp;
-	uint32_t elapsedTime = 0;
+		// FPS handling, uses a ring buffer to store times (in ms) between frames
+		uint32_t timestamp = SDL_GetTicks();
+		ringBufferPointer = (ringBufferPointer + 1) % RING_BUFFER_SIZE;
+		ringBuffer[ringBufferPointer] = timestamp - oldTimestamp;
+		oldTimestamp = timestamp;
+		// calculus the elapsed time
+		uint32_t elapsedTime = 0;
+		for (uint32_t i = 0; i < RING_BUFFER_SIZE; i++)
+		{
+			elapsedTime += ringBuffer[i];
+		}
+		// elpased time cannot be nul, to avoid division by 0
+		if (elapsedTime == 0)
+		{
+			elapsedTime = 1;
+		}
+		// get number of FPS based on elapsed time per block of 10 seconds
+		uint32_t framesPerSecond = (uint32_t)(((float)RING_BUFFER_SIZE / (float)elapsedTime) * 10000.0);
+		uint32_t fpsIntegerPart = framesPerSecond / 10;
+		uint32_t fpsDecimalPart = framesPerSecond % 10;
+		// display number of FPS
+		vjs.useDisplayEmuFPS ? statusBar()->showMessage(QString("%1.%2 FPS").arg(fpsIntegerPart).arg(fpsDecimalPart)) : statusBar()->showMessage(QString("FPS: Off"));
 
-	for(uint32_t i=0; i<RING_BUFFER_SIZE; i++)
-		elapsedTime += ringBuffer[i];
+		// toggle the state of the emulator in case of M68K is set to halt (for tracing mode)
+		if (M68KDebugHaltStatus())
+		{
+			ToggleRunState();
+		}
 
-	// elapsedTime must be non-zero
-	if (elapsedTime == 0)
-		elapsedTime = 1;
-
-	// This is in frames per 10 seconds, so we can have 1 decimal
-	uint32_t framesPerSecond = (uint32_t)(((float)RING_BUFFER_SIZE / (float)elapsedTime) * 10000.0);
-	uint32_t fpsIntegerPart = framesPerSecond / 10;
-	uint32_t fpsDecimalPart = framesPerSecond % 10;
-	// If this is updated too frequently to be useful, we can throttle it down
-	// so that it only updates every 10th frame or so
-	vjs.useDisplayEmuFPS ? statusBar()->showMessage(QString("%1.%2 FPS").arg(fpsIntegerPart).arg(fpsDecimalPart)) : statusBar()->showMessage(QString("FPS: Off"));
-	oldTimestamp = timestamp;
-
-	if (M68KDebugHaltStatus())
-		ToggleRunState();
+		// refresh window with minimal impact on the emulation speed 
+		CommonRefreshWindows();
+	}
 }
 
 
 // Toggle the power state, it can be either on or off
 void MainWin::TogglePowerState(void)
 {
-	powerButtonOn = !powerButtonOn;
 	running = true;
 
-	// With the power off, we simulate white noise on the screen. :-)
+	// switch power on/off
+	powerButtonOn = !powerButtonOn;
 	if (!powerButtonOn)
 	{
-		// Restore the mouse pointer, if hidden:
-		//if (!vjs.softTypeDebugger)
-		{
-			videoWidget->CheckAndRestoreMouseCursor();
-		}
-
+		// restore the mouse pointer, if hidden:
+		videoWidget->CheckAndRestoreMouseCursor();
+		// enable specfic feature available when binary is not running
 		useCDAct->setDisabled(false);
 		palAct->setDisabled(false);
 		ntscAct->setDisabled(false);
 		pauseAct->setChecked(false);
 		pauseAct->setDisabled(true);
+
 		showUntunedTankCircuit = true;
 
 		DACPauseAudioThread();
@@ -1425,14 +1411,16 @@ void MainWin::TogglePowerState(void)
 	}
 	else
 	{
+		// disable specfic feature available when binary is running
 		useCDAct->setDisabled(true);
 		palAct->setDisabled(true);
 		ntscAct->setDisabled(true);
 		pauseAct->setChecked(false);
 		pauseAct->setDisabled(false);
+
 		showUntunedTankCircuit = false;
 
-		// Otherwise, we prepare for running regular software...
+		// display the use of the CD
 		if (CDActive)
 		{
 // Should check for cartridgeLoaded here as well...!
@@ -1458,12 +1446,12 @@ void MainWin::TogglePowerState(void)
 void MainWin::ToggleRunState(void)
 {
 	startM68KTracing = running;
-	running = !running;
 
-	// Pause mode
+	// switch the running mode
+	running = !running;
 	if (!running)
 	{
-		// Set action buttons for the pause mode
+		// set action buttons for the pause mode
 		frameAdvanceAct->setDisabled(false);
 		pauseAct->setChecked(true);
 		pauseAct->setDisabled(false);
@@ -1477,29 +1465,28 @@ void MainWin::ToggleRunState(void)
 			DSPDasmWin->UseDSPPCAddress();
 		}
 
-		//if (!vjs.softTypeDebugger)
+		// restore the mouse pointer, if hidden:
+		videoWidget->CheckAndRestoreMouseCursor();
+
+		// video screen turned blue as to show a pause mode
+		for (uint32_t i = 0; i < (uint32_t)(videoWidget->textureWidth * 256); i++)
 		{
-			// Restore the mouse pointer, if hidden:
-			videoWidget->CheckAndRestoreMouseCursor();
-
-			for (uint32_t i = 0; i < (uint32_t)(videoWidget->textureWidth * 256); i++)
-			{
-				uint32_t pixel = videoWidget->buffer[i];
-				uint8_t r = (pixel >> 24) & 0xFF, g = (pixel >> 16) & 0xFF, b = (pixel >> 8) & 0xFF;
-				pixel = ((r + g + b) / 3) & 0x00FF;
-				videoWidget->buffer[i] = 0x000000FF | (pixel << 16) | (pixel << 8);
-			}
-
-			videoWidget->updateGL();
-			//vjs.softTypeDebugger ? VideoOutputWin->RefreshContents(videoWidget) : NULL;
-
-			cpuBrowseWin->HoldBPM();
-			cpuBrowseWin->HandleBPMContinue();
-			RefreshWindows();
+			uint32_t pixel = videoWidget->buffer[i];
+			uint8_t r = (pixel >> 24) & 0xFF, g = (pixel >> 16) & 0xFF, b = (pixel >> 8) & 0xFF;
+			pixel = ((r + g + b) / 3) & 0x00FF;
+			videoWidget->buffer[i] = 0x000000FF | (pixel << 16) | (pixel << 8);
 		}
+
+		videoWidget->updateGL();
+
+		cpuBrowseWin->HoldBPM();
+		cpuBrowseWin->HandleBPMContinue();
+
+		RefreshWindows();
 	}
 	else
 	{
+		// set action buttons for the run mode
 		frameAdvanceAct->setDisabled(true);
 		pauseAct->setChecked(false);
 		pauseAct->setDisabled(false);
@@ -1515,11 +1502,13 @@ void MainWin::ToggleRunState(void)
 	}
 
 	emuStatusWin->ResetM68KCycles();
+	ShowstdConsoleWin();
 	// Pause/unpause any running/non-running threads...
 	DACPauseAudioThread(!running);
 }
 
 
+// Resize the video screen with a zoom level 1
 void MainWin::SetZoom100(void)
 {
 	zoomLevel = 1;
@@ -1527,6 +1516,7 @@ void MainWin::SetZoom100(void)
 }
 
 
+// Resize the video screen with a zoom level 2
 void MainWin::SetZoom200(void)
 {
 	zoomLevel = 2;
@@ -1534,6 +1524,7 @@ void MainWin::SetZoom200(void)
 }
 
 
+// Resize the video screen with a zoom level 3
 void MainWin::SetZoom300(void)
 {
 	zoomLevel = 3;
@@ -1856,6 +1847,10 @@ void MainWin::LoadSoftware(QString file)
 	cartridgeLoaded = JaguarLoadFile(file.toUtf8().data());
 	SET32(jaguarMainRAM, 0, vjs.DRAM_size);						// Set stack in the M68000's Reset SP
 
+	// Get the Console standard emulation variable address
+	stdConsoleExist = stdConsole_set(STDCONSOLE_STDIN, DBGManager_GetAdrFromSymbolName((char *)"cngetc_value"));
+	stdConsoleExist |= stdConsole_set(STDCONSOLE_STDOUT, DBGManager_GetAdrFromSymbolName((char *)"cnputc_value")) ? true : false;
+
 	// This is icky because we've already done it
 // it gets worse :-P
 	if (!vjs.useJaguarBIOS)
@@ -2116,7 +2111,8 @@ void MainWin::ToggleFullScreen(void)
 }
 
 
-// 
+// Show the M68K exception vector table browser window
+// This debug only window comes from user request
 void MainWin::ShowExceptionVectorTableBrowserWin(void)
 {
 	exceptionvectortableBrowseWin->show();
@@ -2124,7 +2120,8 @@ void MainWin::ShowExceptionVectorTableBrowserWin(void)
 }
 
 
-// 
+// Show the (M68k DRAM) local variable browser window
+// This debug only window comes from user request
 void MainWin::ShowLocalBrowserWin(void)
 {
 	LocalBrowseWin->show();
@@ -2132,7 +2129,8 @@ void MainWin::ShowLocalBrowserWin(void)
 }
 
 
-// 
+// Show the (M68k DRAM) call stack browser window
+// This debug only window comes from user request
 void MainWin::ShowCallStackBrowserWin(void)
 {
 	CallStackBrowseWin->show();
@@ -2140,6 +2138,8 @@ void MainWin::ShowCallStackBrowserWin(void)
 }
 
 
+// Show the all watches browser window
+// This debug only window comes from user request
 void MainWin::ShowAllWatchBrowserWin(void)
 {
 	allWatchBrowseWin->show();
@@ -2147,6 +2147,8 @@ void MainWin::ShowAllWatchBrowserWin(void)
 }
 
 
+// Show the (M68k DRAM) heap allocation browser window
+// This debug only window comes from user request
 void MainWin::ShowHeapAllocatorBrowserWin(void)
 {
 	heapallocatorBrowseWin->show();
@@ -2154,6 +2156,8 @@ void MainWin::ShowHeapAllocatorBrowserWin(void)
 }
 
 
+// Show the ROM cart browser window
+// This debug only window comes from user request
 void MainWin::ShowROMCartBrowserWin(void)
 {
 	romcartBrowseWin->show();
@@ -2161,7 +2165,8 @@ void MainWin::ShowROMCartBrowserWin(void)
 }
 
 
-// Memory (M68K DRAM, GPU & DSP) browser window
+// Show the memory (M68K DRAM, GPU & DSP) browser window
+// This debug only window comes from user request
 void MainWin::ShowMemoryBrowserWin(int NumWin)
 {
 	memBrowseWin[NumWin]->show();
@@ -2169,6 +2174,8 @@ void MainWin::ShowMemoryBrowserWin(int NumWin)
 }
 
 
+// Show one of the memory (M68K DRAM) browser window
+// This debug only window comes from user request
 void MainWin::ShowMemory1BrowserWin(int NumWin)
 {
 //	for (int i = 0; i < vjs.nbrmemory1browserwindow; i++)
@@ -2179,6 +2186,24 @@ void MainWin::ShowMemory1BrowserWin(int NumWin)
 }
 
 
+// Show the Console standard emulation window
+// This window is automatically displayed in case of the Console standard emulation has been detected in the build
+void MainWin::ShowstdConsoleWin(void)
+{
+	if (stdConsoleExist)
+	{
+		stdConsoleWin->show();
+		stdConsoleWin->RefreshContents();
+	}
+	else
+	{
+		stdConsoleWin->hide();
+	}
+}
+
+
+// Show the emulation status window
+// This window is displayed by user request
 void MainWin::ShowEmuStatusWin(void)
 {
 	emuStatusWin->show();
@@ -2186,6 +2211,8 @@ void MainWin::ShowEmuStatusWin(void)
 }
 
 
+// Show the M68K stack browser window
+// This debug window is displayed by user request
 void MainWin::ShowStackBrowserWin(void)
 {
 	stackBrowseWin->show();
@@ -2193,6 +2220,8 @@ void MainWin::ShowStackBrowserWin(void)
 }
 
 
+// Show the CPUs (M68K, GPU and DSP) browser window
+// This debug window is displayed by user request
 void MainWin::ShowCPUBrowserWin(void)
 {
 	cpuBrowseWin->show();
@@ -2200,7 +2229,8 @@ void MainWin::ShowCPUBrowserWin(void)
 }
 
 
-// Show the OP browser window
+// Show the OP (Object Processor) browser window
+// This debug window is displayed by user request
 void MainWin::ShowOPBrowserWin(void)
 {
 	opBrowseWin->show();
@@ -2209,6 +2239,7 @@ void MainWin::ShowOPBrowserWin(void)
 
 
 // Show the HW registers browser window
+// This debug window is displayed by user request
 void MainWin::ShowHWRegsBrowserWin(void)
 {
 	hwRegsBrowseWin->show();
@@ -2216,7 +2247,8 @@ void MainWin::ShowHWRegsBrowserWin(void)
 }
 
 
-// Show the M68K browser window
+// Show the M68K code disassembly browser window
+// This debug window is displayed by user request
 void MainWin::ShowM68KDasmBrowserWin(void)
 {
 	m68kDasmBrowseWin->show();
@@ -2224,6 +2256,8 @@ void MainWin::ShowM68KDasmBrowserWin(void)
 }
 
 
+// Show the RISC (GPU/DSP) code disassembly browser window
+// This debug window is displayed by user request
 void MainWin::ShowRISCDasmBrowserWin(void)
 {
 	riscDasmBrowseWin->show();
@@ -2456,11 +2490,17 @@ void MainWin::ReadUISettings(void)
 	// Video output information
 	zoomLevel = settings.value("zoom", 2).toInt();
 
-// Emulator status UI information
+	// Emulator status UI information
 	pos = settings.value("emuStatusWinPos", QPoint(200, 200)).toPoint();
 	emuStatusWin->move(pos);
 	settings.value("emuStatusWinIsVisible", false).toBool() ? ShowEmuStatusWin() : void();
 	
+	// Console standard emulation information
+	pos = settings.value("stdConsoleWinPos", QPoint(200, 200)).toPoint();
+	stdConsoleWin->move(pos);
+	size = settings.value("stdConsoleWinSize", QSize(400, 400)).toSize();
+	stdConsoleWin->resize(size);
+
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
@@ -2773,6 +2813,8 @@ void MainWin::WriteUISettings(void)
 	// Common UI information
 	settings.setValue("emuStatusWinPos", emuStatusWin->pos());
 	settings.setValue("emuStatusWinIsVisible", emuStatusWin->isVisible());
+	settings.setValue("stdConsoleWinPos", stdConsoleWin->pos());
+	settings.setValue("stdConsoleWinSize", stdConsoleWin->size());
 	
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
@@ -2885,12 +2927,16 @@ void MainWin::AlpineRefreshWindows(void)
 // 
 void MainWin::CommonResetWindows(void)
 {
+	//stdConsoleExist = false;
+	//stdConsoleWin->hide();
+	stdConsoleWin->Reset();
 }
 
 
 // Reset common
 void MainWin::CommonReset(void)
 {
+	//stdConsoleWin->Reset();
 }
 
 
@@ -2920,10 +2966,13 @@ void MainWin::DebuggerResetWindows(void)
 }
 
 
-// Refresh common windows
+// Refresh windows common to all emulation modes (debug or not)
+// Emulation status, and Console standard emulation
 void MainWin::CommonRefreshWindows(void)
 {
 	emuStatusWin->RefreshContents();
+	stdConsoleWin->RefreshContents();
+	//IOConsoleWin->RefreshContents();
 }
 
 
