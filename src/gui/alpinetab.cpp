@@ -13,8 +13,8 @@
 // JLH  07/15/2011  Created this file
 // JPM  09/03/2018  Depend the platform transform slashes or backslashes
 // JPM   Feb./2021  Added a M68K exception catch check
-// JPM   Jan./2022  Added a writes to unknown memory location catch
-// JPM  March/2022  Extracted the exceptions and catches parts to a dedicated tab
+// JPM        2022  Added a writes to unknown memory location catch, extracted the exceptions and catches parts to a dedicated tab
+// JPM  07/14/2024  Windows refresh rate placeholder text update
 //
 
 #include "alpinetab.h"
@@ -36,7 +36,7 @@ AlpineTab::AlpineTab(QWidget * parent/*= 0*/): QWidget(parent)
 //	edit4 = new QLineEdit("");
 	edit1->setPlaceholderText("ROM to load when Virtual Jaguar loads");
 	edit2->setPlaceholderText("ABS to load when Virtual Jaguar loads");
-	edit3->setPlaceholderText("Windows refresh rate");
+	edit3->setPlaceholderText("Windows refresh rate, low value may impact emulation performance");
 //	edit3->setPlaceholderText("EEPROM path");
 //	edit4->setPlaceholderText("Software path");
 

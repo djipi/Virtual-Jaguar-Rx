@@ -7,6 +7,7 @@ Git commit:
 2) Set optimization for code speed in the VS2017 project
 3) Added a setting for the emulation framerate display
 4) Minor fix for the application's exit
+5) Windows refresh rate placeholder text update in the alpine's configure tab
 
 pre-Release 5b (20th July 2022)
 -------------------------------
