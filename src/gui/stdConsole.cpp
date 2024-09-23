@@ -8,7 +8,7 @@
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JPM  07/11/2024  Created this file
-// JPM  09/22/2024  Text output color detection
+// JPM  09/22/2024  Text output color detection, amber style sheet color mode
 //
 
 // STILL TO DO:
@@ -24,6 +24,7 @@
 stdConsoleWindow::stdConsoleWindow(QWidget * parent/*= 0*/) : QWidget(parent, Qt::Dialog),
 layout(new QVBoxLayout),
 text(new QTextBrowser),
+StyleSheetColor(new QCheckBox("Amber")),
 colorcommand(0),
 colorindex(0)
 {
@@ -32,19 +33,40 @@ colorindex(0)
 	QFont fixedFont("Lucida Console", 8, QFont::Normal);
 	fixedFont.setStyleHint(QFont::TypeWriter);
 	text->setFont(fixedFont);
-	text->setStyleSheet("QTextBrowser { background-color : black; color : orange; }");
 	text->setAlignment(Qt::AlignLeft | Qt::AlignBottom);
 	//text->setMinimumWidth(40);
+	//text->setStyleSheet("QTextBrowser { background-color : black; color : orange; }");
 
 	// set layout
 	layout->addWidget(text);
+	layout->addWidget(StyleSheetColor);
 	setLayout(layout);
+
+	// connections
+	connect(StyleSheetColor, SIGNAL(stateChanged(int)), this, SLOT(stateChangedStyleSheetColor(int)));
 }
 
 
 //
 stdConsoleWindow::~stdConsoleWindow(void)
 {
+}
+
+
+//
+void stdConsoleWindow::stateChangedStyleSheetColor(int check)
+{
+	// save setting
+	if (check)
+	{
+		// amber color
+		text->setStyleSheet("QTextBrowser { background-color : black; color : orange; }");
+	}
+	else
+	{
+		// default color
+		text->setStyleSheet("");
+	}
 }
 
 

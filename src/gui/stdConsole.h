@@ -22,6 +22,9 @@ class stdConsoleWindow : public QWidget
 
 	public slots:
 
+	protected slots:
+		void stateChangedStyleSheetColor(int index);
+
 	protected:
 		void keyPressEvent(QKeyEvent *);
 
@@ -33,6 +36,9 @@ class stdConsoleWindow : public QWidget
 		char colorcode[10] = { 0 };
 		char colorcommandid[3] = { 0x1b, 0x5b, 0 };			// \033[
 		size_t colorindex;
+
+	public:
+		QCheckBox *StyleSheetColor;
 };
 
 #endif // __STDCONSOLE_H__

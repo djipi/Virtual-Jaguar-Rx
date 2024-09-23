@@ -2500,6 +2500,7 @@ void MainWin::ReadUISettings(void)
 	stdConsoleWin->move(pos);
 	size = settings.value("stdConsoleWinSize", QSize(400, 400)).toSize();
 	stdConsoleWin->resize(size);
+	stdConsoleWin->StyleSheetColor->setCheckState(Qt::CheckState(settings.value("stdConsoleWinStyleSheetColorCheck", 0).toInt()));
 
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
@@ -2815,6 +2816,7 @@ void MainWin::WriteUISettings(void)
 	settings.setValue("emuStatusWinIsVisible", emuStatusWin->isVisible());
 	settings.setValue("stdConsoleWinPos", stdConsoleWin->pos());
 	settings.setValue("stdConsoleWinSize", stdConsoleWin->size());
+	settings.setValue("stdConsoleWinStyleSheetColorCheck", stdConsoleWin->StyleSheetColor->checkState());
 	
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)

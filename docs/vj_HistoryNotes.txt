@@ -11,6 +11,7 @@ Git commit:
 6) Added a Console standard emulation
 -- Support only stdout
 -- Text output color detection
+-- Amber style sheet color mode selection
 
 pre-Release 5b (20th July 2022)
 -------------------------------
