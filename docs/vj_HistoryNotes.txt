@@ -10,6 +10,7 @@ Git commit:
 5) Windows refresh rate placeholder text update in the alpine's configure tab
 6) Added a Console standard emulation
 -- Support only stdout
+-- Text output color detection
 
 pre-Release 5b (20th July 2022)
 -------------------------------

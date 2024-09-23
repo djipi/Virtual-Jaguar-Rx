@@ -8,6 +8,7 @@
 // Who  When        What
 // ---  ----------  -----------------------------------------------------------
 // JPM  07/11/2024  Created this file
+// JPM  09/22/2024  Text output color detection
 //
 
 // STILL TO DO:
@@ -22,7 +23,9 @@
 //
 stdConsoleWindow::stdConsoleWindow(QWidget * parent/*= 0*/) : QWidget(parent, Qt::Dialog),
 layout(new QVBoxLayout),
-text(new QTextBrowser)
+text(new QTextBrowser),
+colorcommand(0),
+colorindex(0)
 {
 	// window initialisation
 	setWindowTitle(tr("Console standard emulation"));
@@ -45,11 +48,14 @@ stdConsoleWindow::~stdConsoleWindow(void)
 }
 
 
-// 
+// Reset the window with a message
 void stdConsoleWindow::Reset(void)
 {
 	text->clear();
 	stdoutDump += QString("\n\n**** Console Standard Emulation Reset ****\n\n");
+	colorindex = 0;
+	colorcommand = false;
+	memset(colorcode, 0, sizeof(colorcode));
 }
 
 
@@ -59,7 +65,28 @@ void stdConsoleWindow::RefreshContents(void)
 	// update the content from the Console standard emulation's stdout
 	if (stdConsoleInfo[STDCONSOLE_STDOUT].BufText[0])
 	{
-		stdoutDump += QString(stdConsoleInfo[STDCONSOLE_STDOUT].BufText);
+		// loop om the content from the Console standard emulation's stdout
+		size_t index = 0;
+		while (stdConsoleInfo[STDCONSOLE_STDOUT].BufText[index])
+		{
+			// check output for color
+			!colorcommand ? (colorcommand = (!strncmp(&stdConsoleInfo[STDCONSOLE_STDOUT].BufText[index], colorcommandid, 2) ? (index += 2) : false)) : false;		// \033[
+			if (colorcommand)
+			{
+				// get color encoding
+				char c = 0;
+				while ((c != 'm') && (c = stdConsoleInfo[STDCONSOLE_STDOUT].BufText[index]) && index++)
+				{
+					(c != 'm') ? (colorcode[colorindex++] = c) : (colorcommand = false);	// x;yym
+				}
+			}
+			else
+			{
+				// save the text to the window's string
+				stdoutDump += stdConsoleInfo[STDCONSOLE_STDOUT].BufText[index++];
+			}
+		}
+		// erase the content from the Console standard emulation's stdout
 		memset(stdConsoleInfo[STDCONSOLE_STDOUT].BufText, 0, sizeof(stdConsoleInfo[STDCONSOLE_STDOUT].BufText));
 	}
 
