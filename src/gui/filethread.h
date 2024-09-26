@@ -19,8 +19,6 @@ class FileThread: public QThread
 		void Go(bool allowUnknown = false);
 
 	signals:
-//		void FoundAFile(unsigned long index);														// JPM: Not used
-//		void FoundAFile2(unsigned long index, QString filename, QImage * label, unsigned long);		// JPM: Not used
 		void FoundAFile3(unsigned long index, QString filename, QImage * label, unsigned long, bool, unsigned long, unsigned long);
 
 	protected:
