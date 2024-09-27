@@ -37,7 +37,7 @@ Jaguar programs come in, and a lot of this confusion seem to come from
 Cowering's GoodJag renaming tool. Note that it simply gets some files wrong,
 and it also incorrectly renames cartridge images with an extension that
 belongs to an already established extension (.jag is a Jaguar Server
-executable--read on). To clarify, there are basically fith major types of
+executable--read on). To clarify, there are basically six major types of
 Jaguar binary images that are NOT cartridge images:
 
     .abs
@@ -45,6 +45,7 @@ Jaguar binary images that are NOT cartridge images:
     .rom
     .bin
     .elf
+	.j64
 
 The first type, the .abs file, is a DRI/Alcyon format absolute location
 executable. These come in two different flavors and contain load and run
@@ -78,6 +79,7 @@ or without DWARF information.
 There is a sith type of file that is supported by Virtual Jaguar, the .j64
 file, which is simply a 1, 2, or 4 Meg dump of a Jaguar cartridge ROM which
 loads at $800000 in the Jaguar memory space.
+In case of uncommon file size, the .j64 is considered as a homebrew .rom type.
 
 
 ----------------------------------

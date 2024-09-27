@@ -13,10 +13,10 @@
 // JLH  02/06/2010  Modified to use Qt model/view framework
 // JLH  03/08/2010  Added large cart view and info text
 // JPM  06/16/2016  ELF format support
+// JPM  09/25/2024  Added .J64 homebrew format detection
 //
 
 #include "filepicker.h"
-
 #include "file.h"
 #include "filedb.h"
 #include "filelistmodel.h"
@@ -309,6 +309,7 @@ void FilePickerWindow::UpdateSelection(const QModelIndex & current, const QModel
 	unsigned long fileSize = current.model()->data(current, FLM_FILESIZE).toUInt();
 	bool haveUniversalHeader = current.model()->data(current, FLM_UNIVERSALHDR).toBool();
 	unsigned long fileType = current.model()->data(current, FLM_FILETYPE).toUInt();
+	(fileType == JST_NONE) ? fileType = ParseFileExt(current.model()->data(current, FLM_FILETYPE).toString().toLocal8Bit().constData()) : false;
 	uint32_t crc = (uint32_t)current.model()->data(current, FLM_CRC).toUInt();
 //	printf("FPW: %s\n", s.toAscii().data());
 	bool haveUnknown = (i == 0xFFFFFFFF ? true : false);
@@ -349,46 +350,53 @@ void FilePickerWindow::UpdateSelection(const QModelIndex & current, const QModel
 	}
 	else
 	{
-		// We should try to be intelligent with our updates here, and only redraw when
-		// we're going from a selection with a label to a selection without. Now, we
-		// redraw regardless.
+		// no label has been found for the ron, a dedicated label will be used depend the headers and/or file type
 		QImage cart;
 
-// We now have to sources of data for the passed in files:
-// - The file DB
-// - The file type detection
-// This means we have to be mindful of what's passed back by that stuff.
-// We can assume that if it wasn't found in the DB, then the fileType
-// should be valid.
-// The DB takes precedence over the fileType.
-		if ((!haveUnknown && (romList[i].flags & FF_ROM))
-			|| (haveUnknown && (fileType == JST_ROM) && !haveUniversalHeader))
+		// ROM with an 'official' header, or considered as such
+		if ((!haveUnknown && (romList[i].flags & FF_ROM)) || (haveUnknown && (fileType == JST_ROM) && !haveUniversalHeader))
 		{
 			cart = QImage(":/res/cart-blank.png");
 			QPainter painter(&cart);
 			painter.drawPixmap(27, 89, QPixmap::fromImage(QImage(":/res/label-blank.png")));
 			painter.end();
 		}
-		else if ((!haveUnknown && (romList[i].flags & FF_ALPINE))
-			|| (haveUnknown
-				&& ((fileType == JST_ALPINE) || ((fileType == JST_ROM) && haveUniversalHeader))))
-		{
-			if (haveUniversalHeader)
-				cart = QImage(":/res/skunkboard-file.png");
-			else
-				cart = QImage(":/res/alpine-file.png");
-		}
-		else if (haveUnknown && (fileType == JST_ELF32))
-		{
-			cart = QImage(":/res/ELF-file.png");
-		}
-		else if (haveUnknown && (fileType == JST_ABS_TYPE1 || fileType == JST_ABS_TYPE2
-			|| fileType == JST_JAGSERVER) || fileType == JST_WTFOMGBBQ)
-		{
-			cart = QImage(":/res/homebrew-file.png");
-		}
 		else
-			cart = QImage(":/res/unknown-file.png");
+		{
+			// Alpine header or a ROM with an universal / modified header
+			if ((!haveUnknown && (romList[i].flags & FF_ALPINE)) || (haveUnknown && ((fileType == JST_ALPINE) || ((fileType == JST_ROM) && haveUniversalHeader))))
+			{
+				if (haveUniversalHeader)
+				{
+					cart = QImage(":/res/skunkboard-file.png");
+				}
+				else
+				{
+					cart = QImage(":/res/alpine-file.png");
+				}
+			}
+			else
+			{
+				// ELF header is dedicated to homebrew development
+				if (haveUnknown && (fileType == JST_ELF32))
+				{
+					cart = QImage(":/res/ELF-file.png");
+				}
+				else
+				{
+					// COFF/ABS & JAG headers, or a J64 type, are usualy for homebrew
+					if (haveUnknown && ((fileType == JST_ABS_TYPE1) || (fileType == JST_ABS_TYPE2) || (fileType == JST_JAGSERVER)) || (fileType == JST_WTFOMGBBQ) || (fileType == JST_J64))
+					{
+						cart = QImage(":/res/homebrew-file.png");
+					}
+					else
+					{
+						// type is unknow
+						cart = QImage(":/res/unknown-file.png");
+					}
+				}
+			}
+		}
 
 		cartImage->setPixmap(QPixmap::fromImage(cart));
 	}
