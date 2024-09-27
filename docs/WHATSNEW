@@ -1,3 +1,14 @@
+Virtual Jaguar v2.1.3 R5b GCC/Qt
+--------------------------------
+
+* Added the save state patch from PvtLewis (from Atari Age's forum)
+* Merged convience fixes #64 from 42Bastian
+- Start of RISC disassembly moved to F03000, GPU memory browser in longs, and fixed object list display
+* Fix parameter's address pointer and update icons usage for the Local variables window
+* Added a command line option to fill the entire system space with 0
+* M68K disassembly display the Bcc's logic result only when the line match with current PC
+
+
 Virtual Jaguar v2.1.3 R5a GCC/Qt
 --------------------------------
 
