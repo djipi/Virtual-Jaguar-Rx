@@ -14,6 +14,7 @@
 // JLH  03/08/2010  Added large cart view and info text
 // JPM  06/16/2016  ELF format support
 // JPM  09/25/2024  Added .J64 homebrew format detection
+// JPM  10/04/2024  Display full filename in cartridge's information
 //
 
 #include "filepicker.h"
@@ -23,42 +24,13 @@
 #include "filethread.h"
 #include "imagedelegate.h"
 #include "settings.h"
-//#include "types.h"
-
-/*
-Our strategy here is like so:
-Look at the files in the directory pointed to by ROMPath.
-For each file in the directory, take the CRC32 of it and compare it to the CRC
-in the romList[]. If there's a match, put it in a list and note it's index value
-in romList for future reference.
-
-When constructing the list, use the index to pull up an image of the cart and
-put that in the list. User picks from a graphical image of the cart.
-
-Ideally, the label will go into the archive along with the ROM image, but that's
-for the future...
-Maybe box art, screenshots will go as well...
-
-I'm thinking compatibility info should be displayed as well... Just to stop the
-inevitable stupid questions from people too lazy to do basic research for themselves.
 
 
-Data strategy:
-
-- Should keep a QImage of the blank cart with blank label
-- Should keep a QImage of the blank cart? (For overpainting the ROMs label)
-- Should we have a special Alpine image? Floppy image (for COF/ABS)?
-
-- Need some way of keeping track of cart size and compatibility info
-  [compat info needs to be BAD DUMP or % of what works]
-- Need to properly scale the thumbnails images in the list
-*/
-
-//could use Window as well...
-//FilePickerWindow::FilePickerWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dialog)
+//
 FilePickerWindow::FilePickerWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Window),
-	currentFile("")
+currentFile("")
 {
+	// window's title depend on the emulation mode
 	if (!vjs.softTypeDebugger)
 	{
 		setWindowTitle(tr("Insert Cartridge..."));
@@ -67,74 +39,26 @@ FilePickerWindow::FilePickerWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt:
 	{
 		setWindowTitle(tr("Load executable file..."));
 	}
-
-//is there any reason why this must be cast as a QAbstractListModel? No
-//Also, need to think about data structure for the model...
+	// files list as images
 	model = new FileListModel;
 	fileList = new QListView;
 	fileList->setModel(model);
-//	fileList->setItemDelegate(new ImageDelegate(this));
 	fileList->setItemDelegate(new ImageDelegate());
-#if 0
-	//nope.
-//	fileList->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-//	fileList->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-//small problem with this is that it doesn't take scrollbar into account...
-QSize sbSize = fileList->verticalScrollBar()->minimumSizeHint();
-printf("VSB minimumSizeHint: %u, %u\n", sbSize.width(), sbSize.height());
-QSize sbSize2 = fileList->verticalScrollBar()->sizeHint();
-printf("VSB sizeHint: %u, %u\n", sbSize2.width(), sbSize2.height());
-QRect sbRect = fileList->verticalScrollBar()->normalGeometry();
-printf("VSB normalGeometry: %u, %u\n", sbRect.width(), sbRect.height());
-QSize sbSize3 = fileList->verticalScrollBar()->size();
-printf("VSB size: %u, %u\n", sbSize3.width(), sbSize3.height());
-//	int sbWidth = fileList->verticalScrollBar()->width();
-	int sbWidth = fileList->verticalScrollBar()->size().width();
-	fileList->setFixedWidth((488/4) + 4 + sbWidth);//ick
-#else
-	// This sets it to the "too large size" as the minimum!
+	// set the files list vertical scroll bar
 	QScrollBar * vsb = new QScrollBar(Qt::Vertical, this);
-//	int sbWidth = vsb->size().width();
-//	printf("VSB size width: %u\n", sbWidth);
 	int sbWidth2 = vsb->sizeHint().width();
-//	printf("VSB sizeHint width: %u\n", sbWidth2);
-//	int sbWidth3 = vsb->minimumSize().width();
-//	printf("VSB minimum width: %u\n", sbWidth3);
-//	int sbWidth4 = vsb->frameSize().width();
-//	printf("VSB frame width: %u\n", sbWidth4);
 	delete vsb;
-
-//	fileList->setFixedWidth((488/4) + 4);
+	// force width for the files list
 	int sbWidth5 = fileList->frameWidth();
-//	printf("List frame width: %u, (diff=%d)\n", sbWidth5, sbWidth5 - ((488/4) + 4));
-//	int sbWidth6 = fileList->sizeHint().width();
-//	printf("List sizeHint width: %u\n", sbWidth6);
-//	int sbWidth7 = fileList->minimumSize().width();
-//	printf("List minimum width: %u\n", sbWidth7);
-//	int sbWidth8 = fileList->minimumSizeHint().width();
-//	printf("List minimum hint width: %u\n", sbWidth8);
-////	fileList->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
-////	fileList->verticalScrollBar()->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
-	// (488/4) + 4 is the width of the object in the filelistmodel. Dunno why the QListView
-	// isn't picking that up. :-(
-	// 488/4 + 4 = 126
-	// 126 + 17 + 4 = 147 <-- correct width
-	fileList->setFixedWidth((488/4) + 4 + sbWidth2 + sbWidth5 + 1);//ick
-//	fileList->setFixedWidth((488/4) + 4 + 17 + 4);//sbWidth);//ick
-
-//	fileList->setSpacing(4);
+	fileList->setFixedWidth((488/4) + 4 + sbWidth2 + sbWidth5 + 1);
 	fileList->setUniformItemSizes(true);
-#endif
-
-//	QVBoxLayout * layout = new QVBoxLayout;
+	// set filepicker's layout
 	QHBoxLayout * layout = new QHBoxLayout;
 	setLayout(layout);
 	layout->addWidget(fileList);
-
-	// Weird note: This layout has to be added *before* putting anything into it...
 	QVBoxLayout * vLayout = new QVBoxLayout;
 	layout->addLayout(vLayout);
-
+	// set the cardridge image by default
 	cartImage = new QLabel;
 	QImage cartImg(":/res/cart-blank.png");
 	QPainter painter(&cartImg);
@@ -143,20 +67,17 @@ printf("VSB size: %u, %u\n", sbSize3.width(), sbSize3.height());
 	cartImage->setPixmap(QPixmap::fromImage(cartImg));
 	cartImage->setMargin(4);
 	vLayout->addWidget(cartImage);
-
+	// set the cardridge name by default
 	title = new QLabel(QString(tr("<h2>...</h2>")));
 	title->setMargin(6);
+#if 0
 	title->setAlignment(Qt::AlignCenter);
-//no.
-//title->setFixedWidth(cartImage->width());
-//title->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
-//YESH!!!!
 	title->setFixedWidth(cartImage->sizeHint().width());
+#endif
 	vLayout->addWidget(title);
-
+	// set the cardridge information by default
 	QHBoxLayout * dataLayout = new QHBoxLayout;
 	vLayout->addLayout(dataLayout);
-
 	QLabel * labels = new QLabel(QString(tr(
 		"<b>Type: </b><br>"
 		"<b>CRC32: </b><br>"
@@ -174,42 +95,19 @@ printf("VSB size: %u, %u\n", sbSize3.width(), sbSize3.height());
 	)));
 	data->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 	dataLayout->addWidget(data);
-
-//#warning "!!! Icon size for pushbutton is tiny !!!"
+	// insert's button default
 	insertCart = new QPushButton(this);
 	insertCart->setIconSize(QSize(40, 40));
 	insertCart->setIcon(QIcon(":/res/insert.png"));
-	insertCart->setDefault(true);				// We want this button to be the default
+	insertCart->setDefault(true);
 	insertCart->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Preferred);
 	dataLayout->addWidget(insertCart);
-
+	// make proper connection
 	fileThread = new FileThread(this);
-//	connect(fileThread, SIGNAL(FoundAFile(unsigned long)), this, SLOT(AddFileToList(unsigned long)));
-//	connect(fileThread, SIGNAL(FoundAFile2(unsigned long, QString, QImage *, unsigned long)), this, SLOT(AddFileToList2(unsigned long, QString, QImage *, unsigned long)));
-	connect(fileThread, SIGNAL(FoundAFile3(unsigned long, QString, QImage *,
-		unsigned long, bool, unsigned long, unsigned long)), this,
-		SLOT(AddFileToList3(unsigned long, QString, QImage *, unsigned long,
-		bool, unsigned long, unsigned long)));
-
-// Let's defer this to the main window, so we can have some control over when this is done.
-//	fileThread->Go();
-/*
-New sizes: 373x172 (label), 420x340 (cart)
-*/
-
-//	QItemSelectionModel * ism = fileList->selectionModel();
-//	connect(ism, SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), this, SLOT(UpdateSelection(const QModelIndex &, const QModelIndex &)));
+	connect(fileThread, SIGNAL(FoundAFile3(unsigned long, QString, QImage *, unsigned long, bool, unsigned long, unsigned long)), this, SLOT(AddFileToList3(unsigned long, QString, QImage *, unsigned long, bool, unsigned long, unsigned long)));
 	connect(fileList->selectionModel(), SIGNAL(currentChanged(const QModelIndex &, const QModelIndex &)), this, SLOT(UpdateSelection(const QModelIndex &, const QModelIndex &)));
-
 	connect(insertCart, SIGNAL(clicked()), this, SLOT(LoadButtonPressed()));
-
 	connect(fileList, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(CatchDoubleClick(const QModelIndex &)));
-
-//	connect(fileList, SIGNAL(doubleClicked()), this, SLOT(LoadButtonPressed()));
-// This returns:
-// Object::connect: No such signal QListView::QAbstractItemView::doubleClicked() in src/gui/filepicker.cpp:203
-//can't do this, nothing's rendered yet...
-//setFixedWidth(width());
 }
 
 void FilePickerWindow::keyPressEvent(QKeyEvent * e)
@@ -219,8 +117,13 @@ void FilePickerWindow::keyPressEvent(QKeyEvent * e)
 		hide();
 		emit(FilePickerHiding());
 	}
-	else if (e->key() == Qt::Key_Return)
-		LoadButtonPressed();
+	else
+	{
+		if (e->key() == Qt::Key_Return)
+		{
+			LoadButtonPressed();
+		}
+	}
 }
 
 void FilePickerWindow::CatchDoubleClick(const QModelIndex &)
@@ -240,32 +143,6 @@ void FilePickerWindow::ScanSoftwareFolder(bool allow/*= false*/)
 	fileThread->Go(allow);
 }
 
-//
-// This slot gets called by the FileThread's run() function when it finds a
-// match in the filesystem to a ROM on our CRC list.
-//
-void FilePickerWindow::AddFileToList(unsigned long index)
-{
-printf("FilePickerWindow: Found match [%s]...\n", romList[index].name);
-	// NOTE: The model *ignores* what you send it, so this is crap. !!! FIX !!! [DONE, somewhat]
-//	model->AddData(QIcon(":/res/generic.png"));
-//	model->AddData(index);
-}
-
-void FilePickerWindow::AddFileToList2(unsigned long index, QString str, QImage * img, unsigned long size)
-{
-if (index != 0xFFFFFFFF)
-	printf("FilePickerWindow(2): Found match [%s]...\n", romList[index].name);
-
-	if (img)
-	{
-		model->AddData(index, str, *img, size);
-//It would be better to pass the pointer into the model though...
-		delete img;
-	}
-	else
-		model->AddData(index, str, QImage(), size);
-}
 
 void FilePickerWindow::AddFileToList3(unsigned long index, QString str, QImage * img, unsigned long size, bool haveUniversalHeader, unsigned long fileType, unsigned long crc)
 {
@@ -289,20 +166,11 @@ void FilePickerWindow::LoadButtonPressed(void)
 	hide();
 }
 
-//
-// This slot gets called when the QListView gets clicked on. Updates
-// the cart graphic and accompanying text.
-//
+
+// Updates the cart graphic and accompanying text.
 void FilePickerWindow::UpdateSelection(const QModelIndex & current, const QModelIndex &/*previous*/)
 {
-#if 0
-	QString s = current.model()->data(current, Qt::EditRole).toString();
-	unsigned long i = current.model()->data(current, Qt::DisplayRole).toUInt();
-	QImage label = current.model()->data(current, Qt::DecorationRole).value<QImage>();
-//	printf("FPW: %s\n", s.toAscii().data());
-	unsigned long fileSize = current.model()->data(current, Qt::WhatsThisRole).toUInt();
-#else
-//	QString s = current.model()->data(current, FLM_FILENAME).toString();
+	// get information from the file's index
 	currentFile = current.model()->data(current, FLM_FILENAME).toString();
 	unsigned long i = current.model()->data(current, FLM_INDEX).toUInt();
 	QImage label = current.model()->data(current, FLM_LABEL).value<QImage>();
@@ -311,40 +179,19 @@ void FilePickerWindow::UpdateSelection(const QModelIndex & current, const QModel
 	unsigned long fileType = current.model()->data(current, FLM_FILETYPE).toUInt();
 	(fileType == JST_NONE) ? fileType = ParseFileExt(current.model()->data(current, FLM_FILETYPE).toString().toLocal8Bit().constData()) : false;
 	uint32_t crc = (uint32_t)current.model()->data(current, FLM_CRC).toUInt();
-//	printf("FPW: %s\n", s.toAscii().data());
 	bool haveUnknown = (i == 0xFFFFFFFF ? true : false);
-#endif
 
-	// Disallow loading completely unknown files, but allow all others.
+	// disable loading completely unknown files, but allow all others
 	insertCart->setEnabled(haveUnknown && (fileType == JST_NONE) ? false : true);
-//hm.
-//currentFile = s;
 
-//373x172 is label size...
-//365x168 now...
+	// handle cart with a label
 	if (!label.isNull())
 	{
-/*
-	QImage cartImg(":/res/cart-blank.png");
-	QPainter painter(&cartImg);
-	painter.drawPixmap(23, 87, QPixmap(":/res/label-blank.png"));
-	painter.end();
-	cartSmall = cartImg.scaled(488/4, 395/4, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-*/
 		QImage cart(":/res/cart-blank.png");
 		QPainter painter(&cart);
-//Though this should probably be done when this is loaded, instead of every time here...
-//QImage scaledImg = label.scaled(373, 172, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-//painter.drawPixmap(23, 87, QPixmap::fromImage(scaledImg));
-		// Now, looks like it is...
-//		painter.drawPixmap(23, 87, QPixmap::fromImage(label));
 		painter.drawPixmap(27, 89, QPixmap::fromImage(label));
-//		painter.drawPixmap(23, 87, 373, 172, QPixmap::fromImage(label));
-
-// Well, heck. This should be done to the label *before* we get here.
 		painter.drawPixmap(27, 89, QPixmap::fromImage(QImage(":/res/upper-left.png")));
 		painter.drawPixmap(27+355, 89, QPixmap::fromImage(QImage(":/res/upper-right.png")));
-
 		painter.end();
 		cartImage->setPixmap(QPixmap::fromImage(cart));
 	}
@@ -401,92 +248,106 @@ void FilePickerWindow::UpdateSelection(const QModelIndex & current, const QModel
 		cartImage->setPixmap(QPixmap::fromImage(cart));
 	}
 
-//1048576
-//2097152
-//4194304
+	// set the rom's title
 	if (!haveUnknown)
+	{
 		prettyFilename = romList[i].name;
+	}
 	else
 	{
 		int lastSlashPos = currentFile.lastIndexOf('/');
 		prettyFilename = "\"" + currentFile.mid(lastSlashPos + 1) + "\"";
 	}
-
-	// Ensure that the title isn't longer than the width of the dialog...
-#if 1
 	title->setText(QString("<h2>%1</h2>").arg(prettyFilename));
-#else
-	// This doesn't work...
-	QFontMetrics metrics(title->font());
-	QString elidedText = metrics.elidedText(QString("<h2>%1</h2>").arg(prettyFilename), Qt::ElideRight, title->sizeHint().width());
-	title->setText(elidedText);
-#endif
 
-//Kludge for now, we'll have to fix this later...
-// So let's fix it now!
-	QString fileTypeString, crcString, notes, compatibility;
-
-#if 0
-	if (!haveUnknown)
+	// get file type
+	QString fileTypeString;
+	if ((!haveUnknown && (romList[i].flags & FF_ROM)) || (haveUnknown && (fileType == JST_ROM) && !haveUniversalHeader))
 	{
-		if (romList[i].flags & FF_ROM)
-			fileTypeString = QString(tr("%1MB Cartridge")).arg(fileSize / 1048576);
-		else if (romList[i].flags & FF_ALPINE)
-			fileTypeString = QString(tr("%1MB Alpine ROM")).arg(fileSize / 1048576);
-		else
-			fileTypeString = QString(tr("*** UNKNOWN *** (%1 bytes)")).arg(fileSize);
-	}
-#else
-	if ((!haveUnknown && (romList[i].flags & FF_ROM))
-		|| (haveUnknown && (fileType == JST_ROM) && !haveUniversalHeader))
 		fileTypeString = QString(tr("%1MB Cartridge")).arg(fileSize / 1048576);
-	else if ((!haveUnknown && (romList[i].flags & FF_ALPINE))
-		|| (haveUnknown
-				&& ((fileType == JST_ALPINE) || ((fileType == JST_ROM) && haveUniversalHeader))))
-	{
-		if (haveUniversalHeader)
-			fileTypeString = QString(tr("%1MB Alpine ROM w/Universal Header"));
-		else
-			fileTypeString = QString(tr("%1MB Alpine ROM"));
-
-		fileTypeString = fileTypeString.arg((fileSize + 8192) / 1048576);
 	}
-	else if (haveUnknown && (fileType == JST_ELF32))
-		fileTypeString = QString(tr("ELF 32bits Executable (%1 bytes)")).arg(fileSize);
-	else if (haveUnknown && (fileType == JST_ABS_TYPE1 || fileType == JST_ABS_TYPE2))
-		fileTypeString = QString(tr("ABS/COF Executable (%1 bytes)")).arg(fileSize);
-	else if (haveUnknown && (fileType == JST_JAGSERVER))
-		fileTypeString = QString(tr("Jaguar Server Executable (%1 bytes)")).arg(fileSize);
 	else
-		fileTypeString = QString(tr("*** UNKNOWN *** (%1 bytes)")).arg(fileSize);
-#endif
+	{
+		if ((!haveUnknown && (romList[i].flags & FF_ALPINE)) || (haveUnknown && ((fileType == JST_ALPINE) || ((fileType == JST_ROM) && haveUniversalHeader))))
+		{
+			if (haveUniversalHeader)
+			{
+				fileTypeString = QString(tr("%1MB Alpine ROM w/Universal Header"));
+			}
+			else
+			{
+				fileTypeString = QString(tr("%1MB Alpine ROM"));
+			}
+			fileTypeString = fileTypeString.arg((fileSize + 8192) / 1048576);
+		}
+		else
+		{
+			if (haveUnknown && (fileType == JST_ELF32))
+			{
+				fileTypeString = QString(tr("ELF 32bits Executable (%1 bytes)")).arg(fileSize);
+			}
+			else
+			{
+				if (haveUnknown && (fileType == JST_ABS_TYPE1 || fileType == JST_ABS_TYPE2))
+				{
+					fileTypeString = QString(tr("ABS/COF Executable (%1 bytes)")).arg(fileSize);
+				}
+				else
+				{
+					if (haveUnknown && (fileType == JST_JAGSERVER))
+					{
+						fileTypeString = QString(tr("Jaguar Server Executable (%1 bytes)")).arg(fileSize);
+					}
+					else
+					{
+						fileTypeString = QString(tr("*** UNKNOWN *** (%1 bytes)")).arg(fileSize);
+					}
+				}
+			}
+		}
+	}
 
-//	crcString = QString("%1").arg(romList[i].crc32, 8, 16, QChar('0')).toUpper();
-	crcString = QString("%1").arg(crc, 8, 16, QChar('0')).toUpper();
+	// crc
+	QString crcString = QString("%1").arg(crc, 8, 16, QChar('0')).toUpper();
 
+	// compatibility
+	QString compatibility;
 	if (!haveUnknown && (romList[i].flags & FF_NON_WORKING))
+	{
 		compatibility = "DOES NOT WORK";
+	}
 	else
+	{
 		compatibility = "Unknown";
+	}
 
-	// This is going to need some formatting love before long...
+	// notes
+	QString notes;
 	if (!haveUnknown && (romList[i].flags & FF_BAD_DUMP))
+	{
 		notes = "<b>BAD DUMP</b>";
+	}
 
 //	if (haveUniversalHeader)
 //		notes += " Universal Header detected";
 
 	if (!haveUnknown && (romList[i].flags & FF_REQ_BIOS))
+	{
 		notes += " Requires BIOS";
+	}
 
 	if (!haveUnknown && (romList[i].flags & FF_REQ_DSP))
+	{
 		notes += " Requires DSP";
+	}
 
 	if (!haveUnknown && (romList[i].flags & FF_VERIFIED))
+	{
 		notes += " <i>(Verified)</i>";
+	}
 
-	data->setText(QString("%1<br>%2<br>%3<br>%4")
-		.arg(fileTypeString).arg(crcString).arg(compatibility).arg(notes));
+	// display the file info: type, crc value, compatibility and notes
+	data->setText(QString("%1<br>%2<br>%3<br>%4").arg(fileTypeString).arg(crcString).arg(compatibility).arg(notes));
 }
 
 /*

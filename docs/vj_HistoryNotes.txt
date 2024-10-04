@@ -14,6 +14,7 @@ Git commit:
 -- Amber style sheet color mode selection
 7) Allow sub-directory in software's path directory
 8) Added .J64 homebrew format detection
+9) Display full filename in file picker cartridge's information
 
 pre-Release 5b (20th July 2022)
 -------------------------------
