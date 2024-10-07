@@ -33,7 +33,7 @@ class stdConsoleWindow : public QWidget
 		QTextBrowser * text;
 		QString stdoutDump;
 		bool colorcommand;
-		char colorcode[10] = { 0 };
+		char colorcode[30] = { 0 };
 		char colorcommandid[3] = { 0x1b, 0x5b, 0 };			// \033[
 		size_t colorindex;
 

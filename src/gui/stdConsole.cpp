@@ -9,6 +9,7 @@
 // ---  ----------  -----------------------------------------------------------
 // JPM  07/11/2024  Created this file
 // JPM  09/22/2024  Text output color detection, amber style sheet color mode
+// JPM  10/07/2024  Fix output color encoding
 //
 
 // STILL TO DO:
@@ -101,6 +102,11 @@ void stdConsoleWindow::RefreshContents(void)
 				{
 					(c != 'm') ? (colorcode[colorindex++] = c) : (colorcommand = false);	// x;yym
 				}
+				// use color encoding in normal mode
+				if ((c == 'm') && !StyleSheetColor->checkState())
+				{
+				}
+				colorindex = 0;
 			}
 			else
 			{
