@@ -502,6 +502,15 @@
     <ClCompile Include="..\src\gui\debug\romcartbrowser.cpp">
       <Filter>Source Files\alpine</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_stdConsole.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_stdConsole.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\gui\stdConsole.cpp">
+      <Filter>Source Files\gui</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -836,6 +845,9 @@
     </CustomBuild>
     <CustomBuild Include="..\src\gui\debug\romcartbrowser.h">
       <Filter>Header Files\alpine</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\gui\stdConsole.h">
+      <Filter>Header Files\gui</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

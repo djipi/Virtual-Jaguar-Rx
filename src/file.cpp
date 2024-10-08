@@ -20,6 +20,7 @@
 //  RG   Jan./2021  Linux build fixes
 // JPM  06/23/2021  Added ELF sections check
 // JPM  06/29/2023  Fix ELF/DWARF available valid information usage, and added ELF section names
+// JPM  09/25/2024  Added .J64 homebrew format detection
 //
 
 #include "file.h"
@@ -132,18 +133,30 @@ uint32_t JaguarLoadROM(uint8_t * &rom, char * path)
 }
 
 
-//
+// Return the file type based on file extension
+uint32_t ParseFileExt(const char * ext)
+{
+	// check the extension in case of no headers, or valid information, has been found
+	if (!stricmp(ext, "j64"))
+	{
+		// J64 is ROM compatible
+		return JST_J64;
+	}
+
+	// no type has been found
+	return JST_NONE;
+}
+
+
 // Jaguar file loading
-// We do a more intelligent file analysis here instead of relying on (possible
-// false) file extensions which people don't seem to give two shits about
-// anyway. :-(
-//
+// 
+// Will check the headers first, then if no valid one has been found, it will check the extension's filename
 bool JaguarLoadFile(char * path)
 {
 	Elf *ElfMem;
 	GElf_Ehdr ElfEhdr, *PtrGElfEhdr;
 	Elf_Scn	*PtrElfScn;
-	Elf_Data	*PtrElfData;
+	Elf_Data *PtrElfData;
 	GElf_Shdr GElfShdr, *PtrGElfShdr;
 	size_t NbrSect;
 	uint8_t *buffer = NULL;
@@ -153,318 +166,320 @@ bool JaguarLoadFile(char * path)
 	bool error;
 	int err;
 	struct stat _statbuf;
+	int fileType = JST_NONE;
 
+	// load rom in memory
 	jaguarROMSize = JaguarLoadROM(buffer, path);
-
-	if (jaguarROMSize == 0)
+	if (!jaguarROMSize)
 	{
-		// It's up to the GUI to report errors, not us. :-)
 		WriteLog("FILE: Could not load ROM from file \"%s\"...\nAborting load!\n", path);
-		return false;
 	}
-
-	jaguarMainROMCRC32 = crc32_calcCheckSum(buffer, jaguarROMSize);
-	WriteLog("CRC: %08X\n", (unsigned int)jaguarMainROMCRC32);
-// TODO: Check for EEPROM file in ZIP file. If there is no EEPROM in the user's EEPROM
-//       directory, copy the one from the ZIP file, if it exists.
-	EepromInit();
-	jaguarRunAddress = 0x802000;					// For non-BIOS runs, this is true
-	int fileType = ParseFileType(buffer, jaguarROMSize);
-	jaguarCartInserted = false;
-	DBGManager_Reset();
-
-	if (fileType == JST_ROM)
+	else
 	{
-		jaguarCartInserted = true;
-		memcpy(jagMemSpace + 0x800000, buffer, jaguarROMSize);
-// Checking something...
-jaguarRunAddress = GET32(jagMemSpace, 0x800404);
-WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress);
-		delete[] buffer;
-		return true;
-	}
-	else if (fileType == JST_ALPINE)
-	{
-		// File extension ".ROM": Alpine image that loads/runs at $802000
-		WriteLog("FILE: Setting up Alpine ROM... Run address: 00802000, length: %08X\n", jaguarROMSize);
-		memset(jagMemSpace + 0x800000, 0xFF, 0x2000);
-		memcpy(jagMemSpace + 0x802000, buffer, jaguarROMSize);
-		delete[] buffer;
+		jaguarMainROMCRC32 = crc32_calcCheckSum(buffer, jaguarROMSize);
+		WriteLog("CRC: %08X\n", (unsigned int)jaguarMainROMCRC32);
+		// TODO: Check for EEPROM file in ZIP file. If there is no EEPROM in the user's EEPROM
+		//       directory, copy the one from the ZIP file, if it exists.
+		EepromInit();
+		jaguarRunAddress = 0x802000;					// For non-BIOS runs, this is true
+		fileType = ParseFileType(buffer, jaguarROMSize);
+		jaguarCartInserted = false;
+		DBGManager_Reset();
 
-// Maybe instead of this, we could try requiring the STUBULATOR ROM? Just a thought...
-		// Try setting the vector to say, $1000 and putting an instruction there that loops forever:
-		// This kludge works! Yeah!
-		SET32(jaguarMainRAM, 0x10, 0x00001000);
-		SET16(jaguarMainRAM, 0x1000, 0x60FE);		// Here: bra Here
-		return true;
-	}
-	else if (fileType == JST_ELF32)
-	{
-		DBGType = DBG_ELF;
-
-		char *PtrELFExe = (char *)ELFManager_ExeCopy(buffer, jaguarROMSize);
-
-		if (PtrELFExe != NULL)
+		if (fileType == JST_NONE)
 		{
-			// check the ELF version
-			if ((elf_version(EV_CURRENT) != EV_NONE) && (ElfMem = ELFManager_MemOpen(PtrELFExe, jaguarROMSize)))
+			// check the extension in case of no headers, or valid information, has been found
+			fileType = ParseFileExt(&path[strlen(path) - 3]);
+		}
+
+		if ((fileType == JST_ROM) || (fileType == JST_J64))
+		{
+			jaguarCartInserted = true;
+			memcpy(jagMemSpace + 0x800000, buffer, jaguarROMSize);
+			// Checking something...
+			jaguarRunAddress = GET32(jagMemSpace, 0x800404);
+			WriteLog("FILE: Cartridge run address is reported as $%X...\n", jaguarRunAddress);
+		}
+		else
+		{
+			if (fileType == JST_ALPINE)
 			{
-				// get the file information
-				stat(path, &_statbuf);
+				// File extension ".ROM": Alpine image that loads/runs at $802000
+				WriteLog("FILE: Setting up Alpine ROM... Run address: 00802000, length: %08X\n", jaguarROMSize);
+				memset(jagMemSpace + 0x800000, 0xFF, 0x2000);
+				memcpy(jagMemSpace + 0x802000, buffer, jaguarROMSize);
 
-				if (ELFManager_DwarfInit(ElfMem, _statbuf))
+				// Maybe instead of this, we could try requiring the STUBULATOR ROM? Just a thought...
+						// Try setting the vector to say, $1000 and putting an instruction there that loops forever:
+						// This kludge works! Yeah!
+				SET32(jaguarMainRAM, 0x10, 0x00001000);
+				SET16(jaguarMainRAM, 0x1000, 0x60FE);		// Here: bra Here
+			}
+			else
+			{
+				if (fileType == JST_ELF32)
 				{
-					DBGType |= DBG_ELFDWARF;
-				}
+					DBGType = DBG_ELF;
 
-				if (!elf_getshdrnum(ElfMem, &NbrSect))
-				{
-					if (((PtrGElfEhdr = gelf_getehdr(ElfMem, &ElfEhdr)) != NULL) && ((PtrElfScn = elf_getscn(ElfMem, 0)) != NULL))
+					char *PtrELFExe = (char *)ELFManager_ExeCopy(buffer, jaguarROMSize);
+
+					if (PtrELFExe != NULL)
 					{
-						for (error = false; (PtrElfScn != NULL) && (error == false); PtrElfScn = elf_nextscn(ElfMem, PtrElfScn))
+						// check the ELF version
+						if ((elf_version(EV_CURRENT) != EV_NONE) && (ElfMem = ELFManager_MemOpen(PtrELFExe, jaguarROMSize)))
 						{
-							PtrElfData = NULL;
+							// get the file information
+							stat(path, &_statbuf);
 
-							if ((PtrGElfShdr = gelf_getshdr(PtrElfScn, &GElfShdr)) == NULL)
+							if (ELFManager_DwarfInit(ElfMem, _statbuf))
 							{
-								error = true;
+								DBGType |= DBG_ELFDWARF;
 							}
-							else
+
+							if (!elf_getshdrnum(ElfMem, &NbrSect))
 							{
-								NameSection = elf_strptr(ElfMem, PtrGElfEhdr->e_shstrndx, (size_t)PtrGElfShdr->sh_name);
-								WriteLog("FILE: ELF Section %s found\n", NameSection);
-
-								if (((ElfSectionNameType = ELFManager_GetSectionType(NameSection)) == ELF_NO_TYPE) && vjs.ELFSectionsCheck)
+								if (((PtrGElfEhdr = gelf_getehdr(ElfMem, &ElfEhdr)) != NULL) && ((PtrElfScn = elf_getscn(ElfMem, 0)) != NULL))
 								{
-									WriteLog("FILE: ELF Section %s not recognized\n", NameSection);
-									error = true;
-								}
-								else
-								{
-									switch (PtrGElfShdr->sh_type)
+									for (error = false; (PtrElfScn != NULL) && (error == false); PtrElfScn = elf_nextscn(ElfMem, PtrElfScn))
 									{
-									case SHT_NULL:
-										break;
+										PtrElfData = NULL;
 
-									case SHT_PROGBITS:
-										if ((PtrGElfShdr->sh_flags & (SHF_ALLOC | SHF_WRITE | SHF_EXECINSTR)))
+										if ((PtrGElfShdr = gelf_getshdr(PtrElfScn, &GElfShdr)) == NULL)
 										{
-											if (PtrGElfShdr->sh_addr >= 0x800000)
-											{
-												memcpy(jagMemSpace + PtrGElfShdr->sh_addr, buffer + PtrGElfShdr->sh_offset, PtrGElfShdr->sh_size);
-												//error = false;
-											}
-											else
-											{
-												memcpy(jaguarMainRAM + PtrGElfShdr->sh_addr, buffer + PtrGElfShdr->sh_offset, PtrGElfShdr->sh_size);
-											}
+											error = true;
 										}
 										else
 										{
-											switch (ElfSectionNameType)
+											NameSection = elf_strptr(ElfMem, PtrGElfEhdr->e_shstrndx, (size_t)PtrGElfShdr->sh_name);
+											WriteLog("FILE: ELF Section %s found\n", NameSection);
+
+											if (((ElfSectionNameType = ELFManager_GetSectionType(NameSection)) == ELF_NO_TYPE) && vjs.ELFSectionsCheck)
 											{
-											case ELF_debug_TYPE:
-											case ELF_debug_abbrev_TYPE:
-											case ELF_debug_addr_TYPE:
-											case ELF_debug_aranges_TYPE:
-											case ELF_debug_frame_TYPE:
-											case ELF_debug_info_TYPE:
-											case ELF_debug_line_TYPE:
-											case ELF_debug_loc_TYPE:
-											case ELF_debug_loclists_TYPE:
-											case ELF_debug_macinfo_TYPE:
-											case ELF_debug_pubnames_TYPE:
-											case ELF_debug_pubtypes_TYPE:
-											case ELF_debug_ranges_TYPE:
-											case ELF_debug_rnglists_TYPE:
-											case ELF_debug_str_TYPE:
-											case ELF_debug_types_TYPE:						
-												break;
-
-											case ELF_stab_TYPE:
-												break;
-
-											case ELF_heap_TYPE:
-												break;
-
-											case ELF_comment_TYPE:
-												break;
-
-											default:
-												WriteLog("FILE: ELF section %s is not recognized\n", NameSection);
-												//error = true;
-												break;
-											}
-										}
-										break;
-
-									case SHT_NOBITS:
-										break;
-
-									case SHT_STRTAB:
-									case SHT_SYMTAB:
-										while ((error == false) && ((PtrElfData = elf_getdata(PtrElfScn, PtrElfData)) != NULL))
-										{
-											if (!ELFManager_AddTab(PtrElfData, ElfSectionNameType))
-											{
-												WriteLog("FILE: ELF tab cannot be allocated\n");
+												WriteLog("FILE: ELF Section %s not recognized\n", NameSection);
 												error = true;
 											}
-										}
-										break;
+											else
+											{
+												switch (PtrGElfShdr->sh_type)
+												{
+												case SHT_NULL:
+													break;
 
-									default:
-										WriteLog("FILE: ELF SHT type %i not recognized\n", PtrGElfShdr->sh_type);
-										error = true;
-										break;
+												case SHT_PROGBITS:
+													if ((PtrGElfShdr->sh_flags & (SHF_ALLOC | SHF_WRITE | SHF_EXECINSTR)))
+													{
+														if (PtrGElfShdr->sh_addr >= 0x800000)
+														{
+															memcpy(jagMemSpace + PtrGElfShdr->sh_addr, buffer + PtrGElfShdr->sh_offset, PtrGElfShdr->sh_size);
+															//error = false;
+														}
+														else
+														{
+															memcpy(jaguarMainRAM + PtrGElfShdr->sh_addr, buffer + PtrGElfShdr->sh_offset, PtrGElfShdr->sh_size);
+														}
+													}
+													else
+													{
+														switch (ElfSectionNameType)
+														{
+														case ELF_debug_TYPE:
+														case ELF_debug_abbrev_TYPE:
+														case ELF_debug_addr_TYPE:
+														case ELF_debug_aranges_TYPE:
+														case ELF_debug_frame_TYPE:
+														case ELF_debug_info_TYPE:
+														case ELF_debug_line_TYPE:
+														case ELF_debug_loc_TYPE:
+														case ELF_debug_loclists_TYPE:
+														case ELF_debug_macinfo_TYPE:
+														case ELF_debug_pubnames_TYPE:
+														case ELF_debug_pubtypes_TYPE:
+														case ELF_debug_ranges_TYPE:
+														case ELF_debug_rnglists_TYPE:
+														case ELF_debug_str_TYPE:
+														case ELF_debug_types_TYPE:
+															break;
+
+														case ELF_stab_TYPE:
+															break;
+
+														case ELF_heap_TYPE:
+															break;
+
+														case ELF_comment_TYPE:
+															break;
+
+														default:
+															WriteLog("FILE: ELF section %s is not recognized\n", NameSection);
+															//error = true;
+															break;
+														}
+													}
+													break;
+
+												case SHT_NOBITS:
+													break;
+
+												case SHT_STRTAB:
+												case SHT_SYMTAB:
+													while ((error == false) && ((PtrElfData = elf_getdata(PtrElfScn, PtrElfData)) != NULL))
+													{
+														if (!ELFManager_AddTab(PtrElfData, ElfSectionNameType))
+														{
+															WriteLog("FILE: ELF tab cannot be allocated\n");
+															error = true;
+														}
+													}
+													break;
+
+												default:
+													WriteLog("FILE: ELF SHT type %i not recognized\n", PtrGElfShdr->sh_type);
+													error = true;
+													break;
+												}
+											}
+										}
 									}
+
+									// Set the executable address
+									jaguarRunAddress = (uint32_t)PtrGElfEhdr->e_entry;
+									WriteLog("FILE: Setting up ELF 32bits... Run address: %08X\n", jaguarRunAddress);
+								}
+								else
+								{
+									error = true;
 								}
 							}
+							else
+							{
+								WriteLog("FILE: Cannot get the number of the ELF sections\n");
+								error = true;
+							}
 						}
-
-						// Set the executable address
-						jaguarRunAddress = (uint32_t)PtrGElfEhdr->e_entry;
-						WriteLog("FILE: Setting up ELF 32bits... Run address: %08X\n", jaguarRunAddress);
+						else
+						{
+							error = true;
+							WriteLog("FILE: libelf version is not recognized or libelf memory cannot be opened\n");
+						}
 					}
 					else
 					{
 						error = true;
+						WriteLog("FILE: ELFManager cannot allocate memory\n");
+					}
+
+					if (error)
+					{
+						WriteLog("FILE: ELF parsing error\n");
+
+						if ((err = elf_errno()))
+						{
+							WriteLog("FILE: ELF error: %s\n", elf_errmsg(err));
+						}
+
+						fileType = JST_NONE;
+					}
+					else
+					{
+						DBGManager_SetType(DBGType);
 					}
 				}
 				else
 				{
-					WriteLog("FILE: Cannot get the number of the ELF sections\n");
-					error = true;
+					if (fileType == JST_ABS_TYPE1)
+					{
+						// For ABS type 1, run address == load address
+						uint32_t loadAddress = GET32(buffer, 0x16), codeSize = GET32(buffer, 0x02) + GET32(buffer, 0x06);
+						WriteLog("FILE: Setting up homebrew (ABS-1)... Run address: %08X, length: %08X\n", loadAddress, codeSize);
+						memcpy(jagMemSpace + loadAddress, buffer + 0x24, codeSize);
+						jaguarRunAddress = loadAddress;
+					}
+					else
+					{
+						if (fileType == JST_ABS_TYPE2)
+						{
+							uint32_t loadAddress = GET32(buffer, 0x28), runAddress = GET32(buffer, 0x24), codeSize = GET32(buffer, 0x18) + GET32(buffer, 0x1C);
+							WriteLog("FILE: Setting up homebrew (ABS-2)... Run address: %08X, length: %08X\n", runAddress, codeSize);
+							memcpy(jagMemSpace + loadAddress, buffer + 0xA8, codeSize);
+							jaguarRunAddress = runAddress;
+						}
+						// NB: This is *wrong*
+						/*
+						Basically, if there is no "JAG" at position $1C, then the long there is the load/start
+						address in LITTLE ENDIAN.
+						If "JAG" is present, the the next character ("R" or "L") determines the size of the
+						JagServer command (2 bytes vs. 4). Following that are the commands themselves;
+						typically it will either be 2 (load) or 3 (load & run). Command headers go like so:
+						2:
+						Load address (long)
+						Length (long)
+						payload
+						3:
+						Load address (long)
+						Length (long)
+						Run address (long)
+						payload
+						5: (Reset)
+						[command only]
+						7: (Run at address)
+						Run address (long)
+						[no payload]
+						9: (Clear memory)
+						Start address (long)
+						End address (long)
+						[no payload]
+						10: (Poll for commands)
+						[command only]
+						12: (Load & run user program)
+						filname, terminated with NULL
+						[no payload]
+						$FFFF: (Halt)
+						[no payload]
+						*/
+						else
+						{
+							if (fileType == JST_JAGSERVER)
+							{
+								// This kind of shiaut should be in the detection code below...
+								// (and now it is! :-)
+						//		if (buffer[0x1C] == 'J' && buffer[0x1D] == 'A' && buffer[0x1E] == 'G')
+						//		{
+									// Still need to do some checking here for type 2 vs. type 3. This assumes 3
+									// Also, JAGR vs. JAGL (word command size vs. long command size)
+								uint32_t loadAddress = GET32(buffer, 0x22), runAddress = GET32(buffer, 0x2A);
+								WriteLog("FILE: Setting up homebrew (Jag Server)... Run address: $%X, length: $%X\n", runAddress, jaguarROMSize - 0x2E);
+								memcpy(jagMemSpace + loadAddress, buffer + 0x2E, jaguarROMSize - 0x2E);
+								jaguarRunAddress = runAddress;
+
+								// Hmm. Is this kludge necessary?
+								SET32(jaguarMainRAM, 0x10, 0x00001000);		// Set Exception #4 (Illegal Instruction)
+								SET16(jaguarMainRAM, 0x1000, 0x60FE);		// Here: bra Here
+							}
+							else
+							{
+								if (fileType == JST_WTFOMGBBQ)
+								{
+									uint32_t loadAddress = (buffer[0x1F] << 24) | (buffer[0x1E] << 16) | (buffer[0x1D] << 8) | buffer[0x1C];
+									WriteLog("FILE: Setting up homebrew (GEMDOS WTFOMGBBQ type)... Run address: $%X, length: $%X\n", loadAddress, jaguarROMSize - 0x20);
+									memcpy(jagMemSpace + loadAddress, buffer + 0x20, jaguarROMSize - 0x20);
+									jaguarRunAddress = loadAddress;
+								}
+								else
+								{
+									// we can assume we have JST_NONE at this point. :-P
+									WriteLog("FILE: Failed to load headerless file.\n");
+								}
+							}
+						}
+					}
 				}
 			}
-			else
-			{
-				error = true;
-				WriteLog("FILE: libelf version is not recognized or libelf memory cannot be opened\n");
-			}
-		}
-		else
-		{
-			error = true;
-			WriteLog("FILE: ELFManager cannot allocate memory\n");
 		}
 
 		delete[] buffer;
-
-		if (error)
-		{
-			WriteLog("FILE: ELF parsing error\n");
-
-			if ((err = elf_errno()))
-			{
-				WriteLog("FILE: ELF error: %s\n", elf_errmsg(err));
-			}
-
-			return false;
-		}
-		else
-		{
-			DBGManager_SetType(DBGType);
-			return true;
-		}
-	}
-	else if (fileType == JST_ABS_TYPE1)
-	{
-		// For ABS type 1, run address == load address
-		uint32_t loadAddress = GET32(buffer, 0x16),
-			codeSize = GET32(buffer, 0x02) + GET32(buffer, 0x06);
-		WriteLog("FILE: Setting up homebrew (ABS-1)... Run address: %08X, length: %08X\n", loadAddress, codeSize);
-		memcpy(jagMemSpace + loadAddress, buffer + 0x24, codeSize);
-		delete[] buffer;
-		jaguarRunAddress = loadAddress;
-		return true;
-	}
-	else if (fileType == JST_ABS_TYPE2)
-	{
-		uint32_t loadAddress = GET32(buffer, 0x28), runAddress = GET32(buffer, 0x24),
-			codeSize = GET32(buffer, 0x18) + GET32(buffer, 0x1C);
-		WriteLog("FILE: Setting up homebrew (ABS-2)... Run address: %08X, length: %08X\n", runAddress, codeSize);
-		memcpy(jagMemSpace + loadAddress, buffer + 0xA8, codeSize);
-		delete[] buffer;
-		jaguarRunAddress = runAddress;
-		return true;
-	}
-	// NB: This is *wrong*
-	/*
-	Basically, if there is no "JAG" at position $1C, then the long there is the load/start
-	address in LITTLE ENDIAN.
-	If "JAG" is present, the the next character ("R" or "L") determines the size of the
-	JagServer command (2 bytes vs. 4). Following that are the commands themselves;
-	typically it will either be 2 (load) or 3 (load & run). Command headers go like so:
-	2:
-	Load address (long)
-	Length (long)
-	payload
-	3:
-	Load address (long)
-	Length (long)
-	Run address (long)
-	payload
-	5: (Reset)
-	[command only]
-	7: (Run at address)
-	Run address (long)
-	[no payload]
-	9: (Clear memory)
-	Start address (long)
-	End address (long)
-	[no payload]
-	10: (Poll for commands)
-	[command only]
-	12: (Load & run user program)
-	filname, terminated with NULL
-	[no payload]
-	$FFFF: (Halt)
-	[no payload]
-	*/
-	else if (fileType == JST_JAGSERVER)
-	{
-		// This kind of shiaut should be in the detection code below...
-		// (and now it is! :-)
-//		if (buffer[0x1C] == 'J' && buffer[0x1D] == 'A' && buffer[0x1E] == 'G')
-//		{
-			// Still need to do some checking here for type 2 vs. type 3. This assumes 3
-			// Also, JAGR vs. JAGL (word command size vs. long command size)
-			uint32_t loadAddress = GET32(buffer, 0x22), runAddress = GET32(buffer, 0x2A);
-			WriteLog("FILE: Setting up homebrew (Jag Server)... Run address: $%X, length: $%X\n", runAddress, jaguarROMSize - 0x2E);
-			memcpy(jagMemSpace + loadAddress, buffer + 0x2E, jaguarROMSize - 0x2E);
-			delete[] buffer;
-			jaguarRunAddress = runAddress;
-
-// Hmm. Is this kludge necessary?
-SET32(jaguarMainRAM, 0x10, 0x00001000);		// Set Exception #4 (Illegal Instruction)
-SET16(jaguarMainRAM, 0x1000, 0x60FE);		// Here: bra Here
-
-			return true;
-//		}
-//		else // Special WTFOMGBBQ type here...
-//		{
-//			uint32_t loadAddress = (buffer[0x1F] << 24) | (buffer[0x1E] << 16) | (buffer[0x1D] << 8) | buffer[0x1C];
-//			WriteLog("FILE: Setting up homebrew (GEMDOS WTFOMGBBQ type)... Run address: $%X, length: $%X\n", loadAddress, jaguarROMSize - 0x20);
-//			memcpy(jagMemSpace + loadAddress, buffer + 0x20, jaguarROMSize - 0x20);
-//			delete[] buffer;
-//			jaguarRunAddress = loadAddress;
-//			return true;
-//		}
-	}
-	else if (fileType == JST_WTFOMGBBQ)
-	{
-		uint32_t loadAddress = (buffer[0x1F] << 24) | (buffer[0x1E] << 16) | (buffer[0x1D] << 8) | buffer[0x1C];
-		WriteLog("FILE: Setting up homebrew (GEMDOS WTFOMGBBQ type)... Run address: $%X, length: $%X\n", loadAddress, jaguarROMSize - 0x20);
-		memcpy(jagMemSpace + loadAddress, buffer + 0x20, jaguarROMSize - 0x20);
-		delete[] buffer;
-		jaguarRunAddress = loadAddress;
-		return true;
 	}
 
-	// We can assume we have JST_NONE at this point. :-P
-	WriteLog("FILE: Failed to load headerless file.\n");
-	return false;
+	return fileType;
 }
 
 

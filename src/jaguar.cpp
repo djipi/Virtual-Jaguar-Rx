@@ -20,6 +20,7 @@
 // JPM   Feb./2021  Added a specific breakpoint for the M68K bus error exception, and a M68K exception catch detection
 // JPM   Apr./2021  Keep number of M68K cycles used in tracing mode
 // JPM   Jan./2022  Added a writes to unknown memory location catch
+// JPM  07/14/2024  Added a Console standard emulation
 //
 
 
@@ -123,11 +124,14 @@ uint32_t srQueue[0x400];
 uint32_t pcQPtr = 0;
 bool startM68KTracing = false;
 
-// Breakpoint on memory access vars (exported)
+// breakpoint on memory access vars (exported)
 bool bpmActive = false;
 bool bpmSaveActive = false;
 size_t bpmHitCounts;
 uint32_t bpmAddress1;
+// Console standard emulation list
+S_stdConsoleInfo stdConsoleInfo[3];
+// breakpoint functions list
 S_BrkInfo *brkInfo;
 size_t brkNbr;
 
@@ -1066,6 +1070,15 @@ void m68k_brk_init(void)
 }
 
 
+// Console standard emulation reset
+bool stdConsole_set(STDCONSOLE NumStd, unsigned int adr)
+{
+	stdConsoleInfo[NumStd].Adr = adr;
+	memset(stdConsoleInfo[NumStd].BufText, 0, sizeof(stdConsoleInfo[NumStd].BufText));
+	return adr ? true : false;
+}
+
+
 // Reset the M68000 breakpoints structures
 void m68k_brk_reset(void)
 {
@@ -1767,11 +1780,24 @@ void m68k_write_memory_16(unsigned int address, unsigned int value)
 										}//*/
 
 #ifndef USE_NEW_MMU
-										// Note that the Jaguar only has 2M of RAM, not 4!
+		// note that the Jaguar only has 2MB of RAM, but the emulation can reach the maximum of 8MB
 		if ((address >= 0x000000) && (address <= (vjs.DRAM_size - 2)))
 		{
-			/*		jaguar_mainRam[address] = value >> 8;
-					jaguar_mainRam[address + 1] = value & 0xFF;*/
+			// check the Console standard emulation's stdout
+			if (address && ((stdConsoleInfo[STDCONSOLE_STDOUT].Adr == address) || ((stdConsoleInfo[STDCONSOLE_STDOUT].Adr + 2) == address)))
+			{
+				if (value)
+				{
+					// save the value
+					for (size_t i = 0; i < 1; i++)
+					{
+						char buf = (value >> (i * 8)) & 0xff;
+						strncat(stdConsoleInfo[STDCONSOLE_STDOUT].BufText, &buf, 1);
+					}
+				}
+			}
+				/*		jaguar_mainRam[address] = value >> 8;
+						jaguar_mainRam[address + 1] = value & 0xFF;*/
 			SET16(jaguarMainRAM, address, value);
 		}
 		else

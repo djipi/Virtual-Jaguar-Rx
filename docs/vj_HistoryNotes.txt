@@ -4,7 +4,18 @@ Git commit:
 -
 0) Fix the ELF sections check to allow usage of ELF/DWARF available valid information
 1) Added ELF section names
-2) Added support for SDL2 library 64bits for VS 2017
+2) Set optimization for code speed in the VS2017 project
+3) Added a setting for the emulation framerate display
+4) Minor fix for the application's exit
+5) Windows refresh rate placeholder text update in the alpine's configure tab
+6) Added a Console standard emulation
+-- Support only stdout
+-- Text output color detection
+-- Amber style sheet color mode selection
+7) Allow sub-directory in software's path directory
+8) Added .J64 homebrew format detection
+9) Display full filename in file picker cartridge's information
+10) Added support for SDL2 library 64bits for VS 2017
 
 pre-Release 5b (20th July 2022)
 -------------------------------

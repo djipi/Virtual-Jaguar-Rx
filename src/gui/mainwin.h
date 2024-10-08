@@ -16,6 +16,7 @@
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JPM  March/2022  Added the save state patch from PvtLewis
+// JPM  07/14/2024  Added a Console standard emulation window
 //
 
 #ifndef __MAINWIN_H__
@@ -34,6 +35,7 @@ class GLWidget;
 class AboutWindow;
 class HelpWindow;
 class FilePickerWindow;
+class stdConsoleWindow;
 class VideoOutputWindow;
 //class DasmWindow;
 class EmuStatusWindow;
@@ -123,6 +125,7 @@ class MainWin: public QMainWindow
 		void ShowCallStackBrowserWin(void);
 		void ShowHeapAllocatorBrowserWin(void);
 		void ShowMemory1BrowserWin(int NumWin);
+		void ShowstdConsoleWin(void);
 		void ShowExceptionVectorTableBrowserWin(void);
 		void ShowNewFunctionBreakpointWin(void);
 		void ShowBreakpointsWin(void);
@@ -177,6 +180,7 @@ class MainWin: public QMainWindow
 		HelpWindow *helpWin;
 		FilePickerWindow *filePickWin;
 		EmuStatusWindow *emuStatusWin;
+		stdConsoleWindow *stdConsoleWin;
 		SaveDumpAsWindow *SaveDumpAsWin;
 		QTimer *timer;
 		bool running;
@@ -224,6 +228,7 @@ class MainWin: public QMainWindow
 		bool keyHeld[8];
 		bool fullScreen;
 		bool scannedSoftwareFolder;
+		bool stdConsoleExist;	// = NULL;
 
 	public:
 		bool plzDontKillMyComputer;
