@@ -5,15 +5,12 @@
 // (C) 2013 Underground Software
 //
 // JLH = James Hammons <jlhamm@acm.org>
-// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
 // Who  When        What
 // ---  ----------  ------------------------------------------------------------
 // JLH  01/05/2013  Created this file
-// JPM   Jan./2024  Support SDL2 library
 //
 
-#include <string.h>
 #include "gamepad.h"
 #include "log.h"
 
@@ -58,11 +55,7 @@ void Gamepad::AllocateJoysticks(void)
 		// We need to copy the contents of this pointer, as SDL will change it
 		// willy nilly to suit itself
 //		padName[i] = SDL_JoystickName(i);
-#if SDL_MAJOR_VERSION < 2
 		strncpy(padName[i], SDL_JoystickName(i), 127);
-#else
-		strncpy(padName[i], SDL_JoystickName(pad[i]), 127);
-#endif
 		padName[i][127] = 0;	// Just in case name's length > 127
 
 		if (pad[i])
