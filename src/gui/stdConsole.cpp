@@ -16,9 +16,9 @@
 // Support for the stdin, stderr
 //
 
-#include "debugger/DBGManager.h"
 #include "stdConsole.h"
 #include "jaguar.h"
+#include "debugger/DBGManager.h"
 
 
 //
