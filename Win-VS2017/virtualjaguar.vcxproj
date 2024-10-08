@@ -62,7 +62,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.;.\..\src;.\..\src\gui;$(QTDIR)\include;C:\SDK\OpenGL\include;C:\SDK\SDL\SDL2-2.28.5\include;C:\SDK\DWARF\libdwarf-20210528-VS2017\include;C:\SDK\Elf\libelf-0.8.13\include;C:\SDK\zlib\zlib-1.2.11\include;.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;.\..\src;.\..\src\gui;$(QTDIR)\include;C:\SDK\OpenGL\include;C:\SDK\SDL\SDL-1.2.15\include;C:\SDK\DWARF\libdwarf-20210528-VS2017\include;C:\SDK\Elf\libelf-0.8.13\include;C:\SDK\zlib\zlib-1.2.11\include;.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zc:strictStrings -Zc:throwingNew -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -83,8 +83,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Qt5PlatformCompositorSupport.lib;qtmain.lib;Qt5OpenGL.lib;shell32.lib;jaguarcore.lib;zlib-1.2.11_vs2017_x64.lib;m68000.lib;gdi32.lib;user32.lib;SDL2.lib;libelf-0.8.13_vs2017_x64.lib;legacy_stdio_definitions.lib;OpenGL32.lib;libdwarf_x64.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;opengl32.lib;glu32.lib;Ws2_32.lib;imm32.lib;winmm.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\src\m68000\obj;C:\SDK\zlib\zlib-1.2.11\lib;C:\SDK\SDL\SDL2-2.28.5\lib\x64;C:\SDK\Elf\libelf-0.8.13\lib;m68000\x64\Release;jaguarcore\x64\Release;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib\x64;C:\SDK\DWARF\libdwarf-20210528-VS2017\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Qt5PlatformCompositorSupport.lib;qtmain.lib;Qt5OpenGL.lib;shell32.lib;jaguarcore.lib;zlib-1.2.11_vs2017_x64.lib;m68000.lib;gdi32.lib;user32.lib;SDL-1.2.15_vs2017_x64.lib;libelf-0.8.13_vs2017_x64.lib;legacy_stdio_definitions.lib;OpenGL32.lib;libdwarf_x64.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;opengl32.lib;glu32.lib;Ws2_32.lib;imm32.lib;winmm.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\src\m68000\obj;C:\SDK\zlib\zlib-1.2.11\lib;C:\SDK\SDL\SDL-1.2.15\lib\x64\static;C:\SDK\Elf\libelf-0.8.13\lib;m68000\x64\Release;jaguarcore\x64\Release;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib\x64;C:\SDK\DWARF\libdwarf-20210528-VS2017\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -109,7 +109,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.;.\..\src;.\..\src\gui;$(QTDIR)\include;C:\SDK\SDL\SDL2-2.28.5\include;C:\SDK\DWARF\libdwarf-20210528-VS2017\include;C:\SDK\Elf\libelf-0.8.13\include;C:\SDK\zlib\zlib-1.2.11\include;.\GeneratedFiles\$(ConfigurationName);C:\SDK\OpenGL\include;.\GeneratedFiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;.\..\src;.\..\src\gui;$(QTDIR)\include;C:\SDK\SDL\SDL-1.2.15\include;C:\SDK\DWARF\libdwarf-20210528-VS2017\include;C:\SDK\Elf\libelf-0.8.13\include;C:\SDK\zlib\zlib-1.2.11\include;.\GeneratedFiles\$(ConfigurationName);C:\SDK\OpenGL\include;.\GeneratedFiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zc:strictStrings -Zc:throwingNew -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -132,8 +132,8 @@
       <OmitDefaultLibName>false</OmitDefaultLibName>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Qt5PlatformCompositorSupportd.lib;qtmaind.lib;Qt5OpenGLd.lib;shell32.lib;zlib-1.2.11_vs2017_x64d.lib;SDL2.lib;OpenGL32.lib;gdi32.lib;user32.lib;legacy_stdio_definitions.lib;libelf-0.8.13_vs2017_x64d.lib;m68000d.lib;jaguarcored.lib;libdwarf_x64d.lib;Ws2_32.lib;imm32.lib;winmm.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opengl32.lib;glu32.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\..\src\m68000\obj;C:\SDK\zlib\zlib-1.2.11\lib;C:\SDK\SDL\SDL2-2.28.5\lib\x64;C:\SDK\Elf\libelf-0.8.13\lib;m68000\x64\Debug;jaguarcore\x64\Debug;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib\x64;C:\SDK\DWARF\libdwarf-20210528-VS2017\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Qt5PlatformCompositorSupportd.lib;qtmaind.lib;Qt5OpenGLd.lib;shell32.lib;zlib-1.2.11_vs2017_x64d.lib;SDL-1.2.15_vs2017_x64d.lib;OpenGL32.lib;gdi32.lib;user32.lib;legacy_stdio_definitions.lib;libelf-0.8.13_vs2017_x64d.lib;m68000d.lib;jaguarcored.lib;libdwarf_x64d.lib;Ws2_32.lib;imm32.lib;winmm.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opengl32.lib;glu32.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\..\src\m68000\obj;C:\SDK\zlib\zlib-1.2.11\lib;C:\SDK\SDL\SDL-1.2.15\lib\x64\static;C:\SDK\Elf\libelf-0.8.13\lib;m68000\x64\Debug;jaguarcore\x64\Debug;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib\x64;C:\SDK\DWARF\libdwarf-20210528-VS2017\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>

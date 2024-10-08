@@ -34,13 +34,13 @@ win32     { DEFINES += __GCCWIN32__ }
 else:macx { DEFINES += __GCCUNIX__ __THINK_STUPID__ }
 else:unix { DEFINES += __GCCUNIX__ }
 
-# SDL2 (to link statically on Mac)
-macx { LIBS += `sdl2-config --static-libs` }
-#else:win32 { LIBS += `$(CROSS)sdl2-config --libs` }
-#else:win32 { LIBS += `$(CROSS)sdl2-config --static-libs` -static-libgcc}
-else:win32 { LIBS += `$(CROSS)sdl2-config --static-libs` -static -static-libgcc -static-libstdc++ }
-else { LIBS += `$(CROSS)sdl2-config --libs` }
-#else { LIBS += `$(CROSS)sdl2-config --static-libs` }
+# SDL (to link statically on Mac)
+macx { LIBS += `sdl-config --static-libs` }
+#else:win32 { LIBS += `$(CROSS)sdl-config --libs` }
+#else:win32 { LIBS += `$(CROSS)sdl-config --static-libs` -static-libgcc}
+else:win32 { LIBS += `$(CROSS)sdl-config --static-libs` -static -static-libgcc -static-libstdc++ }
+else { LIBS += `$(CROSS)sdl-config --libs` }
+#else { LIBS += `$(CROSS)sdl-config --static-libs` }
 
 # Icon on Win32, Mac
 #win32 { LIBS += res/vj-ico.o }
@@ -53,8 +53,8 @@ macx  { ICON = res/vj-icon.icns }
 # NOTE: May have to put -Wall back in, but only on non-release cycles. It can
 #       cause problems if you're not careful. (Can do this via command line in
 #       qmake)
-QMAKE_CFLAGS += `$(CROSS)sdl2-config --cflags`
-QMAKE_CXXFLAGS += `$(CROSS)sdl2-config --cflags`
+QMAKE_CFLAGS += `$(CROSS)sdl-config --cflags`
+QMAKE_CXXFLAGS += `$(CROSS)sdl-config --cflags`
 
 # Need to add libcdio stuffola (checking/including)...
 
