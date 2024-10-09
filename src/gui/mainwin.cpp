@@ -122,9 +122,9 @@
 //#ifdef __GCCWIN32__
 // Apparently on win32, usleep() is not pulled in by the usual suspects.
 #ifndef _MSC_VER
-#include <unistd.h>
+//#include <unistd.h>
 #else
-#include "_MSC_VER/unistd.h"
+//#include "_MSC_VER/unistd.h"
 #endif // !_MSC_VER
 //#endif
 
