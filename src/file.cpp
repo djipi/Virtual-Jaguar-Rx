@@ -25,7 +25,7 @@
 
 #include "file.h"
 #if defined(_MSC_VER)
-#include "_MSC_VER/config.h"
+//#include "_MSC_VER/config.h"
 #endif // _MSC_VER
 #include <stdarg.h>
 #include <string.h>
@@ -90,7 +90,7 @@ uint32_t JaguarLoadROM(uint8_t * &rom, char * path)
 	WriteLog("\nFILE: Succeeded in finding extension (%s)!\n", ext);
 	WriteLog("FILE: Loading \"%s\"...", path);
 
-	if (strcasecmp(ext, ".zip") == 0)
+	if (stricmp(ext, ".zip") == 0)
 	{
 		// Handle ZIP file loading here...
 		WriteLog("(ZIPped)...");
@@ -579,7 +579,7 @@ static bool CheckExtension(const uint8_t *filename, const char *ext)
 	if (filenameExt == NULL)
 		return false;
 
-	return (strcasecmp(filenameExt, ext) == 0 ? true : false);
+	return (stricmp(filenameExt, ext) == 0 ? true : false);
 }
 
 
