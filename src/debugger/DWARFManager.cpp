@@ -144,6 +144,7 @@ typedef struct SubProgStruct
 // Compilation Unit internal structure
 typedef struct CUStruct
 {
+	size_t DWARFVersion;							// DWARF version used in the CU
 	size_t Tag;
 	size_t Language;								// Language (C, etc.) used by the source code
 	size_t LowPC, HighPC;							// Memory range for the code
@@ -392,6 +393,9 @@ void DWARFManager_InitDMI(void)
 	FILE *SrcFile;
 	char *return_string;
 	char *Ptr, *Ptr1;
+	Dwarf_Unsigned      entries_count;
+	Dwarf_Unsigned      global_offset_of_rle_set;
+	Dwarf_Rnglists_Head rnglhead = 0;
 
 	// Initialisation for the Compilation Units table
 	NbCU = 0;
@@ -406,6 +410,8 @@ void DWARFManager_InitDMI(void)
 			// Compilation Unit RAZ
 			PtrCU = (CUStruct *)Ptr;
 			memset(PtrCU + NbCU, 0, sizeof(CUStruct));
+			// save the CU's DWARF version used
+			PtrCU[NbCU].DWARFVersion = version;
 
 			// Debug specific CU
 #ifdef DEBUG_NumCU
@@ -432,6 +438,27 @@ void DWARFManager_InitDMI(void)
 									{
 										switch (return_attr)
 										{
+											// DWARF5: Location lists base
+										case DW_AT_loclists_base:
+											if (dwarf_global_formref(atlist[i], &return_offset, &error) == DW_DLV_OK)
+											{
+											}
+											break;
+
+											// DWARF5: Base offset for range lists
+										case DW_AT_rnglists_base:
+											if (dwarf_global_formref(atlist[i], &return_offset, &error) == DW_DLV_OK)
+											{
+											}
+											break;
+
+											// DWARF5: Base offset for address table
+										case DW_AT_addr_base:
+											if (dwarf_global_formref(atlist[i], &return_offset, &error) == DW_DLV_OK)
+											{
+											}
+											break;
+
 											// Start address
 										case DW_AT_low_pc:
 											if (dwarf_lowpc(return_sib, &return_lowpc, &error) == DW_DLV_OK)
