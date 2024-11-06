@@ -438,6 +438,13 @@ void DWARFManager_InitDMI(void)
 									{
 										switch (return_attr)
 										{
+											// Line number information for unit
+										case DW_AT_stmt_list:
+											if (dwarf_global_formref(atlist[i], &return_offset, &error) == DW_DLV_OK)
+											{
+											}
+											break;
+
 											// DWARF5: Location lists base
 										case DW_AT_loclists_base:
 											if (dwarf_global_formref(atlist[i], &return_offset, &error) == DW_DLV_OK)
