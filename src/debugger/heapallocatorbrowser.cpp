@@ -10,12 +10,14 @@
 // JPM  01/08/2017            Created this file
 // JPM  Sept./2018            Support of the DRAM size limit option, use definitions for error instead of hard values, detect if heap allocation shares space with SP (Stack), added a status bar and better status report, and set information values in a tab
 // JPM  07/04/2019            Fix the support of the DRAM size limit option
+// JPM  11/10/2024            Support Calypsi's malloc structure for free nodes, revamp of the error/warning detections
 //
 
 // STILL TO DO:
 // To have filters
 // To set the information display at the right
 // Feature to list the pointer(s) in the code using the allocation
+// Support the gcc's malloc structure
 //
 
 
@@ -37,7 +39,8 @@ model(new QStandardItemModel),
 proxyModel(new QSortFilterProxyModel),
 #endif
 statusbar(new QStatusBar),
-Adr(0)
+Adr(0),
+CodeMalloc(HA_MALLOC_NONE)
 {
 	setWindowTitle(tr("Heap Allocation"));
 
@@ -92,9 +95,11 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 	QString MSG;
 	size_t Adr68K, Adr68KHigh;
 	size_t Error = HA_NOERROR;
-	size_t NbBlocks, TotalBytesUsed;
+	int NbBlocks, TotalBytesUsed;
 	HeapAllocation HeapAllocation;
+	S__heap_s* PtrCalypsiHeap;
 
+	// display only if window is visible
 	if (isVisible())
 	{
 		if (Adr68K = Adr)
@@ -103,92 +108,139 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 #ifndef HA_LAYOUTTEXTS
 			model->setRowCount(0);
 #endif
-			do
+			switch (CodeMalloc)
 			{
-				if ((Adr68K >= 0x4000) && (Adr68K < vjs.DRAM_size))
+				// Calypsi compiler malloc allocation
+			case HA_MALLOC_CALYPSI:
+				PtrCalypsiHeap = (S__heap_s*)&jaguarMainRAM[Adr68K];
+				for (S___freenode_s* node = (S___freenode_s*)&jaguarMainRAM[(Adr68K = BigToLittleEndian32(PtrCalypsiHeap->nodelist[1].flink))]; Adr68K && !Error; node = (S___freenode_s*)&jaguarMainRAM[(Adr68K = BigToLittleEndian32(node->flink))])
 				{
-					if (Adr68K < m68k_get_reg(NULL, M68K_REG_SP))
+					if ((Adr68K >= 0x4000) && (Adr68K < vjs.DRAM_size))
 					{
-						memcpy(&HeapAllocation, &jaguarMainRAM[Adr68K], sizeof(HeapAllocation));
-
-						if (HeapAllocation.size = ((HeapAllocation.size & 0xff) << 24) + ((HeapAllocation.size & 0xff00) << 8) + ((HeapAllocation.size & 0xff0000) >> 8) + ((HeapAllocation.size & 0xff000000) >> 24))
+						if (Adr68K < m68k_get_reg(NULL, M68K_REG_SP))
 						{
-							if (HeapAllocation.size <= (vjs.DRAM_size - 0x4000))
-							{
-								if ((HeapAllocation.used = ((HeapAllocation.used & 0xff) << 8) + ((HeapAllocation.used & 0xff00) >> 8)) <= 1)
-								{
-									HeapAllocation.nextalloc = ((HeapAllocation.nextalloc & 0xff) << 24) + ((HeapAllocation.nextalloc & 0xff00) << 8) + ((HeapAllocation.nextalloc & 0xff0000) >> 8) + ((HeapAllocation.nextalloc & 0xff000000) >> 24);
-
-									if ((HeapAllocation.nextalloc >= 0x4000) && (HeapAllocation.nextalloc < vjs.DRAM_size))
-									{
-#ifdef HA_LAYOUTTEXTS
-										if (NbBlocks++)
-										{
-											HA += QString("<br>");
-										}
-										sprintf(string, "0x%06x | 0x%0x (%zi) | %s | 0x%06x", Adr68K, HeapAllocation.size - sizeof(HeapAllocation), HeapAllocation.size - sizeof(HeapAllocation), HeapAllocation.used ? "Allocated" : "Free", HeapAllocation.nextalloc);
-										HA += QString(string);
-#else
-										model->insertRow(NbBlocks);
-										model->setItem(NbBlocks, 0, new QStandardItem(QString("0x%1").arg(Adr68K, 6, 16, QChar('0'))));
-										model->setItem(NbBlocks, 1, new QStandardItem(QString("%1").arg((HeapAllocation.size - sizeof(HeapAllocation)))));
-										model->setItem(NbBlocks++, 2, new QStandardItem(QString("%1").arg(HeapAllocation.used ? "Allocated" : "Free")));
-#endif
-										TotalBytesUsed += HeapAllocation.size;
-
-										if ((Adr68K = HeapAllocation.nextalloc) > Adr68KHigh)
-										{
-											Adr68KHigh = Adr68K;
-										}
-									}
-									else
-									{
-										sprintf(msg, "Unable to determine the next memory allocation");
-										Error = HA_UNABLENEXTMEMORYALLOC;
-									}
-								}
-								else
-								{
-									sprintf(msg, "Unable to determine if the allocated memory is used or not");
-									Error = HA_UNABLEALLOCATEMEMORYUSAGE;
-								}
-							}
-							else
-							{
-								sprintf(msg, "Memory bloc size has a problem");
-								Error = HA_MEMORYBLOCKSIZEPROBLEM;
-							}
+							model->insertRow(NbBlocks);
+							model->setItem(NbBlocks, 0, new QStandardItem(QString("0x%1").arg(Adr68K, 6, 16, QChar('0'))));
+							model->setItem(NbBlocks, 1, new QStandardItem(QString("%1").arg(BigToLittleEndian32(node->size))));
+							model->setItem(NbBlocks++, 2, new QStandardItem(QString("%1").arg("Free")));
 						}
 						else
 						{
-							sprintf(msg, "%i blocks | %i bytes in blocks | %i contiguous bytes free", NbBlocks, TotalBytesUsed, (m68k_get_reg(NULL, M68K_REG_SP) - Adr68KHigh));
+							Error = HA_HAANDSPSHARESPACE;
 						}
 					}
 					else
 					{
-						sprintf(msg, "Memory allocations and Stack have reached the same space");
-						Error = HA_HAANDSPSHARESPACE;
+						Error = HA_MEMORYALLOCATIONPROBLEM;
 					}
 				}
-				else
-				{
-					sprintf(msg, "Memory allocations may have a problem");
-					Error = HA_MEMORYALLOCATIONPROBLEM;
-				}
-			}
-			while (HeapAllocation.size && !Error);
 
-			MSG += QString(msg);
+				Error ? sprintf(msg, "") : sprintf(msg, "Size: $%06X | Start: $%06X | End: $%06X", BigToLittleEndian32(PtrCalypsiHeap->heapsize), BigToLittleEndian32(PtrCalypsiHeap->heapstart), BigToLittleEndian32(PtrCalypsiHeap->heapend));
+				break;
+
+				// LIBM68K malloc allocation
+			case HA_MALLOC_LIBM68K:
+				do
+				{
+					if ((Adr68K >= 0x4000) && (Adr68K < vjs.DRAM_size))
+					{
+						if (Adr68K < m68k_get_reg(NULL, M68K_REG_SP))
+						{
+							memcpy(&HeapAllocation, &jaguarMainRAM[Adr68K], sizeof(HeapAllocation));
+
+							if (HeapAllocation.size = ((HeapAllocation.size & 0xff) << 24) + ((HeapAllocation.size & 0xff00) << 8) + ((HeapAllocation.size & 0xff0000) >> 8) + ((HeapAllocation.size & 0xff000000) >> 24))
+							{
+								if (HeapAllocation.size <= (vjs.DRAM_size - 0x4000))
+								{
+									if ((HeapAllocation.used = ((HeapAllocation.used & 0xff) << 8) + ((HeapAllocation.used & 0xff00) >> 8)) <= 1)
+									{
+										HeapAllocation.nextalloc = ((HeapAllocation.nextalloc & 0xff) << 24) + ((HeapAllocation.nextalloc & 0xff00) << 8) + ((HeapAllocation.nextalloc & 0xff0000) >> 8) + ((HeapAllocation.nextalloc & 0xff000000) >> 24);
+
+										if ((HeapAllocation.nextalloc >= 0x4000) && (HeapAllocation.nextalloc < vjs.DRAM_size))
+										{
+#ifdef HA_LAYOUTTEXTS
+											if (NbBlocks++)
+											{
+												HA += QString("<br>");
+											}
+											sprintf(string, "0x%06x | 0x%0x (%zi) | %s | 0x%06x", Adr68K, HeapAllocation.size - sizeof(HeapAllocation), HeapAllocation.size - sizeof(HeapAllocation), HeapAllocation.used ? "Allocated" : "Free", HeapAllocation.nextalloc);
+											HA += QString(string);
+#else
+											model->insertRow(NbBlocks);
+											model->setItem(NbBlocks, 0, new QStandardItem(QString("0x%1").arg(Adr68K, 6, 16, QChar('0'))));
+											model->setItem(NbBlocks, 1, new QStandardItem(QString("%1").arg((HeapAllocation.size - sizeof(HeapAllocation)))));
+											model->setItem(NbBlocks++, 2, new QStandardItem(QString("%1").arg(HeapAllocation.used ? "Allocated" : "Free")));
+#endif
+											TotalBytesUsed += HeapAllocation.size;
+
+											if ((Adr68K = HeapAllocation.nextalloc) > Adr68KHigh)
+											{
+												Adr68KHigh = Adr68K;
+											}
+										}
+										else
+										{
+											Error = HA_UNABLENEXTMEMORYALLOC;
+										}
+									}
+									else
+									{
+										Error = HA_UNABLEALLOCATEMEMORYUSAGE;
+									}
+								}
+								else
+								{
+									Error = HA_MEMORYBLOCKSIZEPROBLEM;
+								}
+							}
+							else
+							{
+								sprintf(msg, "%i blocks | %i bytes in blocks | %zi contiguous bytes free", NbBlocks, TotalBytesUsed, (m68k_get_reg(NULL, M68K_REG_SP) - Adr68KHigh));
+							}
+						}
+						else
+						{
+							Error = HA_HAANDSPSHARESPACE;
+						}
+					}
+					else
+					{
+						Error = HA_MEMORYALLOCATIONPROBLEM;
+					}
+				} while (HeapAllocation.size && !Error);
+				break;
+
+				// no memory allocator found
+			default:
+				break;
+			}
 		}
 		else
 		{
-			if (Adr = DBGManager_GetAdrFromSymbolName((char *)"__HeapBase"))
+			// look for the malloc's name
+			CodeMalloc = HA_MALLOC_NONE;
+			while (MallocNames[CodeMalloc] && !(Adr = DBGManager_GetAdrFromSymbolName((char*)MallocNames[CodeMalloc])) && ++CodeMalloc);
+			switch (CodeMalloc)
 			{
+				// Calypsi compiler malloc allocation
+			case HA_MALLOC_CALYPSI:
+				if (!(Adr68K = GET32(jaguarMainRAM, (Adr + 4))) || ((Adr68K < 0x4000) || (Adr68K >= vjs.DRAM_size)))
+				{
+					Error = HA_MEMORYALLOCATORNOTINITIALIZED;
+					Adr = 0;
+				}
+				else
+				{
+					return RefreshContents();
+				}
+				break;
+
+				// LIBM68K malloc allocation
+			case HA_MALLOC_LIBM68K:
 				if (Adr68K = DBGManager_GetGlobalVariableAdrFromName((char *)"alloc"))
 				{
-					if (!(Adr68K = (jaguarMainRAM[Adr68K] << 24) + (jaguarMainRAM[Adr68K + 1] << 16) + (jaguarMainRAM[Adr68K + 2] << 8) + (jaguarMainRAM[Adr68K + 3])) || ((Adr68K < 0x4000) || (Adr68K >= vjs.DRAM_size)))
+					if (!(Adr68K = GET32(jaguarMainRAM, Adr68K)) || ((Adr68K < 0x4000) || (Adr68K >= vjs.DRAM_size)))
 					{
-						sprintf(msg, "Memory allocator not yet initialised");
 						Error = HA_MEMORYALLOCATORNOTINITIALIZED;
 						Adr = 0;
 					}
@@ -199,40 +251,84 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 				}
 				else
 				{
-					sprintf(msg, "Memory allocator is not compatible");
 					Error = HA_MEMORYALLOCATORNOTCOMPATIBLE;
 					Adr = 0;
 				}
-			}
-			else
-			{
-				sprintf(msg, "Memory allocator doesn't exist");
+				break;
+
+				// no memory allocator found
+			default:
 				Error = HA_MEMORYALLOCATORNOTEXIST;
+				break;
 			}
+
 #ifdef HA_LAYOUTTEXTS
 			HA += QString("");
 #else
 			model->setRowCount(0);
 #endif
-			MSG += QString(msg);
 		}
 
-		// Display status bar
+		// display status bar
 		if (Error)
 		{
+			// set error text
+			switch (Error)
+			{
+			case HA_UNABLENEXTMEMORYALLOC:
+				sprintf(msg, "Unable to determine the next memory allocation");
+				break;
+
+			case HA_UNABLEALLOCATEMEMORYUSAGE:
+				sprintf(msg, "Unable to determine if the allocated memory is used or not");
+				break;
+
+			case HA_MEMORYBLOCKSIZEPROBLEM:
+				sprintf(msg, "Memory bloc size has a problem");
+				break;
+
+			case HA_HAANDSPSHARESPACE:
+				sprintf(msg, "Memory allocations and Stack have reached the same space");
+				break;
+
+			case HA_MEMORYALLOCATIONPROBLEM:
+				sprintf(msg, "Memory allocations may have a problem");
+				break;
+
+			case HA_MEMORYALLOCATORNOTINITIALIZED:
+				sprintf(msg, "Memory allocator not yet initialised");
+				break;
+
+			case HA_MEMORYALLOCATORNOTCOMPATIBLE:
+				sprintf(msg, "Memory allocator is not compatible");
+				break;
+
+			case HA_MEMORYALLOCATORNOTEXIST:
+				sprintf(msg, "Memory allocator doesn't exist");
+				break;
+
+			default:
+				break;
+			}
+
+			// set message warning/error color
 			if ((Error & HA_WARNING))
 			{
+				// warning
 				statusbar->setStyleSheet("background-color: lightyellow; font: bold");
 			}
 			else
 			{
+				// error
 				statusbar->setStyleSheet("background-color: tomato; font: bold");
 			}
 		}
 		else
 		{
+			// no error
 			statusbar->setStyleSheet("background-color: lightgreen; font: bold");
 		}
+		MSG += QString(msg);
 		statusbar->showMessage(MSG);
 
 #ifdef HA_LAYOUTTEXTS
@@ -247,15 +343,24 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 // 
 void HeapAllocatorBrowserWindow::Reset(void)
 {
-	size_t Adr68K;
-
-	if (DBGManager_GetAdrFromSymbolName((char *)"__HeapBase"))
+	switch (CodeMalloc)
 	{
-		if (Adr68K = DBGManager_GetGlobalVariableAdrFromName((char *)"alloc"))
+		// Calypsi compiler malloc allocation
+	case HA_MALLOC_CALYPSI:
+		Adr = 0;
+		break;
+
+		// LIBM68K malloc allocation
+	case HA_MALLOC_LIBM68K:
+		if (size_t Adr68K = DBGManager_GetGlobalVariableAdrFromName((char *)"alloc"))
 		{
-			jaguarMainRAM[Adr68K] = jaguarMainRAM[Adr68K + 1] = jaguarMainRAM[Adr68K + 2] = jaguarMainRAM[Adr68K + 3] = 0;
+			SET32(jaguarMainRAM, Adr68K, 0);
 			Adr = 0;
 		}
+		break;
+
+	default:
+		break;
 	}
 }
 

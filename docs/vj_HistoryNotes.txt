@@ -12,10 +12,13 @@ Git commit:
 -- Support only stdout
 -- Text output color detection
 -- Amber style sheet color mode selection
-7) Allow sub-directory in software's path directory
+7) Allow sub-directories in software's path directory
 8) Added .J64 homebrew format detection
 9) Display full filename in file picker cartridge's information
 10) Added support for SDL2 library 64bits for VS 2017
+11) Update the heap allocation window
+--- Display Calypsi's malloc structure for the free nodes
+--- Revamp of the error/warning detections
 
 pre-Release 5b (20th July 2022)
 -------------------------------
