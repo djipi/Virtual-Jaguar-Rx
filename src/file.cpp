@@ -21,7 +21,7 @@
 // JPM  06/23/2021  Added ELF sections check
 // JPM  06/29/2023  Fix ELF/DWARF available valid information usage, and added ELF section names
 // JPM  09/25/2024  Added .J64 homebrew format detection
-// JPM  11/15/2024  Enhance ELF's sections check usage
+// JPM   Nov./2024  Enhance ELF's sections check usage, ELF program headers support
 //
 
 #include "file.h"
@@ -156,10 +156,11 @@ bool JaguarLoadFile(char * path)
 {
 	Elf *ElfMem;
 	GElf_Ehdr ElfEhdr, *PtrGElfEhdr;
+	GElf_Phdr ElfPhdr, *PtrGElfPhdr;
 	Elf_Scn	*PtrElfScn;
 	Elf_Data *PtrElfData;
 	GElf_Shdr GElfShdr, *PtrGElfShdr;
-	size_t NbrSect;
+	size_t NbrSectHdr, NbrPrgHdr;
 	uint8_t *buffer = NULL;
 	char *NameSection;
 	size_t ElfSectionNameType;
@@ -232,122 +233,174 @@ bool JaguarLoadFile(char * path)
 							// get the file information
 							stat(path, &_statbuf);
 
+							// setup the DWARF information
 							if (ELFManager_DwarfInit(ElfMem, _statbuf))
 							{
 								DBGType |= DBG_ELFDWARF;
 							}
-
-							if (!elf_getshdrnum(ElfMem, &NbrSect))
+							
+							// get number of section & program headers
+							if (!elf_getshdrnum(ElfMem, &NbrSectHdr) && !elf_getphdrnum(ElfMem, &NbrPrgHdr))
 							{
-								if (((PtrGElfEhdr = gelf_getehdr(ElfMem, &ElfEhdr)) != NULL) && ((PtrElfScn = elf_getscn(ElfMem, 0)) != NULL))
+								// get ELF header's information
+								if ((PtrGElfEhdr = gelf_getehdr(ElfMem, &ElfEhdr)) != NULL)
 								{
-									for (error = false; (PtrElfScn != NULL) && (error == false); PtrElfScn = elf_nextscn(ElfMem, PtrElfScn))
+									// get the first section
+									if ((PtrElfScn = elf_getscn(ElfMem, 0)) != NULL)
 									{
-										PtrElfData = NULL;
-
-										if ((PtrGElfShdr = gelf_getshdr(PtrElfScn, &GElfShdr)) == NULL)
+										// loop on all sections
+										for (error = false; (PtrElfScn != NULL) && (error == false); PtrElfScn = elf_nextscn(ElfMem, PtrElfScn))
 										{
-											error = true;
-										}
-										else
-										{
-											NameSection = elf_strptr(ElfMem, PtrGElfEhdr->e_shstrndx, (size_t)PtrGElfShdr->sh_name);
-											WriteLog("FILE: ELF Section %s found\n", NameSection);
+											PtrElfData = NULL;
 
-											if (((ElfSectionNameType = ELFManager_GetSectionType(NameSection)) == ELF_NO_TYPE))
+											// get the section header
+											if ((PtrGElfShdr = gelf_getshdr(PtrElfScn, &GElfShdr)) == NULL)
 											{
-												WriteLog("FILE: ELF Section %s not recognized\n", NameSection);
-												error = vjs.ELFSectionsCheck;
+												WriteLog("FILE: Cannot get the section header\n");
+												error = true;
 											}
 											else
 											{
-												switch (PtrGElfShdr->sh_type)
-												{
-												case SHT_NULL:
-													break;
+												// get section's name
+												NameSection = elf_strptr(ElfMem, PtrGElfEhdr->e_shstrndx, (size_t)PtrGElfShdr->sh_name);
+												WriteLog("FILE: ELF Section %s found\n", NameSection);
 
-												case SHT_PROGBITS:
-													if ((PtrGElfShdr->sh_flags & (SHF_ALLOC | SHF_WRITE | SHF_EXECINSTR)))
+												// get the section's type
+												if (((ElfSectionNameType = ELFManager_GetSectionType(NameSection)) == ELF_NO_TYPE))
+												{
+													WriteLog("FILE: ELF Section %s not recognized\n", NameSection);
+													error = vjs.ELFSectionsCheck;
+												}
+												else
+												{
+													if (PtrGElfShdr->sh_type & SHT_LOUSER)
 													{
-														if (PtrGElfShdr->sh_addr >= 0x800000)
+														switch (ElfSectionNameType)
 														{
-															memcpy(jagMemSpace + PtrGElfShdr->sh_addr, buffer + PtrGElfShdr->sh_offset, PtrGElfShdr->sh_size);
-															//error = false;
-														}
-														else
-														{
-															memcpy(jaguarMainRAM + PtrGElfShdr->sh_addr, buffer + PtrGElfShdr->sh_offset, PtrGElfShdr->sh_size);
+														case ELF_calypsi_config_info_TYPE:
+															break;
+
+														default:
+															break;
 														}
 													}
 													else
 													{
-														switch (ElfSectionNameType)
+														switch (PtrGElfShdr->sh_type)
 														{
-														case ELF_debug_TYPE:
-														case ELF_debug_abbrev_TYPE:
-														case ELF_debug_addr_TYPE:
-														case ELF_debug_aranges_TYPE:
-														case ELF_debug_frame_TYPE:
-														case ELF_debug_info_TYPE:
-														case ELF_debug_line_TYPE:
-														case ELF_debug_loc_TYPE:
-														case ELF_debug_loclists_TYPE:
-														case ELF_debug_macinfo_TYPE:
-														case ELF_debug_pubnames_TYPE:
-														case ELF_debug_pubtypes_TYPE:
-														case ELF_debug_ranges_TYPE:
-														case ELF_debug_rnglists_TYPE:
-														case ELF_debug_str_TYPE:
-														case ELF_debug_types_TYPE:
+														case SHT_NULL:
 															break;
 
-														case ELF_stab_TYPE:
+														case SHT_PROGBITS:
+															if ((PtrGElfShdr->sh_flags & (SHF_ALLOC | SHF_WRITE | SHF_EXECINSTR)))
+															{
+																if (PtrGElfShdr->sh_addr >= 0x800000)
+																{
+																	memcpy(jagMemSpace + PtrGElfShdr->sh_addr, buffer + PtrGElfShdr->sh_offset, PtrGElfShdr->sh_size);
+																}
+																else
+																{
+																	memcpy(jaguarMainRAM + PtrGElfShdr->sh_addr, buffer + PtrGElfShdr->sh_offset, PtrGElfShdr->sh_size);
+																}
+															}
+															else
+															{
+																switch (ElfSectionNameType)
+																{
+																case ELF_debug_TYPE:
+																case ELF_debug_abbrev_TYPE:
+																case ELF_debug_addr_TYPE:
+																case ELF_debug_aranges_TYPE:
+																case ELF_debug_frame_TYPE:
+																case ELF_debug_info_TYPE:
+																case ELF_debug_line_TYPE:
+																case ELF_debug_loc_TYPE:
+																case ELF_debug_loclists_TYPE:
+																case ELF_debug_macinfo_TYPE:
+																case ELF_debug_pubnames_TYPE:
+																case ELF_debug_pubtypes_TYPE:
+																case ELF_debug_ranges_TYPE:
+																case ELF_debug_rnglists_TYPE:
+																case ELF_debug_str_TYPE:
+																case ELF_debug_types_TYPE:
+																	break;
+
+																case ELF_stab_TYPE:
+																	break;
+
+																case ELF_heap_TYPE:
+																	break;
+
+																case ELF_comment_TYPE:
+																	break;
+
+																default:
+																	WriteLog("FILE: ELF section %s is not recognized\n", NameSection);
+																	error = vjs.ELFSectionsCheck;
+																	break;
+																}
+															}
 															break;
 
-														case ELF_heap_TYPE:
+														case SHT_NOBITS:
 															break;
 
-														case ELF_comment_TYPE:
+														case SHT_STRTAB:
+														case SHT_SYMTAB:
+															while ((error == false) && ((PtrElfData = elf_getdata(PtrElfScn, PtrElfData)) != NULL))
+															{
+																if (!ELFManager_AddTab(PtrElfData, ElfSectionNameType))
+																{
+																	WriteLog("FILE: ELF tab cannot be allocated\n");
+																	error = true;
+																}
+															}
 															break;
 
 														default:
-															WriteLog("FILE: ELF section %s is not recognized\n", NameSection);
+															WriteLog("FILE: ELF SHT type %i not recognized\n", PtrGElfShdr->sh_type);
 															error = vjs.ELFSectionsCheck;
 															break;
 														}
 													}
-													break;
-
-												case SHT_NOBITS:
-													break;
-
-												case SHT_STRTAB:
-												case SHT_SYMTAB:
-													while ((error == false) && ((PtrElfData = elf_getdata(PtrElfScn, PtrElfData)) != NULL))
-													{
-														if (!ELFManager_AddTab(PtrElfData, ElfSectionNameType))
-														{
-															WriteLog("FILE: ELF tab cannot be allocated\n");
-															error = true;
-														}
-													}
-													break;
-
-												default:
-													WriteLog("FILE: ELF SHT type %i not recognized\n", PtrGElfShdr->sh_type);
-													error = vjs.ELFSectionsCheck;
-													break;
 												}
 											}
 										}
-									}
 
-									// Set the executable address
-									jaguarRunAddress = (uint32_t)PtrGElfEhdr->e_entry;
-									WriteLog("FILE: Setting up ELF 32bits... Run address: %08X\n", jaguarRunAddress);
+										if (!error)
+										{
+											// loop on the program headers
+											for (int i = 0; (i < NbrPrgHdr) && !error; i++)
+											{
+												// handle program header
+												if ((PtrGElfPhdr = gelf_getphdr(ElfMem, i, &ElfPhdr)) != NULL)
+												{
+													memcpy(jagMemSpace + PtrGElfPhdr->p_paddr, buffer + PtrGElfPhdr->p_offset, PtrGElfPhdr->p_filesz);
+												}
+												else
+												{
+													WriteLog("FILE: Cannot get the program header #%i\n", i);
+													error = true;
+												}
+											}
+
+											if (!error)
+											{
+												// Set the executable address
+												jaguarRunAddress = (uint32_t)PtrGElfEhdr->e_entry;
+												WriteLog("FILE: Setting up ELF 32bits... Run address: %08X\n", jaguarRunAddress);
+											}
+										}
+									}
+									else
+									{
+										WriteLog("FILE: Cannot get the first section\n");
+										error = true;
+									}
 								}
 								else
 								{
+									WriteLog("FILE: Cannot get the ELF's header information\n");
 									error = true;
 								}
 							}

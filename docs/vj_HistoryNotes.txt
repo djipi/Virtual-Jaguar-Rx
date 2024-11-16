@@ -20,6 +20,7 @@ Git commit:
 --- Display Calypsi's malloc structure for the free nodes
 --- Revamp of the error/warning detections
 12) Enhance ELF's sections check usage
+13) Added ELF program headers support
 
 pre-Release 5b (20th July 2022)
 -------------------------------
