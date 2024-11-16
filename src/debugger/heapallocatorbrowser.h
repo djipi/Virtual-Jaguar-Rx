@@ -25,12 +25,42 @@
 #define	HA_MEMORYALLOCATORNOTCOMPATIBLE		(0x07 | HA_WARNING)
 #define	HA_MEMORYALLOCATORNOTINITIALIZED	(0x08 | HA_WARNING)
 
+// Defines for the library's malloc
+#define HA_MALLOC_NONE		0
+#define HA_MALLOC_CALYPSI	1
+#define HA_MALLOC_LIBM68K	2
+#define HA_MALLOC_NULL		3
+
 
 // 
 class HeapAllocatorBrowserWindow: public QWidget
 {
 	Q_OBJECT
 
+		// Calypsi malloc structure
+	typedef	struct __allocnode_s
+	{
+		uint32_t size;           /* Size of this chunk */
+		uint32_t preceding;      /* Size of the preceding chunk */
+	}S___allocnode_s;
+
+	typedef struct __freenode_s
+	{
+		uint32_t size;              /* Size of this chunk */
+		uint32_t preceding;         /* Size of the preceding chunk */
+		uint32_t flink;				/* Supports a doubly linked list */		// struct __freenode_s*
+		uint32_t blink;														// struct __freenode_s*
+	}S___freenode_s;
+
+	typedef struct __heap_s
+	{
+		uint32_t heapsize;
+		uint32_t heapstart;				// struct __allocnode_s*
+		uint32_t heapend;				// struct __allocnode_s*
+		S___freenode_s nodelist[2];		// struct __freenode_s 
+	}S__heap_s;
+
+		// LibM68K malloc structure
 	typedef struct HeapAllocation
 	{
 		uint32_t nextalloc;
@@ -61,6 +91,8 @@ class HeapAllocatorBrowserWindow: public QWidget
 #endif
 		QStatusBar *statusbar;
 		size_t Adr;
+		size_t CodeMalloc;
+		const char* MallocNames[4] = {"", "__default_heap", "__HeapBase", NULL};
 };
 
 #endif	// __HEAPALLOCATORBROWSER_H__

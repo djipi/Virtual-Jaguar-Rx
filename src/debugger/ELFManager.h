@@ -19,6 +19,7 @@ typedef enum {
 	ELF_shstrtab_TYPE,				// Section names
 	ELF_symtab_TYPE,				// Symbol table
 	ELF_strtab_TYPE,				// Strings that represent the names associated with symbol table entries
+	ELF_calypsi_config_info_TYPE,	// Calypsi toolchain configuration information 
 	ELF_debug_abbrev_TYPE,			// Abbreviations used in the .debug_info section
 	ELF_debug_addr_TYPE,			// Contain a list of relocated addresses, one for each reference needed
 	ELF_debug_aranges_TYPE,			// Lookup table for mapping addresses to compilation units
