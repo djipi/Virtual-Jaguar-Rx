@@ -19,6 +19,7 @@ Git commit:
 11) Update the heap allocation window
 --- Display Calypsi's malloc structure for the free nodes
 --- Revamp of the error/warning detections
+12) Enhance ELF's sections check usage
 
 pre-Release 5b (20th July 2022)
 -------------------------------

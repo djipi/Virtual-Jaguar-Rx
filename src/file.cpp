@@ -21,6 +21,7 @@
 // JPM  06/23/2021  Added ELF sections check
 // JPM  06/29/2023  Fix ELF/DWARF available valid information usage, and added ELF section names
 // JPM  09/25/2024  Added .J64 homebrew format detection
+// JPM  11/15/2024  Enhance ELF's sections check usage
 //
 
 #include "file.h"
@@ -253,10 +254,10 @@ bool JaguarLoadFile(char * path)
 											NameSection = elf_strptr(ElfMem, PtrGElfEhdr->e_shstrndx, (size_t)PtrGElfShdr->sh_name);
 											WriteLog("FILE: ELF Section %s found\n", NameSection);
 
-											if (((ElfSectionNameType = ELFManager_GetSectionType(NameSection)) == ELF_NO_TYPE) && vjs.ELFSectionsCheck)
+											if (((ElfSectionNameType = ELFManager_GetSectionType(NameSection)) == ELF_NO_TYPE))
 											{
 												WriteLog("FILE: ELF Section %s not recognized\n", NameSection);
-												error = true;
+												error = vjs.ELFSectionsCheck;
 											}
 											else
 											{
@@ -311,7 +312,7 @@ bool JaguarLoadFile(char * path)
 
 														default:
 															WriteLog("FILE: ELF section %s is not recognized\n", NameSection);
-															//error = true;
+															error = vjs.ELFSectionsCheck;
 															break;
 														}
 													}
@@ -334,7 +335,7 @@ bool JaguarLoadFile(char * path)
 
 												default:
 													WriteLog("FILE: ELF SHT type %i not recognized\n", PtrGElfShdr->sh_type);
-													error = true;
+													error = vjs.ELFSectionsCheck;
 													break;
 												}
 											}
