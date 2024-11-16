@@ -15,6 +15,7 @@
 //  RG   Jan./2021  Linux build fixes
 // JPM  06/23/2021  Added ELF section names
 // JPM  06/29/2023  Added ELF section names
+// JPM  11/16/2024  Added ELF section name
 //
 
 #include <stdlib.h>
@@ -62,6 +63,7 @@ ELFSectionType	ELFTabSectionType[] =	{
 	{ ".shstrtab", ELF_shstrtab_TYPE },
 	{ ".symtab", ELF_symtab_TYPE },
 	{ ".strtab", ELF_strtab_TYPE },
+	{ ".calypsi_config_info", ELF_calypsi_config_info_TYPE },
 	{ ".debug_abbrev", ELF_debug_abbrev_TYPE },
 	{ ".debug_addr", ELF_debug_addr_TYPE},
 	{ ".debug_aranges", ELF_debug_aranges_TYPE },
