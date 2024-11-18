@@ -221,7 +221,7 @@ char *DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, DBGstatus *Status)
 {
 	if ((DBGType & DBG_ELFDWARF))
 	{
-		return DWARFManager_GetFullSourceFilenameFromAdr(Adr, (DWARFstatus *)Status);
+		return DWARFManager_GetFullSourceFilenameFromAdr(Adr, (DWARFstatus_t *)Status);
 	}
 	else
 	{

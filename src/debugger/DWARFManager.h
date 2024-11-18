@@ -12,7 +12,16 @@ typedef enum
 	DWARFSTATUS_NOFILE = 0x2,
 	DWARFSTATUS_NOFILEINFO = 0x4,
 	DWARFSTATUS_UNKNOWN = 0xff
-}DWARFstatus;
+}DWARFstatus_t;
+
+// Definition for the file O/S
+typedef enum
+{
+	DWARFFILEOS_WIN32 = 0x0,
+	DWARFFILEOS_CYGWIN = 0x1,
+	DWARFFILEOS_UniX = 0x2,
+	DWARFFILEOS_UNKNOWN = 0xff
+}DWARFFileOS_t;
 
 // Internal manager
 extern bool	DWARFManager_Reset(void);
@@ -27,7 +36,7 @@ extern char *DWARFManager_GetFunctionName(size_t Adr);
 extern size_t DWARFManager_GetSrcLanguageFromIndex(size_t Index);
 
 // Source text files manager
-extern char	*DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, DWARFstatus *Status);
+extern char	*DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, DWARFstatus_t *Status);
 extern char *DWARFManager_GetNumFullSourceFilename(size_t Index);
 extern char *DWARFManager_GetNumSourceFilename(size_t Index);
 
