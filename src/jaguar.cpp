@@ -21,6 +21,7 @@
 // JPM   Apr./2021  Keep number of M68K cycles used in tracing mode
 // JPM   Jan./2022  Added a writes to unknown memory location catch
 // JPM  07/14/2024  Added a Console standard emulation
+// JPM  11/28/2024  Add exception catch (Zero divide)
 //
 
 
@@ -1483,20 +1484,29 @@ unsigned int m68k_read_memory_32(unsigned int address)
 	{
 		switch (address)
 		{
+			// exception vector #2
 		case 0x08:
 			m68k_read_exception_vector(address, "Bus error");
 			break;
 
+			// exception vector #3
 		case 0x0c:
 			m68k_read_exception_vector(address, "Address error");
 			break;
 
+			// exception vector #4 (Illegal instructions and BKPT)
 		case 0x10:
 			m68k_read_exception_vector(address, "Illegal instruction");
 			break;
 
+			// exception vector #5 (Zero divide)
+		case 0x14:
+			m68k_read_exception_vector(address, "Division by zero");
+			break;
+
+			// exception vector #11 
 		case 0x2c:
-			m68k_read_exception_vector(address, "Unimplemented instruction");
+			m68k_read_exception_vector(address, "Unimplemented instruction (line 1111)");
 			break;
 
 		default:
