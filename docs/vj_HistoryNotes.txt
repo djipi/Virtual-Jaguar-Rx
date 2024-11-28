@@ -22,6 +22,7 @@ Git commit:
 12) Enhance ELF's sections check usage
 13) Added ELF program headers support
 14) Project switch to VS2022
+15) Added exception catch (Zero divide)
 
 pre-Release 5b (20th July 2022)
 -------------------------------
