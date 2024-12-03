@@ -17,10 +17,12 @@
 // JPM  Sept./2019  Support the unsigned/signed short type
 //  RG   Jan./2021  Linux build fixes
 // JPM    May/2021  Code refactoring for the variables
+// JPM   Dec./2024  Fix the get address in case of empty symbol name
 //
 
 // To Do
 // To think about unique format to handle variations from ELF, DWARF, etc.
+// To create a DBGManager class
 //
 
 
@@ -310,10 +312,10 @@ size_t DBGManager_GetNbGlobalVariables(void)
 
 // Get address from symbol name
 // Return found address
-// Return NULL if no symbol has been found
+// Return NULL if no symbol has been found or if the SymbolName is an empty string
 size_t DBGManager_GetAdrFromSymbolName(char *SymbolName)
 {
-	if (SymbolName)
+	if (SymbolName && *SymbolName)
 	{
 		if ((DBGType & DBG_ELF))
 		{
