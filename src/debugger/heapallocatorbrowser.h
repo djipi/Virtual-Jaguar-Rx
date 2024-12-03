@@ -28,8 +28,9 @@
 // Defines for the library's malloc
 #define HA_MALLOC_NONE		0
 #define HA_MALLOC_CALYPSI	1
-#define HA_MALLOC_LIBM68K	2
-#define HA_MALLOC_NULL		3
+#define HA_MALLOC_VCLIB		2
+#define HA_MALLOC_LIBM68K	3				// __HeapBase: must always be at the end of list
+#define HA_MALLOC_NULL		4
 
 
 // 
@@ -60,14 +61,23 @@ class HeapAllocatorBrowserWindow: public QWidget
 		S___freenode_s nodelist[2];		// struct __freenode_s 
 	}S__heap_s;
 
+		// Vclib malloc structure
+	typedef struct Vclib_memblock
+	{
+		uint32_t used;
+		uint32_t size;
+		uint32_t next;					// struct Vclib_memblock*
+		uint32_t prev;					// struct Vclib_memblock*
+		uint8_t filler[16];				/* keep qphrase (32 bytes) aligned */
+	}S_Vclib_memblock;
+
 		// LibM68K malloc structure
 	typedef struct HeapAllocation
 	{
 		uint32_t nextalloc;
 		uint32_t size;
 		uint16_t used;
-	}
-	S_HeapAllocation;
+	}	S_HeapAllocation;
 
 	public:
 		HeapAllocatorBrowserWindow(QWidget *parent = 0);
@@ -92,7 +102,7 @@ class HeapAllocatorBrowserWindow: public QWidget
 		QStatusBar *statusbar;
 		size_t Adr;
 		size_t CodeMalloc;
-		const char* MallocNames[4] = {"", "__default_heap", "__HeapBase", NULL};
+		const char* MallocNames[5] = {"", "__default_heap", "___heapptr", "__HeapBase", NULL};		// __HeapBase: must always be at the end of list
 };
 
 #endif	// __HEAPALLOCATORBROWSER_H__

@@ -17,12 +17,14 @@ Git commit:
 9) Display full filename in file picker cartridge's information
 10) Added support for SDL2 library 64bits for VS 2017
 11) Update the heap allocation window
---- Display Calypsi's malloc structure for the free nodes
+--- Display Calypsi's library malloc structure for the free nodes
 --- Revamp of the error/warning detections
+--- Display VBcc library malloc structure
 12) Enhance ELF's sections check usage
 13) Added ELF program headers support
 14) Project switch to VS2022
 15) Added exception catch (Zero divide)
+16) Fix debugger for the get address in case of empty symbol name
 
 pre-Release 5b (20th July 2022)
 -------------------------------
