@@ -19,6 +19,7 @@ Git commit:
 11) Update the heap allocation window
 --- Display Calypsi's library malloc structure for the free nodes
 --- Revamp of the error/warning detections
+--- Display VBcc library malloc structure
 12) Enhance ELF's sections check usage
 13) Added ELF program headers support
 14) Project switch to VS2022

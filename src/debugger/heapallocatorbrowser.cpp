@@ -5,16 +5,20 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When (MM/DD/YY)       What
-// ---  ---------------       -----------------------------------------------------------
-// JPM  01/08/2017            Created this file
-// JPM  Sept./2018            Support of the DRAM size limit option, use definitions for error instead of hard values, detect if heap allocation shares space with SP (Stack), added a status bar and better status report, and set information values in a tab
-// JPM  07/04/2019            Fix the support of the DRAM size limit option
-// JPM  11/10/2024            Support Calypsi's malloc structure for free nodes, revamp of the error/warning detections
+// Who  When (MM/DD/YY)  What
+// ---  ---------------  ----------------------------------------------------------
+// JPM  01/08/2017       Created this file
+// JPM  Sept./2018       Support of the DRAM size limit option, use definitions for error instead of hard values
+//                       Detect if heap allocation shares space with SP (Stack), added a status bar and better status report
+//                       Set information values in a tab
+// JPM  07/04/2019       Fix the support of the DRAM size limit option
+// JPM  11/10/2024       Support Calypsi's malloc structure for free nodes, revamp of the error/warning detections
+// JPM   Dec./2024       Add VBcc's malloc structure 
 //
 
 // STILL TO DO:
 // To have filters
+// To use a common structure to handle each malloc's library
 // To set the information display at the right
 // Feature to list the pointer(s) in the code using the allocation
 // Support the gcc's malloc structure
@@ -98,6 +102,7 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 	int NbBlocks, TotalBytesUsed;
 	HeapAllocation HeapAllocation;
 	S__heap_s* PtrCalypsiHeap;
+	S_Vclib_memblock PtrVclibHeap;
 
 	// display only if window is visible
 	if (isVisible())
@@ -110,7 +115,7 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 #endif
 			switch (CodeMalloc)
 			{
-				// Calypsi compiler malloc allocation
+				// Calypsi library malloc allocation
 			case HA_MALLOC_CALYPSI:
 				PtrCalypsiHeap = (S__heap_s*)&jaguarMainRAM[Adr68K];
 				for (S___freenode_s* node = (S___freenode_s*)&jaguarMainRAM[(Adr68K = BigToLittleEndian32(PtrCalypsiHeap->nodelist[1].flink))]; Adr68K && !Error; node = (S___freenode_s*)&jaguarMainRAM[(Adr68K = BigToLittleEndian32(node->flink))])
@@ -138,6 +143,68 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 				Error ? sprintf(msg, "") : sprintf(msg, "Size: $%06X | Start: $%06X | End: $%06X", BigToLittleEndian32(PtrCalypsiHeap->heapsize), BigToLittleEndian32(PtrCalypsiHeap->heapstart), BigToLittleEndian32(PtrCalypsiHeap->heapend));
 				break;
 
+				// VBcc library malloc allocation 
+			case HA_MALLOC_VCLIB:
+				do
+				{
+					if ((Adr68K >= 0x4000) && (Adr68K < vjs.DRAM_size))
+					{
+					if (Adr68K < m68k_get_reg(NULL, M68K_REG_SP))
+					{
+						memcpy(&PtrVclibHeap, &jaguarMainRAM[Adr68K], sizeof(PtrVclibHeap));
+						if (PtrVclibHeap.size = BigToLittleEndian32(PtrVclibHeap.size))
+						{
+							if (PtrVclibHeap.size <= (vjs.DRAM_size - 0x4000))
+							{
+								if (((PtrVclibHeap.used = BigToLittleEndian32(PtrVclibHeap.used)) == 1) || !PtrVclibHeap.used)
+								{
+									PtrVclibHeap.next = BigToLittleEndian32(PtrVclibHeap.next);
+									if ((PtrVclibHeap.next >= 0x4000) && (PtrVclibHeap.next < vjs.DRAM_size))
+									{
+										model->insertRow(NbBlocks);
+										model->setItem(NbBlocks, 0, new QStandardItem(QString("0x%1").arg(Adr68K, 6, 16, QChar('0'))));
+										model->setItem(NbBlocks, 1, new QStandardItem(QString("%1").arg((PtrVclibHeap.size))));
+										model->setItem(NbBlocks++, 2, new QStandardItem(QString("%1").arg(PtrVclibHeap.used ? "Allocated" : "Free")));
+									
+										TotalBytesUsed += PtrVclibHeap.size;
+
+										if ((Adr68K = PtrVclibHeap.next) > Adr68KHigh)
+										{
+											Adr68KHigh = Adr68K;
+										}
+									}
+									else
+									{
+										Error = HA_UNABLENEXTMEMORYALLOC;
+									}
+								}
+								else
+								{
+									Error = HA_UNABLEALLOCATEMEMORYUSAGE;
+								}
+							}
+							else
+							{
+								Error = HA_MEMORYBLOCKSIZEPROBLEM;
+							}
+						}
+						else
+						{
+							sprintf(msg, "%i blocks | %i bytes in blocks | %zi contiguous bytes free", NbBlocks, TotalBytesUsed, (m68k_get_reg(NULL, M68K_REG_SP) - Adr68KHigh));
+						}
+					}
+					else
+					{
+						Error = HA_HAANDSPSHARESPACE;
+					}
+				}
+					else
+					{
+						Error = HA_MEMORYALLOCATIONPROBLEM;
+					}
+				}while (PtrVclibHeap.size && !Error);
+				break;
+
 				// LIBM68K malloc allocation
 			case HA_MALLOC_LIBM68K:
 				do
@@ -147,7 +214,6 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 						if (Adr68K < m68k_get_reg(NULL, M68K_REG_SP))
 						{
 							memcpy(&HeapAllocation, &jaguarMainRAM[Adr68K], sizeof(HeapAllocation));
-
 							if (HeapAllocation.size = ((HeapAllocation.size & 0xff) << 24) + ((HeapAllocation.size & 0xff00) << 8) + ((HeapAllocation.size & 0xff0000) >> 8) + ((HeapAllocation.size & 0xff000000) >> 24))
 							{
 								if (HeapAllocation.size <= (vjs.DRAM_size - 0x4000))
@@ -155,7 +221,6 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 									if ((HeapAllocation.used = ((HeapAllocation.used & 0xff) << 8) + ((HeapAllocation.used & 0xff00) >> 8)) <= 1)
 									{
 										HeapAllocation.nextalloc = ((HeapAllocation.nextalloc & 0xff) << 24) + ((HeapAllocation.nextalloc & 0xff00) << 8) + ((HeapAllocation.nextalloc & 0xff0000) >> 8) + ((HeapAllocation.nextalloc & 0xff000000) >> 24);
-
 										if ((HeapAllocation.nextalloc >= 0x4000) && (HeapAllocation.nextalloc < vjs.DRAM_size))
 										{
 #ifdef HA_LAYOUTTEXTS
@@ -222,9 +287,22 @@ void HeapAllocatorBrowserWindow::RefreshContents(void)
 			while (MallocNames[CodeMalloc] && !(Adr = DBGManager_GetAdrFromSymbolName((char*)MallocNames[CodeMalloc])) && ++CodeMalloc);
 			switch (CodeMalloc)
 			{
-				// Calypsi compiler malloc allocation
+				// Calypsi library malloc allocation
 			case HA_MALLOC_CALYPSI:
 				if (!(Adr68K = GET32(jaguarMainRAM, (Adr + 4))) || ((Adr68K < 0x4000) || (Adr68K >= vjs.DRAM_size)))
+				{
+					Error = HA_MEMORYALLOCATORNOTINITIALIZED;
+					Adr = 0;
+				}
+				else
+				{
+					return RefreshContents();
+				}
+				break;
+
+				// VBcc library malloc allocation 
+			case HA_MALLOC_VCLIB:
+				if (!(Adr68K = Adr) || ((Adr68K < 0x4000) || (Adr68K >= vjs.DRAM_size)))
 				{
 					Error = HA_MEMORYALLOCATORNOTINITIALIZED;
 					Adr = 0;
@@ -345,8 +423,13 @@ void HeapAllocatorBrowserWindow::Reset(void)
 {
 	switch (CodeMalloc)
 	{
-		// Calypsi compiler malloc allocation
+		// Calypsi library malloc allocation
 	case HA_MALLOC_CALYPSI:
+		Adr = 0;
+		break;
+
+		// VBcc library malloc allocation 
+	case HA_MALLOC_VCLIB:
 		Adr = 0;
 		break;
 
