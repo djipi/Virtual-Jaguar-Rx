@@ -20,6 +20,8 @@ Git commit:
 --- Display Calypsi's library malloc structure for the free nodes
 --- Revamp of the error/warning detections
 --- Display VBcc library malloc structure
+--- Display the library's name in the window title
+--- Fix Lib-M68K's malloc detection for ELF's binary file
 12) Enhance ELF's sections check usage
 13) Added ELF program headers support
 14) Project switch to VS2022

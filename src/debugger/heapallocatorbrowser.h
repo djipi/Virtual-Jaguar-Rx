@@ -12,7 +12,7 @@
 #include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
-// Error code definitions
+// Error & Warning code definitions
 #define	HA_NOERROR							0x00
 #define	HA_ERROR							0x80
 #define	HA_WARNING							0x40
@@ -21,9 +21,10 @@
 #define HA_MEMORYBLOCKSIZEPROBLEM			(0x03 | HA_ERROR)
 #define HA_MEMORYALLOCATIONPROBLEM			(0x04 | HA_ERROR)
 #define HA_HAANDSPSHARESPACE				(0x05 | HA_ERROR)
-#define	HA_MEMORYALLOCATORNOTEXIST			(0x06 | HA_WARNING)
-#define	HA_MEMORYALLOCATORNOTCOMPATIBLE		(0x07 | HA_WARNING)
-#define	HA_MEMORYALLOCATORNOTINITIALIZED	(0x08 | HA_WARNING)
+#define HA_UNABLEUSEDMEMORYMALLOC			(0x06 | HA_ERROR)
+#define	HA_MEMORYALLOCATORNOTEXIST			(0x07 | HA_WARNING)
+#define	HA_MEMORYALLOCATORNOTCOMPATIBLE		(0x08 | HA_WARNING)
+#define	HA_MEMORYALLOCATORNOTINITIALIZED	(0x09 | HA_WARNING)
 
 // Defines for the library's malloc
 #define HA_MALLOC_NONE		0
@@ -58,7 +59,7 @@ class HeapAllocatorBrowserWindow: public QWidget
 		uint32_t heapsize;
 		uint32_t heapstart;				// struct __allocnode_s*
 		uint32_t heapend;				// struct __allocnode_s*
-		S___freenode_s nodelist[2];		// struct __freenode_s 
+		S___freenode_s nodelist[2];		// struct __freenode_s
 	}S__heap_s;
 
 		// Vclib malloc structure
@@ -102,7 +103,8 @@ class HeapAllocatorBrowserWindow: public QWidget
 		QStatusBar *statusbar;
 		size_t Adr;
 		size_t CodeMalloc;
-		const char* MallocNames[5] = {"", "__default_heap", "___heapptr", "__HeapBase", NULL};		// __HeapBase: must always be at the end of list
+		const char* MallocNames[5] = { "", "__default_heap", "___heapptr", "__HeapBase", NULL };		// __HeapBase: must always be at the end of list
+		const char* MallocLibNames[5] = { "", "Calypsi", "VBcc", "Lib-M68K", "Unknown" };
 };
 
 #endif	// __HEAPALLOCATORBROWSER_H__
