@@ -5,11 +5,12 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When        What
-// ---  ----------  -----------------------------------------------------------
-// JPM  07/11/2024  Created this file
-// JPM  09/22/2024  Text output color detection, amber style sheet color mode
-// JPM  10/07/2024  Fix output color encoding
+// Who  When (mm/dd/yy)  What
+// ---  ---------------  -----------------------------------------------------------
+// JPM  07/11/2024       Created this file
+// JPM  09/22/2024       Text output color detection, amber style sheet color mode
+// JPM  10/07/2024       Fix output color encoding
+// JPM  10/25/2025       Clear window content
 //
 
 // STILL TO DO:
@@ -24,8 +25,10 @@
 //
 stdConsoleWindow::stdConsoleWindow(QWidget * parent/*= 0*/) : QWidget(parent, Qt::Dialog),
 layout(new QVBoxLayout),
+controlLayout(new QHBoxLayout),
 text(new QTextBrowser),
 StyleSheetColor(new QCheckBox("Amber")),
+ClearButton(new QPushButton("Clear")),
 colorcommand(0),
 colorindex(0)
 {
@@ -38,23 +41,29 @@ colorindex(0)
 	//text->setMinimumWidth(40);
 	//text->setStyleSheet("QTextBrowser { background-color : black; color : orange; }");
 
+	// set button minimum width to display text properly
+	ClearButton->setMinimumWidth(60);
+
 	// set layout
 	layout->addWidget(text);
-	layout->addWidget(StyleSheetColor);
+	controlLayout->addWidget(StyleSheetColor);
+	controlLayout->addWidget(ClearButton);
+	controlLayout->addStretch();
+	layout->addLayout(controlLayout);
 	setLayout(layout);
 
 	// connections
 	connect(StyleSheetColor, SIGNAL(stateChanged(int)), this, SLOT(stateChangedStyleSheetColor(int)));
+	connect(ClearButton, SIGNAL(clicked()), this, SLOT(handleClearButton()));
 }
 
 
-//
 stdConsoleWindow::~stdConsoleWindow(void)
 {
 }
 
 
-//
+// Handle style sheet color change
 void stdConsoleWindow::stateChangedStyleSheetColor(int check)
 {
 	// save setting
@@ -68,6 +77,19 @@ void stdConsoleWindow::stateChangedStyleSheetColor(int check)
 		// default color
 		text->setStyleSheet("");
 	}
+}
+
+
+// Clear the window contents with a message
+void stdConsoleWindow::handleClearButton(void)
+{
+	text->clear();
+	stdoutDump.clear();
+	stdoutDump += QString("\n\n**** Console Standard Emulation ****\n\n");
+	colorindex = 0;
+	colorcommand = false;
+	memset(colorcode, 0, sizeof(colorcode));
+	RefreshContents();
 }
 
 

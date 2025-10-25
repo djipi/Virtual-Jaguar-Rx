@@ -12,6 +12,7 @@ Git commit:
 -- Support only stdout
 -- Text output color detection
 -- Amber style sheet color mode selection
+-- Clear window content
 7) Allow sub-directories in software's path directory
 8) Added .J64 homebrew format detection
 9) Display full filename in file picker cartridge's information

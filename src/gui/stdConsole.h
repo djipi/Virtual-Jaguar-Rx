@@ -24,12 +24,14 @@ class stdConsoleWindow : public QWidget
 
 	protected slots:
 		void stateChangedStyleSheetColor(int index);
+		void handleClearButton(void);
 
 	protected:
 		void keyPressEvent(QKeyEvent *);
 
 	private:
 		QVBoxLayout * layout;
+		QHBoxLayout * controlLayout;
 		QTextBrowser * text;
 		QString stdoutDump;
 		bool colorcommand;
@@ -39,6 +41,7 @@ class stdConsoleWindow : public QWidget
 
 	public:
 		QCheckBox *StyleSheetColor;
+		QPushButton* ClearButton;
 };
 
 #endif // __STDCONSOLE_H__
