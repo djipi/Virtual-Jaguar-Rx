@@ -123,6 +123,9 @@
     <ClInclude Include="..\..\src\op.h">
       <Filter>Header Files\Tom</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\profiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cdintf.cpp">
@@ -208,6 +211,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\wavetable.cpp">
       <Filter>Source Files\Jerry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\profiler.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

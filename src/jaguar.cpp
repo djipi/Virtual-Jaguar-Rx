@@ -22,6 +22,7 @@
 // JPM   Jan./2022  Added a writes to unknown memory location catch
 // JPM  07/14/2024  Added a Console standard emulation
 // JPM  11/28/2024  Add exception catch (Zero divide)
+// JPM  10/29/2025  Added M68K Profiler Hook
 //
 
 
@@ -52,6 +53,7 @@
 #include "mmu.h"
 #include "settings.h"
 #include "tom.h"
+#include "profiler.h"
 //#include "debugger/BreakpointsWin.h"
 #ifdef NEWMODELSBIOSHANDLER
 #include "modelsBIOS.h"
@@ -145,17 +147,59 @@ void GPUDumpDisassembly(void);
 void GPUDumpRegisters(void);
 static bool start = false;
 
+
+// M68K Profiler Hook called after each instruction is executed
+void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles)
+{
+	// update the current profiling entry
+	m68kProfilerEntryUpdate(m68kPC, cycles);
+
+	// Update profiler info
+	switch (m68kOpcode)
+	{
+	case 0x4e75:
+		// RTS
+		m68kProfilerEntryDown(m68kPC);
+		break;
+
+	case 0x4eb8:
+		// JSR for word address
+		m68kProfilerEntryUp(GET16(jagMemSpace, m68kPC + 2));
+		break;
+
+	case 0x4eb9:
+		// JSR for long address
+		m68kProfilerEntryUp(GET32(jagMemSpace, m68kPC + 2));
+		break;
+
+	case 0x6100:
+		// bsr.w
+		m68kProfilerEntryUp(m68kPC + GET16(jagMemSpace, m68kPC + 2));
+		break;
+
+	default:
+		if ((m68kOpcode & 0xFF00) == 0x6100)
+		{
+			// bsr.s
+			m68kProfilerEntryUp(m68kPC + ((int8_t)(m68kOpcode & 0x00FF)) + 2);
+		}
+		else
+		{
+			// jsr modes
+			if ((m68kOpcode >= 0x4e90) && (m68kOpcode <= 0x4ebb))
+			{
+				m68kProfilerEntryUp(-1);
+			}
+		}
+		break;
+	}
+}
+
+
+// M68K Instruction Hook called before each instruction is executed
 void M68KInstructionHook(void)
 {
 	uint32_t m68kPC = m68k_get_reg(NULL, M68K_REG_PC);
-// Temp, for comparing...
-{
-/*	static char buffer[2048];//, mem[64];
-	m68k_disassemble(buffer, m68kPC, M68K_CPU_TYPE_68000);
-	printf("%08X: %s\n", m68kPC, buffer);//*/
-}
-//JaguarDasm(m68kPC, 1);
-//Testing Hover Strike...
 #if 0
 //Dasm(regs.pc, 1);
 static int hitCount = 0;
@@ -2428,6 +2472,7 @@ void JaguarInit(void)
 	JERRYInit();
 	CDROMInit();
 	m68k_brk_init();
+	ProfilerInit();
 }
 
 
@@ -2488,6 +2533,7 @@ void JaguarReset(void)
 //	SetCallbackTime(ScanlineCallback, 63.5555);
 //	SetCallbackTime(ScanlineCallback, 31.77775);
 	SetCallbackTime(HalflineCallback, (vjs.hardwareTypeNTSC ? 31.777777777 : 32.0));
+	ProfilerReset();
 }
 
 

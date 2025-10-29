@@ -78,15 +78,14 @@ extern void m68k_set_irq(unsigned int int_level);
 extern size_t m68k_dump(FILE *fp);
 extern size_t m68k_load(FILE *fp);
 
-
 // Functions that MUST be implemented by the user:
 
-// Read from anywhere
+// Read from memory
 extern unsigned int m68k_read_memory_8(unsigned int address);
 extern unsigned int m68k_read_memory_16(unsigned int address);
 extern unsigned int m68k_read_memory_32(unsigned int address);
 
-// Write to anywhere
+// Write to memory
 extern void m68k_write_memory_8(unsigned int address, unsigned int value);
 extern void m68k_write_memory_16(unsigned int address, unsigned int value);
 extern void m68k_write_memory_32(unsigned int address, unsigned int value);
@@ -95,11 +94,15 @@ extern int irq_ack_handler(int);
 
 // Convenience functions
 
-// Uncomment this to have the emulated CPU call a hook function after every instruction
-// NB: This must be implemented by the user!
+// Emulated M68K CPU call a hook function before every instruction, function must be implemented by the user
 #define M68K_HOOK_FUNCTION
 #ifdef M68K_HOOK_FUNCTION
 extern void M68KInstructionHook(void);
+#endif
+// Profiling M68K CPU call a hook function after every instruction, function must be implemented by the user
+#define M68K_PROFILER_FUNCTION
+#ifdef M68K_PROFILER_FUNCTION
+extern void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles);
 #endif
 
 
@@ -111,13 +114,8 @@ extern int M68KDebugHalt(void);
 extern void M68KDebugResume(void);
 extern int M68KDebugHaltStatus(void);
 
-/* Peek at the internals of a CPU context.  This can either be a context
- * retrieved using m68k_get_context() or the currently running context.
- * If context is NULL, the currently running CPU context will be used.
- */
+// Functions to handle internal registers
 extern unsigned int m68k_get_reg(void * context, m68k_register_t reg);
-
-/* Poke values into the internals of the currently running CPU context */
 extern void m68k_set_reg(m68k_register_t reg, unsigned int value);
 
 // Dummy functions, for now...

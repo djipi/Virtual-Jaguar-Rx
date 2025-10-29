@@ -68,6 +68,12 @@
     <Filter Include="Source Files\debugger\View">
       <UniqueIdentifier>{6a9b2983-c30d-47db-8c30-73c1ec7d029d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\profiler">
+      <UniqueIdentifier>{7f19ade8-e46d-49a2-8cdd-54449dca41f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\profiler">
+      <UniqueIdentifier>{fd1385df-95bc-4b8b-a3da-9fa62f984d01}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\debugger\DasmWin.cpp">
@@ -511,6 +517,9 @@
     <ClCompile Include="..\src\gui\stdConsole.cpp">
       <Filter>Source Files\gui</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\profiler\tracyprofiler.cpp">
+      <Filter>Source Files\profiler</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -563,6 +572,9 @@
     </ClInclude>
     <ClInclude Include="..\src\debugger\HWLABELManager.h">
       <Filter>Header Files\debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\profiler\tracyprofiler.h">
+      <Filter>Header Files\profiler</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
