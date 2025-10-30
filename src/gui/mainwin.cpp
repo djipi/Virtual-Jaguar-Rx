@@ -32,8 +32,8 @@
 // JPM   Apr./2021  Handle number of M68K cycles used in tracing mode, added video output display in a window
 // JPM    May/2021  Check missing dll for the tests pattern
 // JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser, added and slightly modified the save state patch from PvtLewis
-// JPM   Jan./2024  Use setting for the emulation framerate display
-// JPM  07/14/2024  Added a Console standard emulation window
+// JPM        2024  Use setting for the emulation framerate display, added a Console standard emulation window
+// JPM   Oct./2025  Feature to turn on/off the profiler
 //
 
 // FIXED:
@@ -72,6 +72,7 @@
 #include "glwidget.h"
 #include "help.h"
 #include "profile.h"
+#include "profiler.h"
 #include "settings.h"
 #include "version.h"
 #include "emustatus.h"
@@ -406,6 +407,19 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	fullScreenAct->setShortcutContext(Qt::ApplicationShortcut);
 	fullScreenAct->setCheckable(true);
 	connect(fullScreenAct, SIGNAL(triggered()), this, SLOT(ToggleFullScreen()));
+
+	// Actions dedicated to the profiler
+	if (vjs.useProfiler)
+	{
+		QIcon tracyIcon;
+		tracyIcon.addFile(":/res/profiler-tracy-off.png", QSize(), QIcon::Normal, QIcon::Off);
+		tracyIcon.addFile(":/res/profiler-tracy-on.png", QSize(), QIcon::Normal, QIcon::On);
+		tracyAct = new QAction(QIcon(tracyIcon), tr("&Tracy Profiler"), this);
+		tracyAct->setStatusTip(tr("Tracy profiler feed on/off"));
+		tracyAct->setCheckable(true);
+		tracyAct->setDisabled(false);
+		connect(tracyAct, &QAction::toggled, this, &MainWin::ToggleTracyProfiler);
+	}
 
 	// Actions dedicated to debugger mode
 	if (vjs.softTypeDebugger)
@@ -841,6 +855,12 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		debugbar->addAction(memBrowseAct[2]);
 	}
 
+	if (vjs.useProfiler)
+	{
+		profilerbar = addToolBar(tr("&Profiler"));
+		profilerbar->addAction(tracyAct);
+	}
+
 	// Add actions to the main window, as hiding widgets with them
 	// disables them :-P
 	addAction(fullScreenAct);
@@ -924,6 +944,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	WriteLog("Virtual Jaguar %s Rx (Last full build was on %s %s)\n", VJ_RELEASE_VERSION, __DATE__, __TIME__);
 	WriteLog("VJ: Initializing jaguar subsystem...\n");
 	JaguarInit();
+	ProfilerInit();
 
 #ifndef NEWMODELSBIOSHANDLER
 	//	memcpy(jagMemSpace + 0xE00000, jaguarBootROM, 0x20000);	// Use the stock BIOS
@@ -1434,6 +1455,7 @@ void MainWin::TogglePowerState(void)
 		WriteLog("GUI: Resetting Jaguar...\n");
 		JaguarReset();
 		DebuggerReset();
+		ProfilerReset();
 		CommonReset();
 		DebuggerResetWindows();
 		CommonResetWindows();
@@ -1549,6 +1571,13 @@ void MainWin::SetPAL(void)
 	vjs.hardwareTypeNTSC = false;
 	ResizeMainWindow();
 	WriteSettings();
+}
+
+
+// Tracy Profiler
+void MainWin::ToggleTracyProfiler(bool checked)
+{
+	ProfilerPause(checked);
 }
 
 
@@ -1976,7 +2005,7 @@ void MainWin::DebuggerTraceStepInto(void)
 }
 
 
-// Restart the Jaguar executable
+// Restart the Atari Jaguar executable
 void MainWin::DebuggerRestart(void)
 {
 #if 1
@@ -1994,6 +2023,7 @@ void MainWin::DebuggerRestart(void)
 	CommonResetWindows();
 	SourcesWin->Init();
 	RefreshWindows();
+	ProfilerFlush();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Restart function !!!")
 #else

@@ -18,9 +18,13 @@ class TracyProfiler
 {
 public:
 	TracyProfiler(void);
+	void Pause(bool pause);
 	void M68Kenter(TracyCZoneCtx* zoneCtx, char* functionName, char* filename, unsigned int startCycle);
 	void M68Kleave(TracyCZoneCtx* pZone, unsigned int usedCycles);
 	~TracyProfiler(void);
+
+private:
+	bool tracyPaused;
 };
 
 #endif

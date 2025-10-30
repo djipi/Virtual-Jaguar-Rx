@@ -17,6 +17,7 @@
 // ---  ----------  -------------------------------------------------------------
 // JPM  March/2022  Added the save state patch from PvtLewis
 // JPM  07/14/2024  Added a Console standard emulation window
+// JPM   Oct./2025  Feature to turn on/off the profiler
 //
 
 #ifndef __MAINWIN_H__
@@ -116,6 +117,8 @@ class MainWin: public QMainWindow
 		void ToggleFullScreen(void);
 		void ShowEmuStatusWin(void);
 		void MakeScreenshot(void);
+		// Profiler
+		void ToggleTracyProfiler(bool checked);
 		// Debugger
 		void DebuggerTraceStepOver(void);
 		void DebuggerTraceStepInto(void);
@@ -247,6 +250,7 @@ class MainWin: public QMainWindow
 		QToolBar * toolbar;
 		QToolBar * debugbar;
 		QToolBar * debuggerbar;
+		QToolBar* profilerbar;
 #if defined(SAVESTATEPATCH_PvtLewis)
 		QMenu * toolsMenu;
 		QAction * dumpAct;
@@ -313,6 +317,9 @@ class MainWin: public QMainWindow
 		QAction *saveDumpAsAct;
 		QAction *exceptionVectorTableBrowseAct;
 		QAction *CartFilesListAct;
+
+		// Profiler
+		QAction* tracyAct;
 
 		QIcon powerGreen;
 		QIcon powerRed;

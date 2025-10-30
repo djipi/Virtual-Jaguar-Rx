@@ -2481,7 +2481,6 @@ void JaguarInit(void)
 	JERRYInit();
 	CDROMInit();
 	m68k_brk_init();
-	ProfilerInit();
 }
 
 
@@ -2542,7 +2541,6 @@ void JaguarReset(void)
 //	SetCallbackTime(ScanlineCallback, 63.5555);
 //	SetCallbackTime(ScanlineCallback, 31.77775);
 	SetCallbackTime(HalflineCallback, (vjs.hardwareTypeNTSC ? 31.777777777 : 32.0));
-	ProfilerReset();
 }
 
 

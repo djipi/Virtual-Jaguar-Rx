@@ -8,6 +8,7 @@
 // Who  When (mm/dd/yy)  What
 // ---  ---------------  -----------------------------------------------------------
 // JPM  10/29/2025       Created this file
+// JPM   Oct./2025       Added pause feature and flush data to the Tracy profiler
 //
 
 #include <stdio.h>
@@ -63,6 +64,13 @@ void ProfilerInit(void)
 {
 	m68kTracyProfiler = new(TracyProfiler);
 	ProfilerClear();
+}
+
+
+// Pause or resume the profiler
+void ProfilerPause(bool pause)
+{
+	m68kTracyProfiler->Pause(pause);
 }
 
 
@@ -202,6 +210,21 @@ void m68kProfilerEntryDown(unsigned int PCAdr)
 		// error check
 		M68KProfilerTableOverflow = (m68kProfilerEntryIndex < 0) ? true : false;
 	}
+}
+
+
+// Profiler flush and clear all profiling information
+void ProfilerFlush(void)
+{
+	// flush all entries in Tracy profiler
+	while (m68kProfilerEntryIndex >= 0)
+	{
+		m68kTracyProfiler->M68Kleave(&m68kProfilerTable[m68kProfilerEntryIndex].tracyCtx, m68kProfilerTable[m68kProfilerEntryIndex].currentCycles);
+		m68kProfilerEntryIndex = m68kProfilerTable[m68kProfilerEntryIndex].previousIndex;
+	}
+
+	//
+	ProfilerClear();
 }
 
 

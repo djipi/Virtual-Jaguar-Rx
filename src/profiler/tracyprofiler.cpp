@@ -8,6 +8,7 @@
 // Who  When (mm/dd/yy)  What
 // ---  ---------------  -----------------------------------------------------------
 // JPM  10/29/2025       Created this file
+// JPM   Oct./2025       Added pause feature and better control for the Tracy profiler feed
 //
 
 //
@@ -24,8 +25,6 @@
 
 
 constexpr double M68K_CLOCK_HZ = 13290000.0; // 13.29 MHz
-
-
 //
 const char* TracyProfilerNoFilename = "?";
 
@@ -33,10 +32,21 @@ const char* TracyProfilerNoFilename = "?";
 //
 TracyProfiler::TracyProfiler(void)
 {
+	tracyPaused = true;
+
+	// name the application in Tracy, is displayed in the Trace information
 	TracyCAppInfo("Virtual Jaguar Rx - Profiler", strlen("Virtual Jaguar Rx - Profiler"));
 	//TracyCSetThreadName("M68K CPU");
+	// displayed the message in the Tracy profiler messages list
 	TracyCMessage("=== Atari Jaguar: 68000  ===", 28);
 	//TracyCPlotConfig("68000 cycles", TracyPlotFormatNumber, true, true, 0xFFFFFF80);
+}
+
+
+// Pause or resume the Tracy profiler
+void TracyProfiler::Pause(bool pause)
+{
+	tracyPaused = !pause;
 }
 
 
@@ -44,22 +54,29 @@ TracyProfiler::TracyProfiler(void)
 // The plot colors will depend on the plot's name (yellow)
 void TracyProfiler::M68Kenter(TracyCZoneCtx* zoneCtx, char *functionName, char* filename, unsigned int startCycle)
 {
-	unsigned int TracyLine = 0;
-	//char* TracyFunction = functionName;
-	char* TracyFile = (char*)"";			// filename;
-	TracyCZoneC(ctx, 0xFFFFFF80, true);
-	if (functionName)
+	if (!tracyPaused)
 	{
-		TracyCZoneName(ctx, functionName, strlen(functionName));
-		//TracyCZoneText(ctx, functionName, strlen(functionName));
+		unsigned int TracyLine = 0;
+		//char* TracyFunction = functionName;
+		char* TracyFile = (char*)"";			// filename;
+		TracyCZoneC(ctx, 0xFFFFFF80, true);
+		if (functionName)
+		{
+			TracyCZoneName(ctx, functionName, strlen(functionName));
+			//TracyCZoneText(ctx, functionName, strlen(functionName));
+		}
+		else
+		{
+			TracyCZoneName(ctx, TracyProfilerNoFilename, strlen(TracyProfilerNoFilename));
+			//TracyCZoneText(ctx, TracyProfilerNoFilename, strlen(TracyProfilerNoFilename));
+		}
+		*zoneCtx = ctx;
+		TracyCPlot("M68K start cycle", (double)startCycle);
 	}
 	else
 	{
-		TracyCZoneName(ctx, TracyProfilerNoFilename, strlen(TracyProfilerNoFilename));
-		//TracyCZoneText(ctx, TracyProfilerNoFilename, strlen(TracyProfilerNoFilename));
+		*zoneCtx = { 0 };
 	}
-	*zoneCtx = ctx;
-	TracyCPlot("M68K start cycle", (double)startCycle);
 }
 
 
@@ -67,16 +84,19 @@ void TracyProfiler::M68Kenter(TracyCZoneCtx* zoneCtx, char *functionName, char* 
 // The plot colors will depend on the plot's name (yellow)
 void TracyProfiler::M68Kleave(TracyCZoneCtx* pZone, unsigned int usedCycles)
 {
-	char text[64];
+	if (!tracyPaused || (pZone->id && pZone->active))
+	{
+		char text[64];
 
-	// display the used cycles in the function zone text
-	snprintf(text, sizeof(text), "%u cycles", usedCycles);
-	TracyCZoneText(*pZone, text, strlen(text));
+		// display the used cycles in the function zone text
+		snprintf(text, sizeof(text), "%u cycles", usedCycles);
+		TracyCZoneText(*pZone, text, strlen(text));
 
-	TracyCPlot("M68K cycles per function", (double)usedCycles);
-	TracyCPlot("M68K function time (\xC2\xB5s)", (usedCycles / M68K_CLOCK_HZ) * 1e6);
-	TracyCPlot("M68K function time (ms)", (usedCycles / M68K_CLOCK_HZ) * 1e3);
-	TracyCZoneEnd(*pZone);
+		TracyCPlot("M68K cycles per function", (double)usedCycles);
+		TracyCPlot("M68K function time (\xC2\xB5s)", (usedCycles / M68K_CLOCK_HZ) * 1e6);
+		TracyCPlot("M68K function time (ms)", (usedCycles / M68K_CLOCK_HZ) * 1e3);
+		TracyCZoneEnd(*pZone);
+	}
 }
 
 
