@@ -30,6 +30,7 @@ Git commit:
 16) Fix debugger for the get address in case of empty symbol name
 17) Added profiling feature for the 68000
 --- Tracy profiler integration support
+--- Added application option to enable/disable the profiler
 
 pre-Release 5b (20th July 2022)
 -------------------------------

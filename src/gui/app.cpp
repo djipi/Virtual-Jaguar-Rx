@@ -20,6 +20,7 @@
 // JPM   Oct./2018  Added the Rx version's contact in the help text, added timer initialisation in the SDL_Init
 // JPM   Apr./2019  Fixed a command line option duplication
 // JPM   Jan./2024  Added the missing timer for the Quit Sub System
+// JPM   Oct./2025  Added profiler option (--profiler)
 //
 
 #include "app.h"

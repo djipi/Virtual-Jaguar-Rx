@@ -15,6 +15,7 @@
 // JPM  04/06/2019  Added ELF sections check
 //  RG   Jan./2021  Linux build fix
 // JPM  March/2022  Added the save state patch from PvtLewis
+// JPM   Oct./2025  Added profiler setting
 //
 
 #ifndef __SETTINGS_H__

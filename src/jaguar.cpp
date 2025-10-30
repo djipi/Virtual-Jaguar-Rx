@@ -22,7 +22,7 @@
 // JPM   Jan./2022  Added a writes to unknown memory location catch
 // JPM  07/14/2024  Added a Console standard emulation
 // JPM  11/28/2024  Add exception catch (Zero divide)
-// JPM  10/29/2025  Added M68K Profiler Hook
+// JPM  10/29/2025  Added M68K Profiler Hook, and detection usage
 //
 
 
