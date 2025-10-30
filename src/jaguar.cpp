@@ -148,54 +148,61 @@ void GPUDumpRegisters(void);
 static bool start = false;
 
 
+#ifdef M68KPROFILER_HOOK_FUNCTION
 // M68K Profiler Hook called after each instruction is executed
 void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles)
 {
-	// update the current profiling entry
-	m68kProfilerEntryUpdate(m68kPC, cycles);
-
-	// Update profiler info
-	switch (m68kOpcode)
+	// check the profiler usage to avoid unnecessary profiling overhead
+	if (vjs.useProfiler)
 	{
-	case 0x4e75:
-		// RTS
-		m68kProfilerEntryDown(m68kPC);
-		break;
+		// update the current profiling entry
+		m68kProfilerEntryUpdate(m68kPC, cycles);
 
-	case 0x4eb8:
-		// JSR for word address
-		m68kProfilerEntryUp(GET16(jagMemSpace, m68kPC + 2));
-		break;
-
-	case 0x4eb9:
-		// JSR for long address
-		m68kProfilerEntryUp(GET32(jagMemSpace, m68kPC + 2));
-		break;
-
-	case 0x6100:
-		// bsr.w
-		m68kProfilerEntryUp(m68kPC + GET16(jagMemSpace, m68kPC + 2));
-		break;
-
-	default:
-		if ((m68kOpcode & 0xFF00) == 0x6100)
+		// Update profiler info
+		switch (m68kOpcode)
 		{
-			// bsr.s
-			m68kProfilerEntryUp(m68kPC + ((int8_t)(m68kOpcode & 0x00FF)) + 2);
-		}
-		else
-		{
-			// jsr modes
-			if ((m68kOpcode >= 0x4e90) && (m68kOpcode <= 0x4ebb))
+		case 0x4e75:
+			// RTS
+			m68kProfilerEntryDown(m68kPC);
+			break;
+
+		case 0x4eb8:
+			// JSR for word address
+			m68kProfilerEntryUp(GET16(jagMemSpace, m68kPC + 2));
+			break;
+
+		case 0x4eb9:
+			// JSR for long address
+			m68kProfilerEntryUp(GET32(jagMemSpace, m68kPC + 2));
+			break;
+
+		case 0x6100:
+			// bsr.w
+			m68kProfilerEntryUp(m68kPC + GET16(jagMemSpace, m68kPC + 2));
+			break;
+
+		default:
+			if ((m68kOpcode & 0xFF00) == 0x6100)
 			{
-				m68kProfilerEntryUp(-1);
+				// bsr.s
+				m68kProfilerEntryUp(m68kPC + ((int8_t)(m68kOpcode & 0x00FF)) + 2);
 			}
+			else
+			{
+				// jsr modes
+				if ((m68kOpcode >= 0x4e90) && (m68kOpcode <= 0x4ebb))
+				{
+					m68kProfilerEntryUp(-1);
+				}
+			}
+			break;
 		}
-		break;
 	}
 }
+#endif
 
 
+#ifdef M68K_HOOK_FUNCTION
 // M68K Instruction Hook called before each instruction is executed
 void M68KInstructionHook(void)
 {
@@ -539,6 +546,8 @@ CD_switch::	-> $306C
 	}//*/
 #endif
 }
+#endif
+
 
 #if 0
 Now here be dragons...

@@ -79,6 +79,7 @@ struct VJSettings
 	uint32_t glFilter;
 	bool hardwareTypeAlpine;									// Alpine mode
 	bool softTypeDebugger;										// Soft type debugger mode
+	bool useProfiler;											// Use of the profiler
 	bool audioEnabled;
 	uint32_t frameSkip;
 	uint32_t renderType;

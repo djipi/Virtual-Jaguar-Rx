@@ -402,7 +402,7 @@ if (inRoutine)
 		// operation to perform before each instruction
 		M68KInstructionHook();
 #endif
-#ifdef M68K_PROFILER_FUNCTION
+#ifdef M68KPROFILER_HOOK_FUNCTION
 		// profiler prologue
 		uint32_t m68kPC = m68k_get_reg(NULL, M68K_REG_PC);
 #endif
@@ -420,7 +420,7 @@ if (inRoutine)
 		}
 		// update remaining cycles
 		regs.remainingCycles -= cycles;
-#ifdef M68K_PROFILER_FUNCTION
+#ifdef M68KPROFILER_HOOK_FUNCTION
 		// profiler epilogue
 		M68KProfilerHook(m68kPC, opcode, cycles);
 #endif

@@ -100,8 +100,8 @@ extern int irq_ack_handler(int);
 extern void M68KInstructionHook(void);
 #endif
 // Profiling M68K CPU call a hook function after every instruction, function must be implemented by the user
-#define M68K_PROFILER_FUNCTION
-#ifdef M68K_PROFILER_FUNCTION
+#define M68KPROFILER_HOOK_FUNCTION
+#ifdef M68KPROFILER_HOOK_FUNCTION
 extern void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles);
 #endif
 

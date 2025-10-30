@@ -84,6 +84,7 @@ int main(int argc, char * argv[])
 	// Normally, this would be read in from the settings module... :-P
 	vjs.hardwareTypeAlpine = false;
 	vjs.softTypeDebugger = false;
+	vjs.useProfiler = false;
 	vjs.DRAM_size = 0x200000;
 	vjs.full_raz = false;
 	// This is stuff we pass into the mainWindow...
@@ -194,6 +195,7 @@ bool ParseCommandLine(int argc, char * argv[])
 				"   <filename>        Name of file to autoload\n"
 				"   --alpine      -a  Put Virtual Jaguar into Alpine mode\n"
 				"   --debugger    -D  Put Virtual Jaguar into Debugger mode\n"
+				"   --profiler    -P  Enable the profiler\n"
 				"   --pal         -p  PAL mode\n"
 				"   --ntsc        -n  NTSC mode\n"
 				"   --dram-max        Set DRAM size to 8MB\n"
@@ -256,6 +258,13 @@ bool ParseCommandLine(int argc, char * argv[])
 			vjs.hardwareTypeAlpine = true;
 			// We also enable logging as well :-)
 			useLogfile = true;
+		}
+
+		// Profiler enabled
+		if ((strcmp(argv[i], "--profiler") == 0) || (strcmp(argv[i], "-P") == 0))
+		{
+			printf("Profiler enabled.\n");
+			vjs.useProfiler = true;
 		}
 
 		// Debugger mode
