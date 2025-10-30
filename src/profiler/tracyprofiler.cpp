@@ -34,7 +34,9 @@ const char* TracyProfilerNoFilename = "?";
 TracyProfiler::TracyProfiler(void)
 {
 	TracyCAppInfo("Virtual Jaguar Rx - Profiler", strlen("Virtual Jaguar Rx - Profiler"));
-	TracyCSetThreadName("68000");
+	//TracyCSetThreadName("M68K CPU");
+	TracyCMessage("=== Atari Jaguar: 68000  ===", 28);
+	//TracyCPlotConfig("68000 cycles", TracyPlotFormatNumber, true, true, 0xFFFFFF80);
 }
 
 
@@ -72,7 +74,7 @@ void TracyProfiler::M68Kleave(TracyCZoneCtx* pZone, unsigned int usedCycles)
 	TracyCZoneText(*pZone, text, strlen(text));
 
 	TracyCPlot("M68K cycles per function", (double)usedCycles);
-	TracyCPlot("M68K function time (µs)", (usedCycles / M68K_CLOCK_HZ) * 1e6);
+	TracyCPlot("M68K function time (\xC2\xB5s)", (usedCycles / M68K_CLOCK_HZ) * 1e6);
 	TracyCPlot("M68K function time (ms)", (usedCycles / M68K_CLOCK_HZ) * 1e3);
 	TracyCZoneEnd(*pZone);
 }
