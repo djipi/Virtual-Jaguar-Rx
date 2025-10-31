@@ -148,16 +148,36 @@ void TracyProfiler::M68Kleave(TracyCZoneCtx* pZone, unsigned int usedCycles)
 	if (!tracyPaused || (pZone->id && pZone->active))
 	{
 		char text[64];
+		char textWithCommas[64];
 
-		// display the used cycles in the function zone text
-		snprintf(text, sizeof(text), "%u cycles", usedCycles);
+		// display the used cycles in the function zone label
+		snprintf(text, sizeof(text), "%s cycles", IntegerToStringWithCommas(textWithCommas, sizeof(textWithCommas), usedCycles));
 		TracyCZoneText(*pZone, text, strlen(text));
 
+		// used cycles plots
 		TracyCPlot("M68K cycles per function", (double)usedCycles);
-		TracyCPlot("M68K function time (\xC2\xB5s)", (usedCycles / M68K_CLOCK_HZ) * 1e6);
-		TracyCPlot("M68K function time (ms)", (usedCycles / M68K_CLOCK_HZ) * 1e3);
+		TracyCPlot("M68K function time (\xC2\xB5s)", ((double)usedCycles / M68K_CLOCK_HZ) * 1e6);
+		TracyCPlot("M68K function time (ms)", ((double)usedCycles / M68K_CLOCK_HZ) * 1e3);
 		TracyCZoneEnd(*pZone);
 	}
+}
+
+
+// Format an integer with commas into buffer
+char* TracyProfiler::IntegerToStringWithCommas(char* out, unsigned int len, unsigned int value)
+{
+	// transform value to string
+	char tmp[100];
+	itoa(value, tmp, 10);
+	// include separator's commas
+	memset(out, 0, len);
+	int i = strlen(tmp);
+	int j = 0;
+	char* tmpPtr = tmp + i - 1;
+	char* pout = out + len - 2;
+	while ((*pout-- = *tmpPtr--) && --i && (!(++j % 3) ? (*pout-- = ',') : true));
+	while (!*out && out++);
+	return out;
 }
 
 
