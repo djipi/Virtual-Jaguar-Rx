@@ -422,7 +422,7 @@ if (inRoutine)
 		regs.remainingCycles -= cycles;
 #ifdef M68KPROFILER_HOOK_FUNCTION
 		// profiler epilogue
-		M68KProfilerHook(m68kPC, opcode, cycles);
+		M68KProfilerHook(m68kPC, opcode, cycles, m68k_get_reg(NULL, M68K_REG_SP), m68k_get_reg(NULL, M68K_REG_D0));
 #endif
 #endif
 	}

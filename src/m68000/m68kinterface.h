@@ -102,7 +102,7 @@ extern void M68KInstructionHook(void);
 // Profiling M68K CPU call a hook function after every instruction, function must be implemented by the user
 #define M68KPROFILER_HOOK_FUNCTION
 #ifdef M68KPROFILER_HOOK_FUNCTION
-extern void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles);
+extern void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles, unsigned int m68KSP, unsigned int m68KD0);
 #endif
 
 

@@ -32,6 +32,7 @@ Git commit:
 --- Tracy profiler integration support
 --- Added application option to enable/disable the profiler
 --- Added feature to turn on/off the Tracy profiler on demand
+--- Added feature to profile memory allocations
 
 pre-Release 5b (20th July 2022)
 -------------------------------

@@ -150,49 +150,49 @@ static bool start = false;
 
 #ifdef M68KPROFILER_HOOK_FUNCTION
 // M68K Profiler Hook called after each instruction is executed
-void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles)
+void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles, unsigned int m68KSP, unsigned int m68KD0)
 {
 	// check the profiler usage to avoid unnecessary profiling overhead
 	if (vjs.useProfiler)
 	{
 		// update the current profiling entry
-		m68kProfilerEntryUpdate(m68kPC, cycles);
+		m68kProfilerEntryUpdate(m68kPC, cycles, m68KSP);
 
 		// Update profiler info
 		switch (m68kOpcode)
 		{
 		case 0x4e75:
 			// RTS
-			m68kProfilerEntryDown(m68kPC);
+			m68kProfilerEntryDown(m68kPC, m68KD0);
 			break;
 
 		case 0x4eb8:
 			// JSR for word address
-			m68kProfilerEntryUp(GET16(jagMemSpace, m68kPC + 2));
+			m68kProfilerEntryUp(GET16(jagMemSpace, m68kPC + 2), m68KSP);
 			break;
 
 		case 0x4eb9:
 			// JSR for long address
-			m68kProfilerEntryUp(GET32(jagMemSpace, m68kPC + 2));
+			m68kProfilerEntryUp(GET32(jagMemSpace, m68kPC + 2), m68KSP);
 			break;
 
 		case 0x6100:
 			// bsr.w
-			m68kProfilerEntryUp(m68kPC + GET16(jagMemSpace, m68kPC + 2));
+			m68kProfilerEntryUp(m68kPC + GET16(jagMemSpace, m68kPC + 2), m68KSP);
 			break;
 
 		default:
 			if ((m68kOpcode & 0xFF00) == 0x6100)
 			{
 				// bsr.s
-				m68kProfilerEntryUp(m68kPC + ((int8_t)(m68kOpcode & 0x00FF)) + 2);
+				m68kProfilerEntryUp(m68kPC + ((int8_t)(m68kOpcode & 0x00FF)) + 2, m68KSP);
 			}
 			else
 			{
 				// jsr modes
 				if ((m68kOpcode >= 0x4e90) && (m68kOpcode <= 0x4ebb))
 				{
-					m68kProfilerEntryUp(-1);
+					m68kProfilerEntryUp(-1, m68KSP);
 				}
 			}
 			break;
