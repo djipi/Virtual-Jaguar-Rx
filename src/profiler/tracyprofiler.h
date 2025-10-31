@@ -19,7 +19,7 @@ class TracyProfiler
 public:
 	TracyProfiler(void);
 	void Pause(bool pause);
-	void M68Kenter(TracyCZoneCtx* zoneCtx, char* functionName, char* filename, unsigned int startCycle);
+	void M68Kenter(TracyCZoneCtx* zoneCtx, char* functionName, char* filename, unsigned int linenumber, unsigned int startCycle);
 	void M68Kleave(TracyCZoneCtx* pZone, unsigned int usedCycles);
 	void M68Kmalloc(TracyCZoneCtx* zoneCtx, unsigned int ptr, unsigned int size, int depth);
 	void M68Kfree(TracyCZoneCtx* zoneCtx, unsigned int ptr);

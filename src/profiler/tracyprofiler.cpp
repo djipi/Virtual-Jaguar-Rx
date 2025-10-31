@@ -118,11 +118,11 @@ void TracyProfiler::M68Kfree(TracyCZoneCtx* zoneCtx, unsigned int ptr)
 
 // Start a Tracy zone for the 68000 function
 // The plot colors will depend on the plot's name (yellow)
-void TracyProfiler::M68Kenter(TracyCZoneCtx* zoneCtx, char *functionName, char* filename, unsigned int startCycle)
+void TracyProfiler::M68Kenter(TracyCZoneCtx* zoneCtx, char *functionName, char* filename, unsigned int linenumber, unsigned int startCycle)
 {
 	if (!tracyPaused)
 	{
-		// clear the file & line wording dedicated to the function name
+		// clear the source file & line wording dedicated to the function name
 		unsigned int TracyLine = 0;
 		char* TracyFile = (char*)"";
 		// colour for the function's name zone

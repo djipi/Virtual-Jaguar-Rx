@@ -25,6 +25,7 @@ struct ProfilerRecordEntry_s {
 	unsigned int PCFuncAdr;
 	char* functionName;
 	char* sourcefilename;
+	unsigned int numline;
 	unsigned int callCount;
 	unsigned int minCycles;
 	unsigned int maxCycles;
@@ -37,6 +38,7 @@ struct ProfilerCurrentEntry_s {
 	char funcName[10];
 	char* functionName;
 	char* sourcefilename;
+	unsigned int numline;
 	unsigned int currentCycles;
 	unsigned int startCycles;
 	unsigned int endCycles;
@@ -101,12 +103,14 @@ void ProfilerClear(void)
 		m68kProfilerTable[i].previousIndex = -1;
 		m68kProfilerTable[i].PCFuncAdr = 0;
 		m68kProfilerTable[i].functionName = m68kProfilerTable[i].sourcefilename = nullptr;
+		m68kProfilerTable[i].numline = 0;
 		m68kProfilerTable[i].currentCycles = m68kProfilerTable[i].startCycles = m68kProfilerTable[i].endCycles = 0;
 		m68kProfilerTable[i].funcName[0] = '\0';
 		m68kProfilerTable[i].tracyCtx = { 0 };
 		//
 		m68kProfilerTableRecord[i].PCFuncAdr = 0;
 		m68kProfilerTableRecord[i].functionName = m68kProfilerTableRecord[i].sourcefilename = nullptr;
+		m68kProfilerTableRecord[i].numline = 0;
 		m68kProfilerTableRecord[i].callCount = 0;
 		m68kProfilerTableRecord[i].minCycles = 0xffffffff;
 		m68kProfilerTableRecord[i].maxCycles = 0;
@@ -145,6 +149,7 @@ void m68kProfilerEntryUp(unsigned int PCAdr, unsigned int m68KSP)
 				m68kProfilerTableRecord[m68kProfilerEntryCountRecord].PCFuncAdr = PCAdr;
 				m68kProfilerTableRecord[m68kProfilerEntryCountRecord].functionName = DBGManager_GetSymbolNameFromAdr(PCAdr);
 				m68kProfilerTableRecord[m68kProfilerEntryCountRecord].sourcefilename = DBGManager_GetFullSourceFilenameFromAdr(PCAdr, nullptr);
+				m68kProfilerTableRecord[m68kProfilerEntryCountRecord].numline = DBGManager_GetNumLineFromAdr(PCAdr, DBG_NO_TAG);
 				m68kProfilerTableRecord[m68kProfilerEntryCountRecord].callCount = 1;
 				++m68kProfilerEntryCountRecord;
 			}
@@ -153,6 +158,7 @@ void m68kProfilerEntryUp(unsigned int PCAdr, unsigned int m68KSP)
 			m68kProfilerTable[++m68kProfilerEntryIndex].PCFuncAdr = PCAdr;
 			m68kProfilerTable[m68kProfilerEntryIndex].functionName = DBGManager_GetSymbolNameFromAdr(PCAdr);
 			m68kProfilerTable[m68kProfilerEntryIndex].sourcefilename = DBGManager_GetFullSourceFilenameFromAdr(PCAdr, nullptr);
+			m68kProfilerTable[m68kProfilerEntryIndex].numline = DBGManager_GetNumLineFromAdr(PCAdr, DBG_NO_TAG);
 			m68kProfilerTable[m68kProfilerEntryIndex].currentCycles = 0;
 			m68kProfilerTable[m68kProfilerEntryIndex].startCycles = m68kProfilerTable[m68kProfilerEntryIndex].endCycles = M68KProfilerCycles;
 			m68kProfilerTable[m68kProfilerEntryIndex].previousIndex = m68kProfilerEntryIndex - 1;
@@ -164,7 +170,7 @@ void m68kProfilerEntryUp(unsigned int PCAdr, unsigned int m68KSP)
 				m68kProfilerTable[m68kProfilerEntryIndex].functionName = m68kProfilerTable[m68kProfilerEntryIndex].funcName;
 			}
 			// enter to the Tracy profiler
-			m68kTracyProfiler->M68Kenter(&m68kProfilerTable[m68kProfilerEntryIndex].tracyCtx, m68kProfilerTable[m68kProfilerEntryIndex].functionName, m68kProfilerTable[m68kProfilerEntryIndex].sourcefilename, m68kProfilerTable[m68kProfilerEntryIndex].startCycles);
+			m68kTracyProfiler->M68Kenter(&m68kProfilerTable[m68kProfilerEntryIndex].tracyCtx, m68kProfilerTable[m68kProfilerEntryIndex].functionName, m68kProfilerTable[m68kProfilerEntryIndex].sourcefilename, m68kProfilerTable[m68kProfilerEntryIndex].numline, m68kProfilerTable[m68kProfilerEntryIndex].startCycles);
 		
 			// check for malloc
 			if (!strncmp(m68kProfilerTable[m68kProfilerEntryIndex].functionName, "malloc", strlen("malloc")))
@@ -283,6 +289,7 @@ void m68kProfilerEntryDown(unsigned int PCAdr, unsigned int m68KD0)
 		m68kProfilerTable[m68kProfilerEntryIndex].previousIndex = -1;
 		m68kProfilerTable[m68kProfilerEntryIndex].PCFuncAdr = 0;
 		m68kProfilerTable[m68kProfilerEntryIndex].functionName = m68kProfilerTable[m68kProfilerEntryIndex].sourcefilename = nullptr;
+		m68kProfilerTable[m68kProfilerEntryIndex].numline = 0;
 		m68kProfilerTable[m68kProfilerEntryIndex].funcName[0] = '\0';
 		m68kProfilerTable[m68kProfilerEntryIndex].currentCycles = m68kProfilerTable[m68kProfilerEntryIndex].startCycles = m68kProfilerTable[m68kProfilerEntryIndex].endCycles = 0;
 		m68kProfilerTable[m68kProfilerEntryIndex].tracyCtx = { 0 };
