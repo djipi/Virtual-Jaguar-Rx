@@ -58,8 +58,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;TRACY_ON_DEMAND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(QTDIR)\include;$(SDL2DIR)\include;$(ZLIBDIR)\include;$(TRACYPROFILERDIR)\public</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_EMULATED_CLOCK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(QTDIR)\include;$(SDL2DIR)\include;$(ZLIBDIR)\include;$(TRACYPROFILERDIR)\public;$(LUADIR)\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)obj\</ObjectFileName>
@@ -86,8 +86,8 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_LIB;_RELEASE;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;TRACY_ON_DEMAND;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(QTDIR)\include;$(SDL2DIR)\include;$(ZLIBDIR)\include;$(TRACYPROFILERDIR)\public</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;_LIB;_RELEASE;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_EMULATED_CLOCK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(QTDIR)\include;$(SDL2DIR)\include;$(ZLIBDIR)\include;$(TRACYPROFILERDIR)\public;$(LUADIR)\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MinimalRebuild>false</MinimalRebuild>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>

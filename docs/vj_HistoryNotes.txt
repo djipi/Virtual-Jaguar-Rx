@@ -30,9 +30,12 @@ Git commit:
 16) Fix debugger for the get address in case of empty symbol name
 17) Added profiling feature for the 68000
 --- Tracy profiler integration support
---- Added application option to enable/disable the profiler
---- Added feature to turn on/off the Tracy profiler on demand
---- Added feature to profile memory allocations
+--- Application option to enable/disable the profiler
+--- Feature to turn on/off the Tracy profiler on demand
+--- Feature to profile memory allocations
+--- 68000 CPU cycles emulation in Tracy profiler timer
+--- Wait for Tracy profiler connection with a cancellable dialog
+18) Added lua library support for VS 2022
 
 pre-Release 5b (20th July 2022)
 -------------------------------
@@ -375,15 +378,17 @@ Project information
 5) Qt 5.12.0 library 64bits for VS 2017 (compatible with VS 2022)
 6) Zlib 1.3.1 library 64bits for VS 2022
 7) SDL2 2.30.9 library 64bits for VS 2022
-8) The original make files have been modified to follow the requirements and modifications
-9) The 'Rx' word has been added to the emulator name to make distinction with the original version
-10) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
-11) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
+8) lua 5.4.8 library 64bits for VS 2022
+9) Tracy Profiler 0.12.x library 64bits for VS 2022
+10) The original make files have been modified to follow the requirements and modifications
+11) The 'Rx' word has been added to the emulator name to make distinction with the original version
+12) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
+13) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
 -- Text / License terms are the same
 14) The x86 configuration has been removed in the Visual Studio project
 15) Additional project information can be found at https://github.com/djipi/Virtual-Jaguar-Rx/wiki
 16) Windows environment variables for libraries
---- LIBELFDIR, ZLIBDIR, SDL2DIR & DWARFDIR
+--- DWARFDIR, LIBELFDIR, LUADIR, SDL2DIR, TRACYPROFILERDIR & ZLIBDIR
 
 
 Download statistics

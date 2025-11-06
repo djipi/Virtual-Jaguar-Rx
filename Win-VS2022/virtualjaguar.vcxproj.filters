@@ -576,6 +576,15 @@
     <ClInclude Include="..\src\profiler\tracyprofiler.h">
       <Filter>Header Files\profiler</Filter>
     </ClInclude>
+    <ClInclude Include="TracyProfiler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\profiler\baseprofiler.h">
+      <Filter>Header Files\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\profiler\dummyprofiler.h">
+      <Filter>Header Files\profiler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\res\alpine-file.png">

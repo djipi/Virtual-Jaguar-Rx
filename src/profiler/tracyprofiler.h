@@ -1,30 +1,53 @@
 //
-// tracyprofiler.h: Profiler main header with Tracy
+// tracyprofiler.h: Tracy profiler integration for Virtual Jaguar Rx
+//
+// This class provides an implementation of the baseProfiler interface using the Tracy profiler (https://github.com/wolfpld/tracy)
+// It supports real-time performance analysis and visualization.
+//
+// Features:
+// - M68000 CPU cycle tracking and function profiling
+// - Memory allocation tracking (malloc/free)
+// - Lua integration support
+// - Real-time connection to Tracy server
+//
+// Note: This header is only active when TRACY_ENABLE is defined.
 //
 // by Jean-Paul Mari
 //
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+//
+// Who  When (mm/dd/yy)  What
+// ---  ---------------  -----------------------------------------------------------
+// JPM   Nov./2025       Created this file
+//
 
-#ifndef __TRACYPROFILER_H__
+#if !defined(__TRACYPROFILER_H__) && defined(TRACY_ENABLE)
 #define __TRACYPROFILER_H__
 
-#ifndef TRACY_ENABLE
-#error "Tracy must be compiled statically with TRACY_ENABLE defined"
-#else
+#include <stdint.h>
+#include "baseprofiler.h"
+//#include "tracy/Tracy.hpp"
 #include "tracy\TracyC.h"
-//#include "tracy\tracy.hpp"
-#endif
 
-class TracyProfiler
+class TracyProfiler : public baseProfiler
 {
 public:
 	TracyProfiler(void);
-	void Pause(bool pause);
-	char* IntegerToStringWithCommas(char* out, unsigned int len, unsigned int value);
-	void M68Kenter(TracyCZoneCtx* zoneCtx, char* functionName, char* filename, unsigned int linenumber, unsigned int startCycle);
-	void M68Kleave(TracyCZoneCtx* pZone, unsigned int usedCycles);
-	void M68Kmalloc(TracyCZoneCtx* zoneCtx, unsigned int ptr, unsigned int size, int depth);
-	void M68Kfree(TracyCZoneCtx* zoneCtx, unsigned int ptr);
+	bool Start(void) override;
+	void InitLua(lua_State* LuaLib) override;
+	void Timer(bool onoff, bool newvalue) override;
+	void Pause(bool pause) override;
+	void RAZIndex(void* index) override;
+	void M68Kenter(void* zoneCtx, char* functionName, char* filename, size_t linenumber, size_t startCycle) override;
+	bool M68Kactive(void* zoneCtx) override;
+	void M68Kleave(void* zoneCtx, size_t usedCycles) override;
+	void M68Kmalloc(void* zoneCtx, size_t ptr, size_t size, int depth) override;
+	void M68Kfree(void* zoneCtx, size_t ptr, bool flush) override;
 	~TracyProfiler(void);
+
+private:
+	char* IntegerToStringWithCommas(char* out, size_t len, size_t value);
+	bool WaitForConnection(void);
 
 private:
 	bool tracyPaused;

@@ -20,11 +20,10 @@
 // JPM   Oct./2018  Added the Rx version's contact in the help text, added timer initialisation in the SDL_Init
 // JPM   Apr./2019  Fixed a command line option duplication
 // JPM   Jan./2024  Added the missing timer for the Quit Sub System
-// JPM   Oct./2025  Added profiler option (--profiler)
+// JPM        2025  Added profiler option (--profiler), lua library, and profiler initialization
 //
 
 #include "app.h"
-
 #include "SDL.h"
 #include <QtWidgets/QApplication>
 #include "gamepad.h"
@@ -36,6 +35,7 @@
 #include <iostream>
 #include <cstdio>
 #include "debugger/DBGManager.h"
+#include "profiler.h"
 
 // Apparently on win32, SDL is hijacking main from Qt. So let's do this:
 #if defined (__GCCWIN32__) || defined (_MSC_VER)
@@ -113,25 +113,37 @@ int main(int argc, char * argv[])
 			printf("Failed to open virtualjaguar.log for writing!\n");
 	}
 
-	// Set up SDL library
-	if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0)
+	// set the lua library
+	lua_State* LuaLib = luaL_newstate();
+	if (LuaLib)
 	{
-		WriteLog("VJ: Could not initialize the SDL library: %s\n", SDL_GetError());
+		// Set up SDL library
+		if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0)
+		{
+			WriteLog("VJ: Could not initialize the SDL library: %s\n", SDL_GetError());
+		}
+		else
+		{
+			WriteLog("VJ: SDL (joystick, audio and timer) successfully initialized.\n");
+			luaL_openlibs(LuaLib);
+			DBGManager_Init();
+			Profiler_Init(LuaLib);
+			App app(argc, argv);					// Declare an instance of the application
+			Gamepad::AllocateJoysticks();
+			AutoConnectProfiles();
+			retVal = app.exec();					// And run it!
+			DBGManager_Close();
+			Profiler_Close();
+			Gamepad::DeallocateJoysticks();
+			lua_close(LuaLib);
+			// Free SDL components last...!
+			SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER);
+			SDL_Quit();
+		}
 	}
 	else
 	{
-		WriteLog("VJ: SDL (joystick, audio and timer) successfully initialized.\n");
-		DBGManager_Init();
-		App app(argc, argv);					// Declare an instance of the application
-		Gamepad::AllocateJoysticks();
-		AutoConnectProfiles();
-		retVal = app.exec();					// And run it!
-		DBGManager_Close();
-		Gamepad::DeallocateJoysticks();
-
-		// Free SDL components last...!
-		SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER);
-		SDL_Quit();
+		WriteLog("VJ: Could not initialize the Lua library: %s\n", SDL_GetError());
 	}
 
 #if defined (__GCCWIN32__) || defined (_MSC_VER)

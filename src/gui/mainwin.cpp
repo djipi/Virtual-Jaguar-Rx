@@ -33,7 +33,7 @@
 // JPM    May/2021  Check missing dll for the tests pattern
 // JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser, added and slightly modified the save state patch from PvtLewis
 // JPM        2024  Use setting for the emulation framerate display, added a Console standard emulation window
-// JPM   Oct./2025  Feature to turn on/off the profiler
+// JPM        2025  Feature to turn on/off the profiler, and conditional compilation for the Tracy profiler support
 //
 
 // FIXED:
@@ -409,6 +409,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	connect(fullScreenAct, SIGNAL(triggered()), this, SLOT(ToggleFullScreen()));
 
 	// Actions dedicated to the profiler
+#ifdef TRACY_ENABLE
 	if (vjs.useProfiler)
 	{
 		QIcon tracyIcon;
@@ -420,6 +421,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		tracyAct->setDisabled(false);
 		connect(tracyAct, &QAction::toggled, this, &MainWin::ToggleTracyProfiler);
 	}
+#endif
 
 	// Actions dedicated to debugger mode
 	if (vjs.softTypeDebugger)
@@ -855,11 +857,13 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		debugbar->addAction(memBrowseAct[2]);
 	}
 
+#ifdef TRACY_ENABLE
 	if (vjs.useProfiler)
 	{
 		profilerbar = addToolBar(tr("&Profiler"));
 		profilerbar->addAction(tracyAct);
 	}
+#endif
 
 	// Add actions to the main window, as hiding widgets with them
 	// disables them :-P
@@ -944,7 +948,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	WriteLog("Virtual Jaguar %s Rx (Last full build was on %s %s)\n", VJ_RELEASE_VERSION, __DATE__, __TIME__);
 	WriteLog("VJ: Initializing jaguar subsystem...\n");
 	JaguarInit();
-	ProfilerInit();
+	profiler_Start();
 
 #ifndef NEWMODELSBIOSHANDLER
 	//	memcpy(jagMemSpace + 0xE00000, jaguarBootROM, 0x20000);	// Use the stock BIOS
@@ -1455,7 +1459,7 @@ void MainWin::TogglePowerState(void)
 		WriteLog("GUI: Resetting Jaguar...\n");
 		JaguarReset();
 		DebuggerReset();
-		ProfilerReset();
+		Profiler_Reset();
 		CommonReset();
 		DebuggerResetWindows();
 		CommonResetWindows();
@@ -1467,7 +1471,10 @@ void MainWin::TogglePowerState(void)
 // Toggle the emulator state, it can be either on or off
 void MainWin::ToggleRunState(void)
 {
+	// toggle tracing state
 	startM68KTracing = running;
+	// toggle the profiter system
+	Profiler_Pause(!running);
 
 	// switch the running mode
 	running = !running;
@@ -1574,10 +1581,11 @@ void MainWin::SetPAL(void)
 }
 
 
-// Tracy Profiler
+// Toggle the Tracy profiler's status
+// checked: true = unpause, false = pause
 void MainWin::ToggleTracyProfiler(bool checked)
 {
-	ProfilerPause(checked);
+	typeProfiler_Pause(checked, TRACYPROFILER);
 }
 
 
@@ -2023,7 +2031,7 @@ void MainWin::DebuggerRestart(void)
 	CommonResetWindows();
 	SourcesWin->Init();
 	RefreshWindows();
-	ProfilerFlush();
+	Profiler_Reset();
 #ifdef _MSC_VER
 #pragma message("Warning: !!! Need to verify the Restart function !!!")
 #else
