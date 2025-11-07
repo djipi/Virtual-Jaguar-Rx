@@ -31,6 +31,16 @@
 #include "tracy\TracyLua.hpp"
 #include "client\TracyProfiler.hpp"
 
+// Define the Lua zone state that Tracy requires
+namespace tracy
+{
+	LuaZoneState& GetLuaZoneState(void)
+	{
+		static LuaZoneState luaZoneState;
+		return luaZoneState;
+	}
+}
+
 //
 #undef TracyLine
 #undef TracyFunction
