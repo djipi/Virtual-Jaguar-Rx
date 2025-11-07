@@ -182,16 +182,14 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		setCentralWidget(mainWindowCentrale);
 	}
 
+	// set the application's icon
 	setWindowIcon(QIcon(":/res/vj-icon.png"));
 
+	// set window's title
 	QString title = QString(tr("Virtual Jaguar " VJ_RELEASE_VERSION " Rx"));
-
-	if (vjs.hardwareTypeAlpine)
-		title += QString(tr(" - Alpine Mode"));
-
-	if (vjs.softTypeDebugger)
-		title += QString(tr(" - Debugger Mode"));
-
+	vjs.hardwareTypeAlpine ? title += QString(tr(" - Alpine Mode")) : false;
+	vjs.softTypeDebugger ? title += QString(tr(" - Debugger Mode")) : false;
+	(vjs.useProfilers != NOPROFILER) ? title += QString(tr(" - Profiler Enabled")) : false;
 	setWindowTitle(title);
 
 	// windows common features
@@ -409,9 +407,9 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	connect(fullScreenAct, SIGNAL(triggered()), this, SLOT(ToggleFullScreen()));
 
 	// Actions dedicated to the profiler
-#ifdef TRACY_ENABLE
-	if (vjs.useProfiler)
+	if (vjs.useProfilers & TRACYPROFILER)
 	{
+		// Tracy profiler
 		QIcon tracyIcon;
 		tracyIcon.addFile(":/res/profiler-tracy-off.png", QSize(), QIcon::Normal, QIcon::Off);
 		tracyIcon.addFile(":/res/profiler-tracy-on.png", QSize(), QIcon::Normal, QIcon::On);
@@ -421,7 +419,6 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		tracyAct->setDisabled(false);
 		connect(tracyAct, &QAction::toggled, this, &MainWin::ToggleTracyProfiler);
 	}
-#endif
 
 	// Actions dedicated to debugger mode
 	if (vjs.softTypeDebugger)
@@ -857,13 +854,11 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		debugbar->addAction(memBrowseAct[2]);
 	}
 
-#ifdef TRACY_ENABLE
-	if (vjs.useProfiler)
+	if (vjs.useProfilers)
 	{
-		profilerbar = addToolBar(tr("&Profiler"));
-		profilerbar->addAction(tracyAct);
+		profilerbar = addToolBar(tr("&Profilers"));
+		(vjs.useProfilers & TRACYPROFILER) ? profilerbar->addAction(tracyAct) : false;
 	}
-#endif
 
 	// Add actions to the main window, as hiding widgets with them
 	// disables them :-P

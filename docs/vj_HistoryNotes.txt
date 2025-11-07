@@ -30,7 +30,7 @@ Git commit:
 16) Fix debugger for the get address in case of empty symbol name
 17) Added profiling feature for the 68000
 --- Tracy profiler integration support
---- Application option to enable/disable the profiler
+--- Application option to enable/disable the profilers
 --- Feature to turn on/off the Tracy profiler on demand
 --- Feature to profile memory allocations
 --- 68000 CPU cycles emulation in Tracy profiler timer

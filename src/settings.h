@@ -63,7 +63,7 @@ struct KBSettings
 extern bool EraseSettings(char *Setting);
 
 
-// Settings struct
+// Settings structure
 struct VJSettings
 {
 	bool useJoystick;											// Joystick usage
@@ -80,13 +80,13 @@ struct VJSettings
 	uint32_t glFilter;
 	bool hardwareTypeAlpine;									// Alpine mode
 	bool softTypeDebugger;										// Soft type debugger mode
-	bool useProfiler;											// Use of the profiler
+	uint32_t useProfilers;										// Use of profilers
 	bool audioEnabled;
 	uint32_t frameSkip;
 	uint32_t renderType;
 	uint32_t refresh;
 	bool allowM68KExceptionCatch;								// Allow M68K exception catch
-	bool allowWritesToROM;										// Allow writes to ROM cartdridge
+	bool allowWritesToROM;										// Allow writes to ROM cartridge
 	bool allowWritesToUnknownLocation;							// Allow writes to unknown memory location
 	uint32_t biosType;											// Bios type used
 	uint32_t jaguarModel;										// Jaguar model

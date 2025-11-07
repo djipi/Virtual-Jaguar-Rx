@@ -28,12 +28,11 @@ extern "C" {
 #include "lualib.h"
 }
 
-//
-typedef enum {	VJPROFILER,	TRACYPROFILER, 
-				COUNT_PROFILERS } ProfilerType_t;
+// Profiler types list (must be binary based)
+typedef enum {	NOPROFILER = 0x0, VJPROFILER = 0x1, TRACYPROFILER = 0x2	} ProfilerType_t;
 
 // Profiler generic functions
-extern void Profiler_Init(lua_State* LuaLib);
+extern void Profiler_Init(uint32_t type, lua_State* LuaLib);
 extern void profiler_Start(void);
 extern void Profiler_Pause(bool onoff);
 extern void Profiler_Reset(void);

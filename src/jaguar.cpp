@@ -153,7 +153,7 @@ static bool start = false;
 void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles, unsigned int m68KSP, unsigned int m68KD0)
 {
 	// check the profiler usage to avoid unnecessary profiling overhead
-	if (vjs.useProfiler)
+	if (vjs.useProfilers)
 	{
 		// update the current profiling entry
 		m68kProfilerEntryUpdate(m68kPC, cycles, m68KSP);

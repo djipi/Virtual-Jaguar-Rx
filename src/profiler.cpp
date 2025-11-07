@@ -23,7 +23,12 @@
 #include "memory.h"
 
 
+//
 #define M68K_PROFILER_MAX_ENTRIES	200000
+
+// Profiler type index
+typedef enum { VJPROFILER_IDX, TRACYPROFILER_IDX } ProfilerIdx_t;
+#define COUNT_PROFILERS	2
 
 
 // Profiler context structure
@@ -102,15 +107,15 @@ void Profiler_Flush(void);
 
 
 // Profiler initialization
-void Profiler_Init(lua_State* LuaLib)
+void Profiler_Init(uint32_t type, lua_State* LuaLib)
 {
 	// VJ profiler setup
-	BaseProfilers[VJPROFILER] = new DummyProfiler();
+	(type & VJPROFILER) ? BaseProfilers[VJPROFILER_IDX] = new DummyProfiler() : BaseProfilers[VJPROFILER_IDX] = new DummyProfiler();
 	// Tracy profiler setup
 #ifdef TRACY_ENABLE
-	BaseProfilers[TRACYPROFILER] = new TracyProfiler();
+	(type & TRACYPROFILER) ? BaseProfilers[TRACYPROFILER_IDX] = new TracyProfiler() : BaseProfilers[TRACYPROFILER_IDX] = new DummyProfiler();
 #else
-	BaseProfilers[TRACYPROFILER] = new DummyProfiler();
+	BaseProfilers[TRACYPROFILER_IDX] = new DummyProfiler();
 #endif
 	// Profilers initialization
 	for (size_t i = 0; i < COUNT_PROFILERS; i++)
@@ -157,7 +162,7 @@ void typeProfiler_Pause(bool pause, ProfilerType_t mode)
 	switch (mode)
 	{
 	case TRACYPROFILER:
-		BaseProfilers[TRACYPROFILER]->Pause(pause);
+		BaseProfilers[TRACYPROFILER_IDX]->Pause(pause);
 		break;
 
 	default:

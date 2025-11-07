@@ -8,7 +8,7 @@ virtualjaguar \- An Atari Jaguar emulator
 .RI [rom image file]
 
 .SH DESCRIPTION
-Virtual Jaguar Rx is an emulator for the Atari Jaguar videogame system. It includes a debugger.
+Virtual Jaguar Rx is an emulator for the Atari Jaguar videogame system. It includes a debugger & profiling capabilities.
 
 .SH OPTIONS
 .TP
@@ -30,8 +30,11 @@ Run in Debugger emulation mode
 .B \-\-dram-max
 Set the main ram to 8MB
 .TP
-.B \-\-profiler
-Enable the profiler
+.B \-\-profiler-tracy
+Enable the Tracy profiler
+.TP
+.B \-\-profilers
+Enable all profilers
 .TP
 .B \-\-full-raz
 Start the entire system space with 0

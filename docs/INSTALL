@@ -9,7 +9,9 @@ REQUIREMENTS:
 The minimum requirements for compiling Virtual Jaguar Rx from source are:
 
  o  GCC v4.4.x or higher
- o  SDL2-2.30.9
+ o  SDL2 2.30.9
+ o  lua 5.4.8 or higher
+ o  Tracy Profiler 0.12.4 or higher (optional, for profiling support) 
  o  zlib v1.3.1 or higher
  o  libelf 0.8.13
  o  libdwarf 20210528

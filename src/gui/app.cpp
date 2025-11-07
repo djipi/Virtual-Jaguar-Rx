@@ -20,7 +20,7 @@
 // JPM   Oct./2018  Added the Rx version's contact in the help text, added timer initialisation in the SDL_Init
 // JPM   Apr./2019  Fixed a command line option duplication
 // JPM   Jan./2024  Added the missing timer for the Quit Sub System
-// JPM        2025  Added profiler option (--profiler), lua library, and profiler initialization
+// JPM        2025  Added profiler option (--profilers, --profiler-tracy), lua library, and profiler initialization
 //
 
 #include "app.h"
@@ -82,16 +82,14 @@ int main(int argc, char * argv[])
 	}
 #endif
 
-	// Normally, this would be read in from the settings module... :-P
+	// non-saved settings by default
 	vjs.hardwareTypeAlpine = false;
 	vjs.softTypeDebugger = false;
-	vjs.useProfiler = false;
+	vjs.useProfilers = NOPROFILER;
 	vjs.DRAM_size = 0x200000;
 	vjs.full_raz = false;
-	// This is stuff we pass into the mainWindow...
-//	noUntunedTankPlease = false;
 
-	// Check for options that must be in place be constructing the App object
+	// fill non-saved settings from command line
 	if (!ParseCommandLine(argc, argv))
 	{
 		return 0;
@@ -127,7 +125,7 @@ int main(int argc, char * argv[])
 			WriteLog("VJ: SDL (joystick, audio and timer) successfully initialized.\n");
 			luaL_openlibs(LuaLib);
 			DBGManager_Init();
-			Profiler_Init(LuaLib);
+			Profiler_Init(vjs.useProfilers, LuaLib);
 			App app(argc, argv);					// Declare an instance of the application
 			Gamepad::AllocateJoysticks();
 			AutoConnectProfiles();
@@ -201,37 +199,39 @@ bool ParseCommandLine(int argc, char * argv[])
 				"Contact: https://github.com/djipi/Virtual-Jaguar-Rx | djipi.mari@gmail.com\n"
 				"\n"
 				"Usage:\n"
-				"   virtualjaguar [<filename>] [switches]\n"
+				"   virtualjaguar [<filename>] [options]\n"
 				"\n"
-				"   Option            Description\n"
-				"   ----------------  -----------------------------------\n"
-				"   <filename>        Name of file to autoload\n"
-				"   --alpine      -a  Put Virtual Jaguar into Alpine mode\n"
-				"   --debugger    -D  Put Virtual Jaguar into Debugger mode\n"
-				"   --profiler    -P  Enable the profiler\n"
-				"   --pal         -p  PAL mode\n"
-				"   --ntsc        -n  NTSC mode\n"
-				"   --dram-max        Set DRAM size to 8MB\n"
-				"   --bios        -b  Boot using Atari Jaguar BIOS\n"
-				"   --no-bios         Do not use Atari Jaguar BIOS\n"
-				"   --gpu         -g  Enable GPU\n"
-				"   --no-gpu          Disable GPU\n"
-				"   --dsp         -d  Enable DSP\n"
-				"   --no-dsp          Disable DSP\n"
-				"   --fullscreen  -f  Start in full screen mode\n"
-				"   --blur        -B  Enable GL bilinear filter\n"
-				"   --no-blur         Disable GL bilinear filtering\n"
-				"   --log         -l  Create and use log file\n"
-				"   --no-log          Do not use log file (default)\n"
-				"   --full-raz        Fill the entire system space with 0\n"
-				"   --help        -h  Show this message\n"
-				"                 -?  Show this message\n"
-				"   --es-all          Erase all settings\n"
-				"   --es-ui           Erase UI settings only\n"
-				"   --es-alpine       Erase alpine mode settings only\n"
-				"   --es-debugger     Erase debugger mode settings only\n"
+				"   Option            Short    Description\n"
+				"   ----------------  -----    -----------------------------------\n"
+				"   <filename>                 Name of file to autoload\n"
+				"   --alpine          -a       Put Virtual Jaguar into Alpine mode\n"
+				"   --debugger        -D       Put Virtual Jaguar into Debugger mode\n"
+				"   --profilers       -P       Enable all profilers\n"
+#ifdef TRACY_ENABLE
+				"   --profiler-tracy           Enable Tracy profiler\n"
+#endif
+				"   --pal             -p       PAL mode\n"
+				"   --ntsc            -n       NTSC mode\n"
+				"   --dram-max                 Set DRAM size to 8MB\n"
+				"   --bios            -b       Boot using Atari Jaguar BIOS\n"
+				"   --no-bios                  Do not use Atari Jaguar BIOS\n"
+				"   --gpu             -g       Enable GPU\n"
+				"   --no-gpu                   Disable GPU\n"
+				"   --dsp             -d       Enable DSP\n"
+				"   --no-dsp                   Disable DSP\n"
+				"   --fullscreen      -f       Start in full screen mode\n"
+				"   --blur            -B       Enable GL bilinear filter\n"
+				"   --no-blur                  Disable GL bilinear filtering\n"
+				"   --log             -l       Create and use log file\n"
+				"   --no-log                   Do not use log file (default)\n"
+				"   --full-raz                 Fill the entire system space with 0\n"
+				"   --help            -h -?    Show this message\n"
+				"   --es-all                   Erase all settings\n"
+				"   --es-ui                    Erase UI settings only\n"
+				"   --es-alpine                Erase alpine mode settings only\n"
+				"   --es-debugger              Erase debugger mode settings only\n"
 				"   --please-dont-kill-my-computer\n"
-				"                 -z  Run Virtual Jaguar without \"snow\"\n"
+				"                     -z       Run Virtual Jaguar without \"snow\"\n"
 				"\n"
 				"Invoking Virtual Jaguar with no filename will cause it to boot up\n"
 				"with the VJ GUI. Using Alpine mode will enable log file.\n"
@@ -273,11 +273,23 @@ bool ParseCommandLine(int argc, char * argv[])
 			useLogfile = true;
 		}
 
-		// Profiler enabled
-		if ((strcmp(argv[i], "--profiler") == 0) || (strcmp(argv[i], "-P") == 0))
+#ifdef TRACY_ENABLE
+		// Tracy profiler type
+		if (!strcmp(argv[i], "--profiler-tracy"))
 		{
-			printf("Profiler enabled.\n");
-			vjs.useProfiler = true;
+			printf("Tracy profiler enabled.\n");
+			vjs.useProfilers = TRACYPROFILER;
+		}
+#endif
+
+		// All profilers enabled
+		if (!strcmp(argv[i], "--profilers") || !strcmp(argv[i], "-P"))
+		{
+			printf("All profilers enabled.\n");
+			vjs.useProfilers = VJPROFILER;
+#ifdef TRACY_ENABLE			
+			vjs.useProfilers |= TRACYPROFILER;
+#endif
 		}
 
 		// Debugger mode

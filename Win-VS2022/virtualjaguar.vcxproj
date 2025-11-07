@@ -84,7 +84,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>Qt5PlatformCompositorSupport.lib;qtmain.lib;Qt5OpenGL.lib;shell32.lib;jaguarcore.lib;zlibstatic.lib;m68000.lib;gdi32.lib;user32.lib;SDL2.lib;libelf.lib;legacy_stdio_definitions.lib;OpenGL32.lib;libdwarf_x64.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;opengl32.lib;glu32.lib;Ws2_32.lib;imm32.lib;winmm.lib;Advapi32.lib;dxguid.lib;TracyClient.lib;Psapi.lib;kernel32.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\src\m68000\obj;$(ZLIBDIR)\lib;$(SDL2DIR)\lib\x64;$(LIBELFDIR)\lib;m68000\x64\Release;jaguarcore\x64\Release;$(DWARFDIR)\lib;$(TRACYPROFILERDIR)\_build\TracyClient\Release;$(LUADIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\src\m68000\obj;$(ZLIBDIR)\lib;$(SDL2DIR)\lib\x64;$(LIBELFDIR)\lib;m68000\x64\Release;jaguarcore\x64\Release;$(DWARFDIR)\lib;$(TRACYPROFILERDIR)\_build\vstudio\TracyClient\Release;$(LUADIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -133,7 +133,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>Advapi32.lib;Psapi.lib;kernel32.lib;Qt5PlatformCompositorSupportd.lib;qtmaind.lib;Qt5OpenGLd.lib;shell32.lib;zlibstaticd.lib;SDL2.lib;OpenGL32.lib;gdi32.lib;user32.lib;legacy_stdio_definitions.lib;libelfd.lib;m68000d.lib;jaguarcored.lib;libdwarf_x64d.lib;Ws2_32.lib;imm32.lib;winmm.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opengl32.lib;glu32.lib;dxguid.lib;TracyClient.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\..\src\m68000\obj;$(ZLIBDIR)\lib;$(SDL2DIR)\lib\x64;$(LIBELFDIR)\lib;m68000\x64\Debug;jaguarcore\x64\Debug;$(DWARFDIR)\lib;$(TRACYPROFILERDIR)\_build\TracyClient\Debug;$(LUADIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\..\src\m68000\obj;$(ZLIBDIR)\lib;$(SDL2DIR)\lib\x64;$(LIBELFDIR)\lib;m68000\x64\Debug;jaguarcore\x64\Debug;$(DWARFDIR)\lib;$(TRACYPROFILERDIR)\_build\vstudio\TracyClient\Debug;$(LUADIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -954,11 +954,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\docs\LICENSE" />
-    <None Include="..\docs\INSTALL" />
+    <None Include="..\docs\INSTALL">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="..\docs\README" />
     <None Include="..\docs\TODO" />
-    <None Include="..\docs\virtualjaguar.1" />
-    <None Include="..\docs\WHATSNEW" />
+    <None Include="..\docs\virtualjaguar.1">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\docs\WHATSNEW">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="..\LICENSE">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>

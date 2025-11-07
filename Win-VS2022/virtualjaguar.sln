@@ -1,12 +1,12 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36511.14 d17.14
+VisualStudioVersion = 17.14.36511.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "virtualjaguar", "virtualjaguar.vcxproj", "{66994EE0-D47E-319C-B486-0A9CFDF062E3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{07D0EDD9-BED6-4325-8EF6-6B788CC86A48} = {07D0EDD9-BED6-4325-8EF6-6B788CC86A48}
-		{A26AA836-DC94-3512-B55E-D74CF3623087} = {A26AA836-DC94-3512-B55E-D74CF3623087}
+		{EB103D12-385C-3E7B-9FCD-72FB650395E7} = {EB103D12-385C-3E7B-9FCD-72FB650395E7}
 		{D3EDE1F0-828A-4E36-883C-42645DE7AF00} = {D3EDE1F0-828A-4E36-883C-42645DE7AF00}
 	EndProjectSection
 EndProject
@@ -17,7 +17,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "jaguarcore", "jaguarcore\ja
 		{07D0EDD9-BED6-4325-8EF6-6B788CC86A48} = {07D0EDD9-BED6-4325-8EF6-6B788CC86A48}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TracyClient", "..\..\..\tracy\_build\TracyClient\TracyClient.vcxproj", "{A26AA836-DC94-3512-B55E-D74CF3623087}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TracyClient", "..\..\..\tracy\_build\vstudio\TracyClient\TracyClient.vcxproj", "{EB103D12-385C-3E7B-9FCD-72FB650395E7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +37,10 @@ Global
 		{D3EDE1F0-828A-4E36-883C-42645DE7AF00}.Debug|x64.Build.0 = Debug|x64
 		{D3EDE1F0-828A-4E36-883C-42645DE7AF00}.Release|x64.ActiveCfg = Release|x64
 		{D3EDE1F0-828A-4E36-883C-42645DE7AF00}.Release|x64.Build.0 = Release|x64
-		{A26AA836-DC94-3512-B55E-D74CF3623087}.Debug|x64.ActiveCfg = Debug|x64
-		{A26AA836-DC94-3512-B55E-D74CF3623087}.Debug|x64.Build.0 = Debug|x64
-		{A26AA836-DC94-3512-B55E-D74CF3623087}.Release|x64.ActiveCfg = Release|x64
-		{A26AA836-DC94-3512-B55E-D74CF3623087}.Release|x64.Build.0 = Release|x64
+		{EB103D12-385C-3E7B-9FCD-72FB650395E7}.Debug|x64.ActiveCfg = Debug|x64
+		{EB103D12-385C-3E7B-9FCD-72FB650395E7}.Debug|x64.Build.0 = Debug|x64
+		{EB103D12-385C-3E7B-9FCD-72FB650395E7}.Release|x64.ActiveCfg = Release|x64
+		{EB103D12-385C-3E7B-9FCD-72FB650395E7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
