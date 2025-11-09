@@ -36,6 +36,7 @@ Git commit:
 --- 68000 CPU cycles emulation in Tracy profiler timer
 --- Wait for Tracy profiler connection with a cancellable dialog
 18) Added lua library support for VS 2022
+19) Added a CMakeLists.txt file for CMake support
 
 pre-Release 5b (20th July 2022)
 -------------------------------
@@ -381,14 +382,14 @@ Project information
 8) lua 5.4.8 library 64bits for VS 2022
 9) Tracy Profiler 0.12.x library 64bits for VS 2022
 10) The original make files have been modified to follow the requirements and modifications
-11) The 'Rx' word has been added to the emulator name to make distinction with the original version
-12) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
-13) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
+11) A CMakeLists.txt file have been added for CMake support
+12) The 'Rx' word has been added to the emulator name to make distinction with the original version
+13) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
+14) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
 -- Text / License terms are the same
-14) The x86 configuration has been removed in the Visual Studio project
-15) Additional project information can be found at https://github.com/djipi/Virtual-Jaguar-Rx/wiki
-16) Windows environment variables for libraries
---- DWARFDIR, LIBELFDIR, LUADIR, SDL2DIR, TRACYPROFILERDIR & ZLIBDIR
+15) The x86 configuration has been removed in the Visual Studio project
+16) Additional project information can be found at https://github.com/djipi/Virtual-Jaguar-Rx/wiki
+17) The .env file list the Windows environment variables used by the VS 2022 project
 
 
 Download statistics

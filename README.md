@@ -7,6 +7,10 @@ The use of this software is entirely at your own risk. Nobody can be held respon
 damage done to your hardware and/or software.<br>
 All in one, please have a look at the documentations to see if VJ-Rx fits your needs.
 
+## Platforms
+* MSYS2/MinGW64
+* Windows
+
 ## Usage
 Simply double click on the VJ-Rx icon or type ./virtualjaguar -h from the command line.
 
@@ -24,10 +28,10 @@ Additional sources of information can be found at.
 * There is a built in help (under Help|Contents) for more information on how to use the emulator.
 
 ## Improvements
-Beside the new additional debugger integration, little major improvements have been made from the original VJ.<br>
+Beside the new additional debugger & profiler integration, no major improvements have been made from the original VJ.<br>
 However the debuggers can be helpful to fix legacy issues and improve the emulator.<br>
 If you find bugs, wants to enhance the code / documentations or simply have questions / suggestions, 
-you can participate via the Issues and/or the Disccussion tabs in the Github project.
+you can participate via the Issues and/or the Discussion tabs in the Github project.
 
 ## Credits
-The original VJ credits have been kept with some adjustements in regard of the Rx version.
+The original VJ credits have been kept with some adjustments in regard of the Rx version.
