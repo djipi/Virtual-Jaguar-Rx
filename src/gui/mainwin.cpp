@@ -187,9 +187,9 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 	// set window's title
 	QString title = QString(tr("Virtual Jaguar " VJ_RELEASE_VERSION " Rx"));
-	vjs.hardwareTypeAlpine ? title += QString(tr(" - Alpine Mode")) : false;
-	vjs.softTypeDebugger ? title += QString(tr(" - Debugger Mode")) : false;
-	(vjs.useProfilers != NOPROFILER) ? title += QString(tr(" - Profiler Enabled")) : false;
+	vjs.hardwareTypeAlpine ? (title += QString(tr(" - Alpine Mode"))), true : false;
+	vjs.softTypeDebugger ? (title += QString(tr(" - Debugger Mode"))), true : false;
+	(vjs.useProfilers != NOPROFILER) ? (title += QString(tr(" - Profiler Enabled"))), true : false;
 	setWindowTitle(title);
 
 	// windows common features
@@ -857,7 +857,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	if (vjs.useProfilers)
 	{
 		profilerbar = addToolBar(tr("&Profilers"));
-		(vjs.useProfilers & TRACYPROFILER) ? profilerbar->addAction(tracyAct) : false;
+		(vjs.useProfilers & TRACYPROFILER) ? profilerbar->addAction(tracyAct), true : false;
 	}
 
 	// Add actions to the main window, as hiding widgets with them
