@@ -101,7 +101,7 @@ set(M68K_SOURCES
 
 # Profiler sources
 set(PROFILER_SOURCES
-    src/profiler.cpp
+    src/profiler/ctrlprofilerwin.cpp
     src/profiler/baseprofiler.h
     src/profiler/dummyprofiler.h
 )
@@ -224,6 +224,7 @@ set(MOC_HEADERS
     src/debugger/exceptionvectortablebrowser.h
     src/debugger/callstackbrowser.h
     src/debugger/debuggertab.h
+    src/profiler/ctrlprofilerwin.h
 )
 
 # Qt resource file

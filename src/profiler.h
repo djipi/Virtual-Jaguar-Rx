@@ -28,6 +28,19 @@ extern "C" {
 #include "lualib.h"
 }
 
+// Frame loop struture
+typedef struct FrameLoopInfo
+{
+	bool Used;				// Allocated frame loop
+	bool Active;			// Active frame loop
+	char* Name;				// Functions's name
+	char* Filename;			// Source filename
+	char* LineSrc;			// Source code line
+	size_t NumLine;			// Line number
+	size_t Adr;				// Frame loop address
+	size_t HitCounts;		// Hit counts
+} S_FrameLoopInfo;
+
 // Profiler types list (must be binary based)
 typedef enum {	NOPROFILER = 0x0, VJPROFILER = 0x1, TRACYPROFILER = 0x2	} ProfilerType_t;
 
@@ -43,5 +56,6 @@ extern void typeProfiler_Pause(bool pause, ProfilerType_t mode);
 extern void m68kProfilerEntryUp(size_t PCAdr, size_t m68KSP);
 extern void m68kProfilerEntryDown(size_t PCAdr, size_t m68KD0);
 extern void m68kProfilerEntryUpdate(size_t PCAdr, size_t cycles, size_t m68KSP);
+extern bool m68kProfilerEntryLoopFrame(S_FrameLoopInfo* frameInfo);
 
 #endif

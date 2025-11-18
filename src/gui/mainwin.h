@@ -18,6 +18,7 @@
 // JPM  March/2022  Added the save state patch from PvtLewis
 // JPM  07/14/2024  Added a Console standard emulation window
 // JPM   Oct./2025  Feature to turn on/off the profiler
+// JPM   Nov./2025  Added profiler control window
 //
 
 #ifndef __MAINWIN_H__
@@ -40,7 +41,8 @@ class stdConsoleWindow;
 class VideoOutputWindow;
 //class DasmWindow;
 class EmuStatusWindow;
-
+// Profiler
+class CtrlProfilerWindow;
 // Alpine
 class ROMCartBrowserWindow;
 class MemoryBrowserWindow;
@@ -50,7 +52,6 @@ class OPBrowserWindow;
 class M68KDasmBrowserWindow;
 class RISCDasmBrowserWindow;
 class HWRegsBrowserWindow;
-
 // Debugger
 class SourcesWindow;
 class m68KDasmWindow;
@@ -119,6 +120,7 @@ class MainWin: public QMainWindow
 		void MakeScreenshot(void);
 		// Profiler
 		void ToggleTracyProfiler(bool checked);
+		void ShowProfilerControlWin(void);
 		// Debugger
 		void DebuggerTraceStepOver(void);
 		void DebuggerTraceStepInto(void);
@@ -190,6 +192,8 @@ class MainWin: public QMainWindow
 		int zoomLevel;
 		bool powerButtonOn;
 		bool showUntunedTankCircuit;
+		// Profiler
+		CtrlProfilerWindow* ctrlProfilerWin;
 		// Alpine
 		MemoryBrowserWindow *memBrowseWin[3];
 		ROMCartBrowserWindow *romcartBrowseWin;
@@ -207,9 +211,7 @@ class MainWin: public QMainWindow
 		ExceptionVectorTableBrowserWindow *exceptionvectortableBrowseWin;
 		HeapAllocatorBrowserWindow *heapallocatorBrowseWin;
 		Memory1BrowserWindow **mem1BrowseWin;
-		//DasmWindow * DasmWin;
 		QTabWidget *dasmtabWidget;
-		//QDockWidget *dasmtabWidget;
 		SourcesWindow *SourcesWin;
 		m68KDasmWindow *m68kDasmWin;
 		GPUDasmWindow *GPUDasmWin;

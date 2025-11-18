@@ -69,14 +69,16 @@ QMAKE_CXXFLAGS += `$(CROSS)sdl2-config --cflags`
 INCLUDEPATH += \
 	src \
 	src/debugger \
-	src/gui
+	src/gui \
+	src/profiler
 
 DEPENDPATH = \
 	src \
 	src/debugger \
 	src/gui \
 	src/gui/debug \
-	src/m68000
+	src/m68000 \
+	src/profiler
 
 # The GUI
 
@@ -135,6 +137,7 @@ HEADERS = \
 	src/debugger/NewFnctBreakpointWin.h \
 	src/debugger/CartFilesListWin.h \
 	src/debugger/SaveDumpAsWin.h \
+	src/profiler/ctrlprofilerwin.h \
 	src/log.h \
 	src/unzip.h \
 	src/crc32.h \
@@ -197,6 +200,7 @@ SOURCES = \
 	src/debugger/NewFnctBreakpointWin.cpp \
 	src/debugger/CartFilesListWin.cpp \
 	src/debugger/SaveDumpAsWin.cpp \
+	src/profiler/ctrlprofilerwin.cpp \
 	src/log.cpp \
 	src/unzip.cpp \
 	src/crc32.cpp \

@@ -33,7 +33,7 @@
 // JPM    May/2021  Check missing dll for the tests pattern
 // JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser, added and slightly modified the save state patch from PvtLewis
 // JPM        2024  Use setting for the emulation framerate display, added a Console standard emulation window
-// JPM        2025  Feature to turn on/off the profiler, and conditional compilation for the Tracy profiler support
+// JPM        2025  Feature to turn on/off the profiler, profiler control window, and conditional compilation for the Tracy profiler support
 //
 
 // FIXED:
@@ -117,6 +117,7 @@
 #include "debugger/callstackbrowser.h"
 #include "debugger/CartFilesListWin.h"
 #include "debugger/SaveDumpAsWin.h"
+#include "profiler/ctrlprofilerwin.h"
 
 
 // According to SebRmv, this header isn't seen on Arch Linux either... :-/
@@ -199,6 +200,12 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	emuStatusWin = new EmuStatusWindow(this);
 	stdConsoleWin = new stdConsoleWindow(this);
 	
+	// windows profiler mode features
+	if (vjs.useProfilers != NOPROFILER)
+	{
+		ctrlProfilerWin = new CtrlProfilerWindow(this);
+	}
+
 	// windows alpine mode features
 	romcartBrowseWin = new ROMCartBrowserWindow(this);
 	stackBrowseWin = new StackBrowserWindow(this);
@@ -1527,6 +1534,7 @@ void MainWin::ToggleRunState(void)
 
 	emuStatusWin->ResetM68KCycles();
 	ShowstdConsoleWin();
+	ShowProfilerControlWin();
 	// Pause/unpause any running/non-running threads...
 	DACPauseAudioThread(!running);
 }
@@ -2219,6 +2227,18 @@ void MainWin::ShowMemory1BrowserWin(int NumWin)
 }
 
 
+// Show the profiler control window
+// This window is displayed in case of the profiler system has been enabled
+void MainWin::ShowProfilerControlWin(void)
+{
+	if (vjs.useProfilers != NOPROFILER)
+	{
+		ctrlProfilerWin->show();
+		//ctrlProfilerWin->RefreshContents();
+	}
+}
+
+
 // Show the Console standard emulation window
 // This window is automatically displayed in case of the Console standard emulation has been detected in the build
 void MainWin::ShowstdConsoleWin(void)
@@ -2535,6 +2555,16 @@ void MainWin::ReadUISettings(void)
 	stdConsoleWin->resize(size);
 	stdConsoleWin->StyleSheetColor->setCheckState(Qt::CheckState(settings.value("stdConsoleWinStyleSheetColorCheck", 0).toInt()));
 
+	// Profiler UI information
+	if (vjs.useProfilers != NOPROFILER)
+	{
+		pos = settings.value("ctrlProfilerWinPos", QPoint(200, 200)).toPoint();
+		ctrlProfilerWin->move(pos);
+		size = settings.value("ctrlProfilerWinSize", QSize(400, 200)).toSize();
+		ctrlProfilerWin->resize(size);
+		settings.value("ctrlProfilerWinIsVisible", false).toBool() ? ShowProfilerControlWin() : void();
+	}
+
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{
@@ -2850,7 +2880,15 @@ void MainWin::WriteUISettings(void)
 	settings.setValue("stdConsoleWinPos", stdConsoleWin->pos());
 	settings.setValue("stdConsoleWinSize", stdConsoleWin->size());
 	settings.setValue("stdConsoleWinStyleSheetColorCheck", stdConsoleWin->StyleSheetColor->checkState());
-	
+
+	// Profiler UI information
+	if (vjs.useProfilers != NOPROFILER)
+	{
+		settings.setValue("ctrlProfilerWinPos", ctrlProfilerWin->pos());
+		settings.setValue("ctrlProfilerWinSize", ctrlProfilerWin->size());
+		settings.setValue("ctrlProfilerWinIsVisible", ctrlProfilerWin->isVisible());
+	}
+
 	// Alpine debug UI information (also needed by the Debugger)
 	if (vjs.hardwareTypeAlpine || vjs.softTypeDebugger)
 	{

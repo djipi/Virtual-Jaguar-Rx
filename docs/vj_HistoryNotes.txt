@@ -35,6 +35,7 @@ Git commit:
 --- Feature to profile memory allocations
 --- 68000 CPU cycles emulation in Tracy profiler timer
 --- Wait for Tracy profiler connection with a cancellable dialog
+--- Profiler control window to include a frame loop
 18) Added lua library support for VS 2022
 19) Added a CMakeLists.txt file for CMake support
 
