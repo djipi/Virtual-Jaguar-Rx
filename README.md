@@ -15,7 +15,7 @@ All in one, please have a look at the documentations to see if VJ-Rx fits your n
 Simply double click on the VJ-Rx icon or type ./virtualjaguar -h from the command line.
 
 ## Documentations
-The docs directory contain documents worth reading.
+#### The docs directory contain documents worth reading.
 * INSTALL describes the build requirements.
 * LICENSE is the same GPLv3 document used by the original VJ, released under the GPL v3 or later.
 * README has been adapted for VJ-Rx and keep the original VJ information as well.
@@ -23,7 +23,7 @@ The docs directory contain documents worth reading.
 * virtualjaguar.1 describes the emulator usage.
 * vj_HistoryNotes.txt contains in-depth descriptions done during the development.
 * WHATSNEW contains the most important changes done for each Release.
-Additional sources of information can be found at.
+#### Additional sources of information can be found at.
 * The Wiki contains mostly technical information related to the emulator.
 * There is a built in help (under Help|Contents) for more information on how to use the emulator.
 
