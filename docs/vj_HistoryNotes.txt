@@ -39,7 +39,7 @@ Git commit:
 18) Added lua library support for VS 2022
 19) Added a CMakeLists.txt file for CMake support
 20) Update the debugger memory window
----  Added key home/end navigation
+---  Added key home/end, and mouse wheel
 
 pre-Release 5b (20th July 2022)
 -------------------------------

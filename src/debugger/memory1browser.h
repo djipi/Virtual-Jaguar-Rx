@@ -25,6 +25,7 @@ class Memory1BrowserWindow: public QWidget
 
 	protected:
 		void keyPressEvent(QKeyEvent *);
+		void wheelEvent(QWheelEvent* e);
 
 	private:
 		QVBoxLayout * layout;

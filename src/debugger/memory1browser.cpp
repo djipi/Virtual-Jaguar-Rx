@@ -9,7 +9,7 @@
 // ---  ----------  -----------------------------------------------------------
 // JPM  08/07/2017  Created this file
 // JPM  March/2022  Added hexadecimal's value with $
-// JPM   Nov./2025  Added key home/end in memory navigation
+// JPM   Nov./2025  Added key home/end, mouse wheel, in memory navigation
 //
 
 // STILL TO DO:
@@ -174,6 +174,30 @@ void Memory1BrowserWindow::keyPressEvent(QKeyEvent * e)
 		// other keys: process normally
 	default:
 		break;
+	}
+}
+
+
+// Handle wheel events
+void Memory1BrowserWindow::wheelEvent(QWheelEvent* e)
+{
+	// scroll down
+	if (e->angleDelta().y() < 0)
+	{
+		if ((memBase += 16) > (vjs.DRAM_size - 480))
+		{
+			memBase = (int)vjs.DRAM_size - 480;
+		}
+		RefreshContentsWindow();
+	}
+	// scroll up
+	else if (e->angleDelta().y() > 0)
+	{
+		if ((memBase -= 16) < 0)
+		{
+			memBase = 0;
+		}
+		RefreshContentsWindow();
 	}
 }
 
