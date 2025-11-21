@@ -40,6 +40,7 @@ Git commit:
 19) Added a CMakeLists.txt file for CMake support
 20) Update the debugger memory window
 ---  Added key home/end, and mouse wheel
+21) Added _Fract fixed-point support for the DWARF variable type detection
 
 pre-Release 5b (20th July 2022)
 -------------------------------

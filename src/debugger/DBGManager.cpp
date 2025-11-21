@@ -18,6 +18,7 @@
 //  RG   Jan./2021  Linux build fixes
 // JPM    May/2021  Code refactoring for the variables
 // JPM   Dec./2024  Fix the get address in case of empty symbol name
+// JPM   Nov./2025  Added _Fract fixed-point support
 //
 
 // To Do
@@ -577,7 +578,7 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 			V.Ct[i] = jaguarMainRAM[Adr + j - 1];
 		}
 #endif
-		switch (TypeEncoding)
+		switch (TypeEncoding & 0xff)
 		{
 		case DBG_ATE_address:
 			break;
@@ -664,6 +665,91 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 			default:
 				break;
 			}
+			break;
+
+			// fixed-point signed
+		case DBG_ATE_signed_fixed:
+			switch (DBGMANAGER_GETALTIUMVALUE(TypeEncoding))
+			{
+				// _Fract types (short _Fract, _Fract, long _Fract, long long _Fract)
+			case DBG_ATE_ALTIUM_fract:
+				switch (TypeByteSize)
+				{
+				case 1:
+					// Q0.7
+					sprintf(value, "%f", (float)V.C / 128.0f);
+					break;
+
+				case 2:
+					// Q0.15
+					sprintf(value, "%f", (float)V.SS / 32768.0f);
+					break;
+
+				case 4:
+					// Q0.31
+					sprintf(value, "%.10lf", (double)V.SI / 2147483648.0);
+					break;
+
+				case 8:
+					// Q0.63
+					sprintf(value, "%.22Lf", (long double)V.SL / (long double)9223372036854775808.0L);
+					break;
+
+				default:
+					break;
+				}
+				(((value[0] != '-') && (value[0] != '0')) || ((value[0] == '-') && (value[1] != '0'))) ? strcpy(value, "#error"), true : false;
+				break;
+
+			case DBG_ATE_ALTIUM_accum:
+				break;
+	
+			default:
+				break;
+			}
+			break;
+
+			// fixed-point unsigned
+		case DBG_ATE_unsigned_fixed:
+			switch (DBGMANAGER_GETALTIUMVALUE(TypeEncoding))
+			{
+				// _Fract types (short _Fract, _Fract, long _Fract, long long _Fract)
+			case DBG_ATE_ALTIUM_fract:
+				switch (TypeByteSize)
+				{
+				case 1:
+					// Q0.8
+					sprintf(value, "%f", (float)((unsigned char)V.C) / 256.0f);
+					break;
+
+				case 2:
+					// Q0.16
+					sprintf(value, "%f", (float)V.US / 65536.0f);
+					break;	
+
+				case 4:
+					// Q0.32
+					sprintf(value, "%.10lf", (double)V.UI / 4294967296.0);
+					break;
+
+				case 8:
+					// Q0.64
+					sprintf(value, "%.22Lf", (long double)V.UL / (long double)18446744073709551616.0L);
+					break;
+
+				default:
+					break;
+				}
+				((value[0] != '0') || (value[0] == '-')) ? strcpy(value, "#error"), true : false;
+				break;
+
+			case DBG_ATE_ALTIUM_accum:
+				break;
+
+			default:
+				break;
+			}
+			break;
 
 		default:
 			break;

@@ -75,6 +75,8 @@ typedef enum {
 	DBG_ATE_unsigned_fixed = 0xe,			/* DWARF3f */
 	DBG_ATE_decimal_float = 0xf,			/* DWARF3f */
 	DBG_ATE_ptr = 0x10,						// Specific to DBG Manager to represent pointer type
+	DBG_ATE_ALTIUM_fract = 0x80,			// ALTIUM __fract type
+	DBG_ATE_ALTIUM_accum = 0x81,			// ALTIUM __accum type
 	DBG_END_TYPEENCODING
 }DBGTYPEENCODING;
 
@@ -254,6 +256,7 @@ typedef struct VariablesStruct
 	size_t TypeByteSize;							// Variable's Type byte size
 	size_t TypeTag;									// Variable's Type Tag
 	size_t TypeEncoding;							// Variable's Type encoding
+	size_t ALTIUM;									// ALTIUM extension to determine fixed-point type (_Fract, and _Accum)
 	char *PtrTypeName;								// Variable's Type name
 	size_t NbTabVariables;							// Number of Variable's members
 	VariablesStruct **TabVariables;					// Variable's Members (used for structures at the moment)
@@ -297,6 +300,7 @@ extern char *DBGManager_GetNumSourceFilename(size_t Index);
 extern size_t DBGManager_GetNbVariables(size_t Adr);
 extern S_VariablesStruct* DBGManager_GetInfosVariable(size_t Adr, size_t Index);
 extern char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t TypeByteSize);
+#define DBGMANAGER_GETALTIUMVALUE(TypeEncoding) ((TypeEncoding & 0xFF00) >> 8)
 
 // Global variables manager
 extern size_t DBGManager_GetGlobalVariableAdrFromName(char *VariableName);
