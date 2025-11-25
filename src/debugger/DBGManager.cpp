@@ -18,7 +18,7 @@
 //  RG   Jan./2021  Linux build fixes
 // JPM    May/2021  Code refactoring for the variables
 // JPM   Dec./2024  Fix the get address in case of empty symbol name
-// JPM   Nov./2025  Added _Fract fixed-point support
+// JPM   Nov./2025  Added _Fract & _Accum fixed-point support
 //
 
 // To Do
@@ -701,7 +701,28 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 				(((value[0] != '-') && (value[0] != '0')) || ((value[0] == '-') && (value[1] != '0'))) ? strcpy(value, "#error"), true : false;
 				break;
 
+				// _Accum types (short _Accum, _Accum, long _Accum)
 			case DBG_ATE_ALTIUM_accum:
+				switch (TypeByteSize)
+				{
+				case 2:
+					// Q8.7
+					(V.SS & 0x8000) ? sprintf(value, "-%d.%03d", (-V.SS >> 7), ((-V.SS & 0x7f) * 1000 + 64) >> 7) : sprintf(value, "%d.%03d", (V.SS >> 7), ((V.SS & 0x7f) * 1000 + 64) >> 7);
+					break;
+
+				case 4:
+					// Q16.15
+					(V.SI & 0x80000000) ? sprintf(value, "-%d.%03d", (-V.SI >> 15), ((-V.SI & 0x7fff) * 1000 + 64) >> 15) : sprintf(value, "%d.%03d", (V.SI >> 15), ((V.SI & 0x7fff) * 1000 + 64) >> 15);
+					break;
+
+				case 8:
+					// Q32.31
+					(V.SL & 0x8000000000000000) ? sprintf(value, "-%lld.%03lld", (-V.SL >> 31), ((-V.SL & 0x7fffffff) * 1000 + 64) >> 31) : sprintf(value, "%lld.%03lld", (V.SL >> 31), ((V.SL & 0x7fffffff) * 1000 + 64) >> 31);
+					break;
+
+				default:
+					break;
+				}
 				break;
 	
 			default:
@@ -743,7 +764,28 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 				((value[0] != '0') || (value[0] == '-')) ? strcpy(value, "#error"), true : false;
 				break;
 
+				// _Accum types (short _Accum, _Accum, long _Accum)
 			case DBG_ATE_ALTIUM_accum:
+				switch (TypeByteSize)
+				{
+				case 2:
+					// Q8.8
+					sprintf(value, "%d.%03d", (V.US >> 8), ((V.US & 0xFF) * 1000 + 64) >> 8);
+					break;
+
+				case 4:
+					// Q16.16
+					sprintf(value, "%d.%03d", (V.UI >> 16), ((V.UI & 0xffff) * 1000 + 64) >> 16);
+					break;
+
+				case 8:
+					// Q32.32
+					sprintf(value, "%lld.%03lld", (V.UL >> 32), ((V.UL & 0xffffffff) * 1000 + 64) >> 32);
+					break;
+
+				default:
+					break;
+				}
 				break;
 
 			default:
