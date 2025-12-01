@@ -304,7 +304,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Qt5::Widgets
     Qt5::Gui
     Qt5::OpenGL
-    ${SDL2_LIBRARIES}
+    SDL2::SDL2
     ${OPENGL_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${LUA_LIBRARIES}

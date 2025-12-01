@@ -53,6 +53,9 @@
 //
 // SFDX CODE: S1E9T8H5M23YS
 
+// Fix compilation warning: 'main' redefined
+#define SDL_MAIN_HANDLED
+
 // Uncomment this for debugging...
 //#define DEBUG
 //#define DEBUGFOO			// Various tool debugging... but not used
@@ -534,7 +537,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	// Memory browser window action
 	memBrowseAct[0] = new QAction(QIcon(":/res/tool-memory.png"), tr("Memory Browser"), this);
 	memBrowseAct[0]->setStatusTip(tr("Shows the Jaguar memory browser window"));
-	// DSP memory browwer window action
+	// DSP memory browser window action
 	memBrowseAct[1] = new QAction(QIcon(":/res/tool-dsp-ram.png"), tr("DSP Memory Browser"), this);
 	memBrowseAct[1]->setStatusTip(tr("Shows the Jaguar DSP memory browser window"));
 	// GPU memory browser window action
@@ -2107,10 +2110,10 @@ void MainWin::SetFullScreen(bool state/*= true*/)
 
 			// This is needed because the fullscreen may happen on a different
 			// screen than screen 0:
-			int screenNum = QApplication::desktop()->screenNumber(videoWidget);
-			QRect r = QApplication::desktop()->screenGeometry(screenNum);
-			double targetWidth = (double)VIRTUAL_SCREEN_WIDTH,
-				targetHeight = (double)(vjs.hardwareTypeNTSC ? VIRTUAL_SCREEN_HEIGHT_NTSC : VIRTUAL_SCREEN_HEIGHT_PAL);
+			QScreen *screen = QGuiApplication::screenAt(videoWidget->mapToGlobal(QPoint(0,0)));
+			QRect r = screen ? screen->geometry() : QGuiApplication::primaryScreen()->geometry();
+			double targetWidth = (double)VIRTUAL_SCREEN_WIDTH;
+			double targetHeight = (double)(vjs.hardwareTypeNTSC ? VIRTUAL_SCREEN_HEIGHT_NTSC : VIRTUAL_SCREEN_HEIGHT_PAL);
 			double aspectRatio = targetWidth / targetHeight;
 			// NOTE: Really should check here to see which dimension constrains the
 			//       other. Right now, we assume that height is the constraint.
@@ -2208,7 +2211,7 @@ void MainWin::ShowROMCartBrowserWin(void)
 
 // Show the memory (M68K DRAM, GPU & DSP) browser window
 // This debug only window comes from user request
-void MainWin::ShowMemoryBrowserWin(int NumWin)
+void MainWin::ShowMemoryBrowserWin(const int NumWin)
 {
 	memBrowseWin[NumWin]->show();
 	memBrowseWin[NumWin]->RefreshContents();
@@ -2699,7 +2702,7 @@ void MainWin::ReadUISettings(void)
 		settings.value("BreakpointsWinIsVisible", false).toBool() ? ShowBreakpointsWin() : void();
 		size = settings.value("BreakpointsWinSize", QSize(400, 400)).toSize();
 		BreakpointsWin->resize(size);
-		// New function breakpoint UI information
+		// New function break point UI information
 		pos = settings.value("NewFunctionBreakpointWinPos", QPoint(200, 200)).toPoint();
 		NewFunctionBreakpointWin->move(pos);
 		settings.value("NewFunctionBreakpointWinIsVisible", false).toBool() ? ShowNewFunctionBreakpointWin() : void();

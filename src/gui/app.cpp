@@ -20,8 +20,11 @@
 // JPM   Oct./2018  Added the Rx version's contact in the help text, added timer initialisation in the SDL_Init
 // JPM   Apr./2019  Fixed a command line option duplication
 // JPM   Jan./2024  Added the missing timer for the Quit Sub System
-// JPM        2025  Added profiler option (--profilers, --profiler-tracy), lua library, and profiler initialization
+// JPM        2025  Added profiler options, lua library, and profiler initialization
 //
+
+// Fix compilation warning: 'main' redefined
+#define SDL_MAIN_HANDLED
 
 #include "app.h"
 #include "SDL.h"
@@ -66,7 +69,7 @@ int main(int argc, char * argv[])
 #if defined (__GCCWIN32__) || defined (_MSC_VER)
 	BOOL(WINAPI * AttachConsole)(DWORD dwProcessId);
 
-	AttachConsole = (BOOL (WINAPI *)(DWORD))GetProcAddress(LoadLibraryA("kernel32.dll"), "AttachConsole");
+	AttachConsole = (BOOL (WINAPI *)(DWORD))(void*)GetProcAddress(LoadLibraryA("kernel32.dll"), "AttachConsole");
 
 	if ((AttachConsole != NULL) && AttachConsole(((DWORD)-1)))
 	{

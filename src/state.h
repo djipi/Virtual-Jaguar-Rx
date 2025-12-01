@@ -48,7 +48,7 @@ inline uint64_t htonll(uint64_t value)
 
 extern size_t DumpSaveState(void);
 extern size_t LoadSaveState(void);
-extern size_t CanTryToLoadSaveState(void);
+extern int CanTryToLoadSaveState(void);
 
 #define DUMP(_x) do { if (fwrite(&_x, sizeof(_x), 1, fp) != 1) { /* WriteLog("SaveState DUMP error at %s:%d\n", __FILE__, __LINE__); */ return -1; } total_dumped += sizeof(_x); } while (0)
 #define DUMPBYTES(_x, _len) do { int _r; _r = fwrite(_x, 1, _len, fp); if (_r != _len) { /* WriteLog("SaveState DUMP error at %s:%d: expected %d got %d\n", __FILE__, __LINE__, _len, _r); */ return -1; } total_dumped += _len; } while (0)

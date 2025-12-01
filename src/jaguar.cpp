@@ -1116,7 +1116,7 @@ void	M68K_Debughalt(void)
 #endif
 
 
-// M68000 breakpoints initialisations
+// M68000 breakpoints initializations
 void m68k_brk_init(void)
 {
 	brkNbr = 0;
@@ -1493,15 +1493,14 @@ unsigned int m68k_read_memory_16(unsigned int address)
 
 
 // Alert message in case of exception vector request
-bool m68k_read_exception_vector(unsigned int address, char *text)
+bool m68k_read_exception_vector(unsigned int address, const char *text)
 {
-	QString msg;
 	QMessageBox msgBox;
 
 #if 0
 	msg.sprintf("68000 exception\n%s at $%06x", text, pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF]);
 #else
-	msg.sprintf("68000 exception\n$%06x: %s", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], text);
+	QString msg = QString::asprintf("68000 exception\n$%06x: %s", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], text);
 #endif
 	msgBox.setText(msg);
 	msgBox.setStandardButtons(QMessageBox::Abort);
@@ -1595,14 +1594,13 @@ unsigned int m68k_read_memory_32(unsigned int address)
 
 
 // Alert message in case of writing to unknown memory location
-bool m68k_write_unknown_alert(unsigned int address, char *bits, unsigned int value)
+bool m68k_write_unknown_alert(unsigned int address, const char *bits, unsigned int value)
 {
 	if (!M68KDebugHaltStatus())
 	{
-		QString msg;
 		QMessageBox msgBox;
 
-		msg.sprintf("$%06x: Writing at this unknown memory location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
+		QString msg = QString::asprintf("$%06x: Writing at this unknown memory location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
 		msgBox.setText(msg);
 		msgBox.setStandardButtons(QMessageBox::Abort);
 		msgBox.setDefaultButton(QMessageBox::Abort);
@@ -1617,14 +1615,13 @@ bool m68k_write_unknown_alert(unsigned int address, char *bits, unsigned int val
 
 
 // Alert message in case of writing to cartridge/ROM memory location
-bool m68k_write_cartridge_alert(unsigned int address, char *bits, unsigned int value)
+bool m68k_write_cartridge_alert(unsigned int address, const char *bits, unsigned int value)
 {
 	if (!M68KDebugHaltStatus())
 	{
-		QString msg;
 		QMessageBox msgBox;
 
-		msg.sprintf("$%06x: Writing at this ROM cartridge location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
+		QString msg = QString::asprintf("$%06x: Writing at this ROM cartridge location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
 		msgBox.setText(msg);
 
 		msgBox.setInformativeText("Do you want to continue?");
@@ -1632,7 +1629,6 @@ bool m68k_write_cartridge_alert(unsigned int address, char *bits, unsigned int v
 		msgBox.setDefaultButton(QMessageBox::No);
 
 		int retVal = msgBox.exec();
-
 		if (retVal == QMessageBox::Yes)
 		{
 			return false;
@@ -1651,7 +1647,7 @@ bool m68k_write_cartridge_alert(unsigned int address, char *bits, unsigned int v
 
 // Check memory write location
 // BPM & cartridge/ROM detections
-bool m68k_write_memory_check(unsigned int address, char *bits, unsigned int value)
+bool m68k_write_memory_check(unsigned int address, const char *bits, unsigned int value)
 {
 	unsigned int address1;
 
