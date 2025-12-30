@@ -120,6 +120,7 @@ class MainWin: public QMainWindow
 		void MakeScreenshot(void);
 		// Profiler
 		void ToggleTracyProfiler(bool checked);
+		void ToggleVJRxProfiler(bool checked);
 		void ShowProfilerControlWin(void);
 		// Debugger
 		void DebuggerTraceStepOver(void);
@@ -322,6 +323,7 @@ class MainWin: public QMainWindow
 
 		// Profiler
 		QAction* tracyAct;
+		QAction* vjrxAct;
 
 		QIcon powerGreen;
 		QIcon powerRed;

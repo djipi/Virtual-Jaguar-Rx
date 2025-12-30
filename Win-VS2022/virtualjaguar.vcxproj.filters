@@ -529,6 +529,18 @@
     <ClCompile Include="GeneratedFiles\Release\moc_ctrlprofilerwin.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\profiler\vjrxprofilerwin.cpp">
+      <Filter>Source Files\profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\profiler\vjrxprofiler.cpp">
+      <Filter>Source Files\profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_vjrxprofilerwin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_vjrxprofilerwin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\debugger\DWARFManager.h">
@@ -592,6 +604,9 @@
       <Filter>Header Files\profiler</Filter>
     </ClInclude>
     <ClInclude Include="..\src\profiler\dummyprofiler.h">
+      <Filter>Header Files\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\profiler\vjrxprofiler.h">
       <Filter>Header Files\profiler</Filter>
     </ClInclude>
   </ItemGroup>
@@ -880,6 +895,9 @@
       <Filter>Header Files\gui</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\profiler\ctrlprofilerwin.h">
+      <Filter>Header Files\profiler</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\profiler\vjrxprofilerwin.h">
       <Filter>Header Files\profiler</Filter>
     </CustomBuild>
   </ItemGroup>

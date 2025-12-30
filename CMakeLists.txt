@@ -104,6 +104,10 @@ set(PROFILER_SOURCES
     src/profiler/ctrlprofilerwin.cpp
     src/profiler/baseprofiler.h
     src/profiler/dummyprofiler.h
+	src/profiler/vjrxprofiler.cpp
+	src/profiler/vjrxprofiler.h
+	src/profiler/vjrxprofilerwin.cpp
+	src/profiler/vjrxprofilerwin.h
 )
 # Optional profiler sources for the Tracy profiler
 if(TRACY_ENABLE)

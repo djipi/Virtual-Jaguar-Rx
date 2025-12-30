@@ -4,7 +4,7 @@
 // This is the main profiler interface for Virtual Jaguar Rx, providing an unified API for performance analysis and profiling capabilities.
 //
 // Features:
-// - Multiple profiler backend support
+// - Multiple profiler back-end support
 // - M68000 CPU profiling with function entry/exit tracking
 // - Lua scripting integration for custom profiling workflows
 // - Configurable pause/resume and reset capabilities
@@ -28,7 +28,7 @@ extern "C" {
 #include "lualib.h"
 }
 
-// Frame loop struture
+// Frame loop structure
 typedef struct FrameLoopInfo
 {
 	bool Used;				// Allocated frame loop
@@ -42,7 +42,7 @@ typedef struct FrameLoopInfo
 } S_FrameLoopInfo;
 
 // Profiler types list (must be binary based)
-typedef enum {	NOPROFILER = 0x0, VJPROFILER = 0x1, TRACYPROFILER = 0x2	} ProfilerType_t;
+typedef enum {	NOPROFILER = 0x0, VJRXPROFILER = 0x1, TRACYPROFILER = 0x2	} ProfilerType_t;
 
 // Profiler generic functions
 extern void Profiler_Init(uint32_t type, lua_State* LuaLib);

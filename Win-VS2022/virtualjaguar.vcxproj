@@ -189,6 +189,8 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="..\src\profiler\vjrxprofiler.cpp" />
+    <ClCompile Include="..\src\profiler\vjrxprofilerwin.cpp" />
     <ClCompile Include="..\src\settings.cpp" />
     <ClCompile Include="..\src\unzip.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_allwatchbrowser.cpp">
@@ -265,11 +267,9 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_hwregsbrowser.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_keybindingstab.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_keygrabber.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -361,6 +361,9 @@
     <ClCompile Include="..\src\gui\debug\opbrowser.cpp" />
     <ClCompile Include="..\src\gui\profile.cpp" />
     <ClCompile Include="..\src\gui\debug\riscdasmbrowser.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_vjrxprofilerwin.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_virtualjaguar.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </PrecompiledHeader>
@@ -444,7 +447,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_keybindingstab.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_keygrabber.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -500,6 +502,9 @@
     <ClCompile Include="GeneratedFiles\Release\moc_VideoWin.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_vjrxprofilerwin.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\profiler\baseprofiler.h" />
@@ -514,6 +519,17 @@
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
     </CustomBuild>
     <ClInclude Include="..\src\profiler\dummyprofiler.h" />
+    <ClInclude Include="..\src\profiler\vjrxprofiler.h" />
+    <CustomBuild Include="..\src\profiler\vjrxprofilerwin.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_LIB -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions)  "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-20210528-VS2017\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-IC:\SDK\OpenGL\include" "-I.\GeneratedFiles"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_LIB -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions)  "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-20210528-VS2017\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-IC:\SDK\OpenGL\include" "-I.\GeneratedFiles"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+    </CustomBuild>
     <ClInclude Include="TracyProfiler.hpp" />
     <CustomBuild Include="..\src\debugger\BreakpointsWin.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>

@@ -33,7 +33,7 @@
 // JPM    May/2021  Check missing dll for the tests pattern
 // JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser, added and slightly modified the save state patch from PvtLewis
 // JPM        2024  Use setting for the emulation framerate display, added a Console standard emulation window
-// JPM        2025  Feature to turn on/off the profiler, profiler control window, and conditional compilation for the Tracy profiler support
+// JPM        2025  Feature to turn on/off the profiler, profiler control window, and conditional compilation for the VJRx and Tracy profiler support
 //
 
 // FIXED:
@@ -416,7 +416,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	fullScreenAct->setCheckable(true);
 	connect(fullScreenAct, SIGNAL(triggered()), this, SLOT(ToggleFullScreen()));
 
-	// Actions dedicated to the profiler
+	// Actions dedicated to the Tracy profiler
 	if (vjs.useProfilers & TRACYPROFILER)
 	{
 		// Tracy profiler
@@ -428,6 +428,20 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		tracyAct->setCheckable(true);
 		tracyAct->setDisabled(false);
 		connect(tracyAct, &QAction::toggled, this, &MainWin::ToggleTracyProfiler);
+	}
+
+	// Actions dedicated to the VJRx profiler
+	if (vjs.useProfilers & VJRXPROFILER)
+	{
+		// VJRx profiler
+		QIcon vjrxIcon;
+		vjrxIcon.addFile(":/res/profiler-vjrx-off.png", QSize(), QIcon::Normal, QIcon::Off);
+		vjrxIcon.addFile(":/res/profiler-vjrx-on.png", QSize(), QIcon::Normal, QIcon::On);
+		vjrxAct = new QAction(QIcon(vjrxIcon), tr("&VJRx Profiler"), this);
+		vjrxAct->setStatusTip(tr("VJRx profiler feed on/off"));
+		vjrxAct->setCheckable(true);
+		vjrxAct->setDisabled(false);
+		connect(vjrxAct, &QAction::toggled, this, &MainWin::ToggleVJRxProfiler);
 	}
 
 	// Actions dedicated to debugger mode
@@ -868,6 +882,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	{
 		profilerbar = addToolBar(tr("&Profilers"));
 		(vjs.useProfilers & TRACYPROFILER) ? profilerbar->addAction(tracyAct), true : false;
+		(vjs.useProfilers & VJRXPROFILER) ? profilerbar->addAction(vjrxAct), true : false;
 	}
 
 	// Add actions to the main window, as hiding widgets with them
@@ -1592,6 +1607,14 @@ void MainWin::SetPAL(void)
 void MainWin::ToggleTracyProfiler(bool checked)
 {
 	typeProfiler_Pause(checked, TRACYPROFILER);
+}
+
+
+// Toggle the VJRx profiler's status
+// checked: true = unpause, false = pause
+void MainWin::ToggleVJRxProfiler(bool checked)
+{
+	typeProfiler_Pause(checked, VJRXPROFILER);
 }
 
 

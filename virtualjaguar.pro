@@ -138,6 +138,8 @@ HEADERS = \
 	src/debugger/CartFilesListWin.h \
 	src/debugger/SaveDumpAsWin.h \
 	src/profiler/ctrlprofilerwin.h \
+	src/profiler/vjrxprofilerwin.h \
+	src/profiler/vjrxprofiler.h \
 	src/log.h \
 	src/unzip.h \
 	src/crc32.h \
@@ -201,6 +203,8 @@ SOURCES = \
 	src/debugger/CartFilesListWin.cpp \
 	src/debugger/SaveDumpAsWin.cpp \
 	src/profiler/ctrlprofilerwin.cpp \
+	src/profiler/vjrxprofilerwin.cpp \
+	src/profiler/vjrxprofiler.cpp \
 	src/log.cpp \
 	src/unzip.cpp \
 	src/crc32.cpp \
