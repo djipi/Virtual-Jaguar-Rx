@@ -28,8 +28,8 @@ Git commit:
 14) Project switch to VS2022
 15) Added exception catch (Zero divide)
 16) Fix debugger for the get address in case of empty symbol name
-17) Added profiling feature for the 68000
---- Tracy profiler integration support
+17) Added profiling features for the 68000
+--- VJRx & Tracy profilers integration support
 --- Application option to enable/disable the profilers
 --- Feature to turn on/off the Tracy profiler on demand
 --- Feature to profile memory allocations
@@ -41,6 +41,9 @@ Git commit:
 20) Update the debugger memory window
 ---  Added key home/end, and mouse wheel
 21) Added _Fract & _Accum fixed-point support for the DWARF variable type detection
+22) Added application option to allow high-DPI displays support
+23) Removed the Easter egg --yarrr option
+23) Documentation & content texts updates
 
 pre-Release 5b (20th July 2022)
 -------------------------------
@@ -369,8 +372,7 @@ Cosmetic / UX issues
 
 Legacy issues/hints
 ===================
-1) Emulator seems to have easter egg(s)
--- The option --yarrr displays a single message and end the application
+1) Emulator seems to have Easter egg(s)
 -- Pressing F8, while in the main window, will create an extra message in the log file
 2) The --alpine option force the log file but it can be override if --no-log option is set after the --alpine option
 

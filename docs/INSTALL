@@ -88,10 +88,10 @@ NOTES FOR COMPILING UNDER VISUAL STUDIO 2022:
 ---------------------------------------------
 
 Win-VS2022 sub-directory contains the project and solution file.
-You may have to adapt such files to handle your own development environement,
-usualy to put the right include and library paths will be enough assuming you have all the requirements properly set.
+You may have to adapt such files to handle your own development environment,
+usually to put the right include and library paths will be enough assuming you have all the requirements properly set.
 
 For convenience, the .env file list the Windows environment variables used by the project.
 
-Assuming all went well, you will have either Debug or Release executables.
+Assuming all went well, you will have either Debug or Release executable.
 You will also need the necessary DLLs in the executable directory.
