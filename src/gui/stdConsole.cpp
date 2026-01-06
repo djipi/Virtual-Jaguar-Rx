@@ -5,12 +5,13 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When (mm/dd/yy)  What
-// ---  ---------------  -----------------------------------------------------------
-// JPM  07/11/2024       Created this file
-// JPM  09/22/2024       Text output color detection, amber style sheet color mode
-// JPM  10/07/2024       Fix output color encoding
-// JPM  10/25/2025       Clear window content
+// Who  When (m/d/y)  What
+// ---  ------------  -----------------------------------------------------------
+// JPM  07/11/2024    Created this file
+// JPM  09/22/2024    Text output color detection, amber style sheet color mode
+// JPM  10/07/2024    Fix output color encoding
+// JPM  10/25/2025    Clear window content
+// JPM  01/04/2026    Smoother bar scrolling
 //
 
 // STILL TO DO:
@@ -20,9 +21,10 @@
 #include "stdConsole.h"
 #include "jaguar.h"
 #include "debugger/DBGManager.h"
+#include <QtWidgets/QScrollBar>
 
 
-//
+// Constructor
 stdConsoleWindow::stdConsoleWindow(QWidget * parent/*= 0*/) : QWidget(parent, Qt::Dialog),
 layout(new QVBoxLayout),
 controlLayout(new QHBoxLayout),
@@ -32,7 +34,7 @@ ClearButton(new QPushButton("Clear")),
 colorcommand(0),
 colorindex(0)
 {
-	// window initialisation
+	// window initialization
 	setWindowTitle(tr("Console standard emulation"));
 	QFont fixedFont("Lucida Console", 8, QFont::Normal);
 	fixedFont.setStyleHint(QFont::TypeWriter);
@@ -58,6 +60,7 @@ colorindex(0)
 }
 
 
+// Destructor
 stdConsoleWindow::~stdConsoleWindow(void)
 {
 }
@@ -107,6 +110,8 @@ void stdConsoleWindow::Reset(void)
 // Update / Display the window contents
 void stdConsoleWindow::RefreshContents(void)
 {
+	QString str = "";
+
 	// update the content from the Console standard emulation's stdout
 	if (stdConsoleInfo[STDCONSOLE_STDOUT].BufText[0])
 	{
@@ -122,7 +127,7 @@ void stdConsoleWindow::RefreshContents(void)
 				char c = 0;
 				while ((c != 'm') && (c = stdConsoleInfo[STDCONSOLE_STDOUT].BufText[index]) && index++)
 				{
-					(c != 'm') ? (colorcode[colorindex++] = c) : (colorcommand = false);	// x;yym
+					(c != 'm') ? (colorcode[colorindex++] = c) : (colorcommand = false);
 				}
 				// use color encoding in normal mode
 				if ((c == 'm') && !StyleSheetColor->checkState())
@@ -133,23 +138,52 @@ void stdConsoleWindow::RefreshContents(void)
 			else
 			{
 				// save the text to the window's string
-				stdoutDump += stdConsoleInfo[STDCONSOLE_STDOUT].BufText[index++];
+				char c = stdConsoleInfo[STDCONSOLE_STDOUT].BufText[index++];
+				stdoutDump += c;
+				str += c;
 			}
 		}
 		// erase the content from the Console standard emulation's stdout
 		memset(stdConsoleInfo[STDCONSOLE_STDOUT].BufText, 0, sizeof(stdConsoleInfo[STDCONSOLE_STDOUT].BufText));
 	}
 
-	// display content
+	// manage scroll bar position
+	QScrollBar * sb = text->verticalScrollBar();
+	bool atBottom = (sb->value() == sb->maximum());
+	int savedValue = sb->value();
+
+	// first time fill and move to the end
+	if (text->document()->isEmpty() && !stdoutDump.isEmpty())
+	{
+		text->setText(stdoutDump);
+		text->moveCursor(QTextCursor::End);
+	}
+	else
+	{
+		// move to the end and append new text
+		if (!str.isEmpty())
+		{
+			text->moveCursor(QTextCursor::End);
+			text->insertPlainText(str);
+		}
+	}
+
+	// restore scroll bar position
 	if (isVisible())
 	{
-		text->clear();
-		text->setText(stdoutDump);
+		if (atBottom)
+		{
+			sb->setValue(sb->maximum());
+		}
+		else
+		{
+			sb->setValue(savedValue);
+		}
 	}
 }
 
 
-//
+// Handle key press event
 void stdConsoleWindow::keyPressEvent(QKeyEvent * e)
 {
 	if (e->key() == Qt::Key_Escape)
@@ -157,4 +191,3 @@ void stdConsoleWindow::keyPressEvent(QKeyEvent * e)
 		hide();
 	}
 }
-
