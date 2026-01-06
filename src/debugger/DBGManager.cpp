@@ -19,6 +19,7 @@
 // JPM    May/2021  Code refactoring for the variables
 // JPM   Dec./2024  Fix the get address in case of empty symbol name
 // JPM   Nov./2025  Added _Fract & _Accum fixed-point support
+// JPM   Jan./2026  Added char type for the variable
 //
 
 // To Do
@@ -117,7 +118,7 @@ void DBGManager_SourceFileSearchPathsSet(char *ListPaths)
 			char *Ptr1 = Ptr;
 			while (*Ptr && (*Ptr++ != ';'));
 
-			// Copy the inidividual search path
+			// Copy the individual search path
 			SourceFileSearchPaths[i] = (char *)calloc(1, (Ptr - Ptr1) + 1);
 			strncpy(SourceFileSearchPaths[i], Ptr1, (Ptr - Ptr1));
 			if (SourceFileSearchPaths[i][strlen(SourceFileSearchPaths[i]) - 1] == ';')
@@ -154,16 +155,16 @@ void DBGManager_SourceFileSearchPathsClose(void)
 }
 
 
-// Common debugger initialisation
+// Common debugger initialization
 void DBGManager_Init(void)
 {
-	// DBG initialisations
+	// DBG initializations
 	DBGType = DBG_NO_TYPE;
 	DBGManager_SourceFileSearchPathsInit();
 
-	// ELF initialisation 
+	// ELF initialization 
 	ELFManager_Init();
-	// DWARF initialisation
+	// DWARF initialization
 	DWARFManager_Init();
 }
 
@@ -218,7 +219,7 @@ size_t DBGManager_GetType(void)
 }
 
 
-// Get source filename based on the memeory address
+// Get source filename based on the memory address
 // return NULL if no source filename
 char *DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, DBGstatus *Status)
 {
@@ -234,7 +235,7 @@ char *DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, DBGstatus *Status)
 
 
 // Get number of variables
-// A NULL address will return the numbre of global variables, otherwise it will return the number of local variables
+// A NULL address will return the number of global variables, otherwise it will return the number of local variables
 size_t DBGManager_GetNbVariables(size_t Adr)
 {
 	if ((DBGType & DBG_ELFDWARF))
@@ -469,7 +470,7 @@ size_t DBGManager_GetGlobalVariableTypeEncoding(size_t Index)
 
 // Get global variable value based on his Index
 // Return value as a text pointer
-// Note: Pointer may point on a 0 lenght text
+// Note: Pointer may point on a 0 length text
 char *DBGManager_GetGlobalVariableValue(size_t Index)
 {
 	size_t Adr = 0;
@@ -552,7 +553,7 @@ char *DBGManager_GetGlobalVariableName(size_t Index)
 #endif
 
 
-// Get variable value based on his Adresse, Encoding Type and Size
+// Get variable value based on his Address, Encoding Type and Size
 // Return value as a text pointer
 // Note: Pointer may point on a 0 length text
 char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t TypeByteSize)
@@ -629,6 +630,7 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 			break;
 
 		case DBG_ATE_signed_char:
+			sprintf(value, "%i", (int)V.C);
 			break;
 
 		case DBG_ATE_unsigned:
@@ -652,7 +654,7 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 			break;
 
 		case DBG_ATE_unsigned_char:
-			sprintf(value, "%u", (unsigned int) V.C);
+			sprintf(value, "%u", (unsigned int)V.C);
 			break;
 
 		case DBG_ATE_ptr:
