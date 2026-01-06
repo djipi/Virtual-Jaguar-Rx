@@ -155,6 +155,9 @@ void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles, 
 	// check the profiler usage to avoid unnecessary profiling overhead
 	if (vjs.useProfilers)
 	{
+		short int pcrelw;
+		int An;
+
 		// update the current profiling entry
 		m68kProfilerEntryUpdate(m68kPC, cycles, m68KSP);
 
@@ -162,18 +165,24 @@ void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles, 
 		switch (m68kOpcode)
 		{
 		case 0x4e75:
-			// RTS
+			// rts
 			m68kProfilerEntryDown(m68kPC, m68KD0);
 			break;
 
 		case 0x4eb8:
-			// JSR for word address
+			// jsr for word address
 			m68kProfilerEntryUp(GET16(jagMemSpace, m68kPC + 2), m68KSP);
 			break;
 
 		case 0x4eb9:
-			// JSR for long address
+			// jsr for long address
 			m68kProfilerEntryUp(GET32(jagMemSpace, m68kPC + 2), m68KSP);
+			break;
+
+		case 0x4eba:
+			// jsr for PC-Relative (signed word) address [i.e: JSR.L (PC, $xxxx)]
+			pcrelw = GET16(jagMemSpace, m68kPC + 2);
+			m68kProfilerEntryUp(m68kPC + (int)pcrelw + 2, m68KSP);
 			break;
 
 		case 0x6100:
@@ -189,10 +198,19 @@ void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles, 
 			}
 			else
 			{
-				// jsr modes
-				if ((m68kOpcode >= 0x4e90) && (m68kOpcode <= 0x4ebb))
+				// jsr (an)
+				if ((m68kOpcode >= 0x4e90) && (m68kOpcode <= 0x4e97))
 				{
-					m68kProfilerEntryUp(-1, m68KSP);
+					An = (m68kOpcode & 0x0007);
+					m68kProfilerEntryUp(m68k_get_reg(NULL, m68k_register_t(M68K_REG_A0 + An)), m68KSP);
+				}
+				else
+				{
+					// jsr modes
+					if ((m68kOpcode >= 0x4e98) && (m68kOpcode <= 0x4ebb))
+					{
+						m68kProfilerEntryUp(-1, m68KSP);
+					}
 				}
 			}
 			break;
