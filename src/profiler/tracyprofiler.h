@@ -18,7 +18,7 @@
 //
 // Who  When (mm/dd/yy)  What
 // ---  ---------------  -----------------------------------------------------------
-// JPM   Nov./2025       Created this file
+// JPM  Nov./2025        Created this file
 //
 
 #if !defined(__TRACYPROFILER_H__) && defined(TRACY_ENABLE)
@@ -33,17 +33,22 @@ class TracyProfiler : public baseProfiler
 {
 public:
 	TracyProfiler(void);
+	~TracyProfiler(void);
+	//
 	bool Start(void) override;
 	void InitLua(lua_State* LuaLib) override;
 	void Timer(bool onoff, bool newvalue) override;
 	void Pause(bool pause) override;
-	void RAZIndex(void* index) override;
-	void M68Kenter(void* zoneCtx, char* functionName, char* filename, size_t linenumber, size_t startCycle) override;
-	bool M68Kactive(void* zoneCtx) override;
-	void M68Kleave(void* zoneCtx, size_t usedCycles) override;
-	void M68Kmalloc(void* zoneCtx, size_t ptr, size_t size, int depth) override;
-	void M68Kfree(void* zoneCtx, size_t ptr, bool flush) override;
-	~TracyProfiler(void);
+	void RAZIndex(void* zoneCtx) { *(TracyCZoneCtx*)zoneCtx = { 0 }; }
+	// Profiler 68000 functions
+	void M68Kenter(void* zoneCtx, char* functionName, char* filename, size_t linenumber, size_t startCycle);
+	bool M68Kactive(void* zoneCtx);
+	void M68Kleave(void* zoneCtx, size_t usedCycles);
+	void M68Kmalloc(void* zoneCtx, size_t ptr, size_t size, int depth);
+	void M68Kfree(void* zoneCtx, size_t ptr, bool flush);
+	void M68Krecord(void*, char*, size_t, size_t, size_t) override {};
+	void M68KFrameStart(size_t frameNumber);
+	void M68KFrameEnd(size_t frameNumber);
 
 private:
 	char* IntegerToStringWithCommas(char* out, size_t len, size_t value);
@@ -51,6 +56,7 @@ private:
 
 private:
 	bool tracyPaused;
+	bool TracyCancel;
 };
 
 #endif

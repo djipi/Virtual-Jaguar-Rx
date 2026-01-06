@@ -20,6 +20,7 @@
 #include "profiler/baseprofiler.h"
 #include "profiler/dummyprofiler.h"
 #include "profiler/tracyprofiler.h"
+#include "profiler/vjrxprofiler.h"
 #include "memory.h"
 
 
@@ -27,7 +28,7 @@
 #define M68K_PROFILER_MAX_ENTRIES	200000
 
 // Profiler type index
-typedef enum { VJPROFILER_IDX, TRACYPROFILER_IDX } ProfilerIdx_t;
+typedef enum { VJRXPROFILER_IDX, TRACYPROFILER_IDX } ProfilerIdx_t;
 #define COUNT_PROFILERS	2
 
 
@@ -35,17 +36,13 @@ typedef enum { VJPROFILER_IDX, TRACYPROFILER_IDX } ProfilerIdx_t;
 // Structure must contains at least id, and active fields
 union Ctx_s {
 #ifdef TRACY_ENABLE
-	TracyCZoneCtx ctx;
-#else
-	struct TracyCZoneCtx {
-		uint32_t id;
-		bool active;
-	};
+	TracyCZoneCtx TracyCtx;
 #endif
+	VJRxZoneCtx VJRxCtx;
 };
 
 
-// Structure to hold name's address in ascci format
+// Structure to hold name's address in ASCII format
 struct ProfilerNameEntry_s {
 	size_t PCAdr;
 	char Name[256];
@@ -60,6 +57,7 @@ struct ProfilerRecordEntry_s {
 	size_t callCount;
 	size_t minCycles;
 	size_t maxCycles;
+	Ctx_s Ctx[COUNT_PROFILERS];
 };
 
 // Structure to hold current profiling information
@@ -72,14 +70,14 @@ struct ProfilerCurrentEntry_s {
 	size_t currentCycles;
 	size_t startCycles;
 	size_t endCycles;
-	Ctx_s tracyCtx;
+	Ctx_s Ctx[COUNT_PROFILERS];
 };
 
 // Structure to hold memory profiling information
 struct ProfilerMemoryRecord_s {
-	Ctx_s tracyCtx;
 	size_t ptr;
 	size_t size;
+	Ctx_s Ctx[COUNT_PROFILERS];
 };
 
 
@@ -113,7 +111,7 @@ void Profiler_Flush(void);
 void Profiler_Init(uint32_t type, lua_State* LuaLib)
 {
 	// VJ profiler setup
-	(type & VJPROFILER) ? BaseProfilers[VJPROFILER_IDX] = new DummyProfiler() : BaseProfilers[VJPROFILER_IDX] = new DummyProfiler();
+	(type & VJRXPROFILER) ? BaseProfilers[VJRXPROFILER_IDX] = new VJRxProfiler() : BaseProfilers[VJRXPROFILER_IDX] = new DummyProfiler();
 	// Tracy profiler setup
 #ifdef TRACY_ENABLE
 	(type & TRACYPROFILER) ? BaseProfilers[TRACYPROFILER_IDX] = new TracyProfiler() : BaseProfilers[TRACYPROFILER_IDX] = new DummyProfiler();
@@ -160,13 +158,17 @@ void Profiler_Pause(bool onoff)
 
 
 // Toggle on/off the profiler type
-// pause: true = unpause, false = pause
+// pause: true = resume, false = pause
 void typeProfiler_Pause(bool pause, ProfilerType_t mode)
 {
 	switch (mode)
 	{
 	case TRACYPROFILER:
 		BaseProfilers[TRACYPROFILER_IDX]->Pause(pause);
+		break;
+
+	case VJRXPROFILER:
+		BaseProfilers[VJRXPROFILER_IDX]->Pause(pause);
 		break;
 
 	default:
@@ -204,6 +206,10 @@ void Profiler_ClearRecord(void)
 		m68kProfilerTableRecord[i].callCount = 0;
 		m68kProfilerTableRecord[i].minCycles = 0xffffffff;
 		m68kProfilerTableRecord[i].maxCycles = 0;
+		for (size_t j = 0; j < COUNT_PROFILERS; j++)
+		{
+			BaseProfilers[j]->RAZIndex((void*)&m68kProfilerTableRecord[i].Ctx[j]);
+		}
 	}
 }
 
@@ -228,14 +234,14 @@ void Profiler_ClearCurrent(void)
 		m68kProfilerTable[i].currentCycles = m68kProfilerTable[i].startCycles = m68kProfilerTable[i].endCycles = 0;
 		for (size_t j = 0; j < COUNT_PROFILERS; j++)
 		{
-			BaseProfilers[j]->RAZIndex((void*)&m68kProfilerTable[i].tracyCtx);
+			BaseProfilers[j]->RAZIndex((void*)&m68kProfilerTable[i].Ctx[j]);
 		}
 
 		//
 		m68kProfilerMallocRecord[i].ptr = m68kProfilerMallocRecord[i].size = 0;
 		for (size_t k = 0; k < COUNT_PROFILERS; k++)
 		{
-			BaseProfilers[k]->RAZIndex((void*)&m68kProfilerMallocRecord[i].tracyCtx);
+			BaseProfilers[k]->RAZIndex((void*)&m68kProfilerMallocRecord[i].Ctx[k]);
 		}
 	}
 }
@@ -275,6 +281,11 @@ void m68kProfilerEntryUp(size_t PCAdr, size_t m68KSP)
 		if (TableFrameLoopInfo.Active && (PCAdr == TableFrameLoopInfo.Adr) && !TableFrameLoopInfo.Used)
 		{
 			TableFrameLoopInfo.Used = true;
+			// notify profilers about frame start
+			for (size_t j = 0; j < COUNT_PROFILERS; j++)
+			{
+				BaseProfilers[j]->M68KFrameStart(TableFrameLoopInfo.HitCounts);
+			}
 		}
 		if (TableFrameLoopInfo.Used || !TableFrameLoopInfo.Active)
 		{
@@ -317,45 +328,45 @@ void m68kProfilerEntryUp(size_t PCAdr, size_t m68KSP)
 				// enter function's name, or the address, to the profilers
 				for (size_t j = 0; j < COUNT_PROFILERS; j++)
 				{
-					BaseProfilers[j]->M68Kenter(&m68kProfilerTable[m68kProfilerEntryIndex].tracyCtx, m68kProfilerTable[m68kProfilerEntryIndex].functionName, m68kProfilerTable[m68kProfilerEntryIndex].sourcefilename, m68kProfilerTable[m68kProfilerEntryIndex].numline, m68kProfilerTable[m68kProfilerEntryIndex].startCycles);
+					BaseProfilers[j]->M68Kenter(&m68kProfilerTable[m68kProfilerEntryIndex].Ctx[j], m68kProfilerTable[m68kProfilerEntryIndex].functionName, m68kProfilerTable[m68kProfilerEntryIndex].sourcefilename, m68kProfilerTable[m68kProfilerEntryIndex].numline, m68kProfilerTable[m68kProfilerEntryIndex].startCycles);
 				}
 
-				// check for malloc
+				// check for memory allocation's name function
 				if (!strncmp(m68kProfilerTable[m68kProfilerEntryIndex].functionName, "malloc", strlen("malloc")))
 				{
-					// get the malloc size parameter
+					// get the memory allocation size parameter
 					m68kProfilerMallocRecord[m68kProfilerMallocIndex].size = GET32(jagMemSpace, (m68KSP + 4));
 				}
 				else
 				{
-					// check for free
+					// check for the free memory allocation's name function
 					if (!strncmp(m68kProfilerTable[m68kProfilerEntryIndex].functionName, "free", strlen("free")))
 					{
-						// get the malloc pointer parameter
+						// get the memory allocation pointer parameter
 						size_t ptr = GET32(jagMemSpace, (m68KSP + 4));
 						bool flag = false;
 						if (ptr)
 						{
-							// look for the pointer in the malloc record
+							// look for the pointer in the memory allocation record
 							for (size_t i = 0; (i < m68kProfilerMallocIndex) && !flag; i++)
 							{
 								if (m68kProfilerMallocRecord[i].ptr == ptr)
 								{
 									// ptr is found
 									flag = true;
-									// remove the malloc record from profilers
+									// remove the memory allocation record from profilers
 									for (size_t j = 0; j < COUNT_PROFILERS; j++)
 									{
-										BaseProfilers[j]->M68Kfree((void*)&m68kProfilerMallocRecord[i].tracyCtx, ptr, false);
+										BaseProfilers[j]->M68Kfree((void*)&m68kProfilerMallocRecord[i].Ctx[j], ptr, false);
 									}
-									// erase the pointer in the malloc record
+									// erase the pointer in the memory allocation record
 									m68kProfilerMallocRecord[i].ptr = m68kProfilerMallocRecord[i].size = 0;
 								}
 							}
 
 							if (!flag)
 							{
-								// update the malloc record in profilers with an unknown pointer
+								// update the memory allocation record in profilers with an unknown pointer
 								for (size_t j = 0; j < COUNT_PROFILERS; j++)
 								{
 									BaseProfilers[j]->M68Kfree((void*)-1, ptr, false);
@@ -364,7 +375,7 @@ void m68kProfilerEntryUp(size_t PCAdr, size_t m68KSP)
 						}
 						else
 						{
-							// update the malloc record in profilers with a null pointer
+							// update the memory allocation record in profilers with a null pointer
 							for (size_t j = 0; j < COUNT_PROFILERS; j++)
 							{
 								BaseProfilers[j]->M68Kfree(nullptr, ptr, false);
@@ -421,6 +432,12 @@ void m68kProfilerEntryDown(size_t PCAdr, size_t m68KD0)
 			// frame loop hit count update
 			if (TableFrameLoopInfo.Used && (m68kProfilerTable[m68kProfilerEntryIndex].PCFuncAdr == TableFrameLoopInfo.Adr))
 			{
+				// notify profilers about frame end
+				for (size_t j = 0; j < COUNT_PROFILERS; j++)
+				{
+					BaseProfilers[j]->M68KFrameEnd(TableFrameLoopInfo.HitCounts);
+				}
+				// update hit counts
 				TableFrameLoopInfo.HitCounts++;
 				TableFrameLoopInfo.Used = false;
 			}
@@ -442,6 +459,12 @@ void m68kProfilerEntryDown(size_t PCAdr, size_t m68KD0)
 						m68kProfilerTableRecord[i].maxCycles = m68kProfilerTable[m68kProfilerEntryIndex].currentCycles;
 					}
 
+					//
+					for (size_t j = 0; j < COUNT_PROFILERS; j++)
+					{
+						BaseProfilers[j]->M68Krecord((void*)&m68kProfilerTableRecord[i].Ctx[j], m68kProfilerTableRecord[i].functionName, m68kProfilerTableRecord[i].callCount, m68kProfilerTableRecord[i].minCycles, m68kProfilerTableRecord[i].maxCycles);
+					}
+
 					flag = true;
 				}
 			}
@@ -452,17 +475,17 @@ void m68kProfilerEntryDown(size_t PCAdr, size_t m68KD0)
 			// leave the profilers
 			for (size_t j = 0; j < COUNT_PROFILERS; j++)
 			{
-				BaseProfilers[j]->M68Kleave((void*)&m68kProfilerTable[m68kProfilerEntryIndex].tracyCtx, m68kProfilerTable[m68kProfilerEntryIndex].currentCycles);
+				BaseProfilers[j]->M68Kleave((void*)&m68kProfilerTable[m68kProfilerEntryIndex].Ctx[j], m68kProfilerTable[m68kProfilerEntryIndex].currentCycles);
 			}
 
-			// check for malloc
+			// check for the memory allocation's name function
 			if (!strncmp(m68kProfilerTable[m68kProfilerEntryIndex].functionName, "malloc", strlen("malloc")))
 			{
-				// add the malloc record in the profilers
+				// add the memory allocation record in the profilers
 				m68kProfilerMallocRecord[m68kProfilerMallocIndex].ptr = m68KD0;
 				for (size_t j = 0; j < COUNT_PROFILERS; j++)
 				{
-					BaseProfilers[j]->M68Kmalloc((void*)&m68kProfilerMallocRecord[m68kProfilerMallocIndex].tracyCtx, m68KD0, m68kProfilerMallocRecord[m68kProfilerMallocIndex].size, m68kProfilerMallocIndex);
+					BaseProfilers[j]->M68Kmalloc((void*)&m68kProfilerMallocRecord[m68kProfilerMallocIndex].Ctx[j], m68KD0, m68kProfilerMallocRecord[m68kProfilerMallocIndex].size, m68kProfilerMallocIndex);
 				}
 				m68kProfilerMallocIndex++;
 			}
@@ -477,7 +500,7 @@ void m68kProfilerEntryDown(size_t PCAdr, size_t m68KD0)
 			m68kProfilerTable[m68kProfilerEntryIndex].currentCycles = m68kProfilerTable[m68kProfilerEntryIndex].startCycles = m68kProfilerTable[m68kProfilerEntryIndex].endCycles = 0;
 			for (size_t j = 0; j < COUNT_PROFILERS; j++)
 			{
-				BaseProfilers[j]->RAZIndex((void*)&m68kProfilerTable[m68kProfilerEntryIndex].tracyCtx);
+				BaseProfilers[j]->RAZIndex((void*)&m68kProfilerTable[m68kProfilerEntryIndex].Ctx[j]);
 			}
 			// go back to previous entry
 			m68kProfilerEntryIndex = index;
@@ -494,15 +517,15 @@ void m68kProfilerEntryDown(size_t PCAdr, size_t m68KD0)
 // Profiler flush, and clear, all profiling information
 void Profiler_Flush(void)
 {
-	// flush all malloc records from profilers
+	// flush all memory allocation records from profilers
 	while (--m68kProfilerMallocIndex >= 0)
 	{
 		for (size_t i = 0; i < COUNT_PROFILERS; i++)
 		{
 			do
 			{
-				BaseProfilers[i]->M68Kfree((void*)&m68kProfilerMallocRecord[m68kProfilerMallocIndex].tracyCtx, m68kProfilerMallocRecord[m68kProfilerMallocIndex].ptr, true);
-			} while (BaseProfilers[i]->M68Kactive((void*)&m68kProfilerMallocRecord[m68kProfilerMallocIndex].tracyCtx));
+				BaseProfilers[i]->M68Kfree((void*)&m68kProfilerMallocRecord[m68kProfilerMallocIndex].Ctx[i], m68kProfilerMallocRecord[m68kProfilerMallocIndex].ptr, true);
+			} while (BaseProfilers[i]->M68Kactive((void*)&m68kProfilerMallocRecord[m68kProfilerMallocIndex].Ctx[i]));
 		}
 	}
 
@@ -513,8 +536,8 @@ void Profiler_Flush(void)
 		{
 			do
 			{
-				BaseProfilers[i]->M68Kleave((void*)&m68kProfilerTable[m68kProfilerEntryIndex].tracyCtx, m68kProfilerTable[m68kProfilerEntryIndex].currentCycles);
-			} while (BaseProfilers[i]->M68Kactive((void*)&m68kProfilerTable[m68kProfilerEntryIndex].tracyCtx));
+				BaseProfilers[i]->M68Kleave((void*)&m68kProfilerTable[m68kProfilerEntryIndex].Ctx[i], m68kProfilerTable[m68kProfilerEntryIndex].currentCycles);
+			} while (BaseProfilers[i]->M68Kactive((void*)&m68kProfilerTable[m68kProfilerEntryIndex].Ctx[i]));
 		}
 	}
 }
@@ -525,7 +548,7 @@ void Profiler_Reset(void)
 {
 	// flush data, from the profiler, to the profilers
 	Profiler_Flush();
-	// the profiler is ready for a new round of profiling
+	// clear profilers for a new round of profiling
 	Profiler_ClearCurrent();
 	Profiler_ClearRecord();
 	Profiler_ClearLoopFrameInfo();
@@ -569,7 +592,6 @@ char* Profiler_RecordName(char* Name, size_t PCAdr)
 
 // Profilers closing
 void Profiler_Close(void)
-
 {
 	for (size_t i = 0; i < COUNT_PROFILERS; i++)
 	{

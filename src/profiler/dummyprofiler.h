@@ -27,11 +27,15 @@ public:
     void Timer(bool, bool) override {}
     void Pause(bool) override {}
 	void RAZIndex(void*) {}
+    // Profiler 68000 functions
     void M68Kenter(void*, char*, char*, size_t, size_t) override {}
     bool M68Kactive(void*) override { return false; }
     void M68Kleave(void*, size_t) override {}
     void M68Kmalloc(void*, size_t, size_t, int) override {}
     void M68Kfree(void*, size_t, bool) override {}
+    void M68Krecord(void*, char* , size_t, size_t, size_t) override {}
+    void M68KFrameStart(size_t) override {}
+    void M68KFrameEnd(size_t) override {}
 };
 
 #endif

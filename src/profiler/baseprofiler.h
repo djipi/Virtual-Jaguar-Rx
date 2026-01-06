@@ -37,12 +37,15 @@ public:
     virtual void Timer(bool onoff, bool newvalue) = 0;
     virtual void Pause(bool pause) = 0;
 	virtual void RAZIndex(void* index) = 0;
-	virtual void M68Kenter(void* zoneCtx, char* functionName, char* filename, size_t linenumber, size_t startCycle) = 0;
-	virtual bool M68Kactive(void* zoneCtx) = 0;
-	virtual void M68Kleave(void* zoneCtx, size_t usedCycles) = 0;
-	virtual void M68Kmalloc(void* zoneCtx, size_t ptr, size_t size, int depth) = 0;
-	virtual void M68Kfree(void* zoneCtx, size_t ptr, bool flush) = 0;
-    virtual ~baseProfiler() = default;
+	// Profiler 68000 functions
+	virtual void M68Kenter(void* index, char* functionName, char* filename, size_t linenumber, size_t startCycle) = 0;
+	virtual bool M68Kactive(void* index) = 0;
+	virtual void M68Kleave(void* index, size_t usedCycles) = 0;
+	virtual void M68Kmalloc(void* index, size_t ptr, size_t size, int depth) = 0;
+	virtual void M68Kfree(void* index, size_t ptr, bool flush) = 0;
+	virtual void M68Krecord(void* index, char* functionname, size_t callcount, size_t minCycles, size_t maxCycles) = 0;
+	virtual void M68KFrameStart(size_t frameNumber) = 0;
+	virtual void M68KFrameEnd(size_t frameNumber) = 0;
 };
 
 #endif

@@ -10,6 +10,7 @@
 // JPM  10/29/2025       Created this file
 // JPM   Oct./2025       Added pause feature, better control for the Tracy profiler feed and memory allocation tracking
 // JPM   Nov./2025       Tracy profiler connection with a cancellable dialog, Lua initialization, and timer manipulations
+// JPM   Dec./2025       Added M68K functions tracking messages, and frames marking
 //
 
 //#define TracyFunction functionName
@@ -46,7 +47,7 @@ namespace tracy
 #undef TracyFunction
 #undef TracyFile
 
-// message colour codes
+// Message color codes
 #define COLOUR_DEFAULT	0xFFFFFFFF
 #define COLOUR_INFO		0xFFFFFF80
 #define COLOUR_WARNING	0xFFFFA000
@@ -55,16 +56,17 @@ namespace tracy
 #define COLOUR_DEBUG	0xFF808080
 
 // M68K variables for the Tracy profiler
-constexpr double M68K_CLOCK_HZ = 13290000.0;				// 13.29 MHz
-double NANOS_PER_CYCLE = 1000000000.0 / M68K_CLOCK_HZ;		// M68K @ 13.29 MHz: 1 cycle is more or less 75.244 nanoseconds
+static constexpr double M68K_CLOCK_HZ = 13290000.0;					// 13.29 MHz
+static double NANOS_PER_CYCLE = 1000000000.0 / M68K_CLOCK_HZ;		// M68K @ 13.29 MHz: 1 cycle is more or less 75.244 nanoseconds
 int64_t g_tracy_time_offset;
 bool g_tracy_emulation;
 
 
 //
-TracyProfiler::TracyProfiler(void)
+TracyProfiler::TracyProfiler(void) :
+tracyPaused(true),
+TracyCancel(false)
 {
-	tracyPaused = true;
 	g_tracy_emulation = false;
 
 	// name the application in Tracy, is displayed in the Trace information
@@ -147,14 +149,14 @@ bool TracyProfiler::Start(void)
 	// force the Tracy profiler to use the host timer to allow connection with the user
 	Timer(false, false);
 	// wait for Tracy profiler connection
-	bool flag = WaitForConnection();
+	TracyCancel = WaitForConnection();
 	// get current Tracy profiler host timer
 	Timer(true, false);
 	// Tracy profiler is now emulating the 68000 CPU timing
 	g_tracy_emulation = true;
 	// displayed the message in the Tracy profiler messages list
 	TracyCMessageC("=== Atari Jaguar: 68000  ===", 28, COLOUR_DEFAULT);
-	return flag;
+	return TracyCancel;
 }
 
 
@@ -171,33 +173,36 @@ void TracyProfiler::Timer(bool onoff, bool newvalue)
 
 // Pause, or resume, the Tracy profiler
 // Arguments:
-// true: pause, false: unpause
+// true: pause, false: resume
 void TracyProfiler::Pause(bool pause)
 {
+	// set the pause state
 	tracyPaused = !pause;
 }
 
 
-// Reset the Tracy index context
-void TracyProfiler::RAZIndex(void* index)
+// Start a new frame for the Tracy profiler
+void  TracyProfiler::M68KFrameStart(size_t frameNumber)
 {
-	// cast the index context pointer
-	TracyCZoneCtx* ctx = (TracyCZoneCtx*)index;
-	// reset the context
-	*ctx = { 0 };
+	TracyCFrameMarkStart("M68K Frame");
 }
 
 
-// Add a malloc event for the Tracy memory allocation
+// End the current frame for the Tracy profiler
+void  TracyProfiler::M68KFrameEnd(size_t frameNumber)
+{
+	TracyCFrameMarkEnd("M68K Frame");
+}
+
+
+// Add a memory allocution event for the Tracy memory allocation
 // null-pointer is not recorded in Tracy
 void TracyProfiler::M68Kmalloc(void* zoneCtx, size_t ptr, size_t size, int depth)
 {
 	if (!tracyPaused)
 	{
-		// cast the zone context pointer
-		TracyCZoneCtx* ctx = (TracyCZoneCtx*)zoneCtx;
 		//
-		char buffer[128];
+		char buffer[256];
 		if (ptr)
 		{
 			// check potential weird size
@@ -214,7 +219,7 @@ void TracyProfiler::M68Kmalloc(void* zoneCtx, size_t ptr, size_t size, int depth
 				TracyCMessageC(buffer, strlen(buffer), COLOUR_SUCCESS);
 			}
 			// add the pointer address in the memory allocation
-			ctx->active = (depth >= 0) ? TracyCAlloc((void*)ptr, size), (ctx->id = depth), true : false;
+			((TracyCZoneCtx*)zoneCtx)->active = ((depth >= 0) ? TracyCAlloc((void*)ptr, size), (((TracyCZoneCtx*)zoneCtx)->id = depth), true : false);
 		}
 		else
 		{
@@ -233,13 +238,11 @@ void TracyProfiler::M68Kmalloc(void* zoneCtx, size_t ptr, size_t size, int depth
 // flush mode won't display messages
 void TracyProfiler::M68Kfree(void* zoneCtx, size_t ptr, bool flush)
 {
-	if (!tracyPaused || flush)
+	//if (!tracyPaused || flush)
 	{
 		//
-		char buffer[128];
-		// cast the zone context pointer
-		TracyCZoneCtx* ctx = (TracyCZoneCtx*)zoneCtx;
-		if (ctx >= 0)
+		char buffer[256];
+		if (zoneCtx != (void*)-1)
 		{
 			// display message for a null or an existing pointer
 			if (!flush)
@@ -249,7 +252,8 @@ void TracyProfiler::M68Kfree(void* zoneCtx, size_t ptr, bool flush)
 				TracyCMessageC(buffer, strlen(buffer), colour);
 			}
 			// free the non-null pointer address in the memory allocation
-			(ptr && ctx && ctx->active) ? TracyCFree((void*)ptr), (ctx->id = 0), (ctx->active = false) : false;
+			(ptr && zoneCtx && ((TracyCZoneCtx*)zoneCtx)->active) ? TracyCFree((void*)ptr), true : false;
+			zoneCtx ? RAZIndex(zoneCtx), true : false;
 		}
 		else
 		{
@@ -268,28 +272,62 @@ void TracyProfiler::M68Kfree(void* zoneCtx, size_t ptr, bool flush)
 // The plot colors will depend on the plot's name (yellow)
 void TracyProfiler::M68Kenter(void* zoneCtx, char* functionName, char* filename, size_t linenumber, size_t startCycle)
 {
-	// cast the zone context pointer
-	TracyCZoneCtx* zone = (TracyCZoneCtx*)zoneCtx;
+	char buffer[256];
+
 	// start the function zone only if not paused
 	if (!tracyPaused)
 	{
-#if 0
-#else
 		// clear the source file & line wording dedicated to the function name
 		unsigned int TracyLine = 0;
 		char* TracyFile = (char*)"";
-		// colour for the function's name zone
+		// create the zone context
 		TracyCZoneC(ctx, 0xBEBE70, true);
-		// display the function's name
+		// display the function's name in the zone
 		TracyCZoneName(ctx, functionName, strlen(functionName));
-		//
-		*zone = ctx;
-#endif
-		// start cycle plot
+		// store the zone context
+		*(TracyCZoneCtx*)zoneCtx = ctx;
+		// start the cycle plot
 		TracyCPlot("M68K start cycle", (double)startCycle);
+		// display the message in the Tracy profiler messages list
+		sprintf(buffer, "M68K function: Enter for %s() with id=%u", functionName, ctx.id);
+		TracyCMessageC(buffer, strlen(buffer), COLOUR_SUCCESS);
 	}
 	else
 	{
+		// display the message in the Tracy profiler messages list
+		sprintf(buffer, "M68K function: Enter for %s() (paused)", functionName);
+		TracyCMessageC(buffer, strlen(buffer), COLOUR_WARNING);
+		// clear the zone context in pause mode
+		RAZIndex(zoneCtx);
+	}
+}
+
+
+// End the Tracy zone for the 68000 function
+// The plot colors will depend on the plot's name (yellow)
+void TracyProfiler::M68Kleave(void* zoneCtx, size_t usedCycles)
+{
+	char text[256];
+	// display the message in the Tracy profiler messages list
+	sprintf(text, "M68K function: Leave id=%u%s%s", ((TracyCZoneCtx*)zoneCtx)->id, (tracyPaused ? " (paused)" : ""), ((TracyCZoneCtx*)zoneCtx)->active ? "" : " (inactive)");
+	TracyCMessageC(text, strlen(text), (((TracyCZoneCtx*)zoneCtx)->active) ? (tracyPaused ? COLOUR_WARNING : COLOUR_SUCCESS) : COLOUR_ERROR);
+	//printf("%s - Active: %zu\n", text, ((TracyCZoneCtx*)zoneCtx)->active);
+
+	// end the function zone
+	if (((TracyCZoneCtx*)zoneCtx)->id && ((TracyCZoneCtx*)zoneCtx)->active)
+	{
+		char textWithCommas[64];
+
+		// display the used cycles in the function zone label
+		snprintf(text, sizeof(text), "%s cycles", IntegerToStringWithCommas(textWithCommas, sizeof(textWithCommas), usedCycles));
+		TracyCZoneText(*(TracyCZoneCtx*)zoneCtx, text, strlen(text));
+		// used cycles plots
+		TracyCPlot("M68K cycles per function", (double)usedCycles);
+		TracyCPlot("M68K function time (\xC2\xB5s)", ((double)usedCycles / M68K_CLOCK_HZ) * 1e6);
+		TracyCPlot("M68K function time (ms)", ((double)usedCycles / M68K_CLOCK_HZ) * 1e3);
+		// end the zone context without clearing the context
+		TracyCZoneEnd(*(TracyCZoneCtx*)zoneCtx);
+		// clear the zone context
 		RAZIndex(zoneCtx);
 	}
 }
@@ -299,34 +337,7 @@ void TracyProfiler::M68Kenter(void* zoneCtx, char* functionName, char* filename,
 bool TracyProfiler::M68Kactive(void* zoneCtx)
 {
 	// cast the zone context pointer
-	TracyCZoneCtx* zone = (TracyCZoneCtx*)zoneCtx;
-	return (zone->active);
-}
-
-
-// End the Tracy zone for the 68000 function
-// The plot colors will depend on the plot's name (yellow)
-void TracyProfiler::M68Kleave(void* zoneCtx, size_t usedCycles)
-{
-	// cast the zone context pointer
-	TracyCZoneCtx* zone = (TracyCZoneCtx*)zoneCtx;
-	// end the function zone
-	if (!tracyPaused || (zone->id && zone->active))
-	{
-		char text[64];
-		char textWithCommas[64];
-
-		// display the used cycles in the function zone label
-		snprintf(text, sizeof(text), "%s cycles", IntegerToStringWithCommas(textWithCommas, sizeof(textWithCommas), usedCycles));
-		TracyCZoneText(*zone, text, strlen(text));
-		// used cycles plots
-		TracyCPlot("M68K cycles per function", (double)usedCycles);
-		TracyCPlot("M68K function time (\xC2\xB5s)", ((double)usedCycles / M68K_CLOCK_HZ) * 1e6);
-		TracyCPlot("M68K function time (ms)", ((double)usedCycles / M68K_CLOCK_HZ) * 1e3);
-		//
-		TracyCZoneEnd(*zone);
-		RAZIndex(zoneCtx);
-	}
+	return (((TracyCZoneCtx*)zoneCtx)->active);
 }
 
 
@@ -354,5 +365,4 @@ char* TracyProfiler::IntegerToStringWithCommas(char* out, size_t len, size_t val
 //
 TracyProfiler::~TracyProfiler(void)
 {
-
 }
