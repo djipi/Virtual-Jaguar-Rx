@@ -66,42 +66,43 @@ extern bool EraseSettings(char *Setting);
 // Settings structure
 struct VJSettings
 {
-	bool useJoystick;											// Joystick usage
-	int32_t joyport;											// Joystick port
-	bool hardwareTypeNTSC;										// Set to false for PAL, otherwise it is NTSC
-	bool useJaguarBIOS;											// Use of any Jaguar BIOS
-	bool useRetailBIOS;											// Use of Retail BIOS
-	bool useDevBIOS;											// Use of Development BIOS
-	bool GPUEnabled;											// Use of GPU
-	bool DSPEnabled;											// Use of DSP
+	bool useJoystick;									// Joystick usage
+	int32_t joyport;									// Joystick port
+	bool hardwareTypeNTSC;								// Set to false for PAL, otherwise it is NTSC
+	bool useJaguarBIOS;									// Use of any Jaguar BIOS
+	bool useRetailBIOS;									// Use of Retail BIOS
+	bool useDevBIOS;									// Use of Development BIOS
+	bool GPUEnabled;									// Use of GPU
+	bool DSPEnabled;									// Use of DSP
 	bool usePipelinedDSP;
-	bool fullscreen;											// Emulator in full screen mode so video output display only
-	bool useOpenGL;												// OpenGL support (always 'true')
+	bool fullscreen;									// Emulator in full screen mode so video output display only
+	bool useOpenGL;										// OpenGL support (always 'true')
 	uint32_t glFilter;
-	bool hardwareTypeAlpine;									// Alpine mode
-	bool softTypeDebugger;										// Soft type debugger mode
-	uint32_t useProfilers;										// Use of profilers
+	bool hardwareTypeAlpine;							// Alpine mode
+	bool softTypeDebugger;								// Soft type debugger mode
+	uint32_t useProfilers;								// Use of profilers
 	bool audioEnabled;
 	uint32_t frameSkip;
 	uint32_t renderType;
 	uint32_t refresh;
-	bool allowM68KExceptionCatch;								// Allow M68K exception catch
-	bool allowWritesToROM;										// Allow writes to ROM cartridge
-	bool allowWritesToUnknownLocation;							// Allow writes to unknown memory location
-	uint32_t biosType;											// Bios type used
-	uint32_t jaguarModel;										// Jaguar model
-	size_t nbrdisasmlines;										// Number of lines to show in the M68K tracing window
+	bool allowM68KExceptionCatch;						// Allow M68K exception catch
+	bool allowWritesToROM;								// Allow writes to ROM cartridge
+	bool allowWritesToUnknownLocation;					// Allow writes to unknown memory location
+	uint32_t biosType;									// Bios type used
+	uint32_t jaguarModel;								// Atari Jaguar model
+	size_t nbrdisasmlines;								// Number of lines to show in the M68K tracing window
 	bool disasmopcodes;
 	bool displayHWlabels;
 	bool useFastBlitter;
-	bool useDisplayEmuFPS;										// Show the emulation framerate in the status bar
-	bool compressSaveStates;									// Save States compression
+	bool useDisplayEmuFPS;								// Show the emulation frame rate in the status bar
+	bool compressSaveStates;							// Save States compression
 	bool displayFullSourceFilename;
 	bool ELFSectionsCheck;
 	bool cygdriveDirRemoval;
-	size_t nbrmemory1browserwindow;								// Number of memory browser windows
-	size_t DRAM_size;											// DRAM size (2MB or 8MB)
-	bool full_raz;												// Reset to 0 of the entire system at start of the emulator
+	size_t nbrmemory1browserwindow;						// Number of memory browser windows
+	size_t DRAM_size;									// DRAM size (2MB or 8MB)
+	bool full_raz;										// Reset to 0 of the entire system at start of the emulator
+	bool highDPI;										// High-DPI display support
 
 	// Keybindings in order of U, D, L, R, C, B, A, Op, Pa, 0-9, #, *
 	uint32_t p1KeyBindings[21];
