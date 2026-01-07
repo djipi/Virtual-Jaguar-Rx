@@ -3,7 +3,7 @@
 //
 // by Jean-Paul Mari
 //
-// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+// JPM = Jean-Paul Mari
 //  RG = Richard Goedeken
 //
 // WHO  WHEN        WHAT
@@ -18,7 +18,8 @@
 // JPM   June/2021  Update the source file path clean up
 // JPM   Oct./2021  Support wider offset ranges for local and parameter variables
 // JPM  March/2022  Added a '/cygdrive/' directory detection
-// JPM   Nov./2025  Support the fixed-point _Fract type
+// JPM        2025  Support the fixed-point _Fract & _Accum type
+// JPM   Jan./2026  Handle non integer for function parameter
 //
 
 // To Do
@@ -1174,7 +1175,14 @@ void DWARFManager_InitDMI(void)
 
 																						// function parameter
 																					case DW_TAG_formal_parameter:
-																						PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset = ReadULEB128((char *)return_block->bl_data + 1);
+																						if (*(unsigned char*)(return_block->bl_data) == DW_OP_fbreg)
+																						{
+																							PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset = ReadULEB128((char*)return_block->bl_data + 1);
+																						}
+																						else
+																						{
+																							PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset = ReadLEB128((char*)return_block->bl_data + 1);
+																						}
 																						break;
 
 																					default:
