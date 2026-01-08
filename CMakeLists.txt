@@ -153,6 +153,8 @@ set(BROWSER_SOURCES
     src/gui/debug/riscdasmbrowser.cpp
     src/gui/debug/hwregsbrowser.cpp
     src/gui/debug/hwregsblitterbrowser.cpp
+    src/gui/debug/hwregsjerrybrowser.cpp
+    src/gui/debug/interuptbrowser.cpp
     src/gui/debug/romcartbrowser.cpp
 )
 
@@ -208,6 +210,8 @@ set(MOC_HEADERS
     src/gui/debug/riscdasmbrowser.h
     src/gui/debug/hwregsbrowser.h
     src/gui/debug/hwregsblitterbrowser.h
+    src/gui/debug/hwregsjerrybrowser.h
+    src/gui/debug/interuptbrowser.h
     src/gui/debug/romcartbrowser.h
     src/debugger/VideoWin.h
     src/debugger/DasmWin.h
