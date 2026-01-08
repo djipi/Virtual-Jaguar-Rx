@@ -17,12 +17,16 @@
 // JPM  Sept./2016  Visual Studio support, and Soft debugger support (--debugger)
 // JPM  09/  /2017  Added option (--dram-max) to support 8MB ram (which doesn't exist)
 // JPM  Sept./2017  Added the 'Rx' word to the emulator name, updated the credits line, added option (--es-all, --es-ui, --es-alpine & --es-debugger) to support the erase settings
-// JPM   Oct./2018  Added the Rx version's contact in the help text, added timer initialisation in the SDL_Init
+// JPM   Oct./2018  Added the Rx version's contact in the help text, added timer initialization in the SDL_Init
 // JPM   Apr./2019  Fixed a command line option duplication
+// JPM   Jan./2024  Added the missing timer for the Quit Sub System
+// JPM        2025  Added profiler options, lua library, profiler initialization, Easter egg option removed, high-DPI support and clean-up in the usage
 //
 
-#include "app.h"
+// Fix compilation warning: 'main' redefined
+#define SDL_MAIN_HANDLED
 
+#include "app.h"
 #include "SDL.h"
 #include <QtWidgets/QApplication>
 #include "gamepad.h"
@@ -34,6 +38,7 @@
 #include <iostream>
 #include <cstdio>
 #include "debugger/DBGManager.h"
+#include "profiler.h"
 
 // Apparently on win32, SDL is hijacking main from Qt. So let's do this:
 #if defined (__GCCWIN32__) || defined (_MSC_VER)
@@ -55,6 +60,7 @@ bool loadAndGo = false;
 bool useLogfile = false;
 QString filename;
 
+
 // Here's the main application loop--short and simple...
 int main(int argc, char * argv[])
 {
@@ -64,7 +70,7 @@ int main(int argc, char * argv[])
 #if defined (__GCCWIN32__) || defined (_MSC_VER)
 	BOOL(WINAPI * AttachConsole)(DWORD dwProcessId);
 
-	AttachConsole = (BOOL (WINAPI *)(DWORD))GetProcAddress(LoadLibraryA("kernel32.dll"), "AttachConsole");
+	AttachConsole = (BOOL (WINAPI *)(DWORD))(void*)GetProcAddress(LoadLibraryA("kernel32.dll"), "AttachConsole");
 
 	if ((AttachConsole != NULL) && AttachConsole(((DWORD)-1)))
 	{
@@ -80,71 +86,83 @@ int main(int argc, char * argv[])
 	}
 #endif
 
-	// Normally, this would be read in from the settings module... :-P
+	// non-saved settings by default
 	vjs.hardwareTypeAlpine = false;
 	vjs.softTypeDebugger = false;
+	vjs.useProfilers = NOPROFILER;
 	vjs.DRAM_size = 0x200000;
 	vjs.full_raz = false;
-	// This is stuff we pass into the mainWindow...
-//	noUntunedTankPlease = false;
+	vjs.highDPI = false;
 
-	// Check for options that must be in place be constructing the App object
+	// fill non-saved settings from command line
 	if (!ParseCommandLine(argc, argv))
 	{
 		return 0;
 	}
 
-	Q_INIT_RESOURCE(virtualjaguar);	// This must the same name as the exe filename
-//or is it the .qrc filename???
-	// This is so we can pass this stuff using signal/slot mechanism...
-//this is left here to remind me not to try doing this again :-P
-//ick	int id = qRegisterMetaType<uint32>();
+	// enable automatic scaling for high-DPI displays
+	vjs.highDPI ? QApplication::setAttribute(Qt::AA_EnableHighDpiScaling), true : false;
+	// Create the application object
+	Q_INIT_RESOURCE(virtualjaguar);
 
 	int retVal = -1;							// Default is failure
 
 	if (useLogfile)
 	{
-		bool success = (bool)LogInit("./virtualjaguar.log");	// Init logfile
-
+		// log file initialization
+		bool success = (bool)LogInit("./virtualjaguar.log");
 		if (!success)
+		{
 			printf("Failed to open virtualjaguar.log for writing!\n");
+		}
 	}
 
-	// Set up SDL library
-	if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0)
+	// set the lua library
+	lua_State* LuaLib = luaL_newstate();
+	if (LuaLib)
 	{
-		WriteLog("VJ: Could not initialize the SDL library: %s\n", SDL_GetError());
+		// Set up SDL library
+		if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0)
+		{
+			WriteLog("VJ: Could not initialize the SDL library: %s\n", SDL_GetError());
+		}
+		else
+		{
+			WriteLog("VJ: SDL (joystick, audio and timer) successfully initialized.\n");
+			luaL_openlibs(LuaLib);
+			DBGManager_Init();
+			Profiler_Init(vjs.useProfilers, LuaLib);
+			App app(argc, argv);					// Declare an instance of the application
+			Gamepad::AllocateJoysticks();
+			AutoConnectProfiles();
+			retVal = app.exec();					// And run it!
+			DBGManager_Close();
+			Profiler_Close();
+			Gamepad::DeallocateJoysticks();
+			lua_close(LuaLib);
+			// Free SDL components last...!
+			SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER);
+			SDL_Quit();
+		}
 	}
 	else
 	{
-		WriteLog("VJ: SDL (joystick, audio) successfully initialized.\n");
-		DBGManager_Init();
-		App app(argc, argv);					// Declare an instance of the application
-		Gamepad::AllocateJoysticks();
-		AutoConnectProfiles();
-		retVal = app.exec();					// And run it!
-		DBGManager_Close();
-		Gamepad::DeallocateJoysticks();
-
-		// Free SDL components last...!
-		SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO);
-		SDL_Quit();
+		WriteLog("VJ: Could not initialize the Lua library: %s\n", SDL_GetError());
 	}
+
+	// Close log file
+	LogDone();
 
 #if defined (__GCCWIN32__) || defined (_MSC_VER)
 #if 0
 	fclose(ctt);
 #endif
 #endif
-	// Close logfile
-	LogDone();
 	return retVal;
 }
 
 
-//
-// Main app constructor--we stick globally accessible stuff here... (?)
-//
+// Main app constructor
 App::App(int & argc, char * argv[]): QApplication(argc, argv)
 {
 	bool loadAndGo = !filename.isEmpty();
@@ -155,25 +173,26 @@ App::App(int & argc, char * argv[]): QApplication(argc, argv)
 	ParseOptions(argc, argv);
 	mainWindow->SyncUI();
 
+	// auto-load file if requested
 	if (loadAndGo)
 	{
 		mainWindow->LoadFile(filename);
-
 		if (!mainWindow->cartridgeLoaded)
+		{
 			printf("Could not load file \"%s\"!\n", filename.toUtf8().data());
+		}
 	}
 
 	mainWindow->show();
 }
 
 
-//
-// Here we parse out stuff that needs to be looked at *before* we construct the 
-// App object.
-//
-bool ParseCommandLine(int argc, char * argv[])
+// Parse out application options that needs to be looked at and not saved in the config file
+// Return false if we need to exit right away
+bool ParseCommandLine(int argc, char* argv[])
 {
-	for(int i=1; i<argc; i++)
+	// loop on the command line arguments
+	for (int i = 1; i < argc; i++)
 	{
 		if ((strcmp(argv[i], "--help") == 0) || (strcmp(argv[i], "-h") == 0) || (strcmp(argv[i], "-?") == 0))
 		{
@@ -183,126 +202,161 @@ bool ParseCommandLine(int argc, char * argv[])
 				"Based upon the work by James Hammons (Linux/WIN32), Niels Wagenaar (Linux/WIN32),\n"
 				"Carwin Jones (BeOS), and Adam Green (MacOS)\n"
 				"Contact: http://sdlemu.ngemu.com/ | sdlemu@ngemu.com\n"
-				"Contact: https://github.com/djipi/Virtual-Jaguar-Rx | djipi.mari@gmail.com\n"
+				"Contact: https://github.com/djipi/Virtual-Jaguar-Rx\n"
 				"\n"
 				"Usage:\n"
-				"   virtualjaguar [<filename>] [switches]\n"
+				"   virtualjaguar [<filename>] [options]\n"
 				"\n"
-				"   Option            Description\n"
-				"   ----------------  -----------------------------------\n"
-				"   <filename>        Name of file to autoload\n"
-				"   --alpine      -a  Put Virtual Jaguar into Alpine mode\n"
-				"   --debugger    -D  Put Virtual Jaguar into Debugger mode\n"
-				"   --pal         -p  PAL mode\n"
-				"   --ntsc        -n  NTSC mode\n"
-				"   --dram-max        Set DRAM size to 8MB\n"
-				"   --bios        -b  Boot using Atari Jaguar BIOS\n"
-				"   --no-bios         Do not use Atari Jaguar BIOS\n"
-				"   --gpu         -g  Enable GPU\n"
-				"   --no-gpu          Disable GPU\n"
-				"   --dsp         -d  Enable DSP\n"
-				"   --no-dsp          Disable DSP\n"
-				"   --fullscreen  -f  Start in full screen mode\n"
-				"   --blur        -B  Enable GL bilinear filter\n"
-				"   --no-blur         Disable GL bilinear filtering\n"
-				"   --log         -l  Create and use log file\n"
-				"   --no-log          Do not use log file (default)\n"
-				"   --full-raz        Fill the entire system space with 0\n"
-				"   --help        -h  Show this message\n"
-				"                 -?  Show this message\n"
-				"   --es-all          Erase all settings\n"
-				"   --es-ui           Erase UI settings only\n"
-				"   --es-alpine       Erase alpine mode settings only\n"
-				"   --es-debugger     Erase debugger mode settings only\n"
+				"   Option            Short    Description\n"
+				"   ----------------  -----    -----------------------------------\n"
+				"   <filename>                 Name of file to autoload\n"
+				"   --alpine          -a       Put the emulator into Alpine mode\n"
+				"   --debugger        -D       Put the emulator into Debugger mode\n"
+				"   --profilers       -P       Enable all profilers\n"
+#ifdef TRACY_ENABLE
+				"   --profiler-tracy           Enable Tracy profiler\n"
+#endif
+				"   --profiler-vjrx            Enable Virtual Jaguar Rx profiler\n"
+				"   --pal             -p       PAL mode\n"
+				"   --ntsc            -n       NTSC mode\n"
+				"   --dram-max                 Set DRAM size to 8MB\n"
+				"   --bios            -b       Boot using Atari Jaguar BIOS\n"
+				"   --no-bios                  Do not use Atari Jaguar BIOS\n"
+				"   --gpu             -g       Enable GPU\n"
+				"   --no-gpu                   Disable GPU\n"
+				"   --dsp             -d       Enable DSP\n"
+				"   --no-dsp                   Disable DSP\n"
+				"   --high-dpi                 Enable high-DPI displays support\n"
+				"   --fullscreen      -f       Start in full screen mode\n"
+				"   --blur            -B       Enable GL bilinear filter\n"
+				"   --no-blur                  Disable GL bilinear filtering\n"
+				"   --log             -l       Create and use log file\n"
+				"   --no-log                   Do not use log file (default)\n"
+				"   --full-raz                 Fill the entire system space with 0\n"
+				"   --help            -h -?    Show this message\n"
+				"   --es-all                   Erase all settings\n"
+				"   --es-ui                    Erase UI settings only\n"
+				"   --es-alpine                Erase alpine mode settings only\n"
+				"   --es-debugger              Erase debugger mode settings only\n"
 				"   --please-dont-kill-my-computer\n"
-				"                 -z  Run Virtual Jaguar without \"snow\"\n"
+				"                     -z       Run the emulator without \"snow\"\n"
 				"\n"
-				"Invoking Virtual Jaguar with no filename will cause it to boot up\n"
+				"Invoking the emulator with no filename will cause it to boot up\n"
 				"with the VJ GUI. Using Alpine mode will enable log file.\n"
 				"\n");
 			return false;
 		}
-
-		// Easter egg
-		if (strcmp(argv[i], "--yarrr") == 0)
+		else
 		{
-			printf("\n");
-			printf("Shiver me timbers!\n");
-			printf("\n");
-			return false;
-		}
-
-		// Erase settings
-		if (strstr(argv[i], "--es-"))
-		{
-			printf("\n");
-			if (EraseSettings(&argv[i][5]))
+			// Erase settings
+			if (strstr(argv[i], "--es-"))
 			{
-				printf("Settings have been erased");
+				printf("\n");
+				if (EraseSettings(&argv[i][5]))
+				{
+					printf("Settings have been erased");
+				}
+				else
+				{
+					printf("No requested settings have been found");
+				}
+				printf("\n\n");
+				return false;
 			}
 			else
 			{
-				printf("No requested settings have been found");
+				// get the filename
+				if (argv[i][0] != '-')
+				{
+					loadAndGo = true;
+					filename = argv[i];
+				}
+				else
+				{
+					// Alpine/Debug mode
+					if ((strcmp(argv[i], "--alpine") == 0) || (strcmp(argv[i], "-a") == 0))
+					{
+						printf("Alpine Mode enabled.\n");
+						vjs.hardwareTypeAlpine = true;
+						// We also enable logging as well :-)
+						useLogfile = true;
+					}
+
+#ifdef TRACY_ENABLE
+					// Tracy profiler type
+					if (!strcmp(argv[i], "--profiler-tracy"))
+					{
+						printf("Tracy profiler enabled.\n");
+						vjs.useProfilers = TRACYPROFILER;
+					}
+#endif
+
+					// VJRx profiler type
+					if (!strcmp(argv[i], "--profiler-vjrx"))
+					{
+						printf("VJRx profiler enabled.\n");
+						vjs.useProfilers = VJRXPROFILER;
+					}
+
+					// All profilers enabled
+					if (!strcmp(argv[i], "--profilers") || !strcmp(argv[i], "-P"))
+					{
+						printf("All profilers enabled.\n");
+						vjs.useProfilers = VJRXPROFILER;
+#ifdef TRACY_ENABLE			
+						vjs.useProfilers |= TRACYPROFILER;
+#endif
+					}
+
+					// Debugger mode
+					if ((strcmp(argv[i], "--debugger") == 0) || (strcmp(argv[i], "-D") == 0))
+					{
+						printf("Debugger mode enabled.\n");
+						vjs.softTypeDebugger = true;
+					}
+
+					// No snow display
+					if ((strcmp(argv[i], "--please-dont-kill-my-computer") == 0) || (strcmp(argv[i], "-z") == 0))
+					{
+						noUntunedTankPlease = true;
+					}
+
+					// Log file
+					if ((strcmp(argv[i], "--log") == 0) || (strcmp(argv[i], "-l") == 0))
+					{
+						printf("Log file enabled.\n");
+						useLogfile = true;
+					}
+
+					// No log file
+					if (strcmp(argv[i], "--no-log") == 0)
+					{
+						printf("Log file disabled.\n");
+						useLogfile = false;
+					}
+
+					// DRAM size max
+					if (strcmp(argv[i], "--dram-max") == 0)
+					{
+						printf("DRAM size set at 8 MBytes.\n");
+						vjs.DRAM_size = 0x800000;
+					}
+
+					// fill entire system space with 0
+					if (strcmp(argv[i], "--full-raz") == 0)
+					{
+						printf("Set to 0 the entire system space.\n");
+						vjs.full_raz = true;
+					}
+
+					// High DPI support
+					if (strcmp(argv[i], "--high-dpi") == 0)
+					{
+						printf("High DPI displays support enabled.\n");
+						vjs.highDPI = true;
+					}
+				}
 			}
-			printf("\n\n");
-			return false;
-		}
-
-		// Alpine/Debug mode
-		if ((strcmp(argv[i], "--alpine") == 0) || (strcmp(argv[i], "-a") == 0))
-		{
-			printf("Alpine Mode enabled.\n");
-			vjs.hardwareTypeAlpine = true;
-			// We also enable logging as well :-)
-			useLogfile = true;
-		}
-
-		// Debugger mode
-		if ((strcmp(argv[i], "--debugger") == 0) || (strcmp(argv[i], "-D") == 0))
-		{
-			printf("Debugger mode enabled.\n");
-			vjs.softTypeDebugger = true;
-		}
-
-		// No snow display
-		if ((strcmp(argv[i], "--please-dont-kill-my-computer") == 0) || (strcmp(argv[i], "-z") == 0))
-		{
-			noUntunedTankPlease = true;
-		}
-
-		// Log file
-		if ((strcmp(argv[i], "--log") == 0) || (strcmp(argv[i], "-l") == 0))
-		{
-			printf("Log file enabled.\n");
-			useLogfile = true;
-		}
-
-		// No log file
-		if (strcmp(argv[i], "--no-log") == 0)
-		{
-			printf("Log file disabled.\n");
-			useLogfile = false;
-		}
-
-		// DRAM size max
-		if (strcmp(argv[i], "--dram-max") == 0)
-		{
-			printf("DRAM size set at 8 MBytes.\n");
-			vjs.DRAM_size = 0x800000;
-		}
-
-		// 
-		if (strcmp(argv[i], "--full-raz") == 0)
-		{
-			printf("Set to 0 the entire system space.\n");
-			vjs.full_raz = true;
-		}
-
-		// Check for filename
-		if (argv[i][0] != '-')
-		{
-			loadAndGo = true;
-			filename = argv[i];
 		}
 	}
 
@@ -310,14 +364,10 @@ bool ParseCommandLine(int argc, char * argv[])
 }
 
 
-//
-// This is to override settings loaded from the config file.
-// Note that settings set here will become the new defaults!
-// (Not any more: Settings are only saved if the config dialog was OKed, or the toolbar buttons were pressed.)
-//
-void ParseOptions(int argc, char * argv[])
+// Handle options to override settings loaded from the config file
+void ParseOptions(int argc, char* argv[])
 {
-	for(int i=1; i<argc; i++)
+	for (int i = 1; i < argc; i++)
 	{
 		// PAL mode
 		if ((strcmp(argv[i], "--pal") == 0) || (strcmp(argv[i], "-p") == 0))
@@ -369,7 +419,7 @@ void ParseOptions(int argc, char * argv[])
 			vjs.audioEnabled = false;
 		}
 
-		// Fullscreen  mode
+		// Full screen mode
 		if ((strcmp(argv[i], "--fullscreen") == 0) || (strcmp(argv[i], "-f") == 0))
 		{
 			vjs.fullscreen = true;
@@ -388,37 +438,3 @@ void ParseOptions(int argc, char * argv[])
 		}
 	}
 }
-
-#if 0
-	bool useJoystick;
-	int32 joyport;								// Joystick port
-	bool hardwareTypeNTSC;						// Set to false for PAL
-	bool useJaguarBIOS;
-	bool GPUEnabled;
-	bool DSPEnabled;
-	bool usePipelinedDSP;
-	bool fullscreen;
-	bool useOpenGL;
-	uint32 glFilter;
-	bool hardwareTypeAlpine;
-	bool softTypeDebugger;
-	bool audioEnabled;
-	uint32 frameSkip;
-	uint32 renderType;
-	bool allowWritesToROM;
-
-	// Keybindings in order of U, D, L, R, C, B, A, Op, Pa, 0-9, #, *
-
-	uint32 p1KeyBindings[21];
-	uint32 p2KeyBindings[21];
-
-	// Paths
-
-	char ROMPath[MAX_PATH];
-	char jagBootPath[MAX_PATH];
-	char CDBootPath[MAX_PATH];
-	char EEPROMPath[MAX_PATH];
-	char alpineROMPath[MAX_PATH];
-	char absROMPath[MAX_PATH];
-#endif
-

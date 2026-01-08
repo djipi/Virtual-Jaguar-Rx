@@ -9,6 +9,7 @@
 // ---  ----------  -----------------------------------------------------------
 // JPM  08/07/2017  Created this file
 // JPM  March/2022  Added hexadecimal's value with $
+// JPM   Nov./2025  Added key home/end, mouse wheel, in memory navigation
 //
 
 // STILL TO DO:
@@ -20,7 +21,7 @@
 #include "settings.h"
 
 
-//
+// Constructor
 Memory1BrowserWindow::Memory1BrowserWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::Dialog),
 	layout(new QVBoxLayout), text(new QLabel),
 	refresh(new QPushButton(tr("Refresh"))),
@@ -105,67 +106,98 @@ void Memory1BrowserWindow::RefreshContentsWindow(void)
 }
 
 
-//
+// Handle key press events
 void Memory1BrowserWindow::keyPressEvent(QKeyEvent * e)
 {
-	if (e->key() == Qt::Key_Escape)
+	switch (e->key())
 	{
+		// end key: go to the last address
+	case Qt::Key_End:
+		memBase = (int)vjs.DRAM_size - 480;
+		RefreshContentsWindow();
+		break;
+
+		// home key: go to address 0		
+	case Qt::Key_Home:
+		memBase = 0;
+		RefreshContentsWindow();
+		break;
+
+		// escape: close the window
+	case Qt::Key_Escape:
 		hide();
+		break;
+
+		// page up: go back 480 bytes (30 lines of 16 bytes each)
+	case Qt::Key_PageUp:
+		if ((memBase -= 480) < 0)
+		{
+			memBase = 0;
+		}
+		RefreshContentsWindow();
+		break;
+
+		// page down: go forward 480 bytes (30 lines of 16 bytes each)
+	case Qt::Key_PageDown:
+		if ((memBase += 480) > (vjs.DRAM_size - 480))
+		{
+			memBase = (int)vjs.DRAM_size - 480;
+		}
+		RefreshContentsWindow();
+		break;
+
+		// up arrow / minus key: go back 16 bytes (1 line of 16 bytes)
+	case Qt::Key_Up:
+	case Qt::Key_Minus:
+		if ((memBase -= 16) < 0)
+		{
+			memBase = 0;
+		}
+		RefreshContentsWindow();
+		break;
+
+		// down arrow / equal key: go forward 16 bytes (1 line of 16 bytes)
+	case Qt::Key_Down:
+	case Qt::Key_Equal:
+		if ((memBase += 16) > (vjs.DRAM_size - 480))
+		{
+			memBase = (int)vjs.DRAM_size - 480;
+		}
+		RefreshContentsWindow();
+		break;
+
+		// enter / return: go to the requested address
+	case Qt::Key_Return:
+		GoToAddress();
+		break;
+
+		// other keys: process normally
+	default:
+		break;
 	}
-	else
+}
+
+
+// Handle wheel events
+void Memory1BrowserWindow::wheelEvent(QWheelEvent* e)
+{
+	// scroll down
+	if (e->angleDelta().y() < 0)
 	{
-		if (e->key() == Qt::Key_PageUp)
+		if ((memBase += 16) > (vjs.DRAM_size - 480))
 		{
-			if ((memBase -= 480) < 0)
-			{
-				memBase = 0;
-			}
-
-			RefreshContentsWindow();
+			memBase = (int)vjs.DRAM_size - 480;
 		}
-		else
+		RefreshContentsWindow();
+	}
+	// scroll up
+	else if (e->angleDelta().y() > 0)
+	{
+		if ((memBase -= 16) < 0)
 		{
-			if (e->key() == Qt::Key_PageDown)
-			{
-				if ((memBase += 480) > (vjs.DRAM_size - 480))
-				{
-					memBase = vjs.DRAM_size - 480;
-				}
-
-				RefreshContentsWindow();
-			}
-			else
-			{
-				if (e->key() == Qt::Key_Up || e->key() == Qt::Key_Minus)
-				{
-					if ((memBase -= 16) < 0)
-					{
-						memBase = 0;
-					}
-
-					RefreshContentsWindow();
-				}
-				else
-				{
-					if (e->key() == Qt::Key_Down || e->key() == Qt::Key_Equal)
-					{
-						if ((memBase += 16) > (vjs.DRAM_size - 480))
-						{
-							memBase = vjs.DRAM_size - 480;
-						}
-
-						RefreshContentsWindow();
-					}
-					else
-					{
-						if (e->key() == Qt::Key_Return)
-						{
-							GoToAddress();
-						}
-					}
-				}
-			}
+			memBase = 0;
 		}
+		RefreshContentsWindow();
 	}
 }
 
@@ -219,9 +251,15 @@ void Memory1BrowserWindow::GoToAddress(void)
 		else
 		{
 			p.setColor(QPalette::Text, Qt::black);
-			memOrigin = (memBase = newmemBase);
+			memOrigin = (memBase = (int)newmemBase);
 			RefreshContents(NumWinOrigin);
 		}
 		address->setPalette(p);
 	}
+}
+
+
+// Destructor
+Memory1BrowserWindow::~Memory1BrowserWindow(void)
+{
 }

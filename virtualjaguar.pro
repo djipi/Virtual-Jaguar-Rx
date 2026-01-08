@@ -19,7 +19,7 @@ TARGET     = virtualjaguar
 CONFIG    += qt warn_on release
 # debug
 RESOURCES += src/gui/virtualjaguar.qrc
-LIBS      += -Lobj -Lsrc/m68000/obj -ljaguarcore -lz -lm68k -lelf -ldwarf
+LIBS      += -Lobj -Lsrc/m68000/obj -ljaguarcore -lz -lm68k -lelf -ldwarf -lopengl32 -llua
 QT        += opengl widgets
 
 # We stuff all the intermediate crap into obj/ so it won't confuse us mere
@@ -34,13 +34,13 @@ win32     { DEFINES += __GCCWIN32__ }
 else:macx { DEFINES += __GCCUNIX__ __THINK_STUPID__ }
 else:unix { DEFINES += __GCCUNIX__ }
 
-# SDL (to link statically on Mac)
-macx { LIBS += `sdl-config --static-libs` }
-#else:win32 { LIBS += `$(CROSS)sdl-config --libs` }
-#else:win32 { LIBS += `$(CROSS)sdl-config --static-libs` -static-libgcc}
-else:win32 { LIBS += `$(CROSS)sdl-config --static-libs` -static -static-libgcc -static-libstdc++ }
-else { LIBS += `$(CROSS)sdl-config --libs` }
-#else { LIBS += `$(CROSS)sdl-config --static-libs` }
+# SDL2 (to link statically on Mac)
+macx { LIBS += `sdl2-config --static-libs` }
+#else:win32 { LIBS += `$(CROSS)sdl2-config --libs` }
+#else:win32 { LIBS += `$(CROSS)sdl2-config --static-libs` -static-libgcc}
+else:win32 { LIBS += `$(CROSS)sdl2-config --static-libs` -static -static-libgcc -static-libstdc++ }
+else { LIBS += `$(CROSS)sdl2-config --libs` }
+#else { LIBS += `$(CROSS)sdl2-config --static-libs` }
 
 # Icon on Win32, Mac
 #win32 { LIBS += res/vj-ico.o }
@@ -53,8 +53,8 @@ macx  { ICON = res/vj-icon.icns }
 # NOTE: May have to put -Wall back in, but only on non-release cycles. It can
 #       cause problems if you're not careful. (Can do this via command line in
 #       qmake)
-QMAKE_CFLAGS += `$(CROSS)sdl-config --cflags`
-QMAKE_CXXFLAGS += `$(CROSS)sdl-config --cflags`
+QMAKE_CFLAGS += `$(CROSS)sdl2-config --cflags`
+QMAKE_CXXFLAGS += `$(CROSS)sdl2-config --cflags`
 
 # Need to add libcdio stuffola (checking/including)...
 
@@ -69,14 +69,16 @@ QMAKE_CXXFLAGS += `$(CROSS)sdl-config --cflags`
 INCLUDEPATH += \
 	src \
 	src/debugger \
-	src/gui
+	src/gui \
+	src/profiler
 
 DEPENDPATH = \
 	src \
 	src/debugger \
 	src/gui \
 	src/gui/debug \
-	src/m68000
+	src/m68000 \
+	src/profiler
 
 # The GUI
 
@@ -102,6 +104,7 @@ HEADERS = \
 	src/gui/mainwin.h \
 	src/gui/profile.h \
 	src/gui/emustatus.h \
+	src/gui/stdConsole.h \
 	src/gui/debug/cpubrowser.h \
 	src/gui/debug/hwregsblitterbrowser.h \
 	src/gui/debug/hwregsjerrybrowser.h \
@@ -136,6 +139,9 @@ HEADERS = \
 	src/debugger/NewFnctBreakpointWin.h \
 	src/debugger/CartFilesListWin.h \
 	src/debugger/SaveDumpAsWin.h \
+	src/profiler/ctrlprofilerwin.h \
+	src/profiler/vjrxprofilerwin.h \
+	src/profiler/vjrxprofiler.h \
 	src/log.h \
 	src/unzip.h \
 	src/crc32.h \
@@ -165,6 +171,7 @@ SOURCES = \
 	src/gui/mainwin.cpp \
 	src/gui/profile.cpp \
 	src/gui/emustatus.cpp \
+	src/gui/stdConsole.cpp \
 	src/gui/debug/cpubrowser.cpp \
 	src/gui/debug/hwregsblitterbrowser.cpp \
 	src/gui/debug/hwregsjerrybrowser.cpp \
@@ -199,6 +206,9 @@ SOURCES = \
 	src/debugger/NewFnctBreakpointWin.cpp \
 	src/debugger/CartFilesListWin.cpp \
 	src/debugger/SaveDumpAsWin.cpp \
+	src/profiler/ctrlprofilerwin.cpp \
+	src/profiler/vjrxprofilerwin.cpp \
+	src/profiler/vjrxprofiler.cpp \
 	src/log.cpp \
 	src/unzip.cpp \
 	src/crc32.cpp \

@@ -32,6 +32,7 @@ class GeneralTab: public QWidget
 		QCheckBox *useFullScreen;
 		QCheckBox *useUnknownSoftware;
 		QCheckBox *useFastBlitter;
+		QCheckBox *useDisplayEmuFPS;
 };
 
 #endif	// __GENERALTAB_H__

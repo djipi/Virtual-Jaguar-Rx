@@ -4,12 +4,53 @@ Git commit:
 -
 0) Fix the ELF sections check to allow usage of ELF/DWARF available valid information
 1) Added ELF section names
-2) Added JERRY's exceptions settings
-3) Added Jerry registers tab in the HW registers browser window
-4) Added an Interrupt browser window
-5) Fix PIT1 and PIT2 types to fit with console HW requirements
-6) Fix PIT1 and PIT2 callback timing calculus
-7) Partial fix for the PIT1 and PIT2's read-only registers
+2) Set optimization for code speed in the VS2017 project
+3) Added a setting for the emulation framerate display
+4) Minor fix for the application's exit
+5) Windows refresh rate placeholder text update in the alpine's configure tab
+6) Added a Console standard emulation
+-- Support only stdout
+-- Text output color detection
+-- Amber style sheet color mode selection
+-- Clear window content
+7) Allow sub-directories in software's path directory
+8) Added .J64 homebrew format detection
+9) Display full filename in file picker cartridge's information
+10) Added support for SDL2 library 64bits for VS 2017
+11) Update the heap allocation window
+--- Display Calypsi's library malloc structure for the free nodes
+--- Revamp of the error/warning detections
+--- Display VBcc library malloc structure
+--- Display the library's name in the window title
+--- Fix Lib-M68K's malloc detection for ELF's binary file
+12) Enhance ELF's sections check usage
+13) Added ELF program headers support
+14) Project switch to VS2022
+15) Added exception catch (Zero divide)
+16) Fix debugger for the get address in case of empty symbol name
+17) Added profiling features for the 68000
+--- VJRx & Tracy profilers integration support
+--- Application option to enable/disable the profilers
+--- Feature to turn on/off the Tracy profiler on demand
+--- Feature to profile memory allocations
+--- 68000 CPU cycles emulation in Tracy profiler timer
+--- Wait for Tracy profiler connection with a cancellable dialog
+--- Profiler control window to include a frame loop
+18) Added lua library support for VS 2022
+19) Added a CMakeLists.txt file for CMake support
+20) Update the debugger memory window
+---  Added key home/end, and mouse wheel
+21) Added _Fract & _Accum fixed-point support for the DWARF variable type detection
+22) Added application option to allow high-DPI displays support
+23) Removed the Easter egg --yarrr option
+23) Documentation & content texts updates
+24) Add char type support, and handle non integer for function parameter, in debugger
+25) Added JERRY's exceptions settings
+26) Added Jerry registers tab in the HW registers browser window
+27) Added an Interrupt browser window
+28) Fix PIT1 and PIT2 types to fit with console HW requirements
+29) Fix PIT1 and PIT2 callback timing calculus
+30) Partial fix for the PIT1 and PIT2's read-only registers
 
 pre-Release 5b (20th July 2022)
 -------------------------------
@@ -335,27 +376,30 @@ Cosmetic / UX issues
 
 Legacy issues/hints
 ===================
-1) Emulator seems to have easter egg(s)
--- The option --yarrr displays a single message and end the application
+1) Emulator seems to have Easter egg(s)
 -- Pressing F8, while in the main window, will create an extra message in the log file
 2) The --alpine option force the log file but it can be override if --no-log option is set after the --alpine option
 
 Project information
 ===================
 1) Code based on the Shamus Hammons source code available via Gethub by the 12th September 2017 (2.1.3 Final)
-2) Visual Studio 2017 project support for 64 bits
-3) libelf 0.8.13 library 64bits for VS 2017
-4) libdwarf 20210528 library 64bits for VS 2017
-5) Qt 5.12.0 library 64bits for VS 2017
-6) Zlib 1.2.11 library 64bits for VS 2017
-7) SDL 1.2.15 library 64bits for VS 2017
-8) The original make files have been modified to follow the requirements and modifications
-9) The 'Rx' word has been added to the emulator name to make distinction with the official version
-10) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
-11) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
+2) Visual Studio 2022 project support for 64 bits
+3) libelf 0.8.13 library 64bits for VS 2022
+4) libdwarf 20210528 library 64bits for VS 2017 (compatible with VS 2022)
+5) Qt 5.12.0 library 64bits for VS 2017 (compatible with VS 2022)
+6) Zlib 1.3.1 library 64bits for VS 2022
+7) SDL2 2.30.9 library 64bits for VS 2022
+8) lua 5.4.8 library 64bits for VS 2022
+9) Tracy Profiler 0.12.x library 64bits for VS 2022
+10) The original make files have been modified to follow the requirements and modifications
+11) A CMakeLists.txt file have been added for CMake support
+12) The 'Rx' word has been added to the emulator name to make distinction with the original version
+13) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
+14) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
 -- Text / License terms are the same
-14) The x86 configuration has been removed in the VS 2017 project
-15) Additional project information can be found at https://github.com/djipi/Virtual-Jaguar-Rx/wiki
+15) The x86 configuration has been removed in the Visual Studio project
+16) Additional project information can be found at https://github.com/djipi/Virtual-Jaguar-Rx/wiki
+17) The .env file list the Windows environment variables used by the VS 2022 project
 
 
 Download statistics
@@ -364,3 +408,4 @@ jaguar64eu : 15 downloads for the Release 0 on the 12th Feb, 2017
 jaguar64eu : 18 downloads for the Release 1 on the 21st May, 2017
 No downloads statistics available for the Release 2
 No downloads statistics available for the Release 3
+No downloads statistics available for the Release 4

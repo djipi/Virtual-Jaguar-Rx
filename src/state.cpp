@@ -468,7 +468,7 @@ substate_t *find_substate(uint32_t type)
 	return NULL;
 }
 
-size_t CanTryToLoadSaveState(void)
+int CanTryToLoadSaveState(void)
 {
 	if (save_slot == -1)
 	{

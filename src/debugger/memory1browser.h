@@ -16,6 +16,7 @@ class Memory1BrowserWindow: public QWidget
 
 	public:
 		Memory1BrowserWindow(QWidget * parent = 0);
+		~Memory1BrowserWindow(void);
 
 	public slots:
 		void RefreshContents(size_t NumWin);
@@ -24,6 +25,7 @@ class Memory1BrowserWindow: public QWidget
 
 	protected:
 		void keyPressEvent(QKeyEvent *);
+		void wheelEvent(QWheelEvent* e);
 
 	private:
 		QVBoxLayout * layout;

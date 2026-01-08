@@ -16,6 +16,9 @@
 // Who  When        What
 // ---  ----------  -------------------------------------------------------------
 // JPM  March/2022  Added the save state patch from PvtLewis
+// JPM  07/14/2024  Added a Console standard emulation window
+// JPM   Oct./2025  Feature to turn on/off the profiler
+// JPM   Nov./2025  Added profiler control window
 //
 
 #ifndef __MAINWIN_H__
@@ -34,10 +37,12 @@ class GLWidget;
 class AboutWindow;
 class HelpWindow;
 class FilePickerWindow;
+class stdConsoleWindow;
 class VideoOutputWindow;
 //class DasmWindow;
 class EmuStatusWindow;
-
+// Profiler
+class CtrlProfilerWindow;
 // Alpine
 class ROMCartBrowserWindow;
 class MemoryBrowserWindow;
@@ -48,7 +53,6 @@ class InteruptBrowserWindow;
 class M68KDasmBrowserWindow;
 class RISCDasmBrowserWindow;
 class HWRegsBrowserWindow;
-
 // Debugger
 class SourcesWindow;
 class m68KDasmWindow;
@@ -115,6 +119,10 @@ class MainWin: public QMainWindow
 		void ToggleFullScreen(void);
 		void ShowEmuStatusWin(void);
 		void MakeScreenshot(void);
+		// Profiler
+		void ToggleTracyProfiler(bool checked);
+		void ToggleVJRxProfiler(bool checked);
+		void ShowProfilerControlWin(void);
 		// Debugger
 		void DebuggerTraceStepOver(void);
 		void DebuggerTraceStepInto(void);
@@ -124,6 +132,7 @@ class MainWin: public QMainWindow
 		void ShowCallStackBrowserWin(void);
 		void ShowHeapAllocatorBrowserWin(void);
 		void ShowMemory1BrowserWin(int NumWin);
+		void ShowstdConsoleWin(void);
 		void ShowExceptionVectorTableBrowserWin(void);
 		void ShowNewFunctionBreakpointWin(void);
 		void ShowBreakpointsWin(void);
@@ -179,12 +188,15 @@ class MainWin: public QMainWindow
 		HelpWindow *helpWin;
 		FilePickerWindow *filePickWin;
 		EmuStatusWindow *emuStatusWin;
+		stdConsoleWindow *stdConsoleWin;
 		SaveDumpAsWindow *SaveDumpAsWin;
 		QTimer *timer;
 		bool running;
 		int zoomLevel;
 		bool powerButtonOn;
 		bool showUntunedTankCircuit;
+		// Profiler
+		CtrlProfilerWindow* ctrlProfilerWin;
 		// Alpine
 		MemoryBrowserWindow *memBrowseWin[3];
 		ROMCartBrowserWindow *romcartBrowseWin;
@@ -203,9 +215,7 @@ class MainWin: public QMainWindow
 		ExceptionVectorTableBrowserWindow *exceptionvectortableBrowseWin;
 		HeapAllocatorBrowserWindow *heapallocatorBrowseWin;
 		Memory1BrowserWindow **mem1BrowseWin;
-		//DasmWindow * DasmWin;
 		QTabWidget *dasmtabWidget;
-		//QDockWidget *dasmtabWidget;
 		SourcesWindow *SourcesWin;
 		m68KDasmWindow *m68kDasmWin;
 		GPUDasmWindow *GPUDasmWin;
@@ -227,6 +237,7 @@ class MainWin: public QMainWindow
 		bool keyHeld[8];
 		bool fullScreen;
 		bool scannedSoftwareFolder;
+		bool stdConsoleExist;	// = NULL;
 
 	public:
 		bool plzDontKillMyComputer;
@@ -245,6 +256,7 @@ class MainWin: public QMainWindow
 		QToolBar * toolbar;
 		QToolBar * debugbar;
 		QToolBar * debuggerbar;
+		QToolBar* profilerbar;
 #if defined(SAVESTATEPATCH_PvtLewis)
 		QMenu * toolsMenu;
 		QAction * dumpAct;
@@ -312,6 +324,10 @@ class MainWin: public QMainWindow
 		QAction *saveDumpAsAct;
 		QAction *exceptionVectorTableBrowseAct;
 		QAction *CartFilesListAct;
+
+		// Profiler
+		QAction* tracyAct;
+		QAction* vjrxAct;
 
 		QIcon powerGreen;
 		QIcon powerRed;

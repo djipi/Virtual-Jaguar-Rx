@@ -17,10 +17,14 @@
 // JPM  Sept./2019  Support the unsigned/signed short type
 //  RG   Jan./2021  Linux build fixes
 // JPM    May/2021  Code refactoring for the variables
+// JPM   Dec./2024  Fix the get address in case of empty symbol name
+// JPM   Nov./2025  Added _Fract & _Accum fixed-point support
+// JPM   Jan./2026  Added char type for the variable
 //
 
 // To Do
 // To think about unique format to handle variations from ELF, DWARF, etc.
+// To create a DBGManager class
 //
 
 
@@ -114,7 +118,7 @@ void DBGManager_SourceFileSearchPathsSet(char *ListPaths)
 			char *Ptr1 = Ptr;
 			while (*Ptr && (*Ptr++ != ';'));
 
-			// Copy the inidividual search path
+			// Copy the individual search path
 			SourceFileSearchPaths[i] = (char *)calloc(1, (Ptr - Ptr1) + 1);
 			strncpy(SourceFileSearchPaths[i], Ptr1, (Ptr - Ptr1));
 			if (SourceFileSearchPaths[i][strlen(SourceFileSearchPaths[i]) - 1] == ';')
@@ -151,16 +155,16 @@ void DBGManager_SourceFileSearchPathsClose(void)
 }
 
 
-// Common debugger initialisation
+// Common debugger initialization
 void DBGManager_Init(void)
 {
-	// DBG initialisations
+	// DBG initializations
 	DBGType = DBG_NO_TYPE;
 	DBGManager_SourceFileSearchPathsInit();
 
-	// ELF initialisation 
+	// ELF initialization 
 	ELFManager_Init();
-	// DWARF initialisation
+	// DWARF initialization
 	DWARFManager_Init();
 }
 
@@ -215,7 +219,7 @@ size_t DBGManager_GetType(void)
 }
 
 
-// Get source filename based on the memeory address
+// Get source filename based on the memory address
 // return NULL if no source filename
 char *DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, DBGstatus *Status)
 {
@@ -231,7 +235,7 @@ char *DBGManager_GetFullSourceFilenameFromAdr(size_t Adr, DBGstatus *Status)
 
 
 // Get number of variables
-// A NULL address will return the numbre of global variables, otherwise it will return the number of local variables
+// A NULL address will return the number of global variables, otherwise it will return the number of local variables
 size_t DBGManager_GetNbVariables(size_t Adr)
 {
 	if ((DBGType & DBG_ELFDWARF))
@@ -310,10 +314,10 @@ size_t DBGManager_GetNbGlobalVariables(void)
 
 // Get address from symbol name
 // Return found address
-// Return NULL if no symbol has been found
+// Return NULL if no symbol has been found or if the SymbolName is an empty string
 size_t DBGManager_GetAdrFromSymbolName(char *SymbolName)
 {
-	if (SymbolName)
+	if (SymbolName && *SymbolName)
 	{
 		if ((DBGType & DBG_ELF))
 		{
@@ -466,7 +470,7 @@ size_t DBGManager_GetGlobalVariableTypeEncoding(size_t Index)
 
 // Get global variable value based on his Index
 // Return value as a text pointer
-// Note: Pointer may point on a 0 lenght text
+// Note: Pointer may point on a 0 length text
 char *DBGManager_GetGlobalVariableValue(size_t Index)
 {
 	size_t Adr = 0;
@@ -549,7 +553,7 @@ char *DBGManager_GetGlobalVariableName(size_t Index)
 #endif
 
 
-// Get variable value based on his Adresse, Encoding Type and Size
+// Get variable value based on his Address, Encoding Type and Size
 // Return value as a text pointer
 // Note: Pointer may point on a 0 length text
 char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t TypeByteSize)
@@ -575,7 +579,7 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 			V.Ct[i] = jaguarMainRAM[Adr + j - 1];
 		}
 #endif
-		switch (TypeEncoding)
+		switch (TypeEncoding & 0xff)
 		{
 		case DBG_ATE_address:
 			break;
@@ -626,6 +630,7 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 			break;
 
 		case DBG_ATE_signed_char:
+			sprintf(value, "%i", (int)V.C);
 			break;
 
 		case DBG_ATE_unsigned:
@@ -649,7 +654,7 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 			break;
 
 		case DBG_ATE_unsigned_char:
-			sprintf(value, "%u", (unsigned int) V.C);
+			sprintf(value, "%u", (unsigned int)V.C);
 			break;
 
 		case DBG_ATE_ptr:
@@ -662,6 +667,133 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 			default:
 				break;
 			}
+			break;
+
+			// fixed-point signed
+		case DBG_ATE_signed_fixed:
+			switch (DBGMANAGER_GETALTIUMVALUE(TypeEncoding))
+			{
+				// _Fract types (short _Fract, _Fract, long _Fract, long long _Fract)
+			case DBG_ATE_ALTIUM_fract:
+				switch (TypeByteSize)
+				{
+				case 1:
+					// Q0.7
+					sprintf(value, "%f", (float)V.C / 128.0f);
+					break;
+
+				case 2:
+					// Q0.15
+					sprintf(value, "%f", (float)V.SS / 32768.0f);
+					break;
+
+				case 4:
+					// Q0.31
+					sprintf(value, "%.10lf", (double)V.SI / 2147483648.0);
+					break;
+
+				case 8:
+					// Q0.63
+					sprintf(value, "%.22Lf", (long double)V.SL / (long double)9223372036854775808.0L);
+					break;
+
+				default:
+					break;
+				}
+				(((value[0] != '-') && (value[0] != '0')) || ((value[0] == '-') && (value[1] != '0'))) ? strcpy(value, "#error"), true : false;
+				break;
+
+				// _Accum types (short _Accum, _Accum, long _Accum)
+			case DBG_ATE_ALTIUM_accum:
+				switch (TypeByteSize)
+				{
+				case 2:
+					// Q8.7
+					(V.SS & 0x8000) ? sprintf(value, "-%d.%03d", (-V.SS >> 7), ((-V.SS & 0x7f) * 1000 + 64) >> 7) : sprintf(value, "%d.%03d", (V.SS >> 7), ((V.SS & 0x7f) * 1000 + 64) >> 7);
+					break;
+
+				case 4:
+					// Q16.15
+					(V.SI & 0x80000000) ? sprintf(value, "-%d.%03d", (-V.SI >> 15), ((-V.SI & 0x7fff) * 1000 + 64) >> 15) : sprintf(value, "%d.%03d", (V.SI >> 15), ((V.SI & 0x7fff) * 1000 + 64) >> 15);
+					break;
+
+				case 8:
+					// Q32.31
+					(V.SL & 0x8000000000000000) ? sprintf(value, "-%lld.%03lld", (-V.SL >> 31), ((-V.SL & 0x7fffffff) * 1000 + 64) >> 31) : sprintf(value, "%lld.%03lld", (V.SL >> 31), ((V.SL & 0x7fffffff) * 1000 + 64) >> 31);
+					break;
+
+				default:
+					break;
+				}
+				break;
+	
+			default:
+				break;
+			}
+			break;
+
+			// fixed-point unsigned
+		case DBG_ATE_unsigned_fixed:
+			switch (DBGMANAGER_GETALTIUMVALUE(TypeEncoding))
+			{
+				// _Fract types (short _Fract, _Fract, long _Fract, long long _Fract)
+			case DBG_ATE_ALTIUM_fract:
+				switch (TypeByteSize)
+				{
+				case 1:
+					// Q0.8
+					sprintf(value, "%f", (float)((unsigned char)V.C) / 256.0f);
+					break;
+
+				case 2:
+					// Q0.16
+					sprintf(value, "%f", (float)V.US / 65536.0f);
+					break;	
+
+				case 4:
+					// Q0.32
+					sprintf(value, "%.10lf", (double)V.UI / 4294967296.0);
+					break;
+
+				case 8:
+					// Q0.64
+					sprintf(value, "%.22Lf", (long double)V.UL / (long double)18446744073709551616.0L);
+					break;
+
+				default:
+					break;
+				}
+				((value[0] != '0') || (value[0] == '-')) ? strcpy(value, "#error"), true : false;
+				break;
+
+				// _Accum types (short _Accum, _Accum, long _Accum)
+			case DBG_ATE_ALTIUM_accum:
+				switch (TypeByteSize)
+				{
+				case 2:
+					// Q8.8
+					sprintf(value, "%d.%03d", (V.US >> 8), ((V.US & 0xFF) * 1000 + 64) >> 8);
+					break;
+
+				case 4:
+					// Q16.16
+					sprintf(value, "%d.%03d", (V.UI >> 16), ((V.UI & 0xffff) * 1000 + 64) >> 16);
+					break;
+
+				case 8:
+					// Q32.32
+					sprintf(value, "%lld.%03lld", (V.UL >> 32), ((V.UL & 0xffffffff) * 1000 + 64) >> 32);
+					break;
+
+				default:
+					break;
+				}
+				break;
+
+			default:
+				break;
+			}
+			break;
 
 		default:
 			break;

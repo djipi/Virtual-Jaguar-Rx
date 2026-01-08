@@ -20,6 +20,9 @@
 // JPM   Feb./2021  Added a specific breakpoint for the M68K bus error exception, and a M68K exception catch detection
 // JPM   Apr./2021  Keep number of M68K cycles used in tracing mode
 // JPM   Jan./2022  Added a writes to unknown memory location catch
+// JPM  07/14/2024  Added a Console standard emulation
+// JPM  11/28/2024  Add exception catch (Zero divide)
+// JPM  10/29/2025  Added M68K Profiler Hook, and detection usage
 //
 
 
@@ -50,6 +53,7 @@
 #include "mmu.h"
 #include "settings.h"
 #include "tom.h"
+#include "profiler.h"
 //#include "debugger/BreakpointsWin.h"
 #ifdef NEWMODELSBIOSHANDLER
 #include "modelsBIOS.h"
@@ -123,11 +127,14 @@ uint32_t srQueue[0x400];
 uint32_t pcQPtr = 0;
 bool startM68KTracing = false;
 
-// Breakpoint on memory access vars (exported)
+// breakpoint on memory access vars (exported)
 bool bpmActive = false;
 bool bpmSaveActive = false;
 size_t bpmHitCounts;
 uint32_t bpmAddress1;
+// Console standard emulation list
+S_stdConsoleInfo stdConsoleInfo[3];
+// breakpoint functions list
 S_BrkInfo *brkInfo;
 size_t brkNbr;
 
@@ -140,17 +147,84 @@ void GPUDumpDisassembly(void);
 void GPUDumpRegisters(void);
 static bool start = false;
 
+
+#ifdef M68KPROFILER_HOOK_FUNCTION
+// M68K Profiler Hook called after each instruction is executed
+void M68KProfilerHook(unsigned int m68kPC, unsigned int m68kOpcode, int cycles, unsigned int m68KSP, unsigned int m68KD0)
+{
+	// check the profiler usage to avoid unnecessary profiling overhead
+	if (vjs.useProfilers)
+	{
+		short int pcrelw;
+		int An;
+
+		// update the current profiling entry
+		m68kProfilerEntryUpdate(m68kPC, cycles, m68KSP);
+
+		// Update profiler info
+		switch (m68kOpcode)
+		{
+		case 0x4e75:
+			// rts
+			m68kProfilerEntryDown(m68kPC, m68KD0);
+			break;
+
+		case 0x4eb8:
+			// jsr for word address
+			m68kProfilerEntryUp(GET16(jagMemSpace, m68kPC + 2), m68KSP);
+			break;
+
+		case 0x4eb9:
+			// jsr for long address
+			m68kProfilerEntryUp(GET32(jagMemSpace, m68kPC + 2), m68KSP);
+			break;
+
+		case 0x4eba:
+			// jsr for PC-Relative (signed word) address [i.e: JSR.L (PC, $xxxx)]
+			pcrelw = GET16(jagMemSpace, m68kPC + 2);
+			m68kProfilerEntryUp(m68kPC + (int)pcrelw + 2, m68KSP);
+			break;
+
+		case 0x6100:
+			// bsr.w
+			m68kProfilerEntryUp(m68kPC + GET16(jagMemSpace, m68kPC + 2), m68KSP);
+			break;
+
+		default:
+			if ((m68kOpcode & 0xFF00) == 0x6100)
+			{
+				// bsr.s
+				m68kProfilerEntryUp(m68kPC + ((int8_t)(m68kOpcode & 0x00FF)) + 2, m68KSP);
+			}
+			else
+			{
+				// jsr (an)
+				if ((m68kOpcode >= 0x4e90) && (m68kOpcode <= 0x4e97))
+				{
+					An = (m68kOpcode & 0x0007);
+					m68kProfilerEntryUp(m68k_get_reg(NULL, m68k_register_t(M68K_REG_A0 + An)), m68KSP);
+				}
+				else
+				{
+					// jsr modes
+					if ((m68kOpcode >= 0x4e98) && (m68kOpcode <= 0x4ebb))
+					{
+						m68kProfilerEntryUp(-1, m68KSP);
+					}
+				}
+			}
+			break;
+		}
+	}
+}
+#endif
+
+
+#ifdef M68K_HOOK_FUNCTION
+// M68K Instruction Hook called before each instruction is executed
 void M68KInstructionHook(void)
 {
 	uint32_t m68kPC = m68k_get_reg(NULL, M68K_REG_PC);
-// Temp, for comparing...
-{
-/*	static char buffer[2048];//, mem[64];
-	m68k_disassemble(buffer, m68kPC, M68K_CPU_TYPE_68000);
-	printf("%08X: %s\n", m68kPC, buffer);//*/
-}
-//JaguarDasm(m68kPC, 1);
-//Testing Hover Strike...
 #if 0
 //Dasm(regs.pc, 1);
 static int hitCount = 0;
@@ -490,6 +564,8 @@ CD_switch::	-> $306C
 	}//*/
 #endif
 }
+#endif
+
 
 #if 0
 Now here be dragons...
@@ -1058,11 +1134,20 @@ void	M68K_Debughalt(void)
 #endif
 
 
-// M68000 breakpoints initialisations
+// M68000 breakpoints initializations
 void m68k_brk_init(void)
 {
 	brkNbr = 0;
 	brkInfo = NULL;
+}
+
+
+// Console standard emulation reset
+bool stdConsole_set(STDCONSOLE NumStd, unsigned int adr)
+{
+	stdConsoleInfo[NumStd].Adr = adr;
+	memset(stdConsoleInfo[NumStd].BufText, 0, sizeof(stdConsoleInfo[NumStd].BufText));
+	return adr ? true : false;
 }
 
 
@@ -1426,15 +1511,14 @@ unsigned int m68k_read_memory_16(unsigned int address)
 
 
 // Alert message in case of exception vector request
-bool m68k_read_exception_vector(unsigned int address, char *text)
+bool m68k_read_exception_vector(unsigned int address, const char *text)
 {
-	QString msg;
 	QMessageBox msgBox;
 
 #if 0
 	msg.sprintf("68000 exception\n%s at $%06x", text, pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF]);
 #else
-	msg.sprintf("68000 exception\n$%06x: %s", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], text);
+	QString msg = QString::asprintf("68000 exception\n$%06x: %s", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], text);
 #endif
 	msgBox.setText(msg);
 	msgBox.setStandardButtons(QMessageBox::Abort);
@@ -1470,20 +1554,29 @@ unsigned int m68k_read_memory_32(unsigned int address)
 	{
 		switch (address)
 		{
+			// exception vector #2
 		case 0x08:
 			m68k_read_exception_vector(address, "Bus error");
 			break;
 
+			// exception vector #3
 		case 0x0c:
 			m68k_read_exception_vector(address, "Address error");
 			break;
 
+			// exception vector #4 (Illegal instructions and BKPT)
 		case 0x10:
 			m68k_read_exception_vector(address, "Illegal instruction");
 			break;
 
+			// exception vector #5 (Zero divide)
+		case 0x14:
+			m68k_read_exception_vector(address, "Division by zero");
+			break;
+
+			// exception vector #11 
 		case 0x2c:
-			m68k_read_exception_vector(address, "Unimplemented instruction");
+			m68k_read_exception_vector(address, "Unimplemented instruction (line 1111)");
 			break;
 
 		default:
@@ -1519,14 +1612,13 @@ unsigned int m68k_read_memory_32(unsigned int address)
 
 
 // Alert message in case of writing to unknown memory location
-bool m68k_write_unknown_alert(unsigned int address, char *bits, unsigned int value)
+bool m68k_write_unknown_alert(unsigned int address, const char *bits, unsigned int value)
 {
 	if (!M68KDebugHaltStatus())
 	{
-		QString msg;
 		QMessageBox msgBox;
 
-		msg.sprintf("$%06x: Writing at this unknown memory location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
+		QString msg = QString::asprintf("$%06x: Writing at this unknown memory location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
 		msgBox.setText(msg);
 		msgBox.setStandardButtons(QMessageBox::Abort);
 		msgBox.setDefaultButton(QMessageBox::Abort);
@@ -1541,14 +1633,13 @@ bool m68k_write_unknown_alert(unsigned int address, char *bits, unsigned int val
 
 
 // Alert message in case of writing to cartridge/ROM memory location
-bool m68k_write_cartridge_alert(unsigned int address, char *bits, unsigned int value)
+bool m68k_write_cartridge_alert(unsigned int address, const char *bits, unsigned int value)
 {
 	if (!M68KDebugHaltStatus())
 	{
-		QString msg;
 		QMessageBox msgBox;
 
-		msg.sprintf("$%06x: Writing at this ROM cartridge location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
+		QString msg = QString::asprintf("$%06x: Writing at this ROM cartridge location $%06x with a (%s bits) value of $%0x", pcQueue[pcQPtr ? (pcQPtr - 1) : 0x3FF], address, bits, value);
 		msgBox.setText(msg);
 
 		msgBox.setInformativeText("Do you want to continue?");
@@ -1556,7 +1647,6 @@ bool m68k_write_cartridge_alert(unsigned int address, char *bits, unsigned int v
 		msgBox.setDefaultButton(QMessageBox::No);
 
 		int retVal = msgBox.exec();
-
 		if (retVal == QMessageBox::Yes)
 		{
 			return false;
@@ -1575,7 +1665,7 @@ bool m68k_write_cartridge_alert(unsigned int address, char *bits, unsigned int v
 
 // Check memory write location
 // BPM & cartridge/ROM detections
-bool m68k_write_memory_check(unsigned int address, char *bits, unsigned int value)
+bool m68k_write_memory_check(unsigned int address, const char *bits, unsigned int value)
 {
 	unsigned int address1;
 
@@ -1767,11 +1857,24 @@ void m68k_write_memory_16(unsigned int address, unsigned int value)
 										}//*/
 
 #ifndef USE_NEW_MMU
-										// Note that the Jaguar only has 2M of RAM, not 4!
+		// note that the Jaguar only has 2MB of RAM, but the emulation can reach the maximum of 8MB
 		if ((address >= 0x000000) && (address <= (vjs.DRAM_size - 2)))
 		{
-			/*		jaguar_mainRam[address] = value >> 8;
-					jaguar_mainRam[address + 1] = value & 0xFF;*/
+			// check the Console standard emulation's stdout
+			if (address && ((stdConsoleInfo[STDCONSOLE_STDOUT].Adr == address) || ((stdConsoleInfo[STDCONSOLE_STDOUT].Adr + 2) == address)))
+			{
+				if (value)
+				{
+					// save the value
+					for (size_t i = 0; i < 1; i++)
+					{
+						char buf = (value >> (i * 8)) & 0xff;
+						strncat(stdConsoleInfo[STDCONSOLE_STDOUT].BufText, &buf, 1);
+					}
+				}
+			}
+				/*		jaguar_mainRam[address] = value >> 8;
+						jaguar_mainRam[address + 1] = value & 0xFF;*/
 			SET16(jaguarMainRAM, address, value);
 		}
 		else

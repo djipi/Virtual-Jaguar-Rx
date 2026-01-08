@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
@@ -14,11 +14,11 @@
     <ProjectGuid>{66994EE0-D47E-319C-B486-0A9CFDF062E3}</ProjectGuid>
     <RootNamespace>virtualjaguar</RootNamespace>
     <Keyword>Qt4VSv1.0</Keyword>
-    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <PlatformToolSet>v141</PlatformToolSet>
+    <PlatformToolSet>v143</PlatformToolSet>
     <OutputDirectory>release\</OutputDirectory>
     <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
     <CharacterSet>Unicode</CharacterSet>
@@ -29,7 +29,7 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <PlatformToolSet>v141</PlatformToolSet>
+    <PlatformToolSet>v143</PlatformToolSet>
     <OutputDirectory>debug\</OutputDirectory>
     <ATLMinimizesCRunTimeLibraryUsage>false</ATLMinimizesCRunTimeLibraryUsage>
     <CharacterSet>Unicode</CharacterSet>
@@ -62,7 +62,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.;.\..\src;.\..\src\gui;$(QTDIR)\include;C:\SDK\OpenGL\include;C:\SDK\SDL\SDL-1.2.15\include;C:\SDK\DWARF\libdwarf-20210528-VS2017\include;C:\SDK\Elf\libelf-0.8.13\include;C:\SDK\zlib\zlib-1.2.11\include;.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;.\..\src;.\..\src\gui;$(QTDIR)\include;C:\SDK\OpenGL\include;$(SDL2DIR)\include;$(DWARFDIR)\include;$(LIBELFDIR)\include;$(ZLIBDIR)\include;.\GeneratedFiles\$(ConfigurationName);.\GeneratedFiles;$(TRACYPROFILERDIR)\public;$(LUADIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zc:strictStrings -Zc:throwingNew -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -70,8 +70,8 @@
       <DisableSpecificWarnings>4577;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ExceptionHandling>Sync</ExceptionHandling>
       <ObjectFileName>$(IntDir)obj\</ObjectFileName>
-      <Optimization>Full</Optimization>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_WINDOWS;UNICODE;WIN32;WIN64;__GCCWIN32__;QT_NO_DEBUG;QT_OPENGL_LIB;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Optimization>MaxSpeed</Optimization>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_WINDOWS;UNICODE;WIN32;WIN64;__GCCWIN32__;QT_NO_DEBUG;QT_OPENGL_LIB;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_EMULATED_CLOCK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <ProgramDataBaseFileName>$(IntDir)vc$(PlatformToolsetVersion).pdb</ProgramDataBaseFileName>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
@@ -83,8 +83,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Qt5PlatformCompositorSupport.lib;qtmain.lib;Qt5OpenGL.lib;shell32.lib;jaguarcore.lib;zlib-1.2.11_vs2017_x64.lib;m68000.lib;gdi32.lib;user32.lib;SDL-1.2.15_vs2017_x64.lib;libelf-0.8.13_vs2017_x64.lib;legacy_stdio_definitions.lib;OpenGL32.lib;libdwarf_x64.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;opengl32.lib;glu32.lib;Ws2_32.lib;imm32.lib;winmm.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\src\m68000\obj;C:\SDK\zlib\zlib-1.2.11\lib;C:\SDK\SDL\SDL-1.2.15\lib\x64\static;C:\SDK\Elf\libelf-0.8.13\lib;m68000\x64\Release;jaguarcore\x64\Release;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib\x64;C:\SDK\DWARF\libdwarf-20210528-VS2017\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Qt5PlatformCompositorSupport.lib;qtmain.lib;Qt5OpenGL.lib;shell32.lib;jaguarcore.lib;zlibstatic.lib;m68000.lib;gdi32.lib;user32.lib;SDL2.lib;libelf.lib;legacy_stdio_definitions.lib;OpenGL32.lib;libdwarf_x64.lib;Qt5Core.lib;Qt5Gui.lib;Qt5Widgets.lib;opengl32.lib;glu32.lib;Ws2_32.lib;imm32.lib;winmm.lib;Advapi32.lib;dxguid.lib;TracyClient.lib;Psapi.lib;kernel32.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\src\m68000\obj;$(ZLIBDIR)\lib;$(SDL2DIR)\lib\x64;$(LIBELFDIR)\lib;m68000\x64\Release;jaguarcore\x64\Release;$(DWARFDIR)\lib;$(TRACYPROFILERDIR)\_build\vstudio\TracyClient\Release;$(LUADIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>false</GenerateDebugInformation>
@@ -109,7 +109,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.;.\..\src;.\..\src\gui;$(QTDIR)\include;C:\SDK\SDL\SDL-1.2.15\include;C:\SDK\DWARF\libdwarf-20210528-VS2017\include;C:\SDK\Elf\libelf-0.8.13\include;C:\SDK\zlib\zlib-1.2.11\include;.\GeneratedFiles\$(ConfigurationName);C:\SDK\OpenGL\include;.\GeneratedFiles;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;.\..\src;.\..\src\gui;$(QTDIR)\include;$(SDL2DIR)\include;$(DWARFDIR)\include;$(LIBELFDIR)\include;$(ZLIBDIR)\include;.\GeneratedFiles\$(ConfigurationName);C:\SDK\OpenGL\include;.\GeneratedFiles;$(TRACYPROFILERDIR)\public;$(LUADIR)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>-Zc:strictStrings -Zc:throwingNew -w34100 -w34189 -w44996 -w44456 -w44457 -w44458 %(AdditionalOptions)</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
       <BrowseInformation>false</BrowseInformation>
@@ -118,7 +118,7 @@
       <ExceptionHandling>Sync</ExceptionHandling>
       <ObjectFileName>$(IntDir)obj\</ObjectFileName>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_WINDOWS;UNICODE;WIN32;WIN64;__GCCWIN32__;QT_OPENGL_LIB;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_WINDOWS;UNICODE;WIN32;WIN64;__GCCWIN32__;QT_OPENGL_LIB;QT_CORE_LIB;QT_GUI_LIB;QT_WIDGETS_LIB;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_EMULATED_CLOCK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessToFile>false</PreprocessToFile>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -132,8 +132,8 @@
       <OmitDefaultLibName>false</OmitDefaultLibName>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Qt5PlatformCompositorSupportd.lib;qtmaind.lib;Qt5OpenGLd.lib;shell32.lib;zlib-1.2.11_vs2017_x64d.lib;SDL-1.2.15_vs2017_x64d.lib;OpenGL32.lib;gdi32.lib;user32.lib;legacy_stdio_definitions.lib;libelf-0.8.13_vs2017_x64d.lib;m68000d.lib;jaguarcored.lib;libdwarf_x64d.lib;Ws2_32.lib;imm32.lib;winmm.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opengl32.lib;glu32.lib;Advapi32.lib;dxguid.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\..\src\m68000\obj;C:\SDK\zlib\zlib-1.2.11\lib;C:\SDK\SDL\SDL-1.2.15\lib\x64\static;C:\SDK\Elf\libelf-0.8.13\lib;m68000\x64\Debug;jaguarcore\x64\Debug;C:\Program Files\Microsoft SDKs\Windows\v6.0A\Lib\x64;C:\SDK\DWARF\libdwarf-20210528-VS2017\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Advapi32.lib;Psapi.lib;kernel32.lib;Qt5PlatformCompositorSupportd.lib;qtmaind.lib;Qt5OpenGLd.lib;shell32.lib;zlibstaticd.lib;SDL2.lib;OpenGL32.lib;gdi32.lib;user32.lib;legacy_stdio_definitions.lib;libelfd.lib;m68000d.lib;jaguarcored.lib;libdwarf_x64d.lib;Ws2_32.lib;imm32.lib;winmm.lib;Qt5Cored.lib;Qt5Guid.lib;Qt5Widgetsd.lib;opengl32.lib;glu32.lib;dxguid.lib;TracyClient.lib;lua54.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(QTDIR)\lib;$(QTDIR)\plugins\platforms;obj;..\..\src\m68000\obj;$(ZLIBDIR)\lib;$(SDL2DIR)\lib\x64;$(LIBELFDIR)\lib;m68000\x64\Debug;jaguarcore\x64\Debug;$(DWARFDIR)\lib;$(TRACYPROFILERDIR)\_build\vstudio\TracyClient\Debug;$(LUADIR);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>"/MANIFESTDEPENDENCY:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' publicKeyToken='6595b64144ccf1df' language='*' processorArchitecture='*'" %(AdditionalOptions)</AdditionalOptions>
       <DataExecutionPrevention>true</DataExecutionPrevention>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -182,8 +182,17 @@
     <ClCompile Include="..\src\gui\exceptionstab.cpp" />
     <ClCompile Include="..\src\gui\keybindingstab.cpp" />
     <ClCompile Include="..\src\gui\modelsbiostab.cpp" />
+    <ClCompile Include="..\src\gui\stdConsole.cpp" />
     <ClCompile Include="..\src\LEB128.cpp" />
     <ClCompile Include="..\src\log.cpp" />
+    <ClCompile Include="..\src\profiler\ctrlprofilerwin.cpp" />
+    <ClCompile Include="..\src\profiler\tracyprofiler.cpp">
+      <DebugInformationFormat Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">EditAndContinue</DebugInformationFormat>
+      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\src\profiler\vjrxprofiler.cpp" />
+    <ClCompile Include="..\src\profiler\vjrxprofilerwin.cpp" />
     <ClCompile Include="..\src\settings.cpp" />
     <ClCompile Include="..\src\unzip.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_allwatchbrowser.cpp">
@@ -211,6 +220,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_cpubrowser.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ctrlprofilerwin.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_DasmWin.cpp">
@@ -267,7 +279,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_keybindingstab.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_keygrabber.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -317,6 +328,9 @@
     <ClCompile Include="GeneratedFiles\Debug\moc_stackbrowser.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_stdConsole.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_VideoWin.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -356,6 +370,9 @@
     <ClCompile Include="..\src\gui\debug\opbrowser.cpp" />
     <ClCompile Include="..\src\gui\profile.cpp" />
     <ClCompile Include="..\src\gui\debug\riscdasmbrowser.cpp" />
+    <ClCompile Include="GeneratedFiles\Debug\moc_vjrxprofilerwin.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\qrc_virtualjaguar.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
       </PrecompiledHeader>
@@ -387,6 +404,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_cpubrowser.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_ctrlprofilerwin.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_DasmWin.cpp">
@@ -442,7 +462,6 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_keybindingstab.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_keygrabber.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -492,11 +511,41 @@
     <ClCompile Include="GeneratedFiles\Release\moc_stackbrowser.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_stdConsole.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_VideoWin.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_vjrxprofilerwin.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\profiler\baseprofiler.h" />
+    <CustomBuild Include="..\src\profiler\ctrlprofilerwin.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_LIB -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions)  "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-20210528-VS2017\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-IC:\SDK\OpenGL\include" "-I.\GeneratedFiles"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_LIB -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions)  "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-20210528-VS2017\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-IC:\SDK\OpenGL\include" "-I.\GeneratedFiles"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+    </CustomBuild>
+    <ClInclude Include="..\src\profiler\dummyprofiler.h" />
+    <ClInclude Include="..\src\profiler\vjrxprofiler.h" />
+    <CustomBuild Include="..\src\profiler\vjrxprofilerwin.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_LIB -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions)  "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-20210528-VS2017\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-IC:\SDK\OpenGL\include" "-I.\GeneratedFiles"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_OPENGL_LIB -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions)  "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-20210528-VS2017\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-IC:\SDK\OpenGL\include" "-I.\GeneratedFiles"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+    </CustomBuild>
+    <ClInclude Include="TracyProfiler.hpp" />
     <CustomBuild Include="..\src\debugger\BreakpointsWin.h">
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
@@ -663,6 +712,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -D_CRT_SECURE_NO_WARNINGS -D_WINDOWS -DUNICODE -DWIN32 -DWIN64 -D__GCCWIN32__ -DQT_NO_DEBUG -DQT_OPENGL_LIB -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_WIDGETS_LIB -D%(PreprocessorDefinitions) "-I." "-I.\..\src" "-I.\..\src\gui" "-I$(QTDIR)\include" "-IC:\SDK\OpenGL\include" "-IC:\SDK\SDL\SDL-1.2.15\include" "-IC:\SDK\DWARF\libdwarf-20210528-VS2017\include" "-IC:\SDK\Elf\libelf-0.8.13\include" "-IC:\SDK\zlib\zlib-1.2.11\include" "-I.\GeneratedFiles\$(ConfigurationName)" "-I.\GeneratedFiles"</Command>
     </CustomBuild>
+    <CustomBuild Include="..\src\gui\stdConsole.h">
     <CustomBuild Include="..\src\gui\debug\hwregsjerrybrowser.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing %(Identity)...</Message>
@@ -685,6 +735,7 @@
     </CustomBuild>
     <ClInclude Include="..\src\LEB128.h" />
     <ClInclude Include="..\src\log.h" />
+    <ClInclude Include="..\src\profiler\tracyprofiler.h" />
     <ClInclude Include="..\src\settings.h" />
     <ClInclude Include="..\src\unzip.h" />
     <ClInclude Include="..\src\version.h" />
@@ -961,13 +1012,22 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\.env">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="..\docs\LICENSE" />
-    <None Include="..\docs\INSTALL" />
+    <None Include="..\docs\INSTALL">
+          <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </None>
     <None Include="..\docs\README" />
     <None Include="..\docs\TODO" />
-    <None Include="..\docs\virtualjaguar.1" />
-    <None Include="..\docs\WHATSNEW" />
-    <None Include="..\LICENSE">
+    <None Include="..\docs\virtualjaguar.1">
+    <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
+    <None Include="..\docs\WHATSNEW">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
@@ -1212,6 +1272,22 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </Image>
     <Image Include="..\res\Exit.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\res\profiler-tracy-off.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\res\profiler-tracy-on.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\res\profiler-vjrx-off.png">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </Image>
+    <Image Include="..\res\profiler-vjrx-on.png">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </Image>

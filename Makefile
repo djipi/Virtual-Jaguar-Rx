@@ -24,8 +24,8 @@ QMAKE_EXTRA := -spec macx-g++
 endif
 
 # Set basic flags, these can be overridden from the environment
-CFLAGS = -O2
-CXXFLAGS = -O2
+CFLAGS = -Ofast
+CXXFLAGS = -Ofast
 
 # Add CPPFLAGS
 CFLAGS += $(CPPFLAGS)

@@ -17,6 +17,7 @@
 // JLH  06/23/2011  Created this file
 // JPM  Sept./2018  Added a Models & Bios tab, slashes / backslashes formatting, and screenshot path
 // JPM  March/2022  Added and slightly modified the save state patch from PvtLewis
+// JPM   Jan./2024  Added setting for the emulation framerate display
 //
 
 // STILL TO DO:
@@ -77,14 +78,15 @@ GeneralTab::GeneralTab(QWidget * parent/*= 0*/): QWidget(parent)
 
 	// Checkboxes...
 #ifndef NEWMODELSBIOSHANDLER
-	useBIOS            = new QCheckBox(tr("Enable Jaguar BIOS"));
+	useBIOS = new QCheckBox(tr("Enable Jaguar BIOS"));
 #endif
-	useGPU             = new QCheckBox(tr("Enable GPU"));
-	useDSP             = new QCheckBox(tr("Enable DSP"));
-	useFullScreen      = new QCheckBox(tr("Start Virtual Jaguar in full screen"));
-//	useHostAudio       = new QCheckBox(tr("Enable audio playback (requires DSP)"));
+	useGPU = new QCheckBox(tr("Enable GPU"));
+	useDSP = new QCheckBox(tr("Enable DSP"));
+	useFullScreen = new QCheckBox(tr("Start Virtual Jaguar in full screen"));
+//	useHostAudio = new QCheckBox(tr("Enable audio playback (requires DSP)"));
 	useUnknownSoftware = new QCheckBox(tr("Show all files in file chooser"));
-	useFastBlitter     = new QCheckBox(tr("Use fast blitter"));
+	useFastBlitter = new QCheckBox(tr("Use fast blitter"));
+	useDisplayEmuFPS = new QCheckBox(tr("Show the emulation framerate"));
 
 #ifndef NEWMODELSBIOSHANDLER
 	layout4->addWidget(useBIOS);
@@ -95,6 +97,7 @@ GeneralTab::GeneralTab(QWidget * parent/*= 0*/): QWidget(parent)
 //	layout4->addWidget(useHostAudio);
 	layout4->addWidget(useUnknownSoftware);
 	layout4->addWidget(useFastBlitter);
+	layout4->addWidget(useDisplayEmuFPS);
 
 	setLayout(layout4);
 }
@@ -115,6 +118,7 @@ void GeneralTab::GetSettings(void)
 	edit4->setText(vjs.ROMPath);
 	edit5->setText(vjs.screenshotPath);
 	edit6->setText(vjs.SaveStatePath);
+
 #ifndef NEWMODELSBIOSHANDLER
 	useBIOS->setChecked(vjs.useJaguarBIOS);
 #endif
@@ -123,6 +127,7 @@ void GeneralTab::GetSettings(void)
 	useFullScreen->setChecked(vjs.fullscreen);
 	//	generalTab->useHostAudio->setChecked(vjs.audioEnabled);
 	useFastBlitter->setChecked(vjs.useFastBlitter);
+	useDisplayEmuFPS->setChecked(vjs.useDisplayEmuFPS);
 }
 
 
@@ -144,6 +149,7 @@ void GeneralTab::SetSettings(void)
 	vjs.fullscreen = useFullScreen->isChecked();
 	//	vjs.audioEnabled   = generalTab->useHostAudio->isChecked();
 	vjs.useFastBlitter = useFastBlitter->isChecked();
+	vjs.useDisplayEmuFPS = useDisplayEmuFPS->isChecked();
 }
 
 

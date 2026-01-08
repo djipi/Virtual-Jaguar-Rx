@@ -52,7 +52,7 @@ ExRegA6(-1)
 	QFont fixedFont("Lucida Console", 8, QFont::Normal);
 	fixedFont.setStyleHint(QFont::TypeWriter);
 #endif
-	// Set the new layout with proper identation and readibility
+	// Set the new layout with proper indentation and readability
 	model->setColumnCount(LOCAL_NBUI);
 	model->setHeaderData(LOCAL_UINAME, Qt::Horizontal, QObject::tr("Name"));
 	model->setHeaderData(LOCAL_UIVALUE, Qt::Horizontal, QObject::tr("Value"));

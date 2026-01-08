@@ -1,4 +1,4 @@
-.TH virtualjaguar 1 2022-07-19 Virtualjaguar Rx
+.TH virtualjaguar 1 2025-11-08 Virtualjaguar Rx
 .SH NAME
 virtualjaguar \- An Atari Jaguar emulator
 
@@ -8,7 +8,7 @@ virtualjaguar \- An Atari Jaguar emulator
 .RI [rom image file]
 
 .SH DESCRIPTION
-Virtual Jaguar Rx is an emulator for the Atari Jaguar videogame system. It includes a debugger.
+Virtual Jaguar Rx is an emulator for the Atari Jaguar videogame system. It includes a debugger & profiling capabilities.
 
 .SH OPTIONS
 .TP
@@ -39,11 +39,23 @@ Enable GPU emulation
 .B \-\-no\-gpu
 Disable GPU emulation
 .TP
+.B \-\-high\-dpi
+Enable high-DPI displays support
+.TP
 .B \-l, \-\-log
 Create and use log file
 .TP
 .B \-\-no\-log
 Do not use log file
+.TP
+.B \-P, \-\-profilers
+Enable all profilers
+.TP
+.B \-\-profiler-tracy
+Enable the Tracy profiler
+.TP
+.B \-\-profiler-vjrx
+Enable the Virtual Jaguar Rx profiler
 .TP
 .B \-h, \-?, \-\-help
 Show command line help

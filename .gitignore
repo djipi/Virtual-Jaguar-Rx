@@ -1,4 +1,5 @@
 /Assets/
+/[Bb]uild/
 /debug/
 /eeproms/
 /obj/
@@ -21,19 +22,20 @@ object_script.virtualjaguar*.*
 .qmake.stash
 *WinMerge
 /Win-VS2015/
-/Win-VS2017/m68000/m68000.vcxproj.user
-/Win-VS2017/jaguarcore/jaguarcore.vcxproj.user
-/Win-VS2017/x64/Archives/
-/Win-VS2017/*/x64/
-/Win-VS2017/*/ReadMe.txt
-/Win-VS2017/.vs/
-/Win-VS2017/obj/
-/Win-VS2017/Win32/
-/Win-VS2017/x64/
-/Win-VS2017/virtualjaguar.VC.db
-/Win-VS2017/virtualjaguar.VC.VC.opendb
-/Win-VS2017/virtualjaguar.sdf
-/Win-VS2017/virtualjaguar.vcxproj.user
-/Win-VS2017/GeneratedFiles/
-/Win-VS2017/GeneratedFiles/qrc_virtualjaguar.cpp
-/Win-VS2017/My Inspector Results - virtualjaguar
+/Win-VS2017/
+/Win-VS2022/m68000/m68000.vcxproj.user
+/Win-VS2022/jaguarcore/jaguarcore.vcxproj.user
+/Win-VS2022/x64/Archives/
+/Win-VS2022/*/x64/
+/Win-VS2022/*/ReadMe.txt
+/Win-VS2022/.vs/
+/Win-VS2022/obj/
+/Win-VS2022/Win32/
+/Win-VS2022/x64/
+/Win-VS2022/virtualjaguar.VC.db
+/Win-VS2022/virtualjaguar.VC.VC.opendb
+/Win-VS2022/virtualjaguar.sdf
+/Win-VS2022/virtualjaguar.vcxproj.user
+/Win-VS2022/GeneratedFiles/
+/Win-VS2022/GeneratedFiles/qrc_virtualjaguar.cpp
+/Win-VS2022/My Inspector Results - virtualjaguar

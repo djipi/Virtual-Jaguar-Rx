@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Generated Files">
@@ -67,6 +67,12 @@
     </Filter>
     <Filter Include="Source Files\debugger\View">
       <UniqueIdentifier>{6a9b2983-c30d-47db-8c30-73c1ec7d029d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\profiler">
+      <UniqueIdentifier>{7f19ade8-e46d-49a2-8cdd-54449dca41f3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\profiler">
+      <UniqueIdentifier>{fd1385df-95bc-4b8b-a3da-9fa62f984d01}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -502,21 +508,44 @@
     <ClCompile Include="..\src\gui\debug\romcartbrowser.cpp">
       <Filter>Source Files\alpine</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_stdConsole.cpp">
     <ClCompile Include="GeneratedFiles\Debug\moc_hwregsjerrybrowser.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_stdConsole.cpp">
     <ClCompile Include="GeneratedFiles\Release\moc_hwregsjerrybrowser.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\gui\stdConsole.cpp">
+      <Filter>Source Files\gui</Filter>
     <ClCompile Include="..\src\gui\debug\hwregsjerrybrowser.cpp">
       <Filter>Source Files\alpine</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\profiler\tracyprofiler.cpp">
+      <Filter>Source Files\profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\profiler\ctrlprofilerwin.cpp">
+      <Filter>Source Files\profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_ctrlprofilerwin.cpp">
     <ClCompile Include="GeneratedFiles\Debug\moc_interuptbrowser.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+        <ClCompile Include="GeneratedFiles\Release\moc_ctrlprofilerwin.cpp">
     <ClCompile Include="GeneratedFiles\Release\moc_interuptbrowser.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+        <ClCompile Include="..\src\profiler\vjrxprofilerwin.cpp">
+      <Filter>Source Files\profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\profiler\vjrxprofiler.cpp">
+      <Filter>Source Files\profiler</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_vjrxprofilerwin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_vjrxprofilerwin.cpp">
+      <Filter>Generated Files</Filter>
     <ClCompile Include="..\src\gui\debug\interuptbrowser.cpp">
       <Filter>Source Files\alpine</Filter>
     </ClCompile>
@@ -572,6 +601,21 @@
     </ClInclude>
     <ClInclude Include="..\src\debugger\HWLABELManager.h">
       <Filter>Header Files\debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\profiler\tracyprofiler.h">
+      <Filter>Header Files\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="TracyProfiler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\profiler\baseprofiler.h">
+      <Filter>Header Files\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\profiler\dummyprofiler.h">
+      <Filter>Header Files\profiler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\profiler\vjrxprofiler.h">
+      <Filter>Header Files\profiler</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -734,8 +778,8 @@
     <None Include="..\res\help.html">
       <Filter>Docs</Filter>
     </None>
-    <None Include="..\LICENSE" />
     <None Include="..\README.md" />
+    <None Include="..\.env" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="..\src\debugger\VideoWin.h">
@@ -855,9 +899,16 @@
     <CustomBuild Include="..\src\gui\debug\romcartbrowser.h">
       <Filter>Header Files\alpine</Filter>
     </CustomBuild>
+     <CustomBuild Include="..\src\gui\stdConsole.h">
+      <Filter>Header Files\gui</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\src\profiler\ctrlprofilerwin.h">
+      <Filter>Header Files\profiler</Filter>   
     <CustomBuild Include="..\src\gui\debug\hwregsjerrybrowser.h">
       <Filter>Header Files\alpine</Filter>
     </CustomBuild>
+        <CustomBuild Include="..\src\profiler\vjrxprofilerwin.h">
+      <Filter>Header Files\profiler</Filter>
     <CustomBuild Include="..\src\gui\debug\interuptbrowser.h">
       <Filter>Header Files\alpine</Filter>
     </CustomBuild>
@@ -921,7 +972,16 @@
     <Image Include="..\res\tool-romcart.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\res\tool-interupt.png">
+    <Image Include="..\res\profiler-tracy-on.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\profiler-tracy-off.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\profiler-vjrx-off.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="..\res\profiler-vjrx-on.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

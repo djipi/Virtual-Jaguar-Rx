@@ -3,7 +3,7 @@
 //
 // by Jean-Paul Mari
 //
-// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+// JPM = Jean-Paul Mari
 //  RG = Richard Goedeken
 //
 // WHO  WHEN        WHAT
@@ -18,6 +18,8 @@
 // JPM   June/2021  Update the source file path clean up
 // JPM   Oct./2021  Support wider offset ranges for local and parameter variables
 // JPM  March/2022  Added a '/cygdrive/' directory detection
+// JPM        2025  Support the fixed-point _Fract & _Accum type
+// JPM   Jan./2026  Handle non integer for function parameter
 //
 
 // To Do
@@ -120,6 +122,7 @@ typedef struct VariablesStruct
 	size_t TypeByteSize;							// Variable's Type byte size
 	size_t TypeTag;									// Variable's Type Tag
 	size_t TypeEncoding;							// Variable's Type encoding
+	size_t ALTIUM;									// ALTIUM extension to determine fixed-point type (_Fract, and _Accum)
 	char *PtrTypeName;								// Variable's Type name
 	size_t NbTabVariables;							// Number of Variable's members
 	VariablesStruct **TabVariables;					// Variable's Members (used for structures at the moment)
@@ -1148,6 +1151,7 @@ void DWARFManager_InitDMI(void)
 																	{
 																		switch (return_attr)
 																		{
+																			// offset location in memory
 																		case DW_AT_location:
 																			if (dwarf_formblock(return_attr1, &return_block, &error) == DW_DLV_OK)
 																			{
@@ -1164,12 +1168,21 @@ void DWARFManager_InitDMI(void)
 																				case 5:
 																					switch (return_tagval)
 																					{
+																						// local variable
 																					case DW_TAG_variable:
 																						PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset = ReadLEB128((char *)return_block->bl_data + 1);
 																						break;
 
+																						// function parameter
 																					case DW_TAG_formal_parameter:
-																						PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset = ReadULEB128((char *)return_block->bl_data + 1);
+																						if (*(unsigned char*)(return_block->bl_data) == DW_OP_fbreg)
+																						{
+																							PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset = ReadULEB128((char*)return_block->bl_data + 1);
+																						}
+																						else
+																						{
+																							PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].Offset = ReadLEB128((char*)return_block->bl_data + 1);
+																						}
 																						break;
 
 																					default:
@@ -1184,6 +1197,7 @@ void DWARFManager_InitDMI(void)
 																			}
 																			break;
 
+																			// type offset
 																		case DW_AT_type:
 																			if (dwarf_global_formref(return_attr1, &return_offset, &error) == DW_DLV_OK)
 																			{
@@ -1191,6 +1205,7 @@ void DWARFManager_InitDMI(void)
 																			}
 																			break;
 
+																			// name
 																		case DW_AT_name:
 																			if (dwarf_formstring(return_attr1, &return_string, &error) == DW_DLV_OK)
 																			{
@@ -1205,10 +1220,16 @@ void DWARFManager_InitDMI(void)
 																			}
 																			break;
 
+																			// declaration file number
 																		case DW_AT_decl_file:
 																			break;
 
+																			// declaration line number
 																		case DW_AT_decl_line:
+																			break;
+
+																			// declaration column number
+																		case DW_AT_decl_column:
 																			break;
 
 																		default:
@@ -1379,7 +1400,7 @@ void DWARFManager_InitDMI(void)
 					DWARFManager_InitInfosVariable(PtrCU[NbCU].PtrVariables + i);
 				}
 
-				// Init local variables information based on types information
+				// Init local variables, and function parameters, information based on types information
 				for (size_t i = 0; i < PtrCU[NbCU].NbSubProgs; i++)
 				{
 					for (size_t j = 0; j < PtrCU[NbCU].PtrSubProgs[i].NbVariables; j++)
@@ -1416,7 +1437,7 @@ void DWARFManager_ConformSlachesBackslashes(char *Ptr)
 }
 
 
-// Variables information initialisation
+// Variables information initialization
 void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 {
 #ifdef DEBUG_VariableName
@@ -1503,7 +1524,8 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 						switch (PtrVariables->TypeByteSize)
 						{
 						case 4:
-							PtrVariables->TypeEncoding = 0x7;
+							// enumeration of 4 bytes has unsigned encoding by default
+							PtrVariables->TypeEncoding = DW_ATE_unsigned;
 							break;
 
 						default:
@@ -1561,8 +1583,22 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 					}
 					else
 					{
+						// get number of bytes
 						PtrVariables->TypeByteSize = PtrCU[NbCU].PtrTypes[j].ByteSize;
+						// get the encoding based on the DW_ATE_... dwarf's list
 						PtrVariables->TypeEncoding = PtrCU[NbCU].PtrTypes[j].Encoding;
+						// determine the ALTIUM fixed-point extension based on the type's name (_Fract)
+						if (strstr(PtrVariables->PtrTypeName, "_Fract"))
+						{
+							PtrVariables->ALTIUM = DW_ATE_ALTIUM_fract;
+							PtrVariables->TypeEncoding |= (DW_ATE_ALTIUM_fract << 8);
+						}
+						// determine the ALTIUM fixed-point extension based on the type's name (_Accum)
+						if (strstr(PtrVariables->PtrTypeName, "_Accum"))
+						{
+							PtrVariables->ALTIUM = DW_ATE_ALTIUM_accum;
+							PtrVariables->TypeEncoding |= (DW_ATE_ALTIUM_accum << 8);
+						}
 					}
 					if ((PtrVariables->TypeTag & TypeTag_arraytype))
 					{

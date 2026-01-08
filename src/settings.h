@@ -15,6 +15,7 @@
 // JPM  04/06/2019  Added ELF sections check
 //  RG   Jan./2021  Linux build fix
 // JPM  March/2022  Added the save state patch from PvtLewis
+// JPM   Oct./2025  Added profiler setting
 //
 
 #ifndef __SETTINGS_H__
@@ -62,23 +63,24 @@ struct KBSettings
 extern bool EraseSettings(char *Setting);
 
 
-// Settings struct
+// Settings structure
 struct VJSettings
 {
-	bool useJoystick;											// Joystick usage
-	int32_t joyport;											// Joystick port
-	bool hardwareTypeNTSC;										// Set to false for PAL, otherwise it is NTSC
-	bool useJaguarBIOS;											// Use of any Jaguar BIOS
-	bool useRetailBIOS;											// Use of Retail BIOS
-	bool useDevBIOS;											// Use of Development BIOS
-	bool GPUEnabled;											// Use of GPU
-	bool DSPEnabled;											// Use of DSP
+	bool useJoystick;									// Joystick usage
+	int32_t joyport;									// Joystick port
+	bool hardwareTypeNTSC;								// Set to false for PAL, otherwise it is NTSC
+	bool useJaguarBIOS;									// Use of any Jaguar BIOS
+	bool useRetailBIOS;									// Use of Retail BIOS
+	bool useDevBIOS;									// Use of Development BIOS
+	bool GPUEnabled;									// Use of GPU
+	bool DSPEnabled;									// Use of DSP
 	bool usePipelinedDSP;
-	bool fullscreen;											// Emulator in full screen mode so video output display only
-	bool useOpenGL;												// OpenGL support (always 'true')
+	bool fullscreen;									// Emulator in full screen mode so video output display only
+	bool useOpenGL;										// OpenGL support (always 'true')
 	uint32_t glFilter;
-	bool hardwareTypeAlpine;									// Alpine mode
-	bool softTypeDebugger;										// Soft type debugger mode
+	bool hardwareTypeAlpine;							// Alpine mode
+	bool softTypeDebugger;								// Soft type debugger mode
+	uint32_t useProfilers;								// Use of profilers
 	bool audioEnabled;
 	uint32_t frameSkip;
 	uint32_t renderType;
@@ -94,13 +96,15 @@ struct VJSettings
 	bool disasmopcodes;
 	bool displayHWlabels;
 	bool useFastBlitter;
-	bool compressSaveStates;									// Save States compression
+	bool useDisplayEmuFPS;								// Show the emulation frame rate in the status bar
+	bool compressSaveStates;							// Save States compression
 	bool displayFullSourceFilename;
 	bool ELFSectionsCheck;
 	bool cygdriveDirRemoval;
-	size_t nbrmemory1browserwindow;								// Number of memory browser windows
-	size_t DRAM_size;											// DRAM size (2MB or 8MB)
-	bool full_raz;												// Reset to 0 of the entire system at start of the emulator
+	size_t nbrmemory1browserwindow;						// Number of memory browser windows
+	size_t DRAM_size;									// DRAM size (2MB or 8MB)
+	bool full_raz;										// Reset to 0 of the entire system at start of the emulator
+	bool highDPI;										// High-DPI display support
 
 	// Keybindings in order of U, D, L, R, C, B, A, Op, Pa, 0-9, #, *
 	uint32_t p1KeyBindings[21];

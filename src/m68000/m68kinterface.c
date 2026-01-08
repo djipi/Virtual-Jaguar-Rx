@@ -16,6 +16,7 @@
 // JLH  10/28/2011  Created this file ;-)
 // JPM       /201?  Added M68k debug flag handler
 // JPM  March/2022  Added the save state patch from PvtLewis
+// JPM   Oct./2025  Added cycle accurate profiler handling
 //
 
 #include <stdio.h>
@@ -275,6 +276,7 @@ void m68k_pulse_reset(void)
 }
 
 
+// Execute M68K code for num_cycles clock cycles
 int m68k_execute(int num_cycles)
 {
 	if (regs.stopped)
@@ -304,18 +306,16 @@ int m68k_execute(int num_cycles)
 	regs.interruptCycles = 0;
 #endif
 
-	/* Main loop.  Keep going until we run out of clock cycles */
+	// loop until the requested number of clock cycles are running out
 	do
 	{
-		// This is so our debugging code can break in on a dime.
-		// Otherwise, this is just extra slow down :-P
+		// no instructions are executed when in debugger mode
 		if (regs.spcflags & SPCFLAG_DEBUGGER)
 		{
-			// Not sure this is correct... :-P
+			// return how many cycles have been used
 			num_cycles = initialCycles - regs.remainingCycles;
 			regs.remainingCycles = 0;	// int32_t
 			regs.interruptCycles = 0;	// uint32_t
-
 			return num_cycles;
 		}
 #if 0
@@ -399,14 +399,17 @@ if (inRoutine)
 		}
 
 #ifdef M68K_HOOK_FUNCTION
+		// operation to perform before each instruction
 		M68KInstructionHook();
 #endif
+#ifdef M68KPROFILER_HOOK_FUNCTION
+		// profiler prologue
+		uint32_t m68kPC = m68k_get_reg(NULL, M68K_REG_PC);
+#endif
+		// prepare to execute the instruction at PC
 		uint32_t opcode = get_iword(0);
-//if ((opcode & 0xFFF8) == 0x31C0)
-//{
-//	printf("MOVE.W D%i, EA\n", opcode & 0x07);
-//}
 		int32_t cycles;
+		// execute the instruction at PC
 		if (regs.spcflags & SPCFLAG_DEBUGGER)
 		{
 			 cycles = 0;
@@ -415,10 +418,12 @@ if (inRoutine)
 		{
 			cycles = (int32_t)(*cpuFunctionTable[opcode])(opcode);
 		}
+		// update remaining cycles
 		regs.remainingCycles -= cycles;
-//		pthread_mutex_unlock(&executionLock);
-
-//printf("Executed opcode $%04X (%i cycles)...\n", opcode, cycles);
+#ifdef M68KPROFILER_HOOK_FUNCTION
+		// profiler epilogue
+		M68KProfilerHook(m68kPC, opcode, cycles, m68k_get_reg(NULL, M68K_REG_SP), m68k_get_reg(NULL, M68K_REG_D0));
+#endif
 #endif
 	}
 	while (regs.remainingCycles > 0);
@@ -672,6 +677,9 @@ STATIC_INLINE void m68ki_stack_frame_3word(uint32_t pc, uint32_t sr)
 }
 
 
+// Peek at the internals of a CPU context
+// This can either be a context retrieved using m68k_get_context() or the currently running context
+// If context is NULL, the currently running CPU context will be used
 unsigned int m68k_get_reg(void * context, m68k_register_t reg)
 {
 	if (reg <= M68K_REG_A7)
@@ -690,6 +698,7 @@ unsigned int m68k_get_reg(void * context, m68k_register_t reg)
 }
 
 
+// Poke values into the internals of the currently running CPU context
 void m68k_set_reg(m68k_register_t reg, unsigned int value)
 {
 	if (reg <= M68K_REG_A7)

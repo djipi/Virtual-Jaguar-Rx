@@ -37,7 +37,7 @@ Jaguar programs come in, and a lot of this confusion seem to come from
 Cowering's GoodJag renaming tool. Note that it simply gets some files wrong,
 and it also incorrectly renames cartridge images with an extension that
 belongs to an already established extension (.jag is a Jaguar Server
-executable--read on). To clarify, there are basically fith major types of
+executable--read on). To clarify, there are basically six major types of
 Jaguar binary images that are NOT cartridge images:
 
     .abs
@@ -45,6 +45,7 @@ Jaguar binary images that are NOT cartridge images:
     .rom
     .bin
     .elf
+	.j64
 
 The first type, the .abs file, is a DRI/Alcyon format absolute location
 executable. These come in two different flavors and contain load and run
@@ -78,6 +79,7 @@ or without DWARF information.
 There is a sith type of file that is supported by Virtual Jaguar, the .j64
 file, which is simply a 1, 2, or 4 Meg dump of a Jaguar cartridge ROM which
 loads at $800000 in the Jaguar memory space.
+In case of uncommon file size, the .j64 is considered as a homebrew .rom type.
 
 
 ----------------------------------
@@ -93,13 +95,13 @@ Virtual Jaguar GCC/Qt is not just a port of the MS Visual C++/SDL sourcecode
 but has also been extended and rewritten so that we can enjoy Atari Jaguar
 emulation on every platform that has a GCC compiler and a port of Qt.
 
-Currently Virtual Jaguar GCC/Qt Rx compiles on WIN64 using msys2/MinGW64,
-and Visual Studio 2017. Compiles also on cygwin64 but no tests have been done.
+Currently Virtual Jaguar GCC/Qt Rx compiles on WIN64 on MSYS2/MinGW64,
+and Visual Studio 2022. Compiles also on cygwin64 but no tests have been done.
 It has previously compiled on WIN32 using mingw, and several UN*X based systems
 (BeOS, Linux, FreeBSD and MacOS). It may run on other
 systems as well but we can not guarantee that.
 
-The Rx version has been made specically to add a debugger support, but some
+The Rx version has been made specically to add a debugger and profiler, but some
 modifications have been done as well. The official contact email and name(s) are
 not related in any way with this work.
 
@@ -145,3 +147,4 @@ Jaguar better, more accurate, and more polished than it would be otherwise. We
 really appreciate your help!
 
 SDLEMU
+
