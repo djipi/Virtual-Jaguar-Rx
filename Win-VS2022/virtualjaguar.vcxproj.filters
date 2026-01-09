@@ -509,15 +509,20 @@
       <Filter>Source Files\alpine</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_stdConsole.cpp">
+          <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_hwregsjerrybrowser.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_stdConsole.cpp">
+          <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_hwregsjerrybrowser.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
     <ClCompile Include="..\src\gui\stdConsole.cpp">
       <Filter>Source Files\gui</Filter>
+      </ClCompile>
     <ClCompile Include="..\src\gui\debug\hwregsjerrybrowser.cpp">
       <Filter>Source Files\alpine</Filter>
     </ClCompile>
@@ -528,10 +533,14 @@
       <Filter>Source Files\profiler</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_ctrlprofilerwin.cpp">
+          <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_interuptbrowser.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
         <ClCompile Include="GeneratedFiles\Release\moc_ctrlprofilerwin.cpp">
+              <Filter>Generated Files</Filter>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_interuptbrowser.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
@@ -546,6 +555,7 @@
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_vjrxprofilerwin.cpp">
       <Filter>Generated Files</Filter>
+          </ClCompile>
     <ClCompile Include="..\src\gui\debug\interuptbrowser.cpp">
       <Filter>Source Files\alpine</Filter>
     </ClCompile>
@@ -903,12 +913,14 @@
       <Filter>Header Files\gui</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\profiler\ctrlprofilerwin.h">
-      <Filter>Header Files\profiler</Filter>   
+      <Filter>Header Files\profiler</Filter>
+          </CustomBuild>   
     <CustomBuild Include="..\src\gui\debug\hwregsjerrybrowser.h">
       <Filter>Header Files\alpine</Filter>
     </CustomBuild>
         <CustomBuild Include="..\src\profiler\vjrxprofilerwin.h">
       <Filter>Header Files\profiler</Filter>
+          </CustomBuild>
     <CustomBuild Include="..\src\gui\debug\interuptbrowser.h">
       <Filter>Header Files\alpine</Filter>
     </CustomBuild>

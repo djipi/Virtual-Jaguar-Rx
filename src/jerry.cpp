@@ -169,7 +169,7 @@
 // ------------------------------------------------------------
 
 #include "jerry.h"
-
+#include <QtWidgets/QMessageBox>
 #include <string.h>								// For memcpy
 //#include <math.h>
 #include "cdrom.h"
@@ -534,6 +534,39 @@ void JERRYSetPendingIRQ(int irq)
 }
 
 
+// 
+int JERRYExceptionMessage(unsigned int address, char *bits, bool access)
+{
+	if (!M68KDebugHaltStatus())
+	{
+		QString msg;
+		QMessageBox msgBox;
+
+		msg.sprintf("Not supported JERRY's location $%06x (%s bits) in %s access", address, bits, access ? "write" : "read");
+		msgBox.setText(msg);
+
+		msgBox.setInformativeText("Do you want to continue?");
+		msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+		msgBox.setDefaultButton(QMessageBox::No);
+
+		int retVal = msgBox.exec();
+
+		if (retVal == QMessageBox::Yes)
+		{
+			return false;
+		}
+		else
+		{
+			return M68KDebugHalt();
+		}
+	}
+	else
+	{
+		return 1;
+	}
+}
+
+
 // JERRY byte access (read)
 //
 // Memory emulation is distributed among arrrays & variables
@@ -571,6 +604,7 @@ uint8_t JERRYReadByte(uint32_t offset, uint32_t who/*=UNKNOWN*/)
 		//under the new system... !!! FIX !!!
 			else
 			{
+				// value from Timer 1 & 2 registers
 				if ((offset >= 0xF10036) && (offset <= 0xF1003D))
 				{
 					WriteLog("JERRY: Unhandled timer read (BYTE) at %08X...\n", offset);
@@ -601,6 +635,7 @@ uint8_t JERRYReadByte(uint32_t offset, uint32_t who/*=UNKNOWN*/)
 					}
 					else
 					{
+						// value from EEPROM
 						if ((offset >= 0xF14000) && (offset <= 0xF1A0FF))
 						{
 							return EepromReadByte(offset);
@@ -631,13 +666,14 @@ uint16_t JERRYReadWord(uint32_t offset, uint32_t who/*=UNKNOWN*/)
 	}
 	else
 	{
+		// value from DSP's local RAM
 		if ((offset >= DSP_WORK_RAM_BASE) && (offset <= (DSP_WORK_RAM_BASE + 0x1FFF)))
 		{
 			return DSPReadWord(offset, who);
 		}
-		// value from LRXD/RRXD/SSTAT $F1A148/4C/50 (really 16-bit registers...)
 		else
 		{
+			// value from LRXD/RRXD/SSTAT $F1A148/4C/50 (really 16-bit registers...)
 			if ((offset >= 0xF1A148) && (offset <= 0xF1A153))
 			{
 				return DACReadWord(offset, who);
@@ -648,6 +684,7 @@ uint16_t JERRYReadWord(uint32_t offset, uint32_t who/*=UNKNOWN*/)
 			//in the jerry_timer_n_counter variables... !!! FIX !!! [DONE]
 			else
 			{
+				// value from Timer 1 &2 registers
 				if ((offset >= 0xF10036) && (offset <= 0xF1003D))
 				{
 					WriteLog("JERRY: Unhandled timer read (WORD) at %08X...\n", offset);
@@ -656,6 +693,7 @@ uint16_t JERRYReadWord(uint32_t offset, uint32_t who/*=UNKNOWN*/)
 				//		return clock_word_read(offset);
 				else
 				{
+					// pending interrupts (bits 0 to 5 indicate which interrupts are pending)
 					if (offset == 0xF10020)
 					{
 						//		return jerryIntPending;
@@ -679,6 +717,7 @@ uint16_t JERRYReadWord(uint32_t offset, uint32_t who/*=UNKNOWN*/)
 							}
 							else
 							{
+								// value from EEPROM
 								if ((offset >= 0xF14000) && (offset <= 0xF1A0FF))
 								{
 									return EepromReadWord(offset);
