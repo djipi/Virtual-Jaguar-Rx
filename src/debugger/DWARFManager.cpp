@@ -40,11 +40,11 @@
 #include "DWARFManager.h"
 
 // Definitions for debugging
-//#define DEBUG_NumCU			0x2				// CU number to debug or undefine it
-//#define DEBUG_VariableName	"cvar_vars"				// Variable name to look for or undefine it
-//#define DEBUG_TypeName		"edict_t"			// Type name to look for or undefine it
-//#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for or undefine it (not used / not supported)
-//#define DEBUG_Filename		"crt0"			// Filename to look for or undefine it
+//#define DEBUG_NumCU			0x2				// CU number to debug
+//#define DEBUG_VariableName	"cvar_vars"				// Variable name to look for
+//#define DEBUG_TypeName		"edict_t"			// Type name to look for
+//#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for (not used / not supported)
+//#define DEBUG_Filename		"src/sys_jag.c"			// Filename to look for
 
 // Definitions for handling data
 //#define CONVERT_QT_HML								// Text will be converted as HTML
@@ -132,14 +132,19 @@ typedef struct VariablesStruct
 typedef struct SubProgStruct
 {
 	size_t Tag;
+	size_t TypeOffset;								// Offset pointing on the sub program return type
+	bool external;									// Public (true) / Static (false)
 	size_t NumLineSrc;
+	size_t EntryPCIndex;							// Index of the entry point
+	size_t EntryPC;									// Entry point
 	size_t StartPC;
-	size_t LowPC, HighPC;
+	size_t HighPCOffset;							// High PC offset
+	size_t LowPC, HighPC;							// Address range occupation
 	size_t FrameBase;
 	char *PtrLineSrc;
-	char *PtrSubprogramName;						// Sub program name
-	size_t NbLinesSrc;								// Number of lines source used by the sub program
-	DMIStruct_LineSrc *PtrLinesSrc;					// Pointer of the lines source for the sub program
+	char *PtrSubprogramName;						// Name
+	size_t NbLinesSrc;								// Number of used lines source
+	DMIStruct_LineSrc *PtrLinesSrc;					// Pointer of the lines source
 	size_t NbVariables;								// Variables number
 	VariablesStruct *PtrVariables;					// Pointer to the local variables list information structure
 }S_SubProgStruct;
@@ -148,7 +153,11 @@ typedef struct SubProgStruct
 typedef struct CUStruct
 {
 	size_t Tag;
+	size_t AddrBase;								// Start of the address pool
+	size_t RngListsBase;							// Start of the range lists pool
+	size_t LocListsBase;							// Start of the location lists pool
 	size_t Language;								// Language (C, etc.) used by the source code
+	size_t HighPCOffset;
 	size_t LowPC, HighPC;							// Memory range for the code
 	char *PtrProducer;								// "Producer" text information (mostly compiler and compilation options used)
 	char *PtrSourceFilename;						// Source file name
@@ -385,18 +394,19 @@ void DWARFManager_InitDMI(void)
 	Dwarf_Attribute	return_attr1;
 	Dwarf_Half return_tagval, return_attr;
 	Dwarf_Half version, offset_size;
+	Dwarf_Half form;
 	Dwarf_Addr return_lowpc, return_highpc, return_lineaddr;
 	Dwarf_Block *return_block;
 	Dwarf_Signed atcnt, cnt, return_value;
 	Dwarf_Die return_sib, return_die, return_sub, return_subdie;
 	Dwarf_Off return_offset;
 	Dwarf_Line *linebuf;
-	Dwarf_Half form;
+	Dwarf_Bool return_bool;
 	FILE *SrcFile;
 	char *return_string;
 	char *Ptr, *Ptr1;
 
-	// Initialisation for the Compilation Units table
+	// Initialization for the Compilation Units table
 	NbCU = 0;
 	PtrCU = NULL;
 
@@ -445,9 +455,35 @@ void DWARFManager_InitDMI(void)
 
 											// End address
 										case DW_AT_high_pc:
-											if (dwarf_highpc(return_sib, &return_highpc, &error) == DW_DLV_OK)
+											if (dwarf_whatform(return_attr1, &form, &error) == DW_DLV_OK)
 											{
-												PtrCU[NbCU].HighPC = return_highpc;
+												switch (form)
+												{
+												case DW_FORM_addr:
+													if (dwarf_formaddr(return_attr1, &return_highpc, &error) == DW_DLV_OK)
+													{
+														PtrCU[NbCU].HighPC = return_highpc;
+													}
+													break;
+
+												case DW_FORM_ref4:
+													if (dwarf_formref(return_attr1, &return_offset, &error) == DW_DLV_OK)
+													{
+														PtrCU[NbCU].HighPCOffset = return_offset;
+													}
+													break;
+
+													// DWARF4, and above, commonly encodes high_pc as an offset from low_pc
+												case DW_FORM_data4:
+													if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+													{
+														PtrCU[NbCU].HighPCOffset = return_uvalue;
+													}
+													break;
+
+												default:
+													break;
+												}
 											}
 											break;
 
@@ -494,6 +530,99 @@ void DWARFManager_InitDMI(void)
 											}
 											break;
 
+											// Start of the address pool
+										case DW_AT_addr_base:
+											if (dwarf_whatform(atlist[i], &form, &error) == DW_DLV_OK)
+											{
+												switch (form)
+												{
+													// DWARF 5 uses DW_FORM_sec_offset for addr_base
+												case DW_FORM_sec_offset:
+													if (dwarf_global_formref(atlist[i], &return_offset, &error) == DW_DLV_OK)
+													{
+														PtrCU[NbCU].AddrBase = return_offset;
+													}
+													break;
+
+												case DW_FORM_data1:
+												case DW_FORM_data2:
+												case DW_FORM_data4:
+												case DW_FORM_data8:
+												case DW_FORM_udata:
+													if (dwarf_formudata(atlist[i], &return_uvalue, &error) == DW_DLV_OK)
+													{
+														PtrCU[NbCU].AddrBase = return_uvalue;
+													}
+													break;
+
+												default:
+													break;
+												}
+											}
+											break;
+
+											// Start of the range lists pool
+										case DW_AT_rnglists_base:
+											if (dwarf_whatform(atlist[i], &form, &error) == DW_DLV_OK)
+											{
+												switch (form)
+												{
+													// DWARF 5 uses DW_FORM_sec_offset for rnglists_base
+												case DW_FORM_sec_offset:										
+													if (dwarf_global_formref(atlist[i], &return_offset, &error) == DW_DLV_OK)
+													{
+														PtrCU[NbCU].RngListsBase = return_offset;
+													}
+													break;
+
+												case DW_FORM_data1:
+												case DW_FORM_data2:
+												case DW_FORM_data4:
+												case DW_FORM_data8:
+												case DW_FORM_udata:
+													if (dwarf_formudata(atlist[i], &return_uvalue, &error) == DW_DLV_OK)
+													{
+														PtrCU[NbCU].RngListsBase = return_uvalue;
+													}
+													break;
+
+												default:
+													break;
+												}
+											}
+											break;
+
+											// Location lists base
+										case DW_AT_loclists_base:
+											if (dwarf_whatform(atlist[i], &form, &error) == DW_DLV_OK)
+											{
+												switch (form)
+												{
+													// DWARF 5 uses DW_FORM_sec_offset for loclists_base
+												case DW_FORM_sec_offset:
+													if (dwarf_global_formref(atlist[i], &return_offset, &error) == DW_DLV_OK)
+													{
+														PtrCU[NbCU].LocListsBase = return_offset;
+													}
+													break;
+
+												case DW_FORM_data1:
+												case DW_FORM_data2:
+												case DW_FORM_data4:
+												case DW_FORM_data8:
+												case DW_FORM_udata:
+													if (dwarf_formudata(atlist[i], &return_uvalue, &error) == DW_DLV_OK)
+													{
+														PtrCU[NbCU].LocListsBase = return_uvalue;
+													}
+													break;
+
+												default:
+													break;
+												}
+											}
+											break;
+
 										default:
 											break;
 										}
@@ -501,6 +630,12 @@ void DWARFManager_InitDMI(void)
 									dwarf_dealloc(dbg, atlist[i], DW_DLA_ATTR);
 								}
 								dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
+							}
+
+							// Adjust HighPC if needed
+							if (!PtrCU[NbCU].HighPC)
+							{
+								PtrCU[NbCU].HighPC = PtrCU[NbCU].LowPC + PtrCU[NbCU].HighPCOffset;
 							}
 
 							// check filename presence
@@ -760,6 +895,7 @@ void DWARFManager_InitDMI(void)
 															default:
 																break;
 															}
+
 															dwarf_dealloc(dbg, return_block, DW_DLA_BLOCK);
 														}
 														break;
@@ -846,10 +982,6 @@ void DWARFManager_InitDMI(void)
 												{
 													switch (return_attr)
 													{
-														// 
-													case DW_AT_sibling:
-														break;
-
 														// Type's type offset
 													case DW_AT_type:
 														if (dwarf_global_formref(return_attr1, &return_offset, &error) == DW_DLV_OK)
@@ -887,14 +1019,6 @@ void DWARFManager_InitDMI(void)
 															}
 															dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
 														}
-														break;
-
-														// Type's file number
-													case DW_AT_decl_file:
-														break;
-
-														// Type's line number
-													case DW_AT_decl_line:
 														break;
 
 													default:
@@ -939,41 +1063,44 @@ void DWARFManager_InitDMI(void)
 																			case DW_AT_data_member_location:
 																				if (dwarf_whatform(return_attr1, &form, &error) == DW_DLV_OK)
 																				{
-																					if ((form == DW_FORM_data1) || (form == DW_FORM_data2) || (form == DW_FORM_data2) || (form == DW_FORM_data4) || (form == DW_FORM_data8) || (form == DW_FORM_udata))
+																					switch (form)
 																					{
+																					case DW_FORM_data1:
+																					case DW_FORM_data2:
+																					case DW_FORM_data4:
+																					case DW_FORM_data8:
+																					case DW_FORM_udata:
 																						if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
 																						{
 																							PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers[PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers].DataMemberLocation = return_uvalue;
 																						}
-																					}
-																					else
-																					{
-																						if (form == DW_FORM_sdata)
-																						{
-																							if (dwarf_formsdata(return_attr1, &return_value, &error) == DW_DLV_OK)
-																							{
-																								PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers[PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers].DataMemberLocation = return_value;
-																							}
-																						}
-																						else
-																						{
-																							if (dwarf_formblock(return_attr1, &return_block, &error) == DW_DLV_OK)
-																							{
-																								switch (return_block->bl_len)
-																								{
-																								case 2:
-																								case 3:
-																								case 4:
-																									PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers[PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers].DataMemberLocation = ReadULEB128((char *)return_block->bl_data + 1);
-																									break;
+																						break;
 
-																								default:
-																									break;
-																								}
-
-																								dwarf_dealloc(dbg, return_block, DW_DLA_BLOCK);
-																							}
+																					case DW_FORM_sdata:
+																						if (dwarf_formsdata(return_attr1, &return_value, &error) == DW_DLV_OK)
+																						{
+																							PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers[PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers].DataMemberLocation = return_value;
 																						}
+																						break;
+
+																					default:
+																						if (dwarf_formblock(return_attr1, &return_block, &error) == DW_DLV_OK)
+																						{
+																							switch (return_block->bl_len)
+																							{
+																							case 2:
+																							case 3:
+																							case 4:
+																								PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].PtrStructureMembers[PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].NbStructureMembers].DataMemberLocation = ReadULEB128((char*)return_block->bl_data + 1);
+																								break;
+
+																							default:
+																								break;
+																							}
+
+																							dwarf_dealloc(dbg, return_block, DW_DLA_BLOCK);
+																						}
+																						break;
 																					}
 																				}
 																				break;
@@ -994,14 +1121,6 @@ void DWARFManager_InitDMI(void)
 
 																					dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
 																				}
-																				break;
-
-																				// Member's file number
-																			case DW_AT_decl_file:
-																				break;
-
-																				// Member's line number
-																			case DW_AT_decl_line:
 																				break;
 
 																			default:
@@ -1052,9 +1171,28 @@ void DWARFManager_InitDMI(void)
 
 														// end address
 													case DW_AT_high_pc:
-														if (dwarf_highpc(return_die, &return_highpc, &error) == DW_DLV_OK)
+														if (dwarf_whatform(return_attr1, &form, &error) == DW_DLV_OK)
 														{
-															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].HighPC = return_highpc;
+															switch (form)
+															{
+															case DW_FORM_addr:
+																if (dwarf_formaddr(return_attr1, &return_highpc, &error) == DW_DLV_OK)
+																{
+																	PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].HighPC = return_highpc;
+																}
+																break;
+
+																// DWARF4, and above, commonly encodes high_pc as an offset from low_pc
+															case DW_FORM_data4:																
+																if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+																{
+																	PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].HighPCOffset = return_uvalue;
+																}
+																break;
+
+															default:
+																break;
+															}
 														}
 														break;
 
@@ -1085,23 +1223,60 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
-													case DW_AT_sibling:
+														// entry point address
+													case DW_AT_entry_pc:
+														if (dwarf_whatform(return_attr1, &form, &error) == DW_DLV_OK)
+														{
+															switch (form)
+															{
+																// Direct address form
+															case DW_FORM_addr:											
+																if (dwarf_formaddr(return_attr1, &return_lowpc, &error) == DW_DLV_OK)
+																{
+																	PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].EntryPC = return_lowpc;
+																}
+																break;
+
+																// Expression location form
+															case DW_FORM_exprloc:
+																if (dwarf_formblock(return_attr1, &return_block, &error) == DW_DLV_OK)
+																{
+																	unsigned char op = *((unsigned char*)(return_block->bl_data));
+																	switch (op)
+																	{
+																	case DW_OP_addrx:
+																		PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].EntryPCIndex = ReadULEB128((char*)return_block->bl_data + 1);
+																		break;
+
+																	default:
+																		break;
+																	}
+																	break;
+
+																	dwarf_dealloc(dbg, return_block, DW_DLA_BLOCK);
+																}
+																break;
+
+															default:
+																break;
+															}
+														}
 														break;
 
-													case DW_AT_GNU_all_tail_call_sites:
-														break;
-
+														// Data type of a subprogram return value
 													case DW_AT_type:
+														if (dwarf_formref(return_attr1, &return_offset, &error) == DW_DLV_OK)
+														{
+															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].TypeOffset = return_offset;
+														}
 														break;
 
-													case DW_AT_prototyped:
-														break;
-
-														// File number
-													case DW_AT_decl_file:
-														break;
-
+														// Distinguish between public/exported functions and internal/static functions
 													case DW_AT_external:
+														if (dwarf_formflag(return_attr1, &return_bool, &error) == DW_DLV_OK)
+														{
+															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].external = return_bool;
+														}
 														break;
 
 													default:
@@ -1112,6 +1287,12 @@ void DWARFManager_InitDMI(void)
 											dwarf_dealloc(dbg, atlist[i], DW_DLA_ATTR);
 										}
 										dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
+
+										// Get the high_pc based on the offset and low_pc
+										if (!PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].HighPC)
+										{
+											PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].HighPC = PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].LowPC + PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].HighPCOffset;
+										}
 
 										// Get source line number and associated block of address
 										for (Dwarf_Signed i = 0; i < cnt; ++i)
@@ -1193,6 +1374,7 @@ void DWARFManager_InitDMI(void)
 																				default:
 																					break;
 																				}
+
 																				dwarf_dealloc(dbg, return_block, DW_DLA_BLOCK);
 																			}
 																			break;
@@ -1220,18 +1402,6 @@ void DWARFManager_InitDMI(void)
 																			}
 																			break;
 
-																			// declaration file number
-																		case DW_AT_decl_file:
-																			break;
-
-																			// declaration line number
-																		case DW_AT_decl_line:
-																			break;
-
-																			// declaration column number
-																		case DW_AT_decl_column:
-																			break;
-
 																		default:
 																			break;
 																		}
@@ -1245,9 +1415,6 @@ void DWARFManager_InitDMI(void)
 
 															dwarf_dealloc(dbg, atlist, DW_DLA_LIST);
 														}
-														break;
-
-													case DW_TAG_label:
 														break;
 
 													default:
