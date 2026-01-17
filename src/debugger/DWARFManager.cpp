@@ -134,6 +134,7 @@ typedef struct SubProgStruct
 	size_t Tag;
 	size_t TypeOffset;								// Offset pointing on the sub program return type
 	bool external;									// Public (true) / Static (false)
+	bool declaration;								// Declaration only (true) / Definition (false)
 	size_t NumLineSrc;
 	size_t EntryPCIndex;							// Index of the entry point
 	size_t EntryPC;									// Entry point
@@ -1279,6 +1280,14 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
+														// Indicate if the subprogram is only a declaration, or has a definition too
+													case DW_AT_declaration:
+														if (dwarf_formflag(return_attr1, &return_bool, &error) == DW_DLV_OK)
+														{
+															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].declaration = return_bool;
+														}
+														break;
+
 													default:
 														break;
 													}
@@ -1809,8 +1818,10 @@ char *DWARFManager_GetSymbolnameFromAdr(size_t Adr)
 // Return the existence status in Status if pointer not NULL
 char *DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, DWARFstatus *Status)
 {
+	// loop on the number of compilation units
 	for (size_t i = 0; i < NbCU; i++)
 	{
+		// check the address range of the compilation unit
 		if ((Adr >= PtrCU[i].LowPC) && (Adr < PtrCU[i].HighPC))
 		{
 			if (Status)
@@ -1822,7 +1833,7 @@ char *DWARFManager_GetFullSourceFilenameFromAdr(size_t Adr, DWARFstatus *Status)
 		}
 	}
 
-	return	NULL;
+	return NULL;
 }
 
 
