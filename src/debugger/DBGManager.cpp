@@ -11,15 +11,13 @@
 // JPM  12/21/2016  Created this file
 // JPM              Various efforts to set the ELF format support
 // JPM              Various efforts to set the DWARF format support
-// JPM  09/15/2018  Support the unsigned char
-// JPM   Oct./2018  Cosmetic changes, added source file search paths, and ELF function name
-// JPM   Aug./2019  Added new functions mainly for source text lines
-// JPM  Sept./2019  Support the unsigned/signed short type
+// JPM        2018  Support the unsigned char, cosmetic changes, added source file search paths, and ELF function name
+// JPM        2019  Added new functions mainly for source text lines, support the unsigned/signed short type
 //  RG   Jan./2021  Linux build fixes
 // JPM    May/2021  Code refactoring for the variables
 // JPM   Dec./2024  Fix the get address in case of empty symbol name
 // JPM   Nov./2025  Added _Fract & _Accum fixed-point support
-// JPM   Jan./2026  Added char type for the variable
+// JPM        2026  Added char type & fixed the unsigned char for the variable
 //
 
 // To Do
@@ -654,7 +652,7 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 			break;
 
 		case DBG_ATE_unsigned_char:
-			sprintf(value, "%u", (unsigned int)V.C);
+			sprintf(value, "%u", (unsigned int)V.C & 0xff);
 			break;
 
 		case DBG_ATE_ptr:
