@@ -17,7 +17,7 @@
 // JPM    May/2021  Code refactoring for the variables
 // JPM   Dec./2024  Fix the get address in case of empty symbol name
 // JPM   Nov./2025  Added _Fract & _Accum fixed-point support
-// JPM        2026  Added char type & fixed the unsigned char for the variable
+// JPM        2026  Added char type & fixed the unsigned char for the variable, updated fixed point Q16.15 precision
 //
 
 // To Do
@@ -558,6 +558,7 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 {
 	Value V;
 	char *Ptrvalue = value;
+	int32_t a32;
 
 	value[0] = 0;
 
@@ -712,7 +713,8 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 
 				case 4:
 					// Q16.15
-					(V.SI & 0x80000000) ? sprintf(value, "-%d.%03d", (-V.SI >> 15), ((-V.SI & 0x7fff) * 1000 + 64) >> 15) : sprintf(value, "%d.%03d", (V.SI >> 15), ((V.SI & 0x7fff) * 1000 + 64) >> 15);
+					a32 = (V.SI < 0) ? -V.SI : V.SI;
+					sprintf(value, "%s%d.%05d", (V.SI < 0) ? "-" : "", (a32 >> 15), (int)((((int64_t)(a32 & 0x7fff) * 100000) + 16384) >> 15));
 					break;
 
 				case 8:
