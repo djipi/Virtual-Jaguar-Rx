@@ -81,6 +81,7 @@ struct VJSettings
 	bool hardwareTypeAlpine;							// Alpine mode
 	bool softTypeDebugger;								// Soft type debugger mode
 	uint32_t useProfilers;								// Use of profilers
+	uint32_t remotePort;								// Remote port
 	bool audioEnabled;
 	uint32_t frameSkip;
 	uint32_t renderType;

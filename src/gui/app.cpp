@@ -90,6 +90,7 @@ int main(int argc, char * argv[])
 	vjs.hardwareTypeAlpine = false;
 	vjs.softTypeDebugger = false;
 	vjs.useProfilers = NOPROFILER;
+	vjs.remotePort = 1234;
 	vjs.DRAM_size = 0x200000;
 	vjs.full_raz = false;
 	vjs.highDPI = false;
@@ -213,6 +214,7 @@ bool ParseCommandLine(int argc, char* argv[])
 				"   --alpine          -a       Put the emulator into Alpine mode\n"
 				"   --debugger        -D       Put the emulator into Debugger mode\n"
 				"   --profilers       -P       Enable all profilers\n"
+				"   --remote-port[=value]      Set the remote port (default: 1234)\n"
 #ifdef TRACY_ENABLE
 				"   --profiler-tracy           Enable Tracy profiler\n"
 #endif
@@ -280,6 +282,26 @@ bool ParseCommandLine(int argc, char* argv[])
 						vjs.hardwareTypeAlpine = true;
 						// We also enable logging as well :-)
 						useLogfile = true;
+					}
+
+					// Remote port
+					if (strstr(argv[i], "--remote-port"))
+					{
+						char* portStr = strchr(argv[i], '=');
+						if (portStr)
+						{
+							portStr++;
+							uint32_t port = atoi(portStr);
+							if (port > 0 && port <= 65535)
+							{
+								printf("Remote port set to %u.\n", port);
+								vjs.remotePort = port;
+							}
+							else
+							{
+								printf("Invalid remote port specified: %s\n", portStr);
+							}
+						}
 					}
 
 #ifdef TRACY_ENABLE
