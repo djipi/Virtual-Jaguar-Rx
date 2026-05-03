@@ -126,6 +126,9 @@
     <ClInclude Include="..\..\src\profiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\remote.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\cdintf.cpp">
@@ -213,6 +216,9 @@
       <Filter>Source Files\Jerry</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\profiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\remote.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,6 +1,6 @@
 # Virtual Jaguar Rx
 Virtual Jaguar (VJ) is a software dedicated to emulate the Atari Jaguar hardware.<br>
-The VJ-Rx version is mainly developed to add a debugger, and a profiler.
+The VJ-Rx version is mainly developed to add a debugger, a remote control, and a profiler.
 
 ## Disclaimer
 The use of this software is entirely at your own risk. Nobody can be held responsible for

@@ -15,7 +15,7 @@
 
 #include <stdint.h>
 
-extern uint8_t jagMemSpace[];
+extern uint8_t jagMemSpace[0xF20000];
 
 extern uint8_t * jaguarMainRAM;
 extern uint8_t * jaguarMainROM;

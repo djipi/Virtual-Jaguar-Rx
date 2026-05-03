@@ -127,7 +127,7 @@ void Profiler_Init(uint32_t type, lua_State* LuaLib)
 
 
 // Start the profiler & the profilers
-void profiler_Start(void)
+void Profiler_Start(void)
 {
 	// profiler agnostic initialization
 	Profiler_ClearNames();

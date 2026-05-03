@@ -58,8 +58,8 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_EMULATED_CLOCK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(QTDIR)\include;$(SDL2DIR)\include;$(ZLIBDIR)\include;$(TRACYPROFILERDIR)\public;$(LUADIR)\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_EMULATED_CLOCK;GDBSTUB_ENABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(QTDIR)\include;$(SDL2DIR)\include;$(ZLIBDIR)\include;$(TRACYPROFILERDIR)\public;$(LUADIR)\include;$(GDBSTUBDIR)\include</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)obj\</ObjectFileName>
@@ -86,7 +86,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_LIB;_RELEASE;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_EMULATED_CLOCK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;_RELEASE;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_EMULATED_CLOCK;GDBSTUB_ENABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(QTDIR)\include;$(SDL2DIR)\include;$(ZLIBDIR)\include;$(TRACYPROFILERDIR)\public;$(LUADIR)\include</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MinimalRebuild>false</MinimalRebuild>
@@ -131,6 +131,7 @@
     <ClInclude Include="..\..\src\modelsBIOS.h" />
     <ClInclude Include="..\..\src\op.h" />
     <ClInclude Include="..\..\src\profiler.h" />
+    <ClInclude Include="..\..\src\remote.h" />
     <ClInclude Include="..\..\src\state.h" />
     <ClInclude Include="..\..\src\tom.h" />
     <ClInclude Include="..\..\src\universalhdr.h" />
@@ -169,6 +170,7 @@
     <ClCompile Include="..\..\src\modelsBIOS.cpp" />
     <ClCompile Include="..\..\src\op.cpp" />
     <ClCompile Include="..\..\src\profiler.cpp" />
+    <ClCompile Include="..\..\src\remote.cpp" />
     <ClCompile Include="..\..\src\state.cpp" />
     <ClCompile Include="..\..\src\tom.cpp" />
     <ClCompile Include="..\..\src\universalhdr.cpp" />

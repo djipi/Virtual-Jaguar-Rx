@@ -45,6 +45,8 @@ Git commit:
 23) Removed the Easter egg --yarrr option
 23) Documentation & content texts updates
 24) Add char type support, and handle non integer for function parameter, in debugger
+25) Added a feature to receive remote control commands
+--- GDB remote protocol support for the M68K CPU (registers & memory read/write)
 
 pre-Release 5b (20th July 2022)
 -------------------------------

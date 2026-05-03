@@ -16,6 +16,7 @@
 //  RG   Jan./2021  Linux build fix
 // JPM  March/2022  Added the save state patch from PvtLewis
 // JPM   Oct./2025  Added profiler setting
+// JPM    May/2026  Added remote control support
 //
 
 #ifndef __SETTINGS_H__
@@ -81,6 +82,7 @@ struct VJSettings
 	bool hardwareTypeAlpine;							// Alpine mode
 	bool softTypeDebugger;								// Soft type debugger mode
 	uint32_t useProfilers;								// Use of profilers
+	uint32_t useRemotes;								// Use of remotes
 	uint32_t remotePort;								// Remote port
 	bool audioEnabled;
 	uint32_t frameSkip;

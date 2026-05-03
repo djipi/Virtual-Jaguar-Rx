@@ -21,6 +21,7 @@
 // JPM   Apr./2019  Fixed a command line option duplication
 // JPM   Jan./2024  Added the missing timer for the Quit Sub System
 // JPM        2025  Added profiler options, lua library, profiler initialization, Easter egg option removed, high-DPI support and clean-up in the usage
+// JPM    May/2026  Added remote support
 //
 
 // Fix compilation warning: 'main' redefined
@@ -39,6 +40,7 @@
 #include <cstdio>
 #include "debugger/DBGManager.h"
 #include "profiler.h"
+#include "remote.h"
 
 // Apparently on win32, SDL is hijacking main from Qt. So let's do this:
 #if defined (__GCCWIN32__) || defined (_MSC_VER)
@@ -91,6 +93,7 @@ int main(int argc, char * argv[])
 	vjs.softTypeDebugger = false;
 	vjs.useProfilers = NOPROFILER;
 	vjs.remotePort = 1234;
+	vjs.useRemotes = NOREMOTE;
 	vjs.DRAM_size = 0x200000;
 	vjs.full_raz = false;
 	vjs.highDPI = false;
@@ -133,12 +136,16 @@ int main(int argc, char * argv[])
 			luaL_openlibs(LuaLib);
 			DBGManager_Init();
 			Profiler_Init(vjs.useProfilers, LuaLib);
-			App app(argc, argv);					// Declare an instance of the application
+			Remote_Init(vjs.useRemotes, vjs.remotePort);
+			// declare an instance of the application
+			App app(argc, argv);					
 			Gamepad::AllocateJoysticks();
 			AutoConnectProfiles();
-			retVal = app.exec();					// And run it!
+			// application launch and main loop
+			retVal = app.exec();					
 			DBGManager_Close();
 			Profiler_Close();
+			Remote_Close();
 			Gamepad::DeallocateJoysticks();
 			lua_close(LuaLib);
 			// Free SDL components last...!
@@ -214,7 +221,11 @@ bool ParseCommandLine(int argc, char* argv[])
 				"   --alpine          -a       Put the emulator into Alpine mode\n"
 				"   --debugger        -D       Put the emulator into Debugger mode\n"
 				"   --profilers       -P       Enable all profilers\n"
-				"   --remote-port[=value]      Set the remote port (default: 1234)\n"
+				"   --remote-port[=value]      Set the remote control port (default: 1234)\n"
+				"   --remotes                  Enable remote control\n"
+#ifdef GDBSTUB_ENABLE
+				"   --remote-gdb               Enable GDB remote control\n"
+#endif
 #ifdef TRACY_ENABLE
 				"   --profiler-tracy           Enable Tracy profiler\n"
 #endif
@@ -303,6 +314,24 @@ bool ParseCommandLine(int argc, char* argv[])
 							}
 						}
 					}
+
+					// All remote control
+					if ((strcmp(argv[i], "--remotes") == 0))
+					{
+						printf("All remote control enabled.\n");
+#ifdef GDBSTUB_ENABLE
+						vjs.useRemotes = GDBREMOTE;
+#endif
+					}
+
+#ifdef GDBSTUB_ENABLE
+					// Remote GDB control
+					if (strcmp(argv[i], "--remote-gdb") == 0)
+					{
+						printf("GDB remote control enabled.\n");
+						vjs.useRemotes = GDBREMOTE;
+					}
+#endif
 
 #ifdef TRACY_ENABLE
 					// Tracy profiler type

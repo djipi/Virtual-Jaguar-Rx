@@ -34,6 +34,7 @@
 // JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser, added and slightly modified the save state patch from PvtLewis
 // JPM        2024  Use setting for the emulation framerate display, added a Console standard emulation window
 // JPM        2025  Feature to turn on/off the profiler, profiler control window, and conditional compilation for the VJRx and Tracy profiler support
+// JPM    May/2026  Added remote control support
 //
 
 // FIXED:
@@ -76,6 +77,7 @@
 #include "help.h"
 #include "profile.h"
 #include "profiler.h"
+#include "remote.h"
 #include "settings.h"
 #include "version.h"
 #include "emustatus.h"
@@ -968,7 +970,8 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	WriteLog("Virtual Jaguar %s Rx (Last full build was on %s %s)\n", VJ_RELEASE_VERSION, __DATE__, __TIME__);
 	WriteLog("VJ: Initializing jaguar subsystem...\n");
 	JaguarInit();
-	profiler_Start();
+	Profiler_Start();
+	Remote_Start();
 
 #ifndef NEWMODELSBIOSHANDLER
 	//	memcpy(jagMemSpace + 0xE00000, jaguarBootROM, 0x20000);	// Use the stock BIOS

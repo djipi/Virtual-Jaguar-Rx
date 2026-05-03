@@ -46,7 +46,7 @@ typedef enum {	NOPROFILER = 0x0, VJRXPROFILER = 0x1, TRACYPROFILER = 0x2	} Profi
 
 // Profiler generic functions
 extern void Profiler_Init(uint32_t type, lua_State* LuaLib);
-extern void profiler_Start(void);
+extern void Profiler_Start(void);
 extern void Profiler_Pause(bool onoff);
 extern void Profiler_Reset(void);
 extern void Profiler_Close(void);
