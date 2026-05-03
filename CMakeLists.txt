@@ -9,6 +9,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 
 # Options
 option(TRACY_ENABLE "Enable Tracy profiler support" OFF)
+option(GDBSTUB_ENABLE "Enable GDB stub support" OFF)
 set(CMAKE_VERBOSE_MAKEFILE OFF CACHE BOOL "Show full compilation commands")
 
 # Find required packages
@@ -80,6 +81,7 @@ set(CORE_SOURCES
     src/modelsBIOS.cpp
     src/op.cpp
     src/profiler.cpp
+    src/remote.cpp
     src/settings.cpp
     src/state.cpp
     src/tom.cpp
@@ -104,16 +106,29 @@ set(PROFILER_SOURCES
     src/profiler/ctrlprofilerwin.cpp
     src/profiler/baseprofiler.h
     src/profiler/dummyprofiler.h
-	src/profiler/vjrxprofiler.cpp
-	src/profiler/vjrxprofiler.h
-	src/profiler/vjrxprofilerwin.cpp
-	src/profiler/vjrxprofilerwin.h
+    src/profiler/vjrxprofiler.cpp
+    src/profiler/vjrxprofiler.h
+    src/profiler/vjrxprofilerwin.cpp
+    src/profiler/vjrxprofilerwin.h
 )
 # Optional profiler sources for the Tracy profiler
 if(TRACY_ENABLE)
     list(APPEND PROFILER_SOURCES
         src/profiler/tracyprofiler.cpp
         src/profiler/tracyprofiler.h
+    )
+endif()
+
+# Remote sources
+set(REMOTE_SOURCES
+    src/remote/baseremote.h
+    src/remote/dummyremote.h
+)
+# Optional remote sources for the GDB stub
+if(GDBSTUB_ENABLE)
+    list(APPEND PROFILER_SOURCES
+        src/remote/gdbremote.cpp
+        src/remote/gdbremote.h
     )
 endif()
 

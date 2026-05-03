@@ -75,6 +75,7 @@ OBJS := \
 	obj/modelsBIOS.o   \
 	obj/op.o           \
 	obj/profiler.o     \
+	obj/remote.o       \
 	obj/state.o        \
 	obj/tom.o          \
 	obj/universalhdr.o \

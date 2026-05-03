@@ -70,7 +70,8 @@ INCLUDEPATH += \
 	src \
 	src/debugger \
 	src/gui \
-	src/profiler
+	src/profiler \
+	src/remote
 
 DEPENDPATH = \
 	src \
@@ -78,7 +79,8 @@ DEPENDPATH = \
 	src/gui \
 	src/gui/debug \
 	src/m68000 \
-	src/profiler
+	src/profiler \
+	src/remote
 
 # The GUI
 
@@ -140,6 +142,9 @@ HEADERS = \
 	src/profiler/ctrlprofilerwin.h \
 	src/profiler/vjrxprofilerwin.h \
 	src/profiler/vjrxprofiler.h \
+	src/remote/baseremote.h \
+	src/remote/dummyremote.h \
+	src/remote/gdbremote.h \
 	src/log.h \
 	src/unzip.h \
 	src/crc32.h \
@@ -211,4 +216,3 @@ SOURCES = \
 	src/settings.cpp \
 	src/file.cpp \
 	src/LEB128.cpp
-		
