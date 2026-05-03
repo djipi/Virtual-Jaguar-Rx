@@ -40,7 +40,7 @@ bool Remote_Init(uint32_t type, uint32_t port)
 #ifdef GDBSTUB_ENABLE
 	(type & GDBREMOTE) ? BaseRemotes[GDBREMOTE_IDX] = new GDBRemote() : BaseRemotes[GDBREMOTE_IDX] = new DummyRemote();
 #else
-	baseReremotes[GDBREMOTE_IDX] = new DummyRemote();
+	BaseRemotes[GDBREMOTE_IDX] = new DummyRemote();
 #endif
 
 	// initialize all remotes
