@@ -21,6 +21,8 @@
 
 #include <stdint.h>
 #include "baseRemote.h"
+#include "gdbstub.h"
+#include "m68000/m68kinterface.h"
 
 class GDBRemote : public baseRemote
 {
@@ -30,6 +32,10 @@ public:
 	bool Init(uint32_t port, const baseinfosRemote* info) override;
 	bool Start(void) override;
 	void Close(void) override;
+
+private:
+	gdbstub_config_t gdbstub_cfg;
+	M68kCPU gdbstub_cpu;
 };
 
 #endif
