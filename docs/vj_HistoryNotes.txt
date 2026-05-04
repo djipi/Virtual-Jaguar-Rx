@@ -47,6 +47,7 @@ Git commit:
 24) Add char type support, and handle non integer for function parameter, in debugger
 25) Added a feature to receive remote control commands
 --- GDB remote protocol support for the M68K CPU (registers & memory read/write)
+26) Add M68K breakpoints from on address
 
 pre-Release 5b (20th July 2022)
 -------------------------------
@@ -399,12 +400,3 @@ Project information
 15) The x86 configuration has been removed in the Visual Studio project
 16) Additional project information can be found at https://github.com/djipi/Virtual-Jaguar-Rx/wiki
 17) The .env file list the Windows environment variables used by the VS 2022 project
-
-
-Download statistics
--------------------
-jaguar64eu : 15 downloads for the Release 0 on the 12th Feb, 2017
-jaguar64eu : 18 downloads for the Release 1 on the 21st May, 2017
-No downloads statistics available for the Release 2
-No downloads statistics available for the Release 3
-No downloads statistics available for the Release 4

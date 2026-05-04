@@ -142,7 +142,9 @@ extern void m68k_end_timeslice(void);          // End timeslice now
 extern void m68k_brk_init(void);
 extern void m68k_brk_hitcounts_reset(void);
 extern unsigned int m68k_brk_add(void *PtrInfo);
+extern void m68k_brk_add_addr(unsigned int Adr);
 extern void m68k_brk_del(unsigned int NumBrk);
+extern void m68k_brk_del_addr(unsigned int Adr);
 extern void m68k_brk_disable(void);
 extern void m68k_brk_reset(void);
 extern void m68k_brk_close(void);

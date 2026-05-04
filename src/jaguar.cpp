@@ -23,6 +23,7 @@
 // JPM  07/14/2024  Added a Console standard emulation
 // JPM  11/28/2024  Add exception catch (Zero divide)
 // JPM  10/29/2025  Added M68K Profiler Hook, and detection usage
+// JPM    May/2026  Added M68K breakpoints based on address
 //
 
 
@@ -1161,11 +1162,63 @@ void m68k_brk_reset(void)
 }
 
 
-// Delete a M68000 breakpoint (starting from 1)
+// Delete a M68000 breakpoint from an index (starting from 1)
 void m68k_brk_del(unsigned int NumBrk)
 {
 	// Remove the breakpoint
 	memset((void *)(brkInfo + (NumBrk - 1)), 0, sizeof(S_BrkInfo));
+}
+
+
+// Delete a M68000 breakpoint address
+void m68k_brk_del_addr(unsigned int adr)
+{
+	// look for the breakpoints
+	for (size_t i = 0; i < brkNbr; i++)
+	{
+		if (brkInfo[i].Adr == adr)
+		{
+			memset((void*)(brkInfo + i), 0, sizeof(S_BrkInfo));
+		}
+	}
+}
+
+
+// Add a M68000 breakpoint from an address
+void m68k_brk_add_addr(unsigned int adr)
+{
+	S_BrkInfo* Ptr = NULL;
+
+	// check if the breakpoint already exists
+	for (size_t i = 0; i < brkNbr; i++)
+	{
+		if (brkInfo[i].Adr == adr)
+		{
+			brkInfo[i].Active = brkInfo[i].Used = true;
+			return;
+		}
+	}
+
+	// look for an available breakpoint
+	for (size_t i = 0; (i < brkNbr) && !Ptr; i++)
+	{
+		if (!brkInfo[i].Used)
+		{
+			Ptr = &brkInfo[i];
+		}
+	}
+
+	// add a breakpoint
+	if (!Ptr)
+	{
+		brkInfo = (S_BrkInfo*)realloc(brkInfo, (++brkNbr * sizeof(S_BrkInfo)));
+		Ptr = &brkInfo[brkNbr - 1];
+		memset(Ptr, 0, sizeof(S_BrkInfo));
+		Ptr->Adr = adr;
+	}
+
+	// init the activities
+	Ptr->Active = Ptr->Used = true;
 }
 
 
@@ -1175,7 +1228,7 @@ unsigned int m68k_brk_add(void *PtrInfo)
 {
 	S_BrkInfo *Ptr = NULL;
 
-	// Check if breakpoint already exists
+	// check if the breakpoint already exists
 	for (size_t i = 0; i < brkNbr; i++)
 	{
 		if (brkInfo[i].Used)
@@ -1187,8 +1240,8 @@ unsigned int m68k_brk_add(void *PtrInfo)
 		}
 	}
 
-	// Look for an available breakpoint
-	for (size_t i = 0; i < brkNbr, Ptr; i++)
+	// look for an available breakpoint
+	for (size_t i = 0; (i < brkNbr) && !Ptr; i++)
 	{
 		if (!brkInfo[i].Used)
 		{
@@ -1196,14 +1249,14 @@ unsigned int m68k_brk_add(void *PtrInfo)
 		}
 	}
 
-	// Add a breakpoint
+	// add a breakpoint
 	if (!Ptr)
 	{
 		brkInfo = (S_BrkInfo *)realloc(brkInfo, (++brkNbr * sizeof(S_BrkInfo)));
 		Ptr = &brkInfo[brkNbr - 1];
 	}
 
-	// Transfert the breakpoint information and init the activities
+	// transfer the breakpoint information and init the activities
 	memcpy((void *)Ptr, PtrInfo, sizeof(S_BrkInfo));
 	Ptr->HitCounts = 0;
 	return (Ptr->Active = Ptr->Used = true);
