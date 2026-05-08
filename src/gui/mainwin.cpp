@@ -974,73 +974,88 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	Remote_Start();
 
 #ifndef NEWMODELSBIOSHANDLER
-	//	memcpy(jagMemSpace + 0xE00000, jaguarBootROM, 0x20000);	// Use the stock BIOS
-	memcpy(jagMemSpace + 0xE00000, (vjs.biosType == BT_K_SERIES ? jaguarBootROM : jaguarBootROM2), 0x20000);	// Use the stock BIOS
+	// use the K or M BIOS
+	memcpy(jagMemSpace + 0xE00000, (vjs.biosType == BT_K_SERIES ? jaguarBootROM : jaguarBootROM2), 0x20000);
 #else
+	// use the selected BIOS chose by the user
 	SelectBIOS(vjs.biosType);
 #endif
 
-	// Prevent the file scanner from running if filename passed
-	// in on the command line...
-	if (autoRun)
-		return;
-
-	// Load up the default ROM if in Alpine mode:
-	if (vjs.hardwareTypeAlpine)
+	// without a passed in file, the alpine/debugger/remote can be checked
+	if (!autoRun)
 	{
-		bool romLoaded = JaguarLoadFile(vjs.alpineROMPath);
+		// load up the default binary in Alpine mode
+		if (vjs.hardwareTypeAlpine)
+		{
+			// load up the default ROM if in Alpine mode
+			bool romLoaded = JaguarLoadFile(vjs.alpineROMPath);			
+			if (!romLoaded)
+			{
+				romLoaded = AlpineLoadFile(vjs.alpineROMPath);
+			}
 
-		// If regular load failed, try just a straight file load
-		// (Dev only! I don't want people to start getting lazy with their releases again! :-P)
-		if (!romLoaded)
-			romLoaded = AlpineLoadFile(vjs.alpineROMPath);
+			if (romLoaded)
+			{
+				WriteLog("Alpine Mode: Successfully loaded file \"%s\".\n", vjs.alpineROMPath);
+			}
+			else
+			{
+				WriteLog("Alpine Mode: Unable to load file \"%s\"!\n", vjs.alpineROMPath);
+			}
 
-		if (romLoaded)
-			WriteLog("Alpine Mode: Successfully loaded file \"%s\".\n", vjs.alpineROMPath);
-		else
-			WriteLog("Alpine Mode: Unable to load file \"%s\"!\n", vjs.alpineROMPath);
-
-		// Attempt to load/run the ABS file...
-		LoadSoftware(vjs.absROMPath);
+			// load/run the ABS file
+			LoadSoftware(vjs.absROMPath);
 #ifndef NEWMODELSBIOSHANDLER
-		memcpy(jagMemSpace + 0xE00000, jaguarDevBootROM2, 0x20000);	// Use the stub BIOS
+			// use the development kit stub BIOS
+			memcpy(jagMemSpace + 0xE00000, jaguarDevBootROM2, 0x20000);
 #else
-		SelectBIOS(vjs.biosType);
+			// use the selected BIOS chose by the user
+			SelectBIOS(vjs.biosType);
 #endif
-		// Prevent the scanner from running...
-		return;
-	}
-
-	// Load up the default ROM if in Debugger mode:
-	if (vjs.softTypeDebugger)
-	{
-		bool romLoaded = JaguarLoadFile(vjs.debuggerROMPath);
-
-		// If regular load failed, try just a straight file load
-		// (Dev only! I don't want people to start getting lazy with their releases again! :-P)
-		if (!romLoaded)
-			romLoaded = DebuggerLoadFile(vjs.debuggerROMPath);
-
-		if (romLoaded)
-			WriteLog("Debugger Mode: Successfully loaded file \"%s\".\n", vjs.debuggerROMPath);
+		}
 		else
-			WriteLog("Debugger Mode: Unable to load file \"%s\"!\n", vjs.debuggerROMPath);
+		{
+			// load up the default binary in Debugger mode
+			if (vjs.softTypeDebugger)
+			{
+				// load up the default ROM if in Debugger mode
+				bool romLoaded = JaguarLoadFile(vjs.debuggerROMPath);
+				if (!romLoaded)
+				{
+					romLoaded = DebuggerLoadFile(vjs.debuggerROMPath);
+				}
 
-		// Attempt to load/run the ABS file...
-		LoadSoftware(vjs.absROMPath);
+				if (romLoaded)
+				{
+					WriteLog("Debugger Mode: Successfully loaded file \"%s\".\n", vjs.debuggerROMPath);
+				}
+				else
+				{
+					WriteLog("Debugger Mode: Unable to load file \"%s\"!\n", vjs.debuggerROMPath);
+				}
+
+				// load/run the ABS file
+				LoadSoftware(vjs.absROMPath);
 #ifndef NEWMODELSBIOSHANDLER
-		memcpy(jagMemSpace + 0xE00000, jaguarDevBootROM2, 0x20000);	// Use the stub BIOS
-																	// Prevent the scanner from running...
+				// use the development kit stub BIOS
+				memcpy(jagMemSpace + 0xE00000, jaguarDevBootROM2, 0x20000);
 #else
-		SelectBIOS(vjs.biosType);
+				// use the selected BIOS chose by the user
+				SelectBIOS(vjs.biosType);
 #endif
-		return;
+			}
+			else
+			{
+				// remote modes do not use the file picker
+				if (!vjs.useRemotes)
+				{
+					// scan the contents of the software folder, to populate the file picker window
+					filePickWin->ScanSoftwareFolder(allowUnknownSoftware);
+					scannedSoftwareFolder = true;
+				}
+			}
+		}
 	}
-
-	// Run the scanner if nothing passed in and *not* Alpine mode...
-	// NB: Really need to look into caching the info scanned in here...
-	filePickWin->ScanSoftwareFolder(allowUnknownSoftware);
-	scannedSoftwareFolder = true;
 }
 
 
@@ -1886,7 +1901,7 @@ void MainWin::Unpause(void)
 }
 
 
-// Jaguar initialisation and load software file
+// Jaguar initialization and load software file
 void MainWin::LoadSoftware(QString file)
 {
 	running = false;							// Prevent bad things(TM) from happening...
@@ -1929,7 +1944,7 @@ void MainWin::LoadSoftware(QString file)
 
 	m68k_pulse_reset();
 
-// set the M68K in halt mode in case of a debug mode is used, so control is at user side
+	// set the M68K in halt mode in case of a debug mode is used, so control is at user side
 	if (vjs.softTypeDebugger)
 	{
 		m68k_set_reg(M68K_REG_A6, 0);
