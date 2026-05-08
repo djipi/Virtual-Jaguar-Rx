@@ -26,7 +26,7 @@ gdbstub_cfg{ nullptr, nullptr, 0, nullptr, nullptr, nullptr, nullptr }
 }
 
 
-//
+// Initialize the GDB stub with the specified port, and his gdbstub configuration
 bool GDBRemote::Init(uint32_t port, const baseinfosRemote* info)
 {
 	// fill the GDB stub configuration structure with the CPU information
@@ -48,7 +48,7 @@ bool GDBRemote::Init(uint32_t port, const baseinfosRemote* info)
 }
 
 
-//
+// Start the GDB stub in a separate thread to avoid blocking the main emulator thread
 bool GDBRemote::Start(void)
 {
 	std::thread gdb_thread([]() { gdbstub_start(); });
@@ -57,14 +57,14 @@ bool GDBRemote::Start(void)
 }
 
 
-//
+// Close the GDB stub and clean up resources
 void GDBRemote::Close(void)
 {
 	gdbstub_close();
 }
 
 
-//
+// Destructor
 GDBRemote::~GDBRemote()
 {
 }
