@@ -1,4 +1,4 @@
-.TH virtualjaguar 1 2025-11-08 Virtualjaguar Rx
+.TH virtualjaguar 1 2026-05-08 Virtualjaguar Rx
 .SH NAME
 virtualjaguar \- An Atari Jaguar emulator
 
@@ -27,10 +27,10 @@ Do not use Atari Jaguar BIOS
 .B \-D, \-\-debugger
 Run in Debugger emulation mode
 .TP
-.B \-\-dram-max
+.B \-\-dram\-max
 Set the main ram to 8MB
 .TP
-.B \-\-full-raz
+.B \-\-full\-raz
 Start the entire system space with 0
 .TP
 .B \-g, \-\-gpu
@@ -51,11 +51,17 @@ Do not use log file
 .B \-P, \-\-profilers
 Enable all profilers
 .TP
-.B \-\-profiler-tracy
+.B \-\-profiler\-tracy
 Enable the Tracy profiler
 .TP
-.B \-\-profiler-vjrx
+.B \-\-profiler\-vjrx
 Enable the Virtual Jaguar Rx profiler
+.TP
+.B \-P, \-\-remotes
+Enable all remote control interfaces
+.TP
+.B \-P, \-\-remote\-gdb
+Enable GDB remote control interface
 .TP
 .B \-h, \-?, \-\-help
 Show command line help
