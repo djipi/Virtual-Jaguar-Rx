@@ -110,8 +110,10 @@ currentFile("")
 	connect(fileList, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(CatchDoubleClick(const QModelIndex &)));
 }
 
+// Handle key presses for the file picker
 void FilePickerWindow::keyPressEvent(QKeyEvent * e)
 {
+	// escape to hide the file picker without loading anything
 	if (e->key() == Qt::Key_Escape)
 	{
 		hide();
@@ -119,6 +121,7 @@ void FilePickerWindow::keyPressEvent(QKeyEvent * e)
 	}
 	else
 	{
+		// enter to load the selected file
 		if (e->key() == Qt::Key_Return)
 		{
 			LoadButtonPressed();
@@ -159,6 +162,7 @@ void FilePickerWindow::AddFileToList3(unsigned long index, QString str, QImage *
 		model->AddData(index, str, QImage(), size, haveUniversalHeader, fileType, crc);
 }
 
+// Request the main window to load the currently selected file, then hide the file picker
 void FilePickerWindow::LoadButtonPressed(void)
 {
 	// TODO: Get the text of the current selection, call the MainWin slot for loading
