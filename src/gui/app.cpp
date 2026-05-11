@@ -21,7 +21,7 @@
 // JPM   Apr./2019  Fixed a command line option duplication
 // JPM   Jan./2024  Added the missing timer for the Quit Sub System
 // JPM        2025  Added profiler options, lua library, profiler initialization, Easter egg option removed, high-DPI support and clean-up in the usage
-// JPM    May/2026  Added remote support
+// JPM    May/2026  Added remote support, fix the fps counter
 //
 
 // Fix compilation warning: 'main' redefined
@@ -126,13 +126,13 @@ int main(int argc, char * argv[])
 	if (LuaLib)
 	{
 		// Set up SDL library
-		if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER) < 0)
+		if (SDL_Init(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO) < 0)
 		{
 			WriteLog("VJ: Could not initialize the SDL library: %s\n", SDL_GetError());
 		}
 		else
 		{
-			WriteLog("VJ: SDL (joystick, audio and timer) successfully initialized.\n");
+			WriteLog("VJ: SDL (joystick and audio) successfully initialized.\n");
 			luaL_openlibs(LuaLib);
 			DBGManager_Init();
 			Profiler_Init(vjs.useProfilers, LuaLib);
@@ -149,7 +149,7 @@ int main(int argc, char * argv[])
 			Gamepad::DeallocateJoysticks();
 			lua_close(LuaLib);
 			// Free SDL components last...!
-			SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER);
+			SDL_QuitSubSystem(SDL_INIT_JOYSTICK | SDL_INIT_AUDIO);
 			SDL_Quit();
 		}
 	}
@@ -180,6 +180,7 @@ App::App(int & argc, char * argv[]): QApplication(argc, argv)
 	// Override defaults with command line (if any)
 	ParseOptions(argc, argv);
 	mainWindow->SyncUI();
+	mainWindow->StartEmulationTimer();
 
 	// auto-load file if requested
 	if (loadAndGo)

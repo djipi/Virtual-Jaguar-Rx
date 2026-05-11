@@ -19,12 +19,12 @@
 // JPM  07/14/2024  Added a Console standard emulation window
 // JPM   Oct./2025  Feature to turn on/off the profiler
 // JPM   Nov./2025  Added profiler control window
+// JPM    May/2026  Partial fix the fps counter
 //
 
 #ifndef __MAINWIN_H__
 #define __MAINWIN_H__
 
-//Hrm. uh??? I thought this wasn't the way to do this stuff...???
 #include <QtWidgets/QtWidgets>
 #include "state.h"
 #include "tom.h"
@@ -81,6 +81,7 @@ class MainWin: public QMainWindow
 		MainWin(bool);
 		void LoadFile(QString);
 		void SyncUI(void);
+		void StartEmulationTimer(void);
 		void DebuggerRefreshWindows(void);
 		void ViewRefreshWindows(void);
 		void RefreshWindows(void);
@@ -99,7 +100,7 @@ class MainWin: public QMainWindow
 	private slots:
 		void Open(void);
 		void Configure(void);
-		void Timer(void);
+		void EmulationTimer(void);
 		void TogglePowerState(void);
 		void ToggleRunState(void);
 		void SetZoom100(void);
@@ -172,6 +173,7 @@ class MainWin: public QMainWindow
 		void HandleKeys(QKeyEvent *, bool);
 		void HandleGamepads(void);
 		void SetFullScreen(bool state = true);
+		void ResetEmulationTimer(void);
 		void ResizeMainWindow(void);
 		void ReadUISettings(void);
 		void ReadSettings(void);
@@ -238,9 +240,12 @@ class MainWin: public QMainWindow
 
 	public:
 		bool plzDontKillMyComputer;
-		uint32_t oldTimestamp;
+		QElapsedTimer frameTimer;     // single high-res clock for pacing & FPS
+		qint64 lastFrameUsecs; // timestamp (microsecond) of last frame start
 		uint32_t ringBufferPointer;
 		uint32_t ringBuffer[RING_BUFFER_SIZE];
+		qint64 NTSC_FRAME_USECS;
+		qint64 PAL_FRAME_USECS;
 
 	private:
 		QPoint mainWinPosition;

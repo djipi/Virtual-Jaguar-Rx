@@ -34,7 +34,7 @@
 // JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser, added and slightly modified the save state patch from PvtLewis
 // JPM        2024  Use setting for the emulation framerate display, added a Console standard emulation window
 // JPM        2025  Feature to turn on/off the profiler, profiler control window, and conditional compilation for the VJRx and Tracy profiler support
-// JPM    May/2026  Added remote control support
+// JPM    May/2026  Added remote control support, partial fix the fps counter
 //
 
 // FIXED:
@@ -123,6 +123,9 @@
 #include "debugger/CartFilesListWin.h"
 #include "debugger/SaveDumpAsWin.h"
 #include "profiler/ctrlprofilerwin.h"
+#ifdef _MSC_VER
+#include <timeapi.h>
+#endif
 
 
 // According to SebRmv, this header isn't seen on Arch Linux either... :-/
@@ -153,16 +156,28 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 {
 	ReadSettings();
 
+#ifdef _MSC_VER
+	// Set Windows timer resolution to 1ms so QThread::msleep() is precise.
+	// Default resolution is ~15.6ms which causes frame pacing to overshoot.
+	timeBeginPeriod(1);
+#endif
+
 	debugbar = NULL;
 
 	for(int i=0; i<8; i++)
 		keyHeld[i] = false;
 
-	// FPS management
-	for(int i=0; i<RING_BUFFER_SIZE; i++)
+	// fps management
+	for (int i = 0; i < RING_BUFFER_SIZE; i++)
+	{
 		ringBuffer[i] = 0;
-
+	}
 	ringBufferPointer = RING_BUFFER_SIZE - 1;
+	lastFrameUsecs = 0;
+	// NTSC target frame periods in microseconds (~16.666 microseconds)
+	NTSC_FRAME_USECS = 1000000LL / 60;
+	// PAL target frame periods in microseconds (20.000 microseconds)
+	PAL_FRAME_USECS = 1000000LL / 50;
 
 	// main window
 	//if (vjs.softTypeDebugger)
@@ -196,6 +211,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 	vjs.hardwareTypeAlpine ? (title += QString(tr(" - Alpine Mode"))), true : false;
 	vjs.softTypeDebugger ? (title += QString(tr(" - Debugger Mode"))), true : false;
 	(vjs.useProfilers != NOPROFILER) ? (title += QString(tr(" - Profiler Enabled"))), true : false;
+	(vjs.useRemotes != NOREMOTE) ? (title += QString(tr(" - Remote Control Enabled"))), true : false;
 	setWindowTitle(title);
 
 	// windows common features
@@ -955,7 +971,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 
 	// Set up timer based loop for animation...
 	timer = new QTimer(this);
-	connect(timer, SIGNAL(timeout()), this, SLOT(Timer()));
+	connect(timer, SIGNAL(timeout()), this, SLOT(EmulationTimer()));
 
 	// This isn't very accurate for NTSC: This is early by 40 msec per frame.
 	// This is because it's discarding the 0.6666... on the end of the fraction.
@@ -1065,26 +1081,33 @@ void MainWin::LoadFile(QString file)
 }
 
 
+// Set toolbar buttons/menus based on command line options and settings
 void MainWin::SyncUI(void)
 {
-	// Set toolbar buttons/menus based on settings read in (sync the UI)...
-	// (Really, this is to sync command line options passed in)
+	// set the blur button & the zoom level buttons
 	blurAct->setChecked(vjs.glFilter);
 	x1Act->setChecked(zoomLevel == 1);
 	x2Act->setChecked(zoomLevel == 2);
 	x3Act->setChecked(zoomLevel == 3);
-//	running = powerAct->isChecked();
+
+	// set the NTSC/PAL buttons and his power color led
 	ntscAct->setChecked(vjs.hardwareTypeNTSC);
 	palAct->setChecked(!vjs.hardwareTypeNTSC);
 	powerAct->setIcon(vjs.hardwareTypeNTSC ? powerRed : powerGreen);
 
+	// set the Full Screen button & the full screen mode
 	fullScreenAct->setChecked(vjs.fullscreen);
 	fullScreen = vjs.fullscreen;
 	SetFullScreen(fullScreen);
+}
 
-	// Reset the timer to be what was set in the command line (if any):
-//	timer->setInterval(vjs.hardwareTypeNTSC ? 16 : 20);
-	timer->start(vjs.hardwareTypeNTSC ? 16 : 20);
+
+// start the high-res clock and the 0ms driving timer (one-time, at application startup)
+void MainWin::StartEmulationTimer(void)
+{
+	frameTimer.start();
+	lastFrameUsecs = frameTimer.nsecsElapsed() / 1000LL;
+	timer->start(0);
 }
 
 
@@ -1099,8 +1122,12 @@ void MainWin::SelectdasmtabWidget(const int Index)
 }
 
 
+// Do cleanup and save settings when user tries to close the main window
 void MainWin::closeEvent(QCloseEvent * event)
 {
+#ifdef _MSC_VER
+	timeEndPeriod(1);
+#endif
 	JaguarDone();
 // This should only be done by the config dialog
 //	WriteSettings();
@@ -1346,18 +1373,16 @@ void MainWin::Configure(void)
 
 // Main emulator loop no matter if the executable binary is in pause or running
 // The loop won't execute anything in case of the emulator is not running
-void MainWin::Timer(void)
+void MainWin::EmulationTimer(void)
 {
-#if 0
-static uint32_t ntscTickCount;
-	if (vjs.hardwareTypeNTSC)
+	qint64 targetUsecs = vjs.hardwareTypeNTSC ? NTSC_FRAME_USECS : PAL_FRAME_USECS;
+	const qint64 nowUsecs = frameTimer.nsecsElapsed() / 1000LL;
+	if ((nowUsecs - lastFrameUsecs) > (targetUsecs * 2))
 	{
-		ntscTickCount++;
-		ntscTickCount %= 3;
-		timer->start(16 + (ntscTickCount == 0 ? 1 : 0));
+		lastFrameUsecs = nowUsecs - targetUsecs;
 	}
-#endif
-	// emulator must be running
+
+	// emulation must be running
 	if (running)
 	{
 		// check executable binary status
@@ -1382,7 +1407,7 @@ static uint32_t ntscTickCount;
 			HandleGamepads();
 			JaguarExecuteNew();
 			videoWidget->HandleMouseHiding();
-			// auto-refresh specfic debug windows, lower refresh value can slow down the emulator
+			// auto-refresh specific debug windows, lower refresh value can slow down the emulator
 			static uint32_t refresh = 0;
 			if (refresh++ == vjs.refresh)
 			{
@@ -1397,29 +1422,6 @@ static uint32_t ntscTickCount;
 
 		videoWidget->updateGL();
 
-		// FPS handling, uses a ring buffer to store times (in ms) between frames
-		uint32_t timestamp = SDL_GetTicks();
-		ringBufferPointer = (ringBufferPointer + 1) % RING_BUFFER_SIZE;
-		ringBuffer[ringBufferPointer] = timestamp - oldTimestamp;
-		oldTimestamp = timestamp;
-		// calculus the elapsed time
-		uint32_t elapsedTime = 0;
-		for (uint32_t i = 0; i < RING_BUFFER_SIZE; i++)
-		{
-			elapsedTime += ringBuffer[i];
-		}
-		// elpased time cannot be nul, to avoid division by 0
-		if (elapsedTime == 0)
-		{
-			elapsedTime = 1;
-		}
-		// get number of FPS based on elapsed time per block of 10 seconds
-		uint32_t framesPerSecond = (uint32_t)(((float)RING_BUFFER_SIZE / (float)elapsedTime) * 10000.0);
-		uint32_t fpsIntegerPart = framesPerSecond / 10;
-		uint32_t fpsDecimalPart = framesPerSecond % 10;
-		// display number of FPS
-		vjs.useDisplayEmuFPS ? statusBar()->showMessage(QString("%1.%2 FPS").arg(fpsIntegerPart).arg(fpsDecimalPart)) : statusBar()->showMessage(QString("FPS: Off"));
-
 		// toggle the state of the emulator in case of M68K is set to halt (for tracing mode)
 		if (M68KDebugHaltStatus())
 		{
@@ -1429,6 +1431,52 @@ static uint32_t ntscTickCount;
 		// refresh window with minimal impact on the emulation speed 
 		CommonRefreshWindows();
 	}
+
+	// Frame pacing: hybrid sleep + spin-wait to hit the exact NTSC/PAL period.
+	// Pure sleep is not used because Windows timer resolution is ~15.6ms,
+	// which causes oversleeping. The spin-wait covers the final 2ms precisely.
+	targetUsecs = vjs.hardwareTypeNTSC ? NTSC_FRAME_USECS : PAL_FRAME_USECS;
+	const qint64 deadlineUsecs = lastFrameUsecs + targetUsecs;
+
+	// Phase 1: coarse sleep - only if enough headroom to avoid over-sleeping
+	// Leave 2ms (2000 microsecond) for the spin-wait phase below
+	const qint64 sleepUsecs = deadlineUsecs - (frameTimer.nsecsElapsed() / 1000LL) - 2000LL;
+	if (sleepUsecs > 1000LL)
+	{
+		QThread::msleep(static_cast<unsigned long>(sleepUsecs / 1000LL));
+	}
+
+	// Phase 2: spin-wait for the remaining ~2ms to hit the deadline precisely
+	while ((frameTimer.nsecsElapsed() / 1000LL) < deadlineUsecs)
+	{
+		// busy-wait: burns CPU for ~2ms but guarantees frame deadline accuracy
+	}
+	// FPS handling: uses a ring buffer to store times (in microseconds) between frames
+	const qint64 frameUsecs = frameTimer.nsecsElapsed() / 1000LL;
+	const qint64 frameDelta = frameUsecs - lastFrameUsecs;
+	lastFrameUsecs = frameUsecs;
+
+	ringBufferPointer = (ringBufferPointer + 1) % RING_BUFFER_SIZE;
+	ringBuffer[ringBufferPointer] = (uint32_t)(frameDelta > 0 ? frameDelta : 1);
+
+	// calculate elapsed time across the ring buffer
+	uint64_t elapsedTime = 0;
+	for (uint32_t i = 0; i < RING_BUFFER_SIZE; i++)
+	{
+		elapsedTime += ringBuffer[i];
+	}
+
+	// elapsed time cannot be null, to avoid division by 0
+	if (elapsedTime == 0)
+	{
+		elapsedTime = 1;
+	}
+
+	// calculate and display fps from ring buffer average (1 decimal place)
+	const double fps = ((double)RING_BUFFER_SIZE / (double)elapsedTime) * 1000000.0;
+	const uint32_t fpsIntegerPart = (uint32_t)fps;
+	const uint32_t fpsDecimalPart = (uint32_t)((fps - (double)fpsIntegerPart) * 10.0);
+	vjs.useDisplayEmuFPS ? statusBar()->showMessage(QString("%1.%2 FPS").arg(fpsIntegerPart).arg(fpsDecimalPart)) : statusBar()->showMessage(QString("FPS: Off"));
 }
 
 
@@ -1443,16 +1491,18 @@ void MainWin::TogglePowerState(void)
 	{
 		// restore the mouse pointer, if hidden:
 		videoWidget->CheckAndRestoreMouseCursor();
-		// enable specfic feature available when binary is not running
+		// enable specific feature available when binary is not running
 		useCDAct->setDisabled(false);
 		palAct->setDisabled(false);
 		ntscAct->setDisabled(false);
 		pauseAct->setChecked(false);
 		pauseAct->setDisabled(true);
+		frameAdvanceAct->setChecked(false);
+		frameAdvanceAct->setDisabled(true);
 
 		showUntunedTankCircuit = true;
 
-		DACPauseAudioThread();
+		DACPauseAudioThread(true);
 		// This is just in case the ROM we were playing was in a narrow or wide field mode, so the untuned tank sim doesn't look wrong. :-)
 		TOMReset();
 
@@ -1474,12 +1524,14 @@ void MainWin::TogglePowerState(void)
 	}
 	else
 	{
-		// disable specfic feature available when binary is running
+		// disable specific feature available when binary is running
 		useCDAct->setDisabled(true);
 		palAct->setDisabled(true);
 		ntscAct->setDisabled(true);
 		pauseAct->setChecked(false);
 		pauseAct->setDisabled(false);
+		frameAdvanceAct->setChecked(false);
+		frameAdvanceAct->setDisabled(false);
 
 		showUntunedTankCircuit = false;
 
@@ -1501,8 +1553,22 @@ void MainWin::TogglePowerState(void)
 		CommonReset();
 		DebuggerResetWindows();
 		CommonResetWindows();
+		//ResetFrameTiming();
 		DACPauseAudioThread(false);
 	}
+}
+
+
+// Reset frame pacing timestamp and fps ring buffer
+void MainWin::ResetEmulationTimer(void)
+{
+	const uint32_t targetPeriodUsecs = vjs.hardwareTypeNTSC ? (1000000 / 60) : (1000000 / 50);
+	lastFrameUsecs = frameTimer.nsecsElapsed() / 1000LL;
+	for (int i = 0; i < RING_BUFFER_SIZE; i++)
+	{
+		ringBuffer[i] = targetPeriodUsecs;
+	}
+	ringBufferPointer = RING_BUFFER_SIZE - 1;
 }
 
 
@@ -1511,7 +1577,7 @@ void MainWin::ToggleRunState(void)
 {
 	// toggle tracing state
 	startM68KTracing = running;
-	// toggle the profiter system
+	// toggle the profiler system
 	Profiler_Pause(!running);
 
 	// switch the running mode
@@ -1541,7 +1607,7 @@ void MainWin::ToggleRunState(void)
 			uint32_t pixel = videoWidget->buffer[i];
 			uint8_t r = (pixel >> 24) & 0xFF, g = (pixel >> 16) & 0xFF, b = (pixel >> 8) & 0xFF;
 			pixel = ((r + g + b) / 3) & 0x00FF;
-			videoWidget->buffer[i] = 0x000000FF | (pixel << 16) | (pixel << 8);
+			videoWidget->buffer[i] =  0x000000FF | (pixel << 16) | (pixel << 8);
 		}
 
 		videoWidget->updateGL();
@@ -1566,6 +1632,7 @@ void MainWin::ToggleRunState(void)
 		}
 
 		cpuBrowseWin->UnholdBPM();
+		//ResetFrameTiming();
 	}
 
 	emuStatusWin->ResetM68KCycles();
@@ -1600,22 +1667,28 @@ void MainWin::SetZoom300(void)
 }
 
 
+// Set the video system to NTSC, which has a ~16.67ms frame period and a 262 line raster
 void MainWin::SetNTSC(void)
 {
 	powerAct->setIcon(powerRed);
-	timer->setInterval(16);
 	vjs.hardwareTypeNTSC = true;
+	// Reset pacing reference so the Timer() targets the NTSC period
+	//lastFrameUsecs = frameTimer.nsecsElapsed() / 1000LL;
 	ResizeMainWindow();
+	//ResetFrameTiming();
 	WriteSettings();
 }
 
 
+// Set the video system to PAL, which has a 20ms frame period and a 256 line raster
 void MainWin::SetPAL(void)
 {
 	powerAct->setIcon(powerGreen);
-	timer->setInterval(20);
 	vjs.hardwareTypeNTSC = false;
+	// Reset pacing reference so the Timer() targets the PAL period
+	//lastFrameUsecs = frameTimer.nsecsElapsed() / 1000LL;
 	ResizeMainWindow();
+	//ResetFrameTiming();
 	WriteSettings();
 }
 
@@ -1865,24 +1938,25 @@ void MainWin::SaveSlot9Command(void)
 }
 #endif
 
+
+// Open the file selector window
 void MainWin::InsertCart(void)
 {
-	// Check to see if we did autorun, 'cause we didn't load anything in that
-	// case
+	// scan the software folder
 	if (!scannedSoftwareFolder)
 	{
 		filePickWin->ScanSoftwareFolder(allowUnknownSoftware);
 		scannedSoftwareFolder = true;
 	}
 
-	// If the emulator is running, we pause it here and unpause it later
-	// if we dismiss the file selector without choosing anything
+	// emulation mut be paused to open the file selector, so toggle it if it's not already paused
 	if (running && powerButtonOn)
 	{
 		ToggleRunState();
 		pauseForFileSelector = true;
 	}
 
+	// display the file selector
 	filePickWin->show();
 }
 
@@ -1904,10 +1978,11 @@ void MainWin::Unpause(void)
 // Jaguar initialization and load software file
 void MainWin::LoadSoftware(QString file)
 {
-	running = false;							// Prevent bad things(TM) from happening...
-	pauseForFileSelector = false;				// Reset the file selector pause flag
+	// stop emulation while loading software
+	running = false;							
+	pauseForFileSelector = false;				
 
-	// Setup BIOS in his own dedicated Jaguar memory
+	// setup BIOS in his own dedicated Jaguar memory
 #ifndef NEWMODELSBIOSHANDLER
 	uint8_t * biosPointer = jaguarBootROM;
 
@@ -1921,26 +1996,22 @@ void MainWin::LoadSoftware(QString file)
 	SelectBIOS(vjs.biosType);
 #endif
 
-	// Turn 'on' the power to initialize the Jaguar
+	// turn 'on' the power to initialize the Jaguar
 	powerAct->setDisabled(false);
 	powerAct->setChecked(true);
 	powerButtonOn = false;
 	TogglePowerState();
 
-	// We have to load our software *after* the Jaguar RESET
+	// load the binary file
 	cartridgeLoaded = JaguarLoadFile(file.toUtf8().data());
-	SET32(jaguarMainRAM, 0, vjs.DRAM_size);						// Set stack in the M68000's Reset SP
+	// set stack pointer in Reset SP 68000 exception vector
+	SET32(jaguarMainRAM, 0, vjs.DRAM_size);
+	// set the program counter in Reset PC 68000 exception vector for a non-BIOS usage
+	!vjs.useJaguarBIOS ? SET32(jaguarMainRAM, 4, jaguarRunAddress) : false;
 
-	// Get the Console standard emulation variable address
+	// get the Console standard emulation variable address
 	stdConsoleExist = stdConsole_set(STDCONSOLE_STDIN, DBGManager_GetAdrFromSymbolName((char *)"cngetc_value"));
 	stdConsoleExist |= stdConsole_set(STDCONSOLE_STDOUT, DBGManager_GetAdrFromSymbolName((char *)"cnputc_value")) ? true : false;
-
-	// This is icky because we've already done it
-// it gets worse :-P
-	if (!vjs.useJaguarBIOS)
-	{
-		SET32(jaguarMainRAM, 4, jaguarRunAddress);
-	}
 
 	m68k_pulse_reset();
 
@@ -1965,11 +2036,15 @@ void MainWin::LoadSoftware(QString file)
 	}
 
 	// Display the Atari Jaguar software which is running
-	if ((!vjs.hardwareTypeAlpine || !vjs.softTypeDebugger) && !loadAndGo && jaguarRunAddress)
+	if ((!vjs.hardwareTypeAlpine || !vjs.softTypeDebugger || !vjs.useRemotes) && !loadAndGo && jaguarRunAddress)
 	{
 		QString newTitle = QString("Virtual Jaguar " VJ_RELEASE_VERSION " Rx - Now playing: %1").arg(filePickWin->GetSelectedPrettyName());
 		setWindowTitle(newTitle);
 	}
+
+	// Reset frame timing here, AFTER all heavy load work is complete,
+	// so lastFrameUsecs is accurate when Timer() fires for the first frame.
+	//ResetFrameTiming();
 }
 
 

@@ -48,7 +48,8 @@ Git commit:
 25) Added a feature to receive remote control commands
 --- GDB remote protocol support for the M68K CPU (registers & memory read/write)
 --- GDB remote protocol support for the breakpoints
-26) Add M68K breakpoints from on address
+26) Add M68K breakpoints from an address
+27) Partial fix for the fps counter
 
 pre-Release 5b (20th July 2022)
 -------------------------------
