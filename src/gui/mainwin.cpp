@@ -34,7 +34,7 @@
 // JPM  March/2022  Added cygdrive directory removal setting, a ROM cartridge browser, a GPU/DSP memory browser, added and slightly modified the save state patch from PvtLewis
 // JPM        2024  Use setting for the emulation framerate display, added a Console standard emulation window
 // JPM        2025  Feature to turn on/off the profiler, profiler control window, and conditional compilation for the VJRx and Tracy profiler support
-// JPM    May/2026  Added remote control support, partial fix the fps counter
+// JPM    May/2026  Added remote control support, fix the fps counter
 //
 
 // FIXED:
@@ -1553,7 +1553,8 @@ void MainWin::TogglePowerState(void)
 		CommonReset();
 		DebuggerResetWindows();
 		CommonResetWindows();
-		//ResetFrameTiming();
+		startM68KTracing = false;
+		ResetEmulationTimer();
 		DACPauseAudioThread(false);
 	}
 }
@@ -2044,7 +2045,7 @@ void MainWin::LoadSoftware(QString file)
 
 	// Reset frame timing here, AFTER all heavy load work is complete,
 	// so lastFrameUsecs is accurate when Timer() fires for the first frame.
-	//ResetFrameTiming();
+	ResetEmulationTimer();
 }
 
 

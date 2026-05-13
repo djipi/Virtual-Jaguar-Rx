@@ -48,7 +48,7 @@ Git commit:
 25) Added a feature to receive remote control commands
 --- GDB remote protocol support for the M68K CPU (registers & memory read/write)
 --- GDB remote protocol support for the breakpoints
-26) Partial fix for the fps counter
+26) Fix for the fps counter
 27) Update the breakpoints window
 --- Breakpoint can be deleted using the Del key from the breakpoints window
 --- Breakpoint status can be toggled on/off by double-clicking the status cell
