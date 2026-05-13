@@ -9,6 +9,7 @@
 // ---  ----------  -----------------------------------------------------------
 // JPM  30/08/2017  Created this file
 // JPM   Oct./2018  Added the breakpoints features
+// JPM    May/2026  Added breakpoint deletion and on/off toggle from the breakpoints window
 //
 
 // STILL TO DO:
@@ -17,6 +18,7 @@
 #include "debugger/BreakpointsWin.h"
 #include "jaguar.h"
 #include "debugger/DBGManager.h"
+#include "m68000/m68kinterface.h"
 
 
 //
@@ -72,6 +74,7 @@ layout(new QVBoxLayout)
 #ifdef BRK_REFRESHBUTTON
 	connect(refresh, SIGNAL(clicked()), this, SLOT(RefreshContents()));
 #endif
+	connect(TableView, SIGNAL(doubleClicked(const QModelIndex &)), this, SLOT(OnTableDoubleClicked(const QModelIndex &)));
 }
 
 
@@ -146,12 +149,46 @@ void BreakpointsWindow::RefreshContents(void)
 }
 
 
-//
+// Toggle the breakpoint status on double-click on the status cell
+void BreakpointsWindow::OnTableDoubleClicked(const QModelIndex& index)
+{
+	// the row 0 is the BPM entry and cannot be toggled; only column 0 (Status) is actionable
+	if ((index.row() > 0) && (index.column() == 0))
+	{
+		size_t brkIndex = (size_t)(index.row() - 1);
+		if (brkInfo[brkIndex].Used)
+		{
+			m68k_brk_toggle_status((unsigned int)index.row());
+			model->setItem(index.row(), 0, new QStandardItem(QString("%1").arg(brkInfo[brkIndex].Active ? "On" : "Off")));
+		}
+	}
+}
+
+
+// Handle key events for the breakpoints window
 void BreakpointsWindow::keyPressEvent(QKeyEvent * e)
 {
+	// close the window on Escape key press
 	if (e->key() == Qt::Key_Escape)
 	{
 		hide();
 	}
+	else
+	{
+		// delete the selected breakpoint on Delete key press
+		if (e->key() == Qt::Key_Delete)
+		{
+			QModelIndexList selection = TableView->selectionModel()->selectedRows();
+			if (!selection.isEmpty())
+			{
+				// the row 0 is the BPM entry and cannot be deleted
+				int row = selection.first().row();
+				if (row > 0)
+				{
+					m68k_brk_del((unsigned int)row);
+					RefreshContents();
+				}
+			}
+		}
+	}
 }
-

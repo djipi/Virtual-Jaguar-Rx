@@ -23,7 +23,7 @@
 // JPM  07/14/2024  Added a Console standard emulation
 // JPM  11/28/2024  Add exception catch (Zero divide)
 // JPM  10/29/2025  Added M68K Profiler Hook, and detection usage
-// JPM    May/2026  Added M68K breakpoints based on address
+// JPM    May/2026  Added M68K breakpoints based on address, and toggle status change function
 //
 
 
@@ -1155,22 +1155,38 @@ bool stdConsole_set(STDCONSOLE NumStd, unsigned int adr)
 // Reset the M68000 breakpoints structures
 void m68k_brk_reset(void)
 {
-	// Reset the breakpoints
+	// reset the breakpoints
 	free(brkInfo);
 	brkInfo = NULL;
 	brkNbr = 0;
 }
 
 
-// Delete a M68000 breakpoint from an index (starting from 1)
-void m68k_brk_del(unsigned int NumBrk)
+// Toggle the M68000 breakpoint status from an index (starting from 1)
+void m68k_brk_toggle_status(unsigned int NumBrk)
 {
-	// Remove the breakpoint
-	memset((void *)(brkInfo + (NumBrk - 1)), 0, sizeof(S_BrkInfo));
+	// check breakpoint number validity
+	if (NumBrk && (NumBrk <= brkNbr) && brkInfo[NumBrk - 1].Used)
+	{
+		// toggle breakpoint status
+		brkInfo[NumBrk - 1].Active = !brkInfo[NumBrk - 1].Active;
+	}
 }
 
 
-// Delete a M68000 breakpoint address
+// Delete a M68000 breakpoint from an index (starting from 1)
+void m68k_brk_del(unsigned int NumBrk)
+{
+	// check breakpoint number validity
+	if (NumBrk && (NumBrk <= brkNbr))
+	{
+		// erase the breakpoint structure
+		memset((void*)(brkInfo + (NumBrk - 1)), 0, sizeof(S_BrkInfo));
+	}
+}
+
+
+// Delete a M68000 breakpoint from an address
 void m68k_brk_del_addr(unsigned int adr)
 {
 	// look for the breakpoints

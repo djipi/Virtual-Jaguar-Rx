@@ -26,6 +26,7 @@ class BreakpointsWindow: public QWidget
 		void RefreshContents(void);
 
 	public slots:
+		void OnTableDoubleClicked(const QModelIndex &index);
 
 	protected:
 		void keyPressEvent(QKeyEvent *);
@@ -42,4 +43,4 @@ class BreakpointsWindow: public QWidget
 		QPushButton *refresh;
 };
 
-#endif	// __BREAKPOINTSWIN_H__
+#endif
