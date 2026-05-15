@@ -17,7 +17,8 @@
 #define LOCAL_UIVALUE		1
 #define LOCAL_UITYPE		2
 //#define LOCAL_UIA6OFFSET	3
-#define LOCAL_NBUI			3		// Number of UI's column to display
+#define LOCAL_UIADDRESS		3		// Column to display the variable's address or the register used to access it
+#define LOCAL_NBUI			4		// Number of UI's column to display
 
 // Error code definitions
 #define	LOCAL_NOERROR		0x00
@@ -63,4 +64,4 @@ class LocalBrowserWindow: public QWidget
 		size_t ExRegA6;
 };
 
-#endif	// __LOCALBROWSER_H__
+#endif

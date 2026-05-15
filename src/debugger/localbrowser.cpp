@@ -14,6 +14,7 @@
 // JPM    May/2021  Display the structure's members
 // JPM   Oct./2021  Fix a crash for inaccessible memory range, and added an error icon in case of values cannot be read
 // JPM   July/2022  Optional column to display the variable's offset, fix parameter's address pointer and update icons usage
+// JPM        2026  Fix display of the variable's value in case of a pointer, add column for address/register locations
 //
 
 // STILL TO DO:
@@ -59,6 +60,7 @@ ExRegA6(-1)
 #ifdef LOCAL_UIA6OFFSET
 	model->setHeaderData(LOCAL_UIA6OFFSET, Qt::Horizontal, QObject::tr("A6_Offset"));
 #endif
+	model->setHeaderData(LOCAL_UIADDRESS, Qt::Horizontal, QObject::tr("Addr./Reg."));
 	// Information table
 	TableView->setModel(model);
 	TableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -134,7 +136,7 @@ QList<QStandardItem *> LocalBrowserWindow::prepareRow(void* Info)
 #ifdef LOCAL_UIA6OFFSET
 	QList<QStandardItem *> ptrRow = { new QStandardItem(((S_VariablesStruct*)Info)->PtrName), new QStandardItem(""), new QStandardItem(((S_VariablesStruct*)Info)->PtrTypeName), new QStandardItem(QString("%1").arg(((S_VariablesStruct*)Info)->Offset)) };
 #else
-	QList<QStandardItem *> ptrRow = { new QStandardItem(((S_VariablesStruct*)Info)->PtrName), new QStandardItem(""), new QStandardItem(((S_VariablesStruct*)Info)->PtrTypeName) };
+	QList<QStandardItem *> ptrRow = { new QStandardItem(((S_VariablesStruct*)Info)->PtrName), new QStandardItem(""), new QStandardItem(((S_VariablesStruct*)Info)->PtrTypeName), new QStandardItem(((S_VariablesStruct*)Info)->Addr) };
 #endif
 
 	// check if variable has additional variables (such as structure)
@@ -154,14 +156,22 @@ QList<QStandardItem *> LocalBrowserWindow::prepareRow(void* Info)
 // Set the values of each line in accordance of the rows created from prepareRow() function
 void LocalBrowserWindow::setValueRow(QStandardItem *Row, size_t Adr, char* Value, void* Info)
 {
+	// get the row
 	QStandardItem *child = Row->child(0, LOCAL_UINAME);
 	if (child)
 	{
 		// check if variable has additional variables list (such as structure)
 		if (size_t nb = ((S_VariablesStruct*)Info)->NbTabVariables)
 		{
+			// check if this is a pointer type or a direct struct (use address as-is)
+			if (((S_VariablesStruct*)Info)->TypeTag & DBG_TAG_TYPE_pointer)
+			{
+				// this address is from a pointer
+				Adr = GET32(jagMemSpace, Adr);
+			}
+
 			// check the pointer's value fit in RAM
-			if (((Adr = GET32(jagMemSpace, Adr)) >= 4) && (Adr < vjs.DRAM_size))
+			if ((Adr >= 4) && (Adr < vjs.DRAM_size))
 			{
 				// remove any previous set icon
 				child->setIcon(QIcon());
@@ -169,6 +179,13 @@ void LocalBrowserWindow::setValueRow(QStandardItem *Row, size_t Adr, char* Value
 				// loop on the variables list
 				for (size_t i = 0; i < nb; i++)
 				{
+					// set the variable's address in the address/register column
+					char Value1[100];
+					memset(Value1, 0, sizeof(Value1));
+					sprintf(Value1, "0x%x", (int)Adr + ((S_VariablesStruct*)Info)->TabVariables[i]->Offset);
+					child = Row->child((int)i, LOCAL_UIADDRESS);
+					child->setText(QString("%1").arg(Value1));
+
 					// do not display arrays
 					if (!((((S_VariablesStruct*)Info)->TabVariables[i]->TypeTag & DBG_TAG_TYPE_array)))
 					{
@@ -241,6 +258,10 @@ void LocalBrowserWindow::RefreshContents(void)
 							{
 								LocalInfo[i].Adr += 8;		// 4 bytes from the PC return, and 4 bytes from the A6 pushed to stack (link A6)
 							}
+							// display the variable's address in the address/register column
+							memset(Value1, 0, sizeof(Value1));
+							sprintf(Value1, "0x%x", (unsigned int)LocalInfo[i].Adr);
+							model->item((int)i, LOCAL_UIADDRESS)->setText(QString("%1").arg(Value1));
 						}
 						else
 						{
@@ -251,8 +272,11 @@ void LocalBrowserWindow::RefreshContents(void)
 								model->item((int)i, LOCAL_UINAME)->setForeground(QColor(0, 0, 0xfe));
 								model->item((int)i, LOCAL_UIVALUE)->setForeground(QColor(0, 0, 0xfe));
 								model->item((int)i, LOCAL_UITYPE)->setForeground(QColor(0, 0, 0xfe));
+								model->item((int)i, LOCAL_UIADDRESS)->setForeground(QColor(0, 0, 0xfe));
 								// get the register's name
 								LocalInfo[i].PtrCPURegisterName = (char *)CPURegName[(((S_VariablesStruct*)(LocalInfo[i].PtrVariable))->Op - DBG_OP_reg0)];
+								// display the register's name in the address/register column
+								model->item((int)i, LOCAL_UIADDRESS)->setText(QString("%1").arg(LocalInfo[i].PtrCPURegisterName));
 							}
 						}
 
