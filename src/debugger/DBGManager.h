@@ -243,6 +243,7 @@ DBGOP;
 
 
 // Variables internal structure
+// Structure must follow the one from the DWARFManager.cpp file
 typedef struct VariablesStruct
 {
 	size_t Op;										// Variable's DW_OP
@@ -251,7 +252,12 @@ typedef struct VariablesStruct
 		size_t Addr;								// Variable memory address
 		int Offset;									// Variable stack offset (signed)
 	};
+	size_t FileDeclaration;							// Variable declaration file number
+	size_t LineDeclaration;							// Variable declaration line in the file
+	size_t ColumnDeclaration;						// Variable declaration column in the file
 	char *PtrName;									// Variable's name
+	size_t NbTableTypeDef;							// Number of typedefs used for the variable's type
+	size_t TableTypedef[100];						// List of typedefs's offset used for the variable's type
 	size_t TypeOffset;								// Offset pointing on the Variable's Type
 	size_t TypeByteSize;							// Variable's Type byte size
 	size_t TypeTag;									// Variable's Type Tag
@@ -328,4 +334,4 @@ extern int DBGManager_GetLocalVariableOffset(size_t Adr, size_t Index);
 #endif
 
 
-#endif	// __DBGMANAGER_H__
+#endif

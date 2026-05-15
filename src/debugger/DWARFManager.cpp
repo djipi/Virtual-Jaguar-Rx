@@ -14,12 +14,10 @@
 // JPM   Aug./2019  Added new functions to handle DWARF information, full filename fix
 // JPM   Mar./2020  Fix a random crash when reading the source lines information, and added a source code file date check
 //  RG   Jan./2021  Linux build fixes
-// JPM   Apr./2021  Support the structure and union members
-// JPM   June/2021  Update the source file path clean up
-// JPM   Oct./2021  Support wider offset ranges for local and parameter variables
+// JPM        2021  Support the structure and union members, update the source file path clean up, support wider offset ranges for local and parameter variables
 // JPM  March/2022  Added a '/cygdrive/' directory detection
 // JPM        2025  Support the fixed-point _Fract & _Accum type
-// JPM   Jan./2026  Handle non integer for function parameter
+// JPM        2026  Handle non integer for function parameter, record declarations (file, column & line), fix fixed-point extension, record the typedefs list used for a variable
 //
 
 // To Do
@@ -40,14 +38,15 @@
 #include "DWARFManager.h"
 
 // Definitions for debugging
-//#define DEBUG_NumCU			0x2				// CU number to debug or undefine it
-//#define DEBUG_VariableName	"cvar_vars"				// Variable name to look for or undefine it
-//#define DEBUG_TypeName		"edict_t"			// Type name to look for or undefine it
-//#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for or undefine it (not used / not supported)
-//#define DEBUG_Filename		"crt0"			// Filename to look for or undefine it
+//#define DEBUG_NumCU			0x2					// CU number to debug
+//#define DEBUG_VariableName	"cvar_vars"			// Variable name to look for
+//#define DEBUG_TypeName		"edict_t"			// Type name to look for
+//#define DEBUG_TypeDef			DW_TAG_typedef		// Type def to look for (not used / not supported)
+//#define DEBUG_Filename		"crt0"				// Filename to look for
 
 // Definitions for handling data
-//#define CONVERT_QT_HML								// Text will be converted as HTML
+#define	MAXNBTYPEDEFINVARIABLE		100				// Max number of typedefs to handle for a type
+//#define CONVERT_QT_HML							// Text will be converted as HTML
 
 // Definitions for the variables's typetag
 #define	TypeTag_structure			0x01			// structure
@@ -98,9 +97,12 @@ typedef struct BaseTypeStruct
 {
 	size_t Tag;										// Type's Tag
 	size_t Offset;									// Type's offset
-	size_t TypeOffset;								// Type's offset on another type
+	size_t TypeOffset;								// Type's offset to point on another type
 	size_t ByteSize;								// Type's Byte Size
 	size_t Encoding;								// Type's encoding
+	size_t FileDeclaration;							// Type declaration file number
+	size_t LineDeclaration;							// Type declaration line in the file
+	size_t ColumnDeclaration;						// Type declaration column in the file
 	char *PtrName;									// Type's name
 	size_t NbEnumerations;							// Type's enumeration numbers
 	EnumerationStruct *PtrEnumerations;				// Type's enumeration
@@ -109,16 +111,22 @@ typedef struct BaseTypeStruct
 }S_BaseTypeStruct;
 
 // Variables internal structure
+// Modifications must be done also in the DBGManager.h file
 typedef struct VariablesStruct
 {
-	size_t Op;										// Variable's DW_OP
+	size_t Op;										// Variable's DW_OP to describe the location (address, registers, etc.)
 	union
 	{
 		size_t Addr;								// Variable memory address
 		int Offset;									// Variable stack offset (signed)
 	};
+	size_t FileDeclaration;							// Variable declaration file number
+	size_t LineDeclaration;							// Variable declaration line in the file
+	size_t ColumnDeclaration;						// Variable declaration column in the file
 	char *PtrName;									// Variable's name
-	size_t TypeOffset;								// Offset pointing on the Variable's Type
+	size_t NbTableTypeDef;							// Number of typedefs used for the variable's type
+	size_t TableTypedef[MAXNBTYPEDEFINVARIABLE];	// List of typedefs's offset used for the variable's type
+	size_t TypeOffset;								// Offset pointing on the first type (can be the first of a chain)
 	size_t TypeByteSize;							// Variable's Type byte size
 	size_t TypeTag;									// Variable's Type Tag
 	size_t TypeEncoding;							// Variable's Type encoding
@@ -746,6 +754,7 @@ void DWARFManager_InitDMI(void)
 												{
 													switch (return_attr)
 													{
+														// Variable's memory location
 													case DW_AT_location:
 														if (dwarf_formblock(return_attr1, &return_block, &error) == DW_DLV_OK)
 														{
@@ -764,10 +773,35 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
+														// Variable's type offset
 													case DW_AT_type:
 														if (dwarf_global_formref(return_attr1, &return_offset, &error) == DW_DLV_OK)
 														{
 															PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].TypeOffset = return_offset;
+														}
+														break;
+														
+														// File declaration of the variable
+													case DW_AT_decl_file:
+														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+														{
+															PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].FileDeclaration = return_uvalue;
+														}
+														break;
+
+														// Variable declaration line number in the file
+													case DW_AT_decl_line:
+														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+														{
+															PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].LineDeclaration = return_uvalue;
+														}
+														break;
+
+														// Variable declaration column number in the file
+													case DW_AT_decl_column:
+														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+														{
+															PtrCU[NbCU].PtrVariables[PtrCU[NbCU].NbVariables].ColumnDeclaration = return_uvalue;
 														}
 														break;
 
@@ -786,7 +820,7 @@ void DWARFManager_InitDMI(void)
 														}
 														break;
 
-														default:
+													default:
 														break;
 													}
 												}
@@ -891,10 +925,26 @@ void DWARFManager_InitDMI(void)
 
 														// Type's file number
 													case DW_AT_decl_file:
+														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+														{
+															PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].FileDeclaration = return_uvalue;
+														}
+														break;
+
+														// Type's column number
+													case DW_AT_decl_column:
+														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+														{
+															PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].ColumnDeclaration = return_uvalue;
+														}
 														break;
 
 														// Type's line number
 													case DW_AT_decl_line:
+														if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+														{
+															PtrCU[NbCU].PtrTypes[PtrCU[NbCU].NbTypes].LineDeclaration = return_uvalue;
+														}
 														break;
 
 													default:
@@ -1222,14 +1272,26 @@ void DWARFManager_InitDMI(void)
 
 																			// declaration file number
 																		case DW_AT_decl_file:
+																			if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+																			{
+																				PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].FileDeclaration = return_uvalue;
+																			}
 																			break;
 
 																			// declaration line number
 																		case DW_AT_decl_line:
+																			if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+																			{
+																				PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].LineDeclaration = return_uvalue;
+																			}
 																			break;
 
 																			// declaration column number
 																		case DW_AT_decl_column:
+																			if (dwarf_formudata(return_attr1, &return_uvalue, &error) == DW_DLV_OK)
+																			{
+																				PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrVariables[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbVariables].ColumnDeclaration = return_uvalue;
+																			}
 																			break;
 
 																		default:
@@ -1444,7 +1506,9 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 	if (PtrVariables->PtrName && !strcmp(PtrVariables->PtrName, DEBUG_VariableName))
 #endif
 	{
+		// allocation for the complete variable type name
 		PtrVariables->PtrTypeName = (char *)calloc(1000, 1);
+		// look for the first type offset
 		size_t TypeOffset = PtrVariables->TypeOffset;
 
 		for (size_t j = 0; j < PtrCU[NbCU].NbTypes; j++)
@@ -1534,13 +1598,16 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 					}
 					break;
 
-					// Typedef type tag
+					// record the typedef used for the variable
 				case DW_TAG_typedef:
 					if (!(PtrVariables->TypeTag & TypeTag_typedef))
 					{
 						PtrVariables->TypeTag |= TypeTag_typedef;
+						PtrVariables->NbTableTypeDef = 0;
 						strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
 					}
+					PtrVariables->TableTypedef[PtrVariables->NbTableTypeDef++] = TypeOffset;
+					// get the next type offset
 					if ((TypeOffset = PtrCU[NbCU].PtrTypes[j].TypeOffset))
 					{
 						j = -1;
@@ -1575,6 +1642,7 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 				case DW_TAG_base_type:
 					if (!(PtrVariables->TypeTag & TypeTag_typedef))
 					{
+						// use the type name
 						strcat(PtrVariables->PtrTypeName, PtrCU[NbCU].PtrTypes[j].PtrName);
 					}
 					if ((PtrVariables->TypeTag & TypeTag_pointer))
@@ -1588,13 +1656,13 @@ void DWARFManager_InitInfosVariable(VariablesStruct *PtrVariables)
 						// get the encoding based on the DW_ATE_... dwarf's list
 						PtrVariables->TypeEncoding = PtrCU[NbCU].PtrTypes[j].Encoding;
 						// determine the ALTIUM fixed-point extension based on the type's name (_Fract)
-						if (strstr(PtrVariables->PtrTypeName, "_Fract"))
+						if (strstr(PtrCU[NbCU].PtrTypes[j].PtrName, "_Fract"))
 						{
 							PtrVariables->ALTIUM = DW_ATE_ALTIUM_fract;
 							PtrVariables->TypeEncoding |= (DW_ATE_ALTIUM_fract << 8);
 						}
 						// determine the ALTIUM fixed-point extension based on the type's name (_Accum)
-						if (strstr(PtrVariables->PtrTypeName, "_Accum"))
+						if (strstr(PtrCU[NbCU].PtrTypes[j].PtrName, "_Accum"))
 						{
 							PtrVariables->ALTIUM = DW_ATE_ALTIUM_accum;
 							PtrVariables->TypeEncoding |= (DW_ATE_ALTIUM_accum << 8);

@@ -23,6 +23,7 @@
 // To Do
 // To think about unique format to handle variations from ELF, DWARF, etc.
 // To create a DBGManager class
+// To support the long long _Accum type (signed and unsigned) but will require a 128 bits integer type support
 //
 
 
@@ -53,9 +54,11 @@ struct Value
 		int16_t SS;
 		int32_t SI;
 		int64_t SL;
+		// int128_t SLL;
 		uint16_t US;
 		uint32_t UI;
 		uint64_t UL;
+		// int128_t ULL;
 	};
 }S_Value;
 

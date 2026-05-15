@@ -39,12 +39,13 @@ Git commit:
 18) Added lua library support for VS 2022
 19) Added a CMakeLists.txt file for CMake support
 20) Update the debugger memory window
----  Added key home/end, and mouse wheel
-21) Added _Fract & _Accum fixed-point support for the DWARF variable type detection
-22) Added application option to allow high-DPI displays support
-23) Removed the Easter egg --yarrr option
+--- Added key home/end, and mouse wheel
+21) Added application option to allow high-DPI displays support
+22) Removed the Easter egg --yarrr option
 23) Documentation & content texts updates
-24) Add char type support, and handle non integer for function parameter, in debugger
+24) Update the debugger variables support
+--- Add char type support, and handle non integer for function parameter
+--- Added _Fract & _Accum fixed-point support for the DWARF variable type detection
 25) Added a feature to receive remote control commands
 --- GDB remote protocol support for the M68K CPU (registers & memory read/write)
 --- GDB remote protocol support for the breakpoints
@@ -52,6 +53,9 @@ Git commit:
 27) Update the breakpoints window
 --- Breakpoint can be deleted using the Del key from the breakpoints window
 --- Breakpoint status can be toggled on/off by double-clicking the status cell
+28) Local variables window update
+--- Fix display of the variable's value in case of a pointer
+--- Add column for address/register locations
 
 pre-Release 5b (20th July 2022)
 -------------------------------
