@@ -1,8 +1,29 @@
+Virtual Jaguar v2.1.3 R5c GCC/Qt
+--------------------------------
+
+* Improve the ELF/DWARF information support for the debugger mode
+* Added Console standard emulation (stdout support, color detection, Amber style)
+* Added .J64 homebrew format detection and sub-directories support in software path
+* Move SDL to SDL2
+* Updated heap allocation window (Calypsi/VBcc malloc structures, error/warning revamp)
+* Added profiling features for the 68000 (Tracy & VJRx profiler integration)
+* Updated debugger memory window (Home/End keys, mouse wheel)
+* Added high-DPI display support option
+* Added remote control command reception (GDB remote protocol for M68K)
+* Updated breakpoints window (Del key deletion, toggle on/off by double-click)
+* Updated local variables window (pointer value fix, add address/register column)
+* Added char, _Fract & _Accum fixed-point type support for DWARF variable detection
+* Removed Easter egg --yarrr option
+* Fix for the fps counter (PAL & NTSC)
+* Added exception catch (Zero divide)
+* Display full filename in file picker cartridge's information
+
+
 Virtual Jaguar v2.1.3 R5b GCC/Qt
 --------------------------------
 
 * Added the save state patch from PvtLewis (from Atari Age's forum)
-* Merged convience fixes #64 from 42Bastian
+* Merged convenience fixes #64 from 42Bastian
 - Start of RISC disassembly moved to F03000, GPU memory browser in longs, and fixed object list display
 * Fix parameter's address pointer and update icons usage for the Local variables window
 * Added a command line option to fill the entire system space with 0

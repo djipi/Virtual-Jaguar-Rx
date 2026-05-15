@@ -28,7 +28,7 @@ Simply double click on the VJ-Rx icon or type ./virtualjaguar -h from the comman
 * There is a built in help (under Help|Contents) for more information on how to use the emulator.
 
 ## Improvements
-Beside the new additional debugger & profiler integration, no major improvements have been made from the original VJ.<br>
+Beside the new additional remote control, debugger & profiler integration, no major improvements have been made from the original VJ.<br>
 However the debuggers can be helpful to fix legacy issues and improve the emulator.<br>
 If you find bugs, wants to enhance the code / documentations or simply have questions / suggestions, 
 you can participate via the Issues and/or the Discussion tabs in the Github project.

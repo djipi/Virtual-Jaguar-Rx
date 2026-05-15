@@ -18,7 +18,9 @@ The minimum requirements for compiling Virtual Jaguar Rx from source are:
  o  libcdio v0.90 or higher (optional, for Jaguar CD support)
  o  OpenGL libraries
  o  Qt5 5.12.0 or higher
+ o  gdbstub (optional, for gdb remote access support)
  o  Visual Studio 2022 (if any of interest)
+ o  CMake (optional, CMakeLists.txt included)
  o  supported OS (WIN64 through MSYS2/MinGW64, Windows 64 bits, Linux); other
     OSs may work too but you may need to change some items in the Makefile or adapt the Visual Studio project.
  o  cygwin64 support is done but no test has been completed
