@@ -7,11 +7,12 @@
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -----------------------------------------------------------
 // JLH  08/14/2012  Created this file
 // JPM  08/09/2017  Added windows display detection in order to avoid the refresh
 // JPM  10/13/2018  Added BPM hit counts
+// JPM  12/11/2020  Show the SR value as a readable form
 //
 
 // STILL TO DO:
