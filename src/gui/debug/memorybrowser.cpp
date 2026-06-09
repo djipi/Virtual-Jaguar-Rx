@@ -7,12 +7,15 @@
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 // bs42= 42Bastian <github>
+// DBN = https://github.com/glaubitz/virtualjaguar-debian
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -------------------------------------------------------------
 // JLH  08/14/2012  Created this file
+// JPM  08/09/2017  Added windows display detection in order to avoid the refresh
 // JPM  March/2022  Modified to support the GPU & DSP memory browser window
 // bs42  July/2022  GPU memory browser in longs as reading/writing is long only
+// JPM  06/02/2026  Selectable text feature from DBN's repository
 //
 
 // STILL TO DO:
@@ -36,6 +39,9 @@ MemoryBrowserWindow::MemoryBrowserWindow(QWidget * parent/*= 0*/, int Type): QWi
 {
 	// mem information setup
 	setWindowTitle(tr(MemTypeInfo[Type].WindowTitle));
+	
+	// label text selectable
+	text->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
 	// entry mask for the address (in hexadecimal)
 	address->setInputMask("hhhhhh");

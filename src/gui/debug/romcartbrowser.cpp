@@ -2,10 +2,12 @@
 // romcartbrowser.cpp - Jaguar ROM cartridge browser
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+// DBN = https://github.com/glaubitz/virtualjaguar-debian
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -----------------------------------------------------------
 // JPM  March/2022  Created this file
+// JPM  06/02/2026  Selectable text feature from DBN's repository
 //
 
 // STILL TO DO:
@@ -28,6 +30,9 @@ ROMCartBrowserWindow::ROMCartBrowserWindow(QWidget * parent/*= 0*/): QWidget(par
 {
 	// display title
 	setWindowTitle(tr("ROM Cartridge Browser"));
+
+	// label text selectable
+	text->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
 	// set the ROM cartridge size list (default 6MB)
 	listromcartsize->addItem("1 MB", QVariant(ROMCART_1MB));

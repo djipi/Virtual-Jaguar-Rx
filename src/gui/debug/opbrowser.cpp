@@ -5,12 +5,16 @@
 // (C) 2012 Underground Software
 //
 // JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 // bs42= 42Bastian <github>
+// DBN = https://github.com/glaubitz/virtualjaguar-debian
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -----------------------------------------------------------
 // JLH  12/01/2012  Created this file
+// JPM  08/09/2017  Added windows display detection in order to avoid the refresh
 // bs42  July/2022  Fixed object list display: GPU and STOP have no link
+// JPM  06/02/2026  Selectable text feature from DBN's repository
 //
 
 // STILL TO DO:
@@ -27,6 +31,9 @@ OPBrowserWindow::OPBrowserWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt::D
 	refresh(new QPushButton(tr("Refresh")))
 {
 	setWindowTitle(tr("OP Browser"));
+
+	// label text selectable
+	text->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
 	// Need to set the size as well...
 //	resize(560, 480);

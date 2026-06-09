@@ -6,6 +6,7 @@
 //
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+// DBN = https://github.com/glaubitz/virtualjaguar-debian
 //
 // Who  mm/dd/yyyy  What
 // ---  ----------  -----------------------------------------------------------
@@ -13,6 +14,7 @@
 // JPM  08/09/2017  Added windows display detection in order to avoid the refresh
 // JPM  10/13/2018  Added BPM hit counts
 // JPM  12/11/2020  Show the SR value as a readable form
+// JPM  06/02/2026  Selectable text feature from DBN's repository
 //
 
 // STILL TO DO:
@@ -33,6 +35,9 @@ CPUBrowserWindow::CPUBrowserWindow(QWidget * parent/*= 0*/): QWidget(parent, Qt:
 	bpmContinue(new QPushButton(tr("Resume")))
 {
 	setWindowTitle(tr("CPU Browser"));
+
+	// label text selectable
+	text->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
 	// Need to set the size as well...
 //	resize(560, 480);
@@ -376,4 +381,3 @@ void CPUBrowserWindow::keyPressEvent(QKeyEvent * e)
 #endif
 	}
 }
-

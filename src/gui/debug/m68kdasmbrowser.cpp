@@ -5,10 +5,14 @@
 // (C) 2012 Underground Software
 //
 // JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
+// DBN = https://github.com/glaubitz/virtualjaguar-debian
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -------------------------------------------------------------
 // JLH  12/01/2012  Created this file
+// JPM  08/09/2017  Added windows display detection in order to avoid the refresh
+// JPM  06/02/2026  Selectable text feature from DBN's repository
 //
 
 // STILL TO DO:
@@ -30,6 +34,9 @@ M68KDasmBrowserWindow::M68KDasmBrowserWindow(QWidget * parent/*= 0*/): QWidget(p
 	memBase(0x4000)
 {
 	setWindowTitle(tr("M68K Disassembly Browser"));
+
+	// label text selectable
+	text->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
 	address->setInputMask("hhhhhh");
 	QHBoxLayout * hbox1 = new QHBoxLayout;

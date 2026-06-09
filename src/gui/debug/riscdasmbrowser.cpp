@@ -5,12 +5,16 @@
 // (C) 2013 Underground Software
 //
 // JLH = James Hammons <jlhamm@acm.org>
+// JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 // bs42= 42Bastian <github>
+// DBN = https://github.com/glaubitz/virtualjaguar-debian
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -------------------------------------------------------------
 // JLH  01/22/2012  Created this file
+// JPM  08/09/2017  Added windows display detection in order to avoid the refresh
 // bs42  July/2022  Start of RISC disassembly moved to F03000
+// JPM  06/02/2026  Selectable text feature from DBN's repository
 //
 
 // STILL TO DO:
@@ -34,6 +38,9 @@ RISCDasmBrowserWindow::RISCDasmBrowserWindow(QWidget * parent/*= 0*/): QWidget(p
 	memBase(0xf03000)
 {
 	setWindowTitle(tr("RISC Disassembly Browser"));
+
+	// label text selectable
+	text->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
 	address->setInputMask("hhhhhh");
 	QHBoxLayout * hbox1 = new QHBoxLayout;
