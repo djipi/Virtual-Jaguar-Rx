@@ -14,20 +14,25 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When (mm/dd/yy)  What
-// ---  ---------------  -----------------------------------------------------------
-// JPM   Nov./2025       Created this file
+// Who  mm/dd/yyyy  What
+// ---  ----------  -----------------------------------------------------------
+// JPM   Nov./2025  Created this file
+// JPM  06/09/2026  Make Lua optional
 //
 
 #ifndef __BASEPROFILER_H__
 #define __BASEPROFILER_H__
 
 #include <stdint.h>
+#ifdef LUA_ENABLE
 extern "C" {
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
 }
+#else
+typedef void lua_State;
+#endif
 
 class baseProfiler
 {

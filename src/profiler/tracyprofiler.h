@@ -16,9 +16,10 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When (mm/dd/yy)  What
-// ---  ---------------  -----------------------------------------------------------
-// JPM  Nov./2025        Created this file
+// Who  mm/dd/yyyy  What
+// ---  ----------  -----------------------------------------------------------
+// JPM   Nov./2025  Created this file
+// JPM  06/09/2026  Make Lua optional
 //
 
 #if !defined(__TRACYPROFILER_H__) && defined(TRACY_ENABLE)
@@ -36,7 +37,11 @@ public:
 	~TracyProfiler(void);
 	//
 	bool Start(void) override;
+#ifdef LUA_ENABLE
 	void InitLua(lua_State* LuaLib) override;
+#else
+	void InitLua(lua_State* /*LuaLib*/) override {} 	
+#endif
 	void Timer(bool onoff, bool newvalue) override;
 	void Pause(bool pause) override;
 	void RAZIndex(void* zoneCtx) { *(TracyCZoneCtx*)zoneCtx = { 0 }; }

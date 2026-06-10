@@ -5,12 +5,13 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When (mm/dd/yy)  What
-// ---  ---------------  -----------------------------------------------------------
-// JPM  10/29/2025       Created this file
-// JPM   Oct./2025       Added pause feature, better control for the Tracy profiler feed and memory allocation tracking
-// JPM   Nov./2025       Tracy profiler connection with a cancellable dialog, Lua initialization, and timer manipulations
-// JPM   Dec./2025       Added M68K functions tracking messages, and frames marking
+// Who  mm/dd/yyyy)  What
+// ---  ----------  -----------------------------------------------------------
+// JPM  10/29/2025  Created this file
+// JPM   Oct./2025  Added pause feature, better control for the Tracy profiler feed and memory allocation tracking
+// JPM   Nov./2025  Tracy profiler connection with a cancellable dialog, Lua initialization, and timer manipulations
+// JPM   Dec./2025  Added M68K functions tracking messages, and frames marking
+// JPM  06/09/2026  Make Lua optional
 //
 
 //#define TracyFunction functionName
@@ -29,9 +30,13 @@
 #include <QtCore/QTimer>
 #include <QtWidgets/QApplication>
 #include "tracyprofiler.h"
+#ifdef LUA_ENABLE
 #include "tracy\TracyLua.hpp"
+#endif
 #include "client\TracyProfiler.hpp"
 
+//#ifdef _MSC_VER
+#if 0
 // Define the Lua zone state that Tracy requires
 namespace tracy
 {
@@ -41,6 +46,7 @@ namespace tracy
 		return luaZoneState;
 	}
 }
+#endif
 
 //
 #undef TracyLine
@@ -56,7 +62,7 @@ namespace tracy
 #define COLOUR_DEBUG	0xFF808080
 
 // M68K variables for the Tracy profiler
-static constexpr double M68K_CLOCK_HZ = 13290000.0;					// 13.29 MHz
+static constexpr double M68K_CLOCK_HZ = 13290000.0;			// 13.29 MHz
 static double NANOS_PER_CYCLE = 1000000000.0 / M68K_CLOCK_HZ;		// M68K @ 13.29 MHz: 1 cycle is more or less 75.244 nanoseconds
 int64_t g_tracy_time_offset;
 bool g_tracy_emulation;
@@ -76,11 +82,13 @@ TracyCancel(false)
 }
 
 
+#ifdef LUA_ENABLE
 // Tracy profiler Lua initialization
 void TracyProfiler::InitLua(lua_State* LuaLib)
 {
 	tracy::LuaRegister(LuaLib);
 }
+#endif
 
 
 // Wait for Tracy profiler connection with a cancellable dialog
