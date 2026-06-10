@@ -7,25 +7,28 @@
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -------------------------------------------------------------
 // JLH  01/14/2010  Created this file
 // JLH  02/03/2013  Added "centered" fullscreen mode with correct aspect ratio
 // JPM  06/06/2016  Visual Studio support
+// JPM  06/10/2026  Use Qt OpenGL header
 //
 
 #include "glwidget.h"
-
 #include "jaguar.h"
 #include "settings.h"
 #include "tom.h"
+#include <QtGui/qopengl.h>
 
+#if 0
 #if defined(__GCCWIN32__) || defined(_MSC_VER)
 #if defined(_MSC_VER)
 #include <GL/gl.h>
 #endif
 // Apparently on win32, various OpenGL constants aren't pulled in.
 #include <GL/glext.h>
+#endif
 #endif
 
 
