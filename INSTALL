@@ -1,0 +1,69 @@
+-------------------------------------------
+Virtual Jaguar v2.1.3 Rx Qt release INSTALL
+-------------------------------------------
+
+
+REQUIREMENTS
+------------
+
+The minimum requirements for compiling Virtual Jaguar Rx from source are:
+
+ o  CMake
+ o  GCC v4.4.x or higher
+ o  libdwarf 20210528
+ o  libelf 0.8.13
+ o  OpenGL
+ o  Qt5 5.12.0 or higher
+ o  SDL2 2.30.9
+ o  zlib v1.3.1 or higher
+
+The optional requirements are:
+
+ o  gdbstub (gdb remote access support)
+ o  libcdio v0.90 or higher (Jaguar CD support)
+ o  lua 5.3 or higher (future use with Tracy profiler)
+ o  Tracy Profiler 0.13.x or higher (profiling support) 
+ 
+ 
+PLATFORMS
+--------- 
+
+Supported O/S (WIN64 through MSYS2/MinGW64, Windows 64 bits, Linux and cygwin64).
+Previously supported O/S (BeOS, FreeBSD and WIN32 through MinGW, MacOS) could work too but the CMakeLists may need modifications.
+
+
+COMPILING
+---------
+
+To generate makefiles and projects, a CMakeLists file is provided.
+
+These environement variables are supported with CMake and can be used in case of CMake cannot found the packages.
+DWARFDIR, GDBSTUBDIR, LIBELFDIR, LUADIR, SDL2DIR, TRACYPROFILERDIR, LIBTRACY_PUBLIC_DIR, ZLIBDIR, QTDIR
+-D<DIR>=<Path>
+
+These options are supported with CMake, by default the LIBDWARF_ENABLE & LIBELF_ENABLE are ON.
+GDBSTUB_ENABLE, LIBCDIO_ENABLE, LIBDWARF_ENABLE, LIBELF_ENABLE, TRACY_ENABLE, LUA_ENABLE
+-D<Option>=ON|OFF
+
+These options will affect the makefile.
+CMAKE_VERBOSE_MAKEFILE=OFF|ON
+CMAKE_INSTALL_PREFIX=<installation path>
+
+mkdir build
+cd build
+cmake -G <Generator> ..
+cmake --build . --config Release
+
+
+VISUAL STUDIO 2022
+------------------
+
+Beside the CMakeLists.txt file, a Win-VS2022 sub-directory contains the project and solution file.
+You may have to adapt such files to handle your own development environment, usually to put the right include and library paths will be enough..
+The project uses the environment variables described in the compiling section.
+It can create a Debug or Release executable, and will also need the necessary DLLs in the executable directory.
+
+
+SUPPORT
+-------
+For additional info, go to https://github.com/djipi/Virtual-Jaguar-Rx/wiki.
