@@ -63,7 +63,7 @@ namespace tracy
 
 // M68K variables for the Tracy profiler
 static constexpr double M68K_CLOCK_HZ = 13290000.0;			// 13.29 MHz
-static double NANOS_PER_CYCLE = 1000000000.0 / M68K_CLOCK_HZ;		// M68K @ 13.29 MHz: 1 cycle is more or less 75.244 nanoseconds
+double NANOS_PER_CYCLE = 1000000000.0 / M68K_CLOCK_HZ;		// M68K @ 13.29 MHz: 1 cycle is more or less 75.244 nanoseconds
 int64_t g_tracy_time_offset;
 bool g_tracy_emulation;
 
