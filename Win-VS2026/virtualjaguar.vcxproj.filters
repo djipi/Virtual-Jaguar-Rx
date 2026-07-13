@@ -755,10 +755,10 @@
     <None Include="..\docs\WHATSNEW">
       <Filter>Docs</Filter>
     </None>
-    <None Include="..\docs\INSTALL">
+    <None Include="..\INSTALL">
       <Filter>Docs</Filter>
     </None>
-    <None Include="..\docs\LICENSE">
+    <None Include="..\LICENSE">
       <Filter>Docs</Filter>
     </None>
     <None Include="..\res\tool-stack.png">

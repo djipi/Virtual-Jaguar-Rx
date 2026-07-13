@@ -21,14 +21,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>
@@ -59,7 +59,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_EMULATED_CLOCK;GDBSTUB_ENABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(QTDIR)\include;$(SDL2DIR)\include;$(ZLIBDIR)\include;$(TRACYPROFILERDIR)\public;$(LUADIR)\include;$(GDBSTUBDIR)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(QTDIR)\include;$(SDL2DIR)\include;$(ZLIBDIR)\include;$(TRACYPROFILERDIR)\public;$(LUADIR)\include;$(GDBSTUBDIR)\include\gdbstub</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
       <ObjectFileName>$(IntDir)obj\</ObjectFileName>
@@ -87,7 +87,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;_RELEASE;_CRT_SECURE_NO_WARNINGS;TRACY_ENABLE;TRACY_ON_DEMAND;TRACY_EMULATED_CLOCK;GDBSTUB_ENABLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(QTDIR)\include;$(SDL2DIR)\include;$(ZLIBDIR)\include;$(TRACYPROFILERDIR)\public;$(LUADIR)\include;$(GDBSTUBDIR)\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(QTDIR)\include;$(SDL2DIR)\include;$(ZLIBDIR)\include;$(TRACYPROFILERDIR)\public;$(LUADIR)\include;$(GDBSTUBDIR)\include\gdbstub</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <MinimalRebuild>false</MinimalRebuild>
       <AssemblerListingLocation>$(IntDir)asm\</AssemblerListingLocation>
