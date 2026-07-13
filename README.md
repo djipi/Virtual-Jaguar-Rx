@@ -16,8 +16,6 @@ Simply double click on the VJ-Rx icon or type ./virtualjaguar -h from the comman
 
 ## Documentations
 #### The docs directory contain documents worth reading.
-* INSTALL describes the build requirements.
-* LICENSE is the same GPLv3 document used by the original VJ, released under the GPL v3 or later.
 * README has been adapted for VJ-Rx and keep the original VJ information as well.
 * TODO has been slightly updated and follow the original VJ information as well.
 * virtualjaguar.1 describes the emulator usage.
@@ -27,6 +25,9 @@ Simply double click on the VJ-Rx icon or type ./virtualjaguar -h from the comman
 * The Wiki contains mostly technical information related to the emulator.
 * There is a built in help (under Help|Contents) for more information on how to use the emulator.
 
+## Project
+The INSTALL document describes the build requirements.
+
 ## Improvements
 Beside the new additional remote control, debugger & profiler integration, no major improvements have been made from the original VJ.<br>
 However the debuggers can be helpful to fix legacy issues and improve the emulator.<br>
@@ -35,3 +36,6 @@ you can participate via the Issues and/or the Discussion tabs in the Github proj
 
 ## Credits
 The original VJ credits have been kept with some adjustments in regard of the Rx version.
+
+## License
+It is the same GPLv3 document used by the original VJ, released under the GPL v3 or later.

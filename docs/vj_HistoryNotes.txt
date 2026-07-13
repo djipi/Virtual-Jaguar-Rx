@@ -25,7 +25,7 @@ Git commit:
 --- Fix Lib-M68K's malloc detection for ELF's binary file
 12) Enhance ELF's sections check usage
 13) Added ELF program headers support
-14) Project switch to VS2022
+14) Project switch to VS2026
 15) Added exception catch (Zero divide)
 16) Fix debugger for the get address in case of empty symbol name
 17) Added profiling features for the 68000
@@ -36,7 +36,7 @@ Git commit:
 --- 68000 CPU cycles emulation in Tracy profiler timer
 --- Wait for Tracy profiler connection with a cancellable dialog
 --- Profiler control window to include a frame loop
-18) Added lua library support for VS 2022
+18) Added lua library support
 19) Added a CMakeLists.txt file for CMake support
 20) Update the debugger memory window
 --- Added key home/end, and mouse wheel
@@ -56,6 +56,9 @@ Git commit:
 28) Local variables window update
 --- Fix display of the variable's value in case of a pointer
 --- Add column for address/register locations
+29) Added features from https://github.com/glaubitz/virtualjaguar-debian
+--- Selectable text feature in the Alpine's Browser window
+30) The original make files have been removed
 
 pre-Release 5b (20th July 2022)
 -------------------------------
@@ -391,20 +394,11 @@ Legacy issues/hints
 Project information
 ===================
 1) Code based on the Shamus Hammons source code available via Gethub by the 12th September 2017 (2.1.3 Final)
-2) Visual Studio 2022 project support for 64 bits
-3) libelf 0.8.13 library 64bits for VS 2022
-4) libdwarf 20210528 library 64bits for VS 2017 (compatible with VS 2022)
-5) Qt 5.12.0 library 64bits for VS 2017 (compatible with VS 2022)
-6) Zlib 1.3.1 library 64bits for VS 2022
-7) SDL2 2.30.9 library 64bits for VS 2022
-8) lua 5.4.8 library 64bits for VS 2022
-9) Tracy Profiler 0.12.x library 64bits for VS 2022
-10) The original make files have been modified to follow the requirements and modifications
-11) A CMakeLists.txt file have been added for CMake support
-12) The 'Rx' word has been added to the emulator name to make distinction with the original version
-13) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
-14) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
+2) The original make files have been removed
+3) A CMakeLists.txt file have been added for CMake support
+4) The 'Rx' word has been added to the emulator name to make distinction with the original version
+5) The project is set at https://github.com/djipi/Virtual-Jaguar-Rx
+6) GPLv3 file document has been renamed as LICENSE, to fit better the GitHub requirements
 -- Text / License terms are the same
-15) The x86 configuration has been removed in the Visual Studio project
-16) Additional project information can be found at https://github.com/djipi/Virtual-Jaguar-Rx/wiki
-17) The .env file list the Windows environment variables used by the VS 2022 project
+7) The x86 configuration has been removed in the Visual Studio project
+8) Additional project information can be found at https://github.com/djipi/Virtual-Jaguar-Rx/wiki
