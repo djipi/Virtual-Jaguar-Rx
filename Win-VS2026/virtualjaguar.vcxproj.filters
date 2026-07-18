@@ -427,13 +427,7 @@
     <ClCompile Include="GeneratedFiles\Release\moc_BreakpointsWin.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_NewFnctBreakpointWin.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_NewFnctBreakpointWin.cpp">
-      <Filter>Generated Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\debugger\NewFnctBreakpointWin.cpp">
+    <ClCompile Include="..\src\debugger\NewBreakpointWin.cpp">
       <Filter>Source Files\debugger</Filter>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_CartFilesListWin.cpp">
@@ -549,6 +543,12 @@
     </ClCompile>
     <ClCompile Include="..\src\remote\gdbremote.cpp">
       <Filter>Source Files\remote</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_NewBreakpointWin.cpp">
+      <Filter>Generated Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_NewBreakpointWin.cpp">
+      <Filter>Generated Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -876,7 +876,7 @@
     <CustomBuild Include="..\src\debugger\BreakpointsWin.h">
       <Filter>Header Files\debugger</Filter>
     </CustomBuild>
-    <CustomBuild Include="..\src\debugger\NewFnctBreakpointWin.h">
+    <CustomBuild Include="..\src\debugger\NewBreakpointWin.h">
       <Filter>Header Files\debugger</Filter>
     </CustomBuild>
     <CustomBuild Include="..\src\debugger\CartFilesListWin.h">

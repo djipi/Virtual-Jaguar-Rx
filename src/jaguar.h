@@ -15,14 +15,17 @@ typedef struct stdConsoleInfo
 // Breakpoint struture
 typedef struct BrkInfo
 {
-	bool Used;					// Allocated breakpoint
-	bool Active;				// Active breakpoint
-	char *Name;					// Functions's name
-	char *Filename;				// Source filename
-	char *LineSrc;				// Source code line
-	size_t NumLine;				// Line number
-	size_t Adr;					// Breakpoint address
-	size_t HitCounts;			// Hit counts
+	bool Used;				// Allocated breakpoint
+	bool Active;			// Active breakpoint
+	char* Name;				// Functions's name, or data label
+	char *Filename;			// Source filename
+	char *LineSrc;			// Source code line
+	size_t NumLine;			// Line number
+	size_t Adr;				// Breakpoint address
+	size_t HitCounts;		// Hit counts
+	size_t Access;			// Read/Write breakpoint flag (0=Read, 1=Write, 2=Read/Write)
+	size_t Size;			// Breakpoint data's size (1, 2, 4), 0 for code breakpoint
+	bool IsCode;			// Code breakpoint flag
 }S_BrkInfo;
 
 extern void JaguarSetScreenBuffer(uint32_t * buffer);

@@ -63,7 +63,7 @@ class CallStackBrowserWindow;
 class HeapAllocatorBrowserWindow;
 class Memory1BrowserWindow;
 class BreakpointsWindow;
-class NewFnctBreakpointWindow;
+class NewBreakpointWindow;
 class ExceptionVectorTableBrowserWindow;
 class FilesrcListWindow;
 class CartFilesListWindow;
@@ -134,7 +134,7 @@ class MainWin: public QMainWindow
 		void ShowMemory1BrowserWin(int NumWin);
 		void ShowstdConsoleWin(void);
 		void ShowExceptionVectorTableBrowserWin(void);
-		void ShowNewFunctionBreakpointWin(void);
+		void ShowNewBreakpointWin(void);
 		void ShowBreakpointsWin(void);
 		void DeleteAllBreakpoints(void);
 		void DisableAllBreakpoints(void);
@@ -221,7 +221,7 @@ class MainWin: public QMainWindow
 		DSPDasmWindow *DSPDasmWin;
 		FilesrcListWindow *FilesrcListWin;
 		BreakpointsWindow *BreakpointsWin;
-		NewFnctBreakpointWindow *NewFunctionBreakpointWin;
+		NewBreakpointWindow *NewBreakpointWin;
 		CartFilesListWindow *CartFilesListWin;
 
 	public:
@@ -253,7 +253,7 @@ class MainWin: public QMainWindow
 		int lastEditedProfile;
 		QMenu *fileMenu;
 		QMenu *helpMenu;
-		QMenu *debugMenu, *debugWindowsMenu, *debugWindowsBrowsesMenu, *debugWindowsWatchMenu, *debugWindowOutputMenu, *debugWindowExceptionMenu, *debugWindowsMemoryMenu, *debugNewBreakpointMenu;
+		QMenu *debugMenu, *debugWindowsMenu, *debugWindowsBrowsesMenu, *debugWindowsWatchMenu, *debugWindowOutputMenu, *debugWindowExceptionMenu, *debugWindowsMemoryMenu, *debugNewBreakpointMenu;;
 		QMenu *viewMenu, *viewCartMenu;
 		QToolBar * toolbar;
 		QToolBar * debugbar;
@@ -318,7 +318,7 @@ class MainWin: public QMainWindow
 		QAction *LocalBrowseAct;
 		QAction *CallStackBrowseAct;
 		QAction **mem1BrowseAct;
-		QAction *newFunctionBreakpointAct;
+		QAction *newBreakpointAct;
 		QAction *BreakpointsAct;
 		QAction *deleteAllBreakpointsAct;
 		QAction *disableAllBreakpointsAct;

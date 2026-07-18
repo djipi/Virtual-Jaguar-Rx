@@ -11,7 +11,7 @@
 //  RG = Richard Goedeken
 //  PL = PvtLewis <from Atari Age>
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  ------------------------------------------------------------
 // JLH  12/23/2009  Created this file
 // JLH  12/20/2010  Added settings, menus & toolbars
@@ -35,6 +35,7 @@
 // JPM        2024  Use setting for the emulation framerate display, added a Console standard emulation window
 // JPM        2025  Feature to turn on/off the profiler, profiler control window, and conditional compilation for the VJRx and Tracy profiler support
 // JPM    May/2026  Added remote control support, fix the fps counter
+// JPM   July/2026  Replace new function breakpoint with a new breakpoint window
 //
 
 // FIXED:
@@ -113,7 +114,7 @@
 #include "debugger/DSPDasmWin.h"
 #include "debugger/memory1browser.h"
 #include "debugger/BreakpointsWin.h"
-#include "debugger/NewFnctBreakpointWin.h"
+#include "debugger/NewBreakpointWin.h"
 #include "debugger/FilesrcListWin.h"
 #include "debugger/exceptionvectortablebrowser.h"
 #include "debugger/allwatchbrowser.h"
@@ -252,7 +253,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		LocalBrowseWin = new LocalBrowserWindow(this);
 		heapallocatorBrowseWin = new HeapAllocatorBrowserWindow(this);
 		BreakpointsWin = new BreakpointsWindow(this);
-		NewFunctionBreakpointWin = new NewFnctBreakpointWindow(this);
+		NewBreakpointWin = new NewBreakpointWindow(this);
 		SaveDumpAsWin = new SaveDumpAsWindow(this);
 		exceptionvectortableBrowseWin = new ExceptionVectorTableBrowserWindow(this);
 		CallStackBrowseWin = new CallStackBrowserWindow(this);
@@ -490,9 +491,9 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 		connect(traceStepIntoAct, SIGNAL(triggered()), this, SLOT(DebuggerTraceStepInto()));
 
 		// Function breakpoint
-		newFunctionBreakpointAct = new QAction(QIcon(""), tr("&Function Breakpoint"), this);
-		newFunctionBreakpointAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBFUNCTIONBREAKPOINT].KBSettingValue)));
-		connect(newFunctionBreakpointAct, SIGNAL(triggered()), this, SLOT(ShowNewFunctionBreakpointWin()));
+		newBreakpointAct = new QAction(QIcon(""), tr("&Code && Data Breakpoint"), this);
+		newBreakpointAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBCODEDATABREAKPOINT].KBSettingValue)));
+		connect(newBreakpointAct, SIGNAL(triggered()), this, SLOT(ShowNewBreakpointWin()));
 		BreakpointsAct = new QAction(QIcon(":/res/debug-breakpoints.png"), tr("&Breakpoints"), this);
 		BreakpointsAct->setShortcut(QKeySequence(tr(vjs.KBContent[KBBREAKPOINTS].KBSettingValue)));
 		connect(BreakpointsAct, SIGNAL(triggered()), this, SLOT(ShowBreakpointsWin()));
@@ -701,7 +702,7 @@ MainWin::MainWin(bool autoRun): running(true), powerButtonOn(false),
 			debugMenu->addAction(traceStepOverAct);
 			debugMenu->addSeparator();
 			debugNewBreakpointMenu = debugMenu->addMenu(tr("&New Breakpoint"));
-			debugNewBreakpointMenu->addAction(newFunctionBreakpointAct);
+			debugNewBreakpointMenu->addAction(newBreakpointAct);
 			debugMenu->addAction(deleteAllBreakpointsAct);
 			debugMenu->addAction(disableAllBreakpointsAct);
 			debugMenu->addSeparator();
@@ -2088,10 +2089,10 @@ void MainWin::DisableAllBreakpoints(void)
 
 
 // Open, or display, the new breakpoint function window
-void MainWin::ShowNewFunctionBreakpointWin(void)
+void MainWin::ShowNewBreakpointWin(void)
 {
-	NewFunctionBreakpointWin->SetFnctBreakpointWin(BreakpointsWin);
-	NewFunctionBreakpointWin->show();
+	NewBreakpointWin->SetBreakpointWin(BreakpointsWin);
+	NewBreakpointWin->show();
 	ShowBreakpointsWin();
 }
 
@@ -2819,12 +2820,12 @@ void MainWin::ReadUISettings(void)
 		settings.value("BreakpointsWinIsVisible", false).toBool() ? ShowBreakpointsWin() : void();
 		size = settings.value("BreakpointsWinSize", QSize(400, 400)).toSize();
 		BreakpointsWin->resize(size);
-		// New function break point UI information
-		pos = settings.value("NewFunctionBreakpointWinPos", QPoint(200, 200)).toPoint();
-		NewFunctionBreakpointWin->move(pos);
-		settings.value("NewFunctionBreakpointWinIsVisible", false).toBool() ? ShowNewFunctionBreakpointWin() : void();
-		size = settings.value("NewFunctionBreakpointWinSize", QSize(400, 400)).toSize();
-		NewFunctionBreakpointWin->resize(size);
+		// New breakpoint UI information
+		pos = settings.value("NewBreakpointWinPos", QPoint(200, 200)).toPoint();
+		NewBreakpointWin->move(pos);
+		settings.value("NewBreakpointWinIsVisible", false).toBool() ? ShowNewBreakpointWin() : void();
+		size = settings.value("NewBreakpointWinSize", QSize(400, 400)).toSize();
+		NewBreakpointWin->resize(size);
 
 		// Memories browser UI information
 		for (i = 0; i < vjs.nbrmemory1browserwindow; i++)
@@ -3073,9 +3074,9 @@ void MainWin::WriteUISettings(void)
 		settings.setValue("BreakpointsWinPos", BreakpointsWin->pos());
 		settings.setValue("BreakpointsWinIsVisible", BreakpointsWin->isVisible());
 		settings.setValue("BreakpointsWinSize", BreakpointsWin->size());
-		settings.setValue("NewFunctionBreakpointWinPos", NewFunctionBreakpointWin->pos());
-		settings.setValue("NewFunctionBreakpointWinIsVisible", NewFunctionBreakpointWin->isVisible());
-		settings.setValue("NewFunctionBreakpointWinSize", NewFunctionBreakpointWin->size());
+		settings.setValue("NewBreakpointWinPos", NewBreakpointWin->pos());
+		settings.setValue("NewBreakpointWinIsVisible", NewBreakpointWin->isVisible());
+		settings.setValue("NewBreakpointWinSize", NewBreakpointWin->size());
 		settings.setValue("CartFilesListWinPos", CartFilesListWin->pos());
 		settings.setValue("CartFilesListWinIsVisible", CartFilesListWin->isVisible());
 		settings.setValue("CartFilesListWinSize", CartFilesListWin->size());

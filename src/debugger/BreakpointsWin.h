@@ -9,7 +9,6 @@
 
 //#define BRK_STATUSBAR				// Status bar usage
 //#define BRK_REFRESHBUTTON				// Refresh button
-#define BRK_HITCOUNTS				// Support the hit count
 
 #include <QtWidgets/QtWidgets>
 #include <stdint.h>

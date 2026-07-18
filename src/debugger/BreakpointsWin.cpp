@@ -5,11 +5,12 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -----------------------------------------------------------
 // JPM  30/08/2017  Created this file
 // JPM   Oct./2018  Added the breakpoints features
 // JPM    May/2026  Added breakpoint deletion and on/off toggle from the breakpoints window
+// JPM   July/2026  Added columns for the access & type of the breakpoint
 //
 
 // STILL TO DO:
@@ -46,12 +47,13 @@ layout(new QVBoxLayout)
 	fixedFont.setStyleHint(QFont::TypeWriter);
 
 	// Set the new layout with proper identation and readibility
-	model->setColumnCount(3);
+	model->setColumnCount(5);
 	model->setHeaderData(0, Qt::Horizontal, QObject::tr("Status"));
-	model->setHeaderData(1, Qt::Horizontal, QObject::tr("Name"));
-#ifdef BRK_HITCOUNTS
+	model->setHeaderData(1, Qt::Horizontal, QObject::tr("Address"));
 	model->setHeaderData(2, Qt::Horizontal, QObject::tr("Hit Count"));
-#endif
+	model->setHeaderData(3, Qt::Horizontal, QObject::tr("Type"));
+	model->setHeaderData(4, Qt::Horizontal, QObject::tr("Access"));
+
 	// Information table
 	TableView->setModel(model);
 	TableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -102,9 +104,7 @@ void BreakpointsWindow::UpdateInfos(void)
 		strcpy(Addresse, "(null)");
 	}
 	model->setItem(0, 1, new QStandardItem(QString("%1").arg((bpmAddress1 && (FuncName = DBGManager_GetSymbolNameFromAdr(bpmAddress1))) ? FuncName : Addresse)));
-#ifdef BRK_HITCOUNTS
 	model->setItem(0, 2, new QStandardItem(QString("%1").arg(bpmHitCounts)));
-#endif
 
 	// Display all user breakpoints
 	for (size_t i = 0; i < brkNbr; i++)
@@ -115,6 +115,8 @@ void BreakpointsWindow::UpdateInfos(void)
 			sprintf(Addresse, "0x%06X", brkInfo[i].Adr);
 			model->setItem((i + 1), 1, new QStandardItem(QString("%1").arg((FuncName = brkInfo[i].Name) ? FuncName : Addresse)));
 			model->setItem((i + 1), 2, new QStandardItem(QString("%1").arg(brkInfo[i].HitCounts)));
+			model->setItem((i + 1), 3, new QStandardItem(QString("%1").arg(brkInfo[i].IsCode ? "Code" : "Data")));
+			model->setItem((i + 1), 4, new QStandardItem(QString("%1").arg((brkInfo[i].Access == 1) ? "Read" : ((brkInfo[i].Access == 2) ? "Write" : "Read/Write"))));
 		}
 	}
 }

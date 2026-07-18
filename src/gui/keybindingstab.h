@@ -40,7 +40,7 @@ enum
 	KBRESTART,
 	KBSTEPINTO,
 	KBSTEPOVER,
-	KBFUNCTIONBREAKPOINT,
+	KBCODEDATABREAKPOINT,
 	KBBREAKPOINTS,
 	KBDELETEALLBREAKPOINTS,
 	KB_END
@@ -64,4 +64,4 @@ class KeyBindingsTab: public QWidget
 extern	KeyBindings KeyBindingsTable[KB_END];
 
 
-#endif	// __KEYBINDINGSTAB_H__
+#endif

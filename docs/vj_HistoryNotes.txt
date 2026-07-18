@@ -53,12 +53,16 @@ Git commit:
 27) Update the breakpoints window
 --- Breakpoint can be deleted using the Del key from the breakpoints window
 --- Breakpoint status can be toggled on/off by double-clicking the status cell
+--- Added code/data information
 28) Local variables window update
 --- Fix display of the variable's value in case of a pointer
 --- Add column for address/register locations
 29) Added features from https://github.com/glaubitz/virtualjaguar-debian
 --- Selectable text feature in the Alpine's Browser window
 30) The original make files have been removed
+31) Updated the breakpoint feature
+--- Added breakpoint for the data
+--- Added code/data selection in the new breakoint window
 
 pre-Release 5b (20th July 2022)
 -------------------------------

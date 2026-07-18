@@ -5,11 +5,12 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// WHO  WHEN        WHAT
+// WHO  mm/dd/yyyy  WHAT
 // ---  ----------  ------------------------------------------------------------
 // JPM  09/10/2017  Created this file
 // JPM  Sept./2018  Added screenshot key bindings
 // JPM  10/13/2018  Added breakpoints features
+// JPM  07/16/2026  Renamed the "Function Breakpoint" as "Code & Data breakpoint"
 //
 
 
@@ -30,7 +31,7 @@ KeyBindings KeyBindingsTable[KB_END] =	{
 											{ KB_TYPEDEBUGGER, "KB_Restart", "Restart", "Restart key binding", "Ctrl+Shift+F5", NULL, NULL	},
 											{ KB_TYPEDEBUGGER, "KB_StepInto", "Step Into", "Step into key binding", "F11", NULL, NULL	},
 											{ KB_TYPEDEBUGGER, "KB_StepOver", "Step Over", "Step over key binding", "F10", NULL, NULL	},
-											{ KB_TYPEDEBUGGER, "KB_FunctionBreakpoint", "Function Breakpoint", "Function breakpoint binding", "Ctrl+B", NULL, NULL	},
+											{ KB_TYPEDEBUGGER, "KB_CodeDataBreakpoint", "Code & Data Breakpoint", "Code & Data breakpoint binding", "Ctrl+B", NULL, NULL	},
 											{ KB_TYPEDEBUGGER, "KB_Breakpoints", "Breakpoints", "Breakpoints binding", "Ctrl+Alt+B", NULL, NULL	},
 											{ KB_TYPEDEBUGGER, "KB_DeleteAllBreakpoints", "Delete All Breakpoints", "Delete all breakpoints binding", "Ctrl+Shift+F9", NULL, NULL	}
 										};

@@ -432,7 +432,7 @@ set(DEBUGGER_SOURCES
     src/debugger/SourceCWin.cpp
     src/debugger/FilesrcListWin.cpp
     src/debugger/BreakpointsWin.cpp
-    src/debugger/NewFnctBreakpointWin.cpp
+    src/debugger/NewBreakpointWin.cpp
     src/debugger/SaveDumpAsWin.cpp
     src/debugger/CartFilesListWin.cpp
     src/debugger/allwatchbrowser.cpp
@@ -479,7 +479,7 @@ set(MOC_HEADERS
     src/debugger/SourceCWin.h
     src/debugger/FilesrcListWin.h
     src/debugger/BreakpointsWin.h
-    src/debugger/NewFnctBreakpointWin.h
+    src/debugger/NewBreakpointWin.h
     src/debugger/SaveDumpAsWin.h
     src/debugger/CartFilesListWin.h
     src/debugger/allwatchbrowser.h

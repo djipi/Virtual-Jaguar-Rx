@@ -149,7 +149,7 @@ extern void m68k_brk_del_addr(unsigned int Adr);
 extern void m68k_brk_disable(void);
 extern void m68k_brk_reset(void);
 extern void m68k_brk_close(void);
-extern unsigned int m68k_brk_check(unsigned int adr);
+extern unsigned int m68k_brk_check(unsigned int adr, size_t access, size_t sizeadr);
 
 #ifdef __cplusplus
 }
