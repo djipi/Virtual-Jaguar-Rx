@@ -18,6 +18,7 @@
 // JPM  March/2022  Added a '/cygdrive/' directory detection
 // JPM        2025  Support the fixed-point _Fract & _Accum type
 // JPM        2026  Handle non integer for function parameter, record declarations (file, column & line), fix fixed-point extension, record the typedefs list used for a variable
+// JPM        2026  Fix the number of sources lines
 //
 
 // To Do
@@ -387,7 +388,7 @@ void DWARFManager_CloseDMI(void)
 // Dwarf manager Compilation Units initialisations
 void DWARFManager_InitDMI(void)
 {
-	Dwarf_Unsigned	next_cu_header, return_uvalue;
+	Dwarf_Unsigned next_cu_header, return_uvalue;
 	Dwarf_Error	error;
 	Dwarf_Attribute	*atlist;
 	Dwarf_Attribute	return_attr1;
@@ -699,6 +700,7 @@ void DWARFManager_InitDMI(void)
 					}
 
 					// Get the source lines table located in the CU
+					cnt = 0;
 					if ((dwarf_srclines(return_sib, &linebuf, &cnt, &error) == DW_DLV_OK) && (PtrCU[NbCU].Status == DWARFSTATUS_OK))
 					{
 						if (cnt)
@@ -1129,7 +1131,7 @@ void DWARFManager_InitDMI(void)
 													case DW_AT_name:
 														if (dwarf_formstring(return_attr1, &return_string, &error) == DW_DLV_OK)
 														{
-															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrSubprogramName = (char *)calloc(strlen(return_string) + 1, 1);
+															PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrSubprogramName = (char*)calloc(strlen(return_string) + 1, 1);
 															strcpy(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrSubprogramName, return_string);
 															dwarf_dealloc(dbg, return_string, DW_DLA_STRING);
 														}
@@ -1169,8 +1171,8 @@ void DWARFManager_InitDMI(void)
 											// Check the presence of the line in the memory frame
 											if (PtrCU[NbCU].PtrUsedLinesSrc && (PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC >= return_lowpc) && (PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC <= return_highpc))
 											{
-												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc = (DMIStruct_LineSrc *)realloc(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc, (PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc + 1) * sizeof(DMIStruct_LineSrc));
-												memset((void *)(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc + PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc), 0, sizeof(DMIStruct_LineSrc));
+												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc = (DMIStruct_LineSrc*)realloc(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc, (PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc + 1) * sizeof(DMIStruct_LineSrc));
+												memset((void*)(PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc + PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc), 0, sizeof(DMIStruct_LineSrc));
 												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].StartPC = PtrCU[NbCU].PtrUsedLinesSrc[i].StartPC;
 												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].PtrLinesSrc[PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc].NumLineSrc = PtrCU[NbCU].PtrUsedLinesSrc[i].NumLineSrc;
 												PtrCU[NbCU].PtrSubProgs[PtrCU[NbCU].NbSubProgs].NbLinesSrc++;
