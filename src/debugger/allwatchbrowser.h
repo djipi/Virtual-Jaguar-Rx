@@ -7,9 +7,9 @@
 #ifndef __ALLWATCHBROWSER_H__
 #define __ALLWATCHBROWSER_H__
 
-//#define AW_LAYOUTTEXTS						// Use a layout with just texts
-//#define AW_SUPPORTARRAY						// Support array
-//#define AW_SUPPORTSTRUCTURE					// Support structure
+//#define AW_LAYOUTTEXTS							// Use a layout with just texts
+//#define AW_SUPPORTARRAY							// Support array
+//#define AW_SUPPORTSTRUCTURE						// Support structure
 
 #include <QtWidgets/QtWidgets>
 #include <stdint.h>
@@ -20,6 +20,8 @@
 #define	AW_WARNING		0x40
 #define	AW_NOALLWATCH	(0x01 | AW_WARNING)
 
+// Color for value change indication
+#define AW_CHANGED_COLOR QColor(255, 85, 0)		// Orange
 
 // 
 class AllWatchBrowserWindow: public QWidget
@@ -70,6 +72,7 @@ class AllWatchBrowserWindow: public QWidget
 		QPushButton *search;
 		QLineEdit* symbol;
 		size_t CurrentWatch;
+		QVector<QString> PreviousValues;		// Cache for previous values to detect changes
 };
 
 #endif	// __ALLWATCHBROWSER_H__

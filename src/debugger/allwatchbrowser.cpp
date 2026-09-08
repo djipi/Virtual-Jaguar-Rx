@@ -5,12 +5,13 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -----------------------------------------------------------
 // JPM  12/07/2017  Created this file
 // JPM  09/14/2018  Added a status bar, better status report and set information values in a tab
 // JPM  April/2019  Added a sorting filter, tableview unique rows creation
 // JPM  April/2021  Added a search feature.
+// JPM   Aug./2026  Added value change detection with text color highlighting
 //
 
 // STILL TO DO:
@@ -35,7 +36,7 @@
 #include "debugger/DBGManager.h"
 
 
-// 
+// Constructor
 AllWatchBrowserWindow::AllWatchBrowserWindow(QWidget * parent/*= 0*/) : QWidget(parent, Qt::Dialog),
 layout(new QVBoxLayout),
 symbol(new QLineEdit),
@@ -94,7 +95,7 @@ PtrWatchInfo(NULL)
 }
 
 
-//
+// Destructor
 AllWatchBrowserWindow::~AllWatchBrowserWindow(void)
 {
 	Reset();
@@ -155,23 +156,24 @@ void AllWatchBrowserWindow::SearchSymbol(void)
 }
 
 
-//
+// Reset the search symbol color
 void AllWatchBrowserWindow::SelectSearchSymbol(void)
 {
 	symbol->setStyleSheet("color: black");
 }
 
 
-//
+// Reset the watch list
 void AllWatchBrowserWindow::Reset(void)
 {
 	free(PtrWatchInfo);
 	NbWatch = 0;
 	PtrWatchInfo = NULL;
+	PreviousValues.clear();
 }
 
 
-//
+// Refresh the watch list contents
 void AllWatchBrowserWindow::RefreshContents(void)
 {
 	char msg[100];
@@ -196,6 +198,12 @@ void AllWatchBrowserWindow::RefreshContents(void)
 				TableView->setSortingEnabled(false);
 #endif
 				model->setRowCount(0);
+				// Initialize previous values cache
+				PreviousValues.resize(NbWatch);
+				for (size_t i = 0; i < NbWatch; i++)
+				{
+					PreviousValues[i] = nullptr;
+				}
 #endif
 				for (uint32_t i = AW_STARTNUMVARIABLE; i < NbWatch; i++)
 				{
@@ -209,6 +217,10 @@ void AllWatchBrowserWindow::RefreshContents(void)
 						}
 #else
 						model->insertRow(i);
+						// Create items once for this row
+						model->setItem(i, 0, new QStandardItem());
+						model->setItem(i, 1, new QStandardItem());
+						model->setItem(i, 2, new QStandardItem());
 #endif
 					}
 				}
@@ -240,9 +252,30 @@ void AllWatchBrowserWindow::RefreshContents(void)
 				sprintf(string, "%i : %s | %s | 0x%06X | %s", (i + 1), PtrWatchInfo[i].PtrVariableBaseTypeName, PtrWatchInfo[i].PtrVariableName, (unsigned int)PtrWatchInfo[i].addr, PtrValue ? PtrValue : (char *)"<font color='#ff0000'>N/A</font>");
 				WatchAll += QString(string);
 #else
-				model->setItem(i, 0, new QStandardItem(QString("%1").arg(((S_VariablesStruct*)PtrWatchInfo[i])->PtrName)));
-				model->setItem(i, 1, new QStandardItem(QString("%1").arg(PtrValue)));
-				model->setItem(i, 2, new QStandardItem(QString("%1").arg(((S_VariablesStruct*)PtrWatchInfo[i])->PtrTypeName)));
+				// Convert current value to QString (null-safe)
+				QString CurrentValue = QString("%1").arg(PtrValue ? PtrValue : "N/A");
+				
+				// Update existing items
+				model->item(i, 0)->setText(QString("%1").arg(((S_VariablesStruct*)PtrWatchInfo[i])->PtrName));
+				model->item(i, 1)->setText(CurrentValue);
+				model->item(i, 2)->setText(QString("%1").arg(((S_VariablesStruct*)PtrWatchInfo[i])->PtrTypeName));
+				
+				// Check if value changed and apply color
+				if ((PreviousValues[i] != nullptr) && (CurrentValue != PreviousValues[i]))
+				{
+					// Update the color of the Value column item
+					model->item(i, 1)->setForeground(QBrush(AW_CHANGED_COLOR));
+					// Update the cache with the current value
+					PreviousValues[i] = model->item(i, 1)->text();
+				}
+				else
+				{
+					// Reset the color of the Value column item to black
+					model->item(i, 1)->setForeground(QColor(0, 0, 0));
+				}
+				
+				// Update cache with current value for next refresh
+				PreviousValues[i] = CurrentValue;
 #endif
 			}
 #ifdef AW_LAYOUTTEXTS
@@ -299,4 +332,3 @@ void AllWatchBrowserWindow::keyPressEvent(QKeyEvent * e)
 		}
 	}
 }
-

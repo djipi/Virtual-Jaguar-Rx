@@ -63,6 +63,8 @@ Git commit:
 31) Updated the breakpoint feature
 --- Added breakpoint for the data
 --- Added code/data selection in the new breakoint window
+32) Update the All Watch variables window
+--- Value change with text color highlighting
 
 pre-Release 5b (20th July 2022)
 -------------------------------
