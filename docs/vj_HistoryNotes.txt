@@ -65,6 +65,8 @@ Git commit:
 --- Added code/data selection in the new breakoint window
 32) Update the All Watch variables window
 --- Value change with text color highlighting
+33) Update the source tracing windows
+--- Smoother scrolling for the source tracing window
 
 pre-Release 5b (20th July 2022)
 -------------------------------

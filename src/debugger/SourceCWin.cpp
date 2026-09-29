@@ -5,9 +5,10 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -------------------------------------------------------------
 // JPM  08/23/2019  Created this file
+// JPM   July/2026  Smooth horizontal scrolling
 
 // STILL TO DO:
 //
@@ -54,6 +55,13 @@ model(new QStandardItemModel)
 	TableView->horizontalHeader()->hide();
 	TableView->verticalHeader()->hide();
 	TableView->setFont(fixedFont);
+	// smoother horizontal scrolling
+	TableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+	TableView->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
+	TableView->horizontalScrollBar()->setSingleStep(2);   // try 1..4
+	TableView->horizontalScrollBar()->setPageStep(20);    // optional
+	TableView->horizontalScrollBar()->setTracking(true);
+	// Set text in layout
 	layout->addWidget(TableView);
 #endif
 
