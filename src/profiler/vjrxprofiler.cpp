@@ -5,9 +5,9 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When (mm/dd/yy)  What
-// ---  ---------------  -----------------------------------------------------------
-// JPM  Dec./2025        Created this file
+// Who  mm/dd/yyyy  What
+// ---  ----------  -----------------------------------------------------------
+// JPM   Dec./2025  Created this file
 
 #include "profiler/vjrxprofiler.h"
 
@@ -19,7 +19,7 @@ static double NANOS_PER_CYCLE = 1000000000.0 / M68K_CLOCK_HZ;		// M68K @ 13.29 M
 //
 VJRxProfiler::VJRxProfiler(void) :
 NbM68KRecord(0),
-VJRxPaused(true)
+Paused(true)
 {
 	memset(M68KRecord, 0, sizeof(M68KRecord));
 }
@@ -30,7 +30,7 @@ VJRxPaused(true)
 // true: pause, false: resume
 void VJRxProfiler::Pause(bool pause)
 {
-	VJRxPaused = !pause;
+	Paused = !pause;
 }
 
 
@@ -41,9 +41,9 @@ void VJRxProfiler::RAZIndex(void* index)
 	{
 		switch (((VJRxZoneCtx*)index)->type)
 		{
-		case VJRXM68KPROFILER_TYPE_RECORD:
+		case VJRxProfilerType_t::Record:
 			// refresh the profiler window
-			VJRxProfilerWin->RefreshContents(NbM68KRecord, (VJRxProfilerData*)&M68KRecord[0]);
+			VJRxProfilerWin->RefreshContents(NbM68KRecord--, (VJRxProfilerWindow::VJRxProfilerData*)&M68KRecord[0]);
 			// clear the record
 			M68KRecord[(((VJRxZoneCtx*)index)->id)] = { 0 };
 			break;
@@ -56,7 +56,7 @@ void VJRxProfiler::RAZIndex(void* index)
 	}
 	// reset id and type
 	((VJRxZoneCtx*)index)->id = 0;
-	((VJRxZoneCtx*)index)->type = VJRXM68KPROFILER_TYPE_NULL;
+	((VJRxZoneCtx*)index)->type = VJRxProfilerType_t::Null;
 }
 
 
@@ -70,33 +70,37 @@ bool VJRxProfiler::Start(void)
 
 
 // Record a function profiling data
-void VJRxProfiler::M68Krecord(void* ZoneCtx, char* functionname, size_t callcount, size_t minCycles, size_t maxCycles)
+void VJRxProfiler::M68Krecord(void* ZoneCtx, char* functionName, char* filename, size_t linenumber, size_t callcount, size_t minCycles, size_t maxCycles)
 {
-	if (!VJRxPaused)
+	if (!Paused)
 	{
 		// look for the id
 		size_t NumID = 0;
-		while ((NumID < NbM68KRecord) && M68KRecord[NumID].FunctionName && ((!strcmp(functionname, M68KRecord[NumID].FunctionName) && (strlen(functionname) == strlen(M68KRecord[NumID].FunctionName))) ? false : true) && ++NumID);
+		while ((NumID < NbM68KRecord) && M68KRecord[NumID].FunctionName && ((!strcmp(functionName, M68KRecord[NumID].FunctionName) && (strlen(functionName) == strlen(M68KRecord[NumID].FunctionName))) ? false : true) && ++NumID);
 		//
 		if (!(((VJRxZoneCtx*)ZoneCtx)->active))
 		{
 			(NumID == NbM68KRecord) ? NbM68KRecord++, true : false;
 			// new record
 			M68KRecord[NumID].id = NumID;
-			M68KRecord[NumID].FunctionName = functionname;
+			M68KRecord[NumID].FunctionName = functionName;
+			M68KRecord[NumID].SourceFileName = filename;
+			M68KRecord[NumID].LineNumber = linenumber;
 			// set the zone context
 			((VJRxZoneCtx*)ZoneCtx)->id = NumID;
 			((VJRxZoneCtx*)ZoneCtx)->active = true;
-			((VJRxZoneCtx*)ZoneCtx)->type = VJRXM68KPROFILER_TYPE_RECORD;
+			((VJRxZoneCtx*)ZoneCtx)->type = VJRxProfilerType_t::Record;
 		}
 		// update the record
 		M68KRecord[NumID].CallCount = callcount;
 		M68KRecord[NumID].maxCycles = maxCycles;
 		M68KRecord[NumID].minCycles = minCycles;
-		//M68KRecord[NumID].avgms = ((minCycles + maxCycles) / 2) * NANOS_PER_CYCLE / 1000000.0;
+#if 0
+		M68KRecord[NumID].avgms = ((minCycles + maxCycles) / 2) * NANOS_PER_CYCLE / 1000000.0;
 		M68KRecord[NumID].maxms = maxCycles * NANOS_PER_CYCLE / 1000000.0;
-		// refresh the profiler window
-		VJRxProfilerWin->UpdateContent(NumID, (VJRxProfilerData*)&M68KRecord[NumID]);
+#endif
+		// update the profiler window
+		VJRxProfilerWin->UpdateContent(NumID, (VJRxProfilerWindow::VJRxProfilerData*)&M68KRecord[NumID]);
 	}
 }
 

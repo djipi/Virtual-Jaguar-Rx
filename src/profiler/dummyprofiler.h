@@ -8,9 +8,9 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When (mm/dd/yy)  What
-// ---  ---------------  -----------------------------------------------------------
-// JPM   Nov./2025       Created this file
+// Who  mm/dd/yyyy  What
+// ---  ----------  -----------------------------------------------------------
+// JPM   Nov./2025  Created this file
 //
 
 #ifndef __DUMMYPROFILER_H__
@@ -33,7 +33,7 @@ public:
     void M68Kleave(void*, size_t) override {}
     void M68Kmalloc(void*, size_t, size_t, int) override {}
     void M68Kfree(void*, size_t, bool) override {}
-    void M68Krecord(void*, char* , size_t, size_t, size_t) override {}
+    void M68Krecord(void*, char*, char*, size_t, size_t, size_t, size_t) override {}
     void M68KFrameStart(size_t) override {}
     void M68KFrameEnd(size_t) override {}
 };

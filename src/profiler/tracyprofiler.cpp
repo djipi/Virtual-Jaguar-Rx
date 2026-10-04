@@ -5,7 +5,7 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  mm/dd/yyyy)  What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -----------------------------------------------------------
 // JPM  10/29/2025  Created this file
 // JPM   Oct./2025  Added pause feature, better control for the Tracy profiler feed and memory allocation tracking

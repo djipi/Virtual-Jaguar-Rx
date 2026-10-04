@@ -48,7 +48,7 @@ public:
 	virtual void M68Kleave(void* index, size_t usedCycles) = 0;
 	virtual void M68Kmalloc(void* index, size_t ptr, size_t size, int depth) = 0;
 	virtual void M68Kfree(void* index, size_t ptr, bool flush) = 0;
-	virtual void M68Krecord(void* index, char* functionname, size_t callcount, size_t minCycles, size_t maxCycles) = 0;
+	virtual void M68Krecord(void* index, char* functionName, char* filename, size_t linenumber, size_t callcount, size_t minCycles, size_t maxCycles) = 0;
 	virtual void M68KFrameStart(size_t frameNumber) = 0;
 	virtual void M68KFrameEnd(size_t frameNumber) = 0;
 };

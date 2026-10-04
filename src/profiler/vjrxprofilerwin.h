@@ -10,25 +10,28 @@
 #include <QtWidgets/QtWidgets>
 #include <stdint.h>
 
-
-// Profiler data structure for each function
-typedef struct S_VJRxProfilerData
-{
-	char* FunctionName;
-	size_t CallCount;
-	size_t minCycles;
-	size_t maxCycles;
-	//double avgms;				// average time in milliseconds
-	double maxms;				// maximum time in milliseconds
-	size_t id;
-}
-VJRxProfilerData;
-
-
 //
-class VJRxProfilerWindow : public QWidget
+class VJRxProfilerWindow : public QMainWindow
 {
 	Q_OBJECT
+
+public:
+	// Profiler data structure for each function
+	typedef struct S_VJRxProfilerData
+	{
+		char* SourceFileName;		// source file name
+		char* FunctionName;			// function name
+		size_t LineNumber;			// line number in the source file
+		size_t CallCount;			// number of times the function was called
+		size_t minCycles;			// minimum time in cycles
+		size_t maxCycles;			// maximum time in cycles
+#if 0
+		double avgms;				// average time in milliseconds
+		double maxms;				// maximum time in milliseconds
+#endif
+		size_t id;					// unique id
+	}
+	VJRxProfilerData;
 
 public:
 	VJRxProfilerWindow(QWidget* parent = 0);
@@ -39,13 +42,18 @@ public:
 protected:
 	void keyPressEvent(QKeyEvent*);
 
+private slots:
+	void OnExportCSV();
+	void OnExportCallgrind();
+
 private:
 	QString FormatThousands(size_t value);
-
-	QVBoxLayout* layout;
 	QTableView* TableView;
 	QStandardItemModel* model;
 	QSortFilterProxyModel* proxyModel;
+	QMenuBar* menuBar;
+	QMenu* fileMenu;
+	QMenu* exportMenu;
 };
 
 #endif

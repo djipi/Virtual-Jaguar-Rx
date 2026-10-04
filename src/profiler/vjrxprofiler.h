@@ -10,9 +10,9 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When (mm/dd/yy)  What
-// ---  ---------------  -----------------------------------------------------------
-// JPM  Dec./2025        Created this file
+// Who  mm/dd/yyyy  What
+// ---  ----------  -----------------------------------------------------------
+// JPM   Dec./2025  Created this file
 //
 
 #ifndef __VJRXPROFILER_H__
@@ -22,21 +22,23 @@
 #include "baseprofiler.h"
 #include "profiler/vjrxprofilerwin.h"
 
-//
+    // Profiler type enumeration
+enum class VJRxProfilerType_t : uint32_t { Null = 0, Record = 1 };
+
+    // Profiler context structure for VJRx
 struct VJRxZoneCtx {
     size_t id;
     bool active;
-    uint32_t type;
+    VJRxProfilerType_t type;
 };
-
-//
-#define MAX_VJRXM68KRECORD  10000
-#define VJRXM68KPROFILER_TYPE_NULL  0x00
-#define VJRXM68KPROFILER_TYPE_RECORD    0x01
 
 //
 class VJRxProfiler : public baseProfiler
 {
+private:
+	// Maximum number of records for the VJRx profiler
+    static constexpr size_t MAX_VJRXM68KRECORD = 10000;
+
 public:
     VJRxProfiler(void);
     ~VJRxProfiler(void);
@@ -52,15 +54,15 @@ public:
     void M68Kleave(void*, size_t) {}
     void M68Kmalloc(void*, size_t, size_t, int) {}
     void M68Kfree(void*, size_t, bool) {}
-    void M68Krecord(void* index, char* functionname, size_t callcount, size_t minCycles, size_t maxCycles);
+    void M68Krecord(void* index, char* functionName, char* filename, size_t linenumber, size_t callcount, size_t minCycles, size_t maxCycles);
     void M68KFrameStart(size_t) {}
     void M68KFrameEnd(size_t) {}
 
 private:
     VJRxProfilerWindow* VJRxProfilerWin = nullptr;
-    VJRxProfilerData M68KRecord[MAX_VJRXM68KRECORD];
+    VJRxProfilerWindow::VJRxProfilerData M68KRecord[MAX_VJRXM68KRECORD];
     size_t NbM68KRecord;
-    bool VJRxPaused;
+    bool Paused;
 };
 
 #endif

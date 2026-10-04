@@ -5,11 +5,11 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When (mm/dd/yy)  What
-// ---  ---------------  -----------------------------------------------------------
-// JPM  10/29/2025       Created this file
-// JPM   Oct./2025       Added pause feature, flush data to the Tracy profiler and memory allocation tracking
-// JPM   Nov./2025       Prepare code for multiple profilers, revamp the profiler initialization, frame loop
+// Who  mm/dd/yyyy  What
+// ---  ----------  -----------------------------------------------------------
+// JPM  10/29/2025  Created this file
+// JPM   Oct./2025  Added pause feature, flush data to the Tracy profiler and memory allocation tracking
+// JPM   Nov./2025  Prepare code for multiple profilers, revamp the profiler initialization, frame loop
 //
 
 #include <stdio.h>
@@ -462,7 +462,7 @@ void m68kProfilerEntryDown(size_t PCAdr, size_t m68KD0)
 					//
 					for (size_t j = 0; j < COUNT_PROFILERS; j++)
 					{
-						BaseProfilers[j]->M68Krecord((void*)&m68kProfilerTableRecord[i].Ctx[j], m68kProfilerTableRecord[i].functionName, m68kProfilerTableRecord[i].callCount, m68kProfilerTableRecord[i].minCycles, m68kProfilerTableRecord[i].maxCycles);
+						BaseProfilers[j]->M68Krecord((void*)&m68kProfilerTableRecord[i].Ctx[j], m68kProfilerTableRecord[i].functionName, m68kProfilerTableRecord[i].sourcefilename, m68kProfilerTableRecord[i].numline, m68kProfilerTableRecord[i].callCount, m68kProfilerTableRecord[i].minCycles, m68kProfilerTableRecord[i].maxCycles);
 					}
 
 					flag = true;

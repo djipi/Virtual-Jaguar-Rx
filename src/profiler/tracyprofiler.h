@@ -51,7 +51,7 @@ public:
 	void M68Kleave(void* zoneCtx, size_t usedCycles);
 	void M68Kmalloc(void* zoneCtx, size_t ptr, size_t size, int depth);
 	void M68Kfree(void* zoneCtx, size_t ptr, bool flush);
-	void M68Krecord(void*, char*, size_t, size_t, size_t) override {};
+	void M68Krecord(void*, char*, char*, size_t, size_t, size_t, size_t) override {};
 	void M68KFrameStart(size_t frameNumber);
 	void M68KFrameEnd(size_t frameNumber);
 
