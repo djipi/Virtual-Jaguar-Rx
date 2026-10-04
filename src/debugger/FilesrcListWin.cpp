@@ -5,13 +5,14 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -----------------------------------------------------------
 // JPM  09/23/2018  Created this file
+// JPM   Aug./2026  Remove WIN32 detection, remove the 1st information, named '1', at the top
 //
 
 // STILL TO DO:
-// Remove the 1st information, named '1', at the top
+// 
 // To allow source code file opening / viewing
 //
 
@@ -34,6 +35,7 @@ nbItem(0)
 	rootNode = standardModel->invisibleRootItem();
 	//register the model
 	treeView->setModel(standardModel);
+	treeView->setHeaderHidden(true);
 	treeView->expandAll();
 	layout->addWidget(treeView);
 
@@ -118,36 +120,37 @@ size_t FilesrcListWindow::UpdateInfos(void)
 // Add source code filename in the list
 void FilesrcListWindow::AddFilename(char *FileName, QStandardItem *root, size_t ItemPos)
 {
-	char *Ptr = FileName;
-	Sfilesrcitem *PtrNewFilesrc;
-	char Buffer[255];
-	char a;
+	if (FileName)
+	{
+		char* Ptr = FileName;
+		Sfilesrcitem* PtrNewFilesrc;
+		char Buffer[255];
+		char a;
 
-#ifdef _WIN32
-	while ((a = *Ptr++) && (a != '\\'));
-#else
-	while ((a = *Ptr++) && (a != '/'));
-#endif
-	if (a)
-	{
-		strncpy(Buffer, FileName, (Ptr - FileName - 1));
-		Buffer[(Ptr - FileName - 1)] = 0;
-	}
-	else
-	{
-		strcpy(Buffer, FileName);
-	}
-	PtrNewFilesrc = (Sfilesrcitem *)AddItem(Buffer, ItemPos);
-	if (!PtrNewFilesrc->PreviousItem)
-	{
-		PtrNewFilesrc->PreviousItem = root;
-		root->appendRow(PtrNewFilesrc->Item);
-		PtrNewFilesrc->Item->setEditable(false);
-	}
+		// Search for the next path separator
+		while ((a = *Ptr++) && ((a != '\\') && (a != '/')));
 
-	if (a)
-	{
-		return (AddFilename(Ptr, PtrNewFilesrc->Item, (ItemPos + 1)));
+		if (a)
+		{
+			strncpy(Buffer, FileName, (Ptr - FileName - 1));
+			Buffer[(Ptr - FileName - 1)] = 0;
+		}
+		else
+		{
+			strcpy(Buffer, FileName);
+		}
+		PtrNewFilesrc = (Sfilesrcitem*)AddItem(Buffer, ItemPos);
+		if (!PtrNewFilesrc->PreviousItem)
+		{
+			PtrNewFilesrc->PreviousItem = root;
+			root->appendRow(PtrNewFilesrc->Item);
+			PtrNewFilesrc->Item->setEditable(false);
+		}
+
+		if (a)
+		{
+			return (AddFilename(Ptr, PtrNewFilesrc->Item, (ItemPos + 1)));
+		}
 	}
 }
 

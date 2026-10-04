@@ -5,15 +5,15 @@
 //
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -----------------------------------------------------------
 // JPM   Oct./2018  Created this file, and changed position of the status bar
 // JPM   Aug./2019  Update texts descriptions
+// JPM   Aug./2026  Modify the 1st information, named '1', at the top
 //
 
 // TO DO:
 // To allow file opening / viewing
-// Remove/modify the 1st information, named '1', at the top
 // To add a filter
 //
 
@@ -71,8 +71,12 @@ CartDirType(CFL_NOTYPE)
 
 	// Setup root
 	rootNode = standardModel->invisibleRootItem();
-	//register the model
+	// Setup the tree view
+	standardModel->setColumnCount(1);
+	standardModel->setHeaderData(0, Qt::Horizontal, QObject::tr("Cartridge Files"));
+	// register the model
 	treeView->setModel(standardModel);
+	treeView->setHeaderHidden(false);
 	treeView->expandAll();
 	Mlayout->addWidget(treeView);
 
