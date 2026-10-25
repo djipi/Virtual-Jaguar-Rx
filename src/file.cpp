@@ -29,7 +29,14 @@
 //#include "_MSC_VER/config.h"
 #endif // _MSC_VER
 #include <stdarg.h>
+#include <stdio.h>
+#if defined(_MSC_VER)
 #include <string.h>
+#else
+#include <string.h>
+#include <strings.h>
+#define stricmp strcasecmp
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "crc32.h"

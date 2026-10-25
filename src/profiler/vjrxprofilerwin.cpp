@@ -11,6 +11,7 @@
 // JPM   Oct./2026  Added CSV and Callgrind export features
 //
 
+#include <stdio.h>
 #include "profiler/vjrxprofilerwin.h"
 #include "settings.h"
 
@@ -260,7 +261,8 @@ void VJRxProfilerWindow::OnExportCSV()
 				size_t maxCycles = model->item(row, VJRXPW_COL_MAXCYCLES)->data(Qt::UserRole).toULongLong();
 				// Write the row to the CSV file
 				char buf[32];
-				fprintf(f, "\"%s\",%s,%s,%llu,%llu,%llu\n", functionName.toStdString().c_str(), sourceFileName.toStdString().c_str(), lineNumber ? itoa(lineNumber, buf, 10) : "", callCount, minCycles, maxCycles);
+				lineNumber ? snprintf(buf, sizeof(buf), "%zu", lineNumber) : buf[0] = '\0';
+				fprintf(f, "\"%s\",%s,%s,%llu,%llu,%llu\n", functionName.toStdString().c_str(), sourceFileName.toStdString().c_str(), buf, callCount, minCycles, maxCycles);
 			}
 
 			// close the file
