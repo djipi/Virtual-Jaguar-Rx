@@ -210,7 +210,6 @@ bool ParseCommandLine(int argc, char* argv[])
 				"Based upon Virtual Jaguar core v1.0.0 by David Raingeard.\n"
 				"Based upon the work by James Hammons (Linux/WIN32), Niels Wagenaar (Linux/WIN32),\n"
 				"Carwin Jones (BeOS), and Adam Green (MacOS)\n"
-				"Contact: http://sdlemu.ngemu.com/ | sdlemu@ngemu.com\n"
 				"Contact: https://github.com/djipi/Virtual-Jaguar-Rx\n"
 				"\n"
 				"Usage:\n"
