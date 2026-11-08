@@ -7,7 +7,7 @@
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //  RG = Richard Goedeken
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  ------------------------------------------------------------
 // JPM  06/19/2016  Soft debugger support
 // JPM  Sept./2018  Added the new Models and BIOS handler, and a screenshot settings
@@ -16,7 +16,7 @@
 //  RG   Jan./2021  Linux build fix
 // JPM  March/2022  Added the save state patch from PvtLewis
 // JPM   Oct./2025  Added profiler setting
-// JPM    May/2026  Added remote control support
+// JPM        2026  Added remote control support, use system-defined PATH_MAX for Linux
 //
 
 #ifndef __SETTINGS_H__
@@ -25,7 +25,7 @@
 // MAX_PATH isn't defined in stdlib.h on *nix, so we do it here...
 #ifdef __GCCUNIX__
 #include <limits.h>
-#define MAX_PATH		_POSIX_PATH_MAX
+#define MAX_PATH		PATH_MAX		// _POSIX_PATH_MAX
 #else
 #include <stdlib.h>				// for MAX_PATH on MinGW/Darwin
 // Kludge for Win64
