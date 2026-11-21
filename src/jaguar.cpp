@@ -9,6 +9,7 @@
 //
 // JLH = James Hammons
 // JPM = Jean-Paul Mari
+// SLC = slaapliedje / Claude Code
 //
 // WHO  mm/dd/yyyy  WHAT
 // ---  ----------  -----------------------------------------------------------
@@ -23,6 +24,7 @@
 // JPM  10/29/2025  Added M68K Profiler Hook, and detection usage
 // JPM    May/2026  Added M68K breakpoints based on address and toggle status change function
 // JPM   July/2026  Added M68K breakpoints check on writing address
+// SLC  11/21/2026  Run the DSP and JERRY events in the main loop, in step with the 68K
 //
 
 

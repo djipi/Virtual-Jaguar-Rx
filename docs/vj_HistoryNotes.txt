@@ -69,6 +69,8 @@ Git commit:
 33) Update the source tracing windows
 --- Smoother scrolling for the source tracing window
 34) Remove the original Virtual Jaguar contact information in the help text
+35) Merge PR from slaapliedje / Claude Code (from Github)
+--- Run the DSP and JERRY events in the main loop
 
 pre-Release 5b (20th July 2022)
 -------------------------------

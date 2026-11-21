@@ -10,11 +10,13 @@
 // JLH = James Hammons <jlhamm@acm.org>
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //  PL = PvtLewis <from Atari Age>
+// SLC = slaapliedje / Claude Code <from Github.com>
 //
-// Who  When        What
+// Who  mm/dd/yyyy  What
 // ---  ----------  -------------------------------------------------------------
 // JLH  01/16/2010  Created this log ;-)
 // JPM  March/2022  Added the save state patch from PvtLewis
+// SLC  11/21/2026  Run the DSP and JERRY events in the main loop, in step with the 68K
 //
 
 //
