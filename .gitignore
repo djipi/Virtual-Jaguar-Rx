@@ -1,3 +1,4 @@
+.github/
 /Assets/
 /[Bb]uild/
 /debug/
@@ -21,27 +22,34 @@ makefile-qt*.*
 object_script.virtualjaguar*.*
 .qmake.stash
 *WinMerge
-/Win-VS2015/
-/Win-VS2017/
-/Win-VS2022/
-/Win-VS2026/m68000/m68000.vcxproj.user
-/Win-VS2026/jaguarcore/jaguarcore.vcxproj.user
-/Win-VS2026/x64/Archives/
-/Win-VS2026/*/x64/
-/Win-VS2026/*/ReadMe.txt
-/Win-VS2026/.vs/
-/Win-VS2026/obj/
-/Win-VS2026/Win32/
-/Win-VS2026/x64/
-/Win-VS2026/virtualjaguar.VC.db
-/Win-VS2026/virtualjaguar.VC.VC.opendb
-/Win-VS2026/virtualjaguar.sdf
-/Win-VS2026/virtualjaguar.vcxproj.user
-/Win-VS2026/GeneratedFiles/
-/Win-VS2026/GeneratedFiles/qrc_virtualjaguar.cpp
-/Win-VS2026/My Inspector Results - virtualjaguar
 .env
-MSYS2_MinGW64.sh
-vstudio.bat
-Cygwin64.sh
 desktop.ini
+
+# Visual Studio
+Win-VS2015/
+Win-VS2017/
+Win-VS2022/
+Win-VS2026/m68000/m68000.vcxproj.user
+Win-VS2026/jaguarcore/jaguarcore.vcxproj.user
+Win-VS2026/x64/Archives/
+Win-VS2026/*/x64/
+Win-VS2026/*/ReadMe.txt
+Win-VS2026/.vs/
+Win-VS2026/obj/
+Win-VS2026/Win32/
+Win-VS2026/x64/
+Win-VS2026/virtualjaguar.VC.db
+Win-VS2026/virtualjaguar.VC.VC.opendb
+Win-VS2026/virtualjaguar.sdf
+Win-VS2026/virtualjaguar.vcxproj.user
+Win-VS2026/GeneratedFiles/
+Win-VS2026/GeneratedFiles/qrc_virtualjaguar.cpp
+Win-VS2026/My Inspector Results - virtualjaguar
+.vs/
+
+# Scripts
+Cygwin64.sh
+MinGW64.sh
+ucrt64.sh
+vstudio.bat
+WSL2.sh
