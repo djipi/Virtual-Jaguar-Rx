@@ -20,6 +20,7 @@
 // JLH  04/30/2012  Changed SDL audio handler to run JERRY
 // JPM  March/2022  Added the save state patch from PvtLewis
 // SLC  11/21/2026  Run the DSP and JERRY events in the main loop, in step with the 68K
+// SLC  11/21/2026  Report the queued audio for the frame pacer
 //
 
 // Need to set up defaults that the BIOS sets for the SSI here in DACInit()... !!! FIX !!!
@@ -311,6 +312,20 @@ void SDLSoundCallback(void * userdata, Uint8 * buffer, int length)
 		dac_load_state = false;
 	else if (dac_dump_state)
 		dac_dump_state = false;
+}
+
+
+//
+// Frames queued for the audio thread, or -1 with no audio device open.
+// The frame pacer uses it to keep the emulation in step with the sound card.
+//
+int DACQueuedFrames(void)
+{
+	if (!SDLSoundInitialized)
+		return -1;
+
+	return (int)(dacRingHead.load(std::memory_order_acquire)
+		- dacRingTail.load(std::memory_order_acquire));
 }
 
 
