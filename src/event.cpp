@@ -361,39 +361,40 @@ double GetTimeToNextEvent(int type/*= EVENT_MAIN*/)
 		}
 	}
 #else
-	if (type == EVENT_MAIN)
+	// Only valid events count: slot 0 may be free (the JERRY list can even be
+	// empty), so start from "never" rather than from slot 0's stale time.
+	Event * list = (type == EVENT_MAIN ? eventList : eventListJERRY);
+	uint32_t * next = (type == EVENT_MAIN ? &nextEvent : &nextEventJERRY);
+	double time = EVENT_NEVER;
+	*next = 0;
+
+	for(uint32_t i=0; i<EVENT_LIST_SIZE; i++)
 	{
-		double time = eventList[0].eventTime;
-		nextEvent = 0;
-
-		for(uint32_t i=1; i<EVENT_LIST_SIZE; i++)
+		if (list[i].valid && (list[i].eventTime < time))
 		{
-			if (eventList[i].valid && (eventList[i].eventTime < time))
-			{
-				time = eventList[i].eventTime;
-				nextEvent = i;
-			}
+			time = list[i].eventTime;
+			*next = i;
 		}
-
-		return time;
 	}
-	else
-	{
-		double time = eventListJERRY[0].eventTime;
-		nextEventJERRY = 0;
 
-		for(uint32_t i=1; i<EVENT_LIST_SIZE; i++)
-		{
-			if (eventListJERRY[i].valid && (eventListJERRY[i].eventTime < time))
-			{
-				time = eventListJERRY[i].eventTime;
-				nextEventJERRY = i;
-			}
-		}
-
-		return time;
-	}
+	return time;
 #endif
+}
+
+
+//
+// Let time pass on one list without firing anything: the main loop steps
+// both lists together and fires whichever event is due first.
+//
+void AdvanceEventTime(double elapsed, int type/*= EVENT_MAIN*/)
+{
+	Event * list = (type == EVENT_MAIN ? eventList : eventListJERRY);
+
+	for(uint32_t i=0; i<EVENT_LIST_SIZE; i++)
+	{
+		if (list[i].valid)
+			list[i].eventTime -= elapsed;
+	}
 }
 
 

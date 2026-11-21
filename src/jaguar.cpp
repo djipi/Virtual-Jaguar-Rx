@@ -2837,17 +2837,67 @@ void JaguarExecuteNew(void)
 {
 	frameDone = false;
 
+	// The DSP and JERRY's events (PIT timers, I2S, the host sample clock) run
+	// here in lockstep with the 68K and GPU. They used to run on the host
+	// audio thread (SDLSoundCallback), paced by the sound card instead of
+	// emulated time, so the I2S rate drifted (~14 kHz for a 16 kHz SCLK) and
+	// the PITs and 68K/DSP handshakes had no common timeline. Both lists are
+	// stepped together and whichever event is due first fires. Fractions of a
+	// cycle carry over, so short slices neither gain nor lose time.
+	static double m68kOwed = 0, gpuOwed = 0, dspOwed = 0;
+	const double m68kUsec = (vjs.hardwareTypeNTSC ? M68K_CYCLE_IN_USEC : M68K_CYCLE_PAL_IN_USEC);
+	const double riscUsec = (vjs.hardwareTypeNTSC ? RISC_CYCLE_IN_USEC : RISC_CYCLE_PAL_IN_USEC);
+
 	do
 	{
-		double timeToNextEvent = GetTimeToNextEvent();
-//WriteLog("JEN: Time to next event (%u) is %f usec (%u RISC cycles)...\n", nextEvent, timeToNextEvent, USEC_TO_RISC_CYCLES(timeToNextEvent));
+		double timeMain = GetTimeToNextEvent(EVENT_MAIN);
+		double timeJERRY = GetTimeToNextEvent(EVENT_JERRY);
+		bool jerryFirst = (timeJERRY < timeMain);
+		double timeToNextEvent = (jerryFirst ? timeJERRY : timeMain);
 
-		m68k_execute(USEC_TO_M68K_CYCLES(timeToNextEvent));
+		if (timeToNextEvent > 0)
+		{
+			m68kOwed += timeToNextEvent / m68kUsec;
 
-		if (vjs.GPUEnabled)
-			GPUExec(USEC_TO_RISC_CYCLES(timeToNextEvent));
+			if (m68kOwed >= 1.0)
+				m68kOwed -= m68k_execute((int)m68kOwed);
 
-		HandleNextEvent();
+			if (vjs.GPUEnabled)
+			{
+				gpuOwed += timeToNextEvent / riscUsec;
+				int32_t n = (int32_t)gpuOwed;
+				gpuOwed -= n;
+
+				if (n > 0)
+					GPUExec(n);
+			}
+
+			if (vjs.DSPEnabled)
+			{
+				dspOwed += timeToNextEvent / riscUsec;
+				int32_t n = (int32_t)dspOwed;
+				dspOwed -= n;
+
+				if (n > 0)
+				{
+					if (vjs.usePipelinedDSP)
+						DSPExecP2(n);
+					else
+						DSPExec(n);
+				}
+			}
+		}
+
+		if (jerryFirst)
+		{
+			AdvanceEventTime(timeToNextEvent, EVENT_MAIN);
+			HandleNextEvent(EVENT_JERRY);
+		}
+		else
+		{
+			AdvanceEventTime(timeToNextEvent, EVENT_JERRY);
+			HandleNextEvent(EVENT_MAIN);
+		}
  	}
 	while (!frameDone);
 }
