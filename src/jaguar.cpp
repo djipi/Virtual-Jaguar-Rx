@@ -2833,6 +2833,11 @@ uint8_t * GetRamPtr(void)
 // New Jaguar execution stack
 // This executes 1 frame's worth of code.
 //
+// Cycles each processor still owes (> 0) or has run ahead (< 0) of the
+// event clock, carried between slices
+static double m68kOwed = 0, gpuOwed = 0, dspOwed = 0;
+
+
 void JaguarExecuteNew(void)
 {
 	frameDone = false;
@@ -2844,7 +2849,6 @@ void JaguarExecuteNew(void)
 	// the PITs and 68K/DSP handshakes had no common timeline. Both lists are
 	// stepped together and whichever event is due first fires. Fractions of a
 	// cycle carry over, so short slices neither gain nor lose time.
-	static double m68kOwed = 0, gpuOwed = 0, dspOwed = 0;
 	const double m68kUsec = (vjs.hardwareTypeNTSC ? M68K_CYCLE_IN_USEC : M68K_CYCLE_PAL_IN_USEC);
 	const double riscUsec = (vjs.hardwareTypeNTSC ? RISC_CYCLE_IN_USEC : RISC_CYCLE_PAL_IN_USEC);
 
@@ -2857,6 +2861,7 @@ void JaguarExecuteNew(void)
 
 		if (timeToNextEvent > 0)
 		{
+			// Owed < 0: that processor overran the last slice and is ahead
 			m68kOwed += timeToNextEvent / m68kUsec;
 
 			if (m68kOwed >= 1.0)
@@ -2866,24 +2871,33 @@ void JaguarExecuteNew(void)
 			{
 				gpuOwed += timeToNextEvent / riscUsec;
 				int32_t n = (int32_t)gpuOwed;
-				gpuOwed -= n;
 
 				if (n > 0)
+				{
+					uint32_t runAtStart = GPUCyclesRun();
 					GPUExec(n);
+					int32_t ran = (int32_t)(GPUCyclesRun() - runAtStart);
+					// a halted GPU doesn't bank the time it didn't use
+					gpuOwed -= (ran < n ? n : ran);
+				}
 			}
 
 			if (vjs.DSPEnabled)
 			{
 				dspOwed += timeToNextEvent / riscUsec;
 				int32_t n = (int32_t)dspOwed;
-				dspOwed -= n;
 
 				if (n > 0)
 				{
+					uint32_t runAtStart = DSPCyclesRun();
+
 					if (vjs.usePipelinedDSP)
 						DSPExecP2(n);
 					else
 						DSPExec(n);
+
+					int32_t ran = (int32_t)(DSPCyclesRun() - runAtStart);
+					dspOwed -= (ran < n ? n : ran);
 				}
 			}
 		}

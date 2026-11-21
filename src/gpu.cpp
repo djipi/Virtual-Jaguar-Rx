@@ -1248,6 +1248,15 @@ void GPUDone(void)
 static int testCount = 1;
 static int len = 0;
 static bool tripwire = false;
+// Running count of GPU cycles executed (see DSPCyclesRun)
+static uint32_t gpuCyclesRun = 0;
+
+uint32_t GPUCyclesRun(void)
+{
+	return gpuCyclesRun;
+}
+
+
 void GPUExec(int32_t cycles)
 {
 	if (!GPU_RUNNING)
@@ -1264,7 +1273,11 @@ void GPUExec(int32_t cycles)
 	gpu_releaseTimeSlice_flag = 0;
 	gpu_in_exec++;
 
-	while (cycles > 0 && GPU_RUNNING)
+	// Bound the slice by the running count: a jump's delay slot runs in a
+	// nested GPUExec(1) that this call's own budget would never see
+	const uint32_t gpuRunEnd = gpuCyclesRun + cycles;
+
+	while ((int32_t)(gpuRunEnd - gpuCyclesRun) > 0 && GPU_RUNNING)
 	{
 if (gpu_ram_8[0x054] == 0x98 && gpu_ram_8[0x055] == 0x0A && gpu_ram_8[0x056] == 0x03
 	&& gpu_ram_8[0x057] == 0x00 && gpu_ram_8[0x058] == 0x00 && gpu_ram_8[0x059] == 0x00)
@@ -1435,6 +1448,8 @@ if (gpu_pc == 0xF03548 && firstTime)
 	gpu_flag_z = 0;//, gpu_start_log = 1;//*/
 
 		cycles -= gpu_opcode_cycles[index];
+
+		gpuCyclesRun += gpu_opcode_cycles[index];
 		gpu_opcode_use[index]++;
 if (gpu_start_log)
 	WriteLog("(RM=%08X, RN=%08X)\n", RM, RN);//*/

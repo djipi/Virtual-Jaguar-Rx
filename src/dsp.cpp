@@ -391,6 +391,10 @@ const char * dsp_opcode_str[65]=
 };
 
 uint32_t dsp_pc;
+
+// Running count of DSP cycles executed (wraps), so the main loop can tell
+// how far the DSP is into a slice (JERRY PIT readback)
+static uint32_t dspCyclesRun = 0;
 static uint64_t dsp_acc;								// 40 bit register, NOT 32!
 static uint32_t dsp_remain;
 static uint32_t dsp_modulo;
@@ -1565,6 +1569,7 @@ DSPUpdateRegisterBanks();
 		// Decrement cycles based on non-pipelined core...
 		uint16_t instr1 = DSPReadWord(dsp_pc, DSP);
 		cycles -= dsp_opcode_cycles[instr1 >> 10];
+		dspCyclesRun += dsp_opcode_cycles[instr1 >> 10];
 
 //WriteLog("\tAbout to execute non-pipelined core on tick #%u (DSP_PC=%08X)...\n", (uint32_t)count, dsp_pc);
 		DSPExec(1);									// Do *one* instruction
@@ -1690,6 +1695,7 @@ for(int k=0; k<2; k++)
 		// Decrement cycles based on non-pipelined core...
 		instr1 = DSPReadWord(dsp_pc, DSP);
 		cycles -= dsp_opcode_cycles[instr1 >> 10];
+		dspCyclesRun += dsp_opcode_cycles[instr1 >> 10];
 
 //WriteLog("\tAbout to execute non-pipelined core on tick #%u (DSP_PC=%08X)...\n", (uint32_t)count, dsp_pc);
 		DSPExec(1);									// Do *one* instruction
@@ -1738,6 +1744,12 @@ for(int k=0; k<2; k++)
 //
 //static bool R20Set = false, tripwire = false;
 //static uint32_t pcQueue[32], ptrPCQ = 0;
+uint32_t DSPCyclesRun(void)
+{
+	return dspCyclesRun;
+}
+
+
 void DSPExec(int32_t cycles)
 {
 #ifdef DSP_SINGLE_STEPPING
@@ -1752,7 +1764,11 @@ void DSPExec(int32_t cycles)
 	dsp_releaseTimeSlice_flag = 0;
 	dsp_in_exec++;
 
-	while (cycles > 0 && DSP_RUNNING)
+	// Bound the slice by the running count: a jump's delay slot runs in a
+	// nested DSPExec(1) that this call's own budget would never see
+	const uint32_t dspRunEnd = dspCyclesRun + cycles;
+
+	while ((int32_t)(dspRunEnd - dspCyclesRun) > 0 && DSP_RUNNING)
 	{
 /*extern uint32_t totalFrames;
 //F1B2F6: LOAD   (R14+$04), R24 [NCZ:001, R14+$04=00F20018, R24=FFFFFFFF] -> Jaguar: Unknown word read at 00F20018 by DSP (M68K PC=00E32E)
@@ -1801,6 +1817,7 @@ ptrPCQ %= 32;*/
 		dsp_opcode[index]();
 		dsp_opcode_use[index]++;
 		cycles -= dsp_opcode_cycles[index];
+		dspCyclesRun += dsp_opcode_cycles[index];
 /*if (dsp_reg_bank_0[20] == 0xF1A100 & !R20Set)
 {
 	WriteLog("DSP: R20 set to $F1A100 at %u ms%s...\n", SDL_GetTicks(), (dsp_flags & IMASK ? " (inside interrupt)" : ""));
@@ -3159,6 +3176,7 @@ WriteLog("DSPExecP: About to execute opcode %s...\n", dsp_opcode_str[pipeline[pl
 			DSPOpcode[pipeline[plPtrExec].opcode]();
 			dsp_opcode_use[pipeline[plPtrExec].opcode]++;
 			cycles -= dsp_opcode_cycles[pipeline[plPtrExec].opcode];
+			dspCyclesRun += dsp_opcode_cycles[pipeline[plPtrExec].opcode];
 		}
 		else
 			cycles--;
@@ -3348,7 +3366,11 @@ void DSPExecP2(int32_t cycles)
 	dsp_releaseTimeSlice_flag = 0;
 	dsp_in_exec++;
 
-	while (cycles > 0 && DSP_RUNNING)
+	// Bound the slice by the running count: a jump's delay slot runs in a
+	// nested DSPExec(1) that this call's own budget would never see
+	const uint32_t dspRunEnd = dspCyclesRun + cycles;
+
+	while ((int32_t)(dspRunEnd - dspCyclesRun) > 0 && DSP_RUNNING)
 	{
 /*extern uint32_t totalFrames;
 //F1B2F6: LOAD   (R14+$04), R24 [NCZ:001, R14+$04=00F20018, R24=FFFFFFFF] -> Jaguar: Unknown word read at 00F20018 by DSP (M68K PC=00E32E)
@@ -3516,6 +3538,7 @@ lastExec = pipeline[plPtrExec].instruction;
 //WriteLog("[lastExec = %04X]\n", lastExec);
 #endif
 			cycles -= dsp_opcode_cycles[pipeline[plPtrExec].opcode];
+			dspCyclesRun += dsp_opcode_cycles[pipeline[plPtrExec].opcode];
 			dsp_opcode_use[pipeline[plPtrExec].opcode]++;
 			DSPOpcode[pipeline[plPtrExec].opcode]();
 //WriteLog("    --> Returned from execute. DSP_PC: %08X\n", dsp_pc);
@@ -3673,6 +3696,7 @@ WriteLog("DSPExecP: About to execute opcode %s...\n", dsp_opcode_str[pipeline[pl
 			DSPOpcode[pipeline[plPtrExec].opcode]();
 			dsp_opcode_use[pipeline[plPtrExec].opcode]++;
 			cycles -= dsp_opcode_cycles[pipeline[plPtrExec].opcode];
+			dspCyclesRun += dsp_opcode_cycles[pipeline[plPtrExec].opcode];
 		}
 		else
 			cycles--;

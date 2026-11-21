@@ -14,6 +14,7 @@
 void GPUInit(void);
 void GPUReset(void);
 void GPUExec(int32_t);
+uint32_t GPUCyclesRun(void);
 void GPUDone(void);
 void GPUUpdateRegisterBanks(void);
 void GPUHandleIRQs(void);
