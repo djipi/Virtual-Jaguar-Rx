@@ -48,6 +48,8 @@
 
 #include "dac.h"
 
+#include <atomic>
+
 #include "SDL.h"
 #include "cdrom.h"
 #include "dsp.h"
@@ -91,10 +93,17 @@ static bool SDLSoundInitialized;
 void SDLSoundCallback(void * userdata, Uint8 * buffer, int length);
 void DSPSampleCallback(void);
 
-static Uint8 * sampleBuffer = NULL;
-static int bufferIndex = 0;
-static int numberOfSamples = 0;
-static bool bufferDone = false;
+// Emulated time makes the samples (DSPSampleCallback, a JERRY event run by
+// JaguarExecuteNew) and the host audio thread only plays them back, through
+// this single-producer/single-consumer ring of stereo frames.
+#define DAC_RING_FRAMES		16384				// power of 2; ~340 ms at 48 kHz
+#define DAC_RING_PREFILL	(DAC_AUDIO_RATE / 30)	// ~33 ms (2 video frames) of slack
+#define DAC_RING_TARGET		(DAC_AUDIO_RATE / 10)	// ~100 ms: trim lag above this
+static int16_t dacRing[DAC_RING_FRAMES * 2];
+static std::atomic<uint32_t> dacRingHead(0);	// written by the emulation
+static std::atomic<uint32_t> dacRingTail(0);	// written by the audio thread
+static int16_t dacLastL = 0, dacLastR = 0;		// audio thread only
+static bool dacStarved = true;					// audio thread only
 
 
 size_t dac_dump(FILE *fp)
@@ -200,6 +209,10 @@ void DACReset(void)
 {
 //	LeftFIFOHeadPtr = LeftFIFOTailPtr = 0, RightFIFOHeadPtr = RightFIFOTailPtr = 1;
 	ltxd = lrxd = desired.silence;
+
+	// the host sample clock is a JERRY event on the emulated timeline
+	RemoveCallback(DSPSampleCallback);
+	SetCallbackTime(DSPSampleCallback, 1000000.0 / (double)DAC_AUDIO_RATE, EVENT_JERRY);
 }
 
 
@@ -248,93 +261,75 @@ volatile bool dac_dump_state = false;
 
 void SDLSoundCallback(void * userdata, Uint8 * buffer, int length)
 {
-	WriteLog("SDLSoundCallback called: length: %d  load: %d  dump: %d\n", length, dac_load_state, dac_dump_state);
+	int16_t * out = (int16_t *)buffer;
+	int frames = length / 4;					// 16-bit stereo
+	uint32_t tail = dacRingTail.load(std::memory_order_relaxed);
+	uint32_t head = dacRingHead.load(std::memory_order_acquire);
 
-	// 1st, check to see if the DSP is running. If not, fill the buffer with L/RXTD and exit.
+	// The emulation makes a video frame's worth of samples in a burst and
+	// the host asks in its own buffer-sized bursts. After an underrun, wait
+	// until there is a buffer plus some slack queued, so the two clocks
+	// settle with headroom instead of starving every buffer.
+	if (dacStarved && head - tail < (uint32_t)(frames + DAC_RING_PREFILL))
+		frames = 0;
+	else
+		dacStarved = false;
 
-	if (!DSPIsRunning())
+	// More queued than we want to lag by (emulation ran ahead, e.g. after a
+	// pause or fast-forward): drop the oldest frames.
+	if (head - tail > (uint32_t)(DAC_RING_TARGET + frames))
+		tail = head - (DAC_RING_TARGET + frames);
+
+	for(int i=0; i<frames; i++)
 	{
-		for(int i=0; i<(length/2); i+=2)
+		if (tail == head)
 		{
-			((uint16_t *)buffer)[i + 0] = ltxd;
-			((uint16_t *)buffer)[i + 1] = rtxd;
+			dacStarved = true;
+			frames = i;
+			break;
 		}
 
-		return;
+		uint32_t at = (tail & (DAC_RING_FRAMES - 1)) * 2;
+		dacLastL = out[i * 2 + 0] = dacRing[at + 0];
+		dacLastR = out[i * 2 + 1] = dacRing[at + 1];
+		tail++;
 	}
 
-	// The length of time we're dealing with here is 1/48000 s, so we multiply this
-	// by the number of cycles per second to get the number of cycles for one sample.
-//	uint32_t riscClockRate = (vjs.hardwareTypeNTSC ? RISC_CLOCK_RATE_NTSC : RISC_CLOCK_RATE_PAL);
-//	uint32_t cyclesPerSample = riscClockRate / DAC_AUDIO_RATE;
-	// This is the length of time
-//	timePerSample = (1000000.0 / (double)riscClockRate) * ();
-
-	// Now, run the DSP for that length of time for each sample we need to make
-
-	bufferIndex = 0;
-	sampleBuffer = buffer;
-// If length is the length of the sample buffer in BYTES, then shouldn't the # of
-// samples be / 4? No, because we bump the sample count by 2, so this is OK.
-	numberOfSamples = length / 2;
-	bufferDone = false;
-
-	SetCallbackTime(DSPSampleCallback, 1000000.0 / (double)DAC_AUDIO_RATE, EVENT_JERRY);
-
-	// These timings are tied to NTSC, need to fix that in event.cpp/h! [FIXED]
-	do
+	// Underrun (or still refilling): hold the last frame, which is quieter
+	// than a click
+	for(int i=frames; i<length/4; i++)
 	{
-		double timeToNextEvent = GetTimeToNextEvent(EVENT_JERRY);
-
-		if (vjs.DSPEnabled)
-		{
-			if (vjs.usePipelinedDSP)
-				DSPExecP2(USEC_TO_RISC_CYCLES(timeToNextEvent));
-			else
-				DSPExec(USEC_TO_RISC_CYCLES(timeToNextEvent));
-		}
-
-		HandleNextEvent(EVENT_JERRY);
+		out[i * 2 + 0] = dacLastL;
+		out[i * 2 + 1] = dacLastR;
 	}
-	while (!bufferDone);
+
+	dacRingTail.store(tail, std::memory_order_release);
 
 	if (dac_load_state)
-	{
 		dac_load_state = false;
-	}
-	else
-	{
-		if (dac_dump_state)
-		{
-			dac_dump_state = false;
-		}
-	}
+	else if (dac_dump_state)
+		dac_dump_state = false;
 }
 
 
+//
+// One host sample period of emulated time has passed: queue what the DAC
+// outputs now. Runs on the emulation thread as a JERRY event.
+//
 void DSPSampleCallback(void)
 {
-	if (bufferIndex >= numberOfSamples)
-	{
-		bufferDone = true;
-		//return;
-	}
-	else
-	{
-		((uint16_t *)sampleBuffer)[bufferIndex + 0] = ltxd;
-		((uint16_t *)sampleBuffer)[bufferIndex + 1] = rtxd;
-		bufferIndex += 2;
+	uint32_t head = dacRingHead.load(std::memory_order_relaxed);
+	uint32_t tail = dacRingTail.load(std::memory_order_acquire);
 
-		if (bufferIndex == numberOfSamples)
-		{
-			bufferDone = true;
-			//return;
-		}
-		else
-		{
-			SetCallbackTime(DSPSampleCallback, 1000000.0 / (double)DAC_AUDIO_RATE, EVENT_JERRY);
-		}
+	if (head - tail < DAC_RING_FRAMES)			// full: drop this frame
+	{
+		uint32_t at = (head & (DAC_RING_FRAMES - 1)) * 2;
+		dacRing[at + 0] = (int16_t)ltxd;
+		dacRing[at + 1] = (int16_t)rtxd;
+		dacRingHead.store(head + 1, std::memory_order_release);
 	}
+
+	SetCallbackTime(DSPSampleCallback, 1000000.0 / (double)DAC_AUDIO_RATE, EVENT_JERRY);
 }
 
 

@@ -27,6 +27,9 @@ void SetCallbackTime(void (* callback)(void), double time, int type = EVENT_MAIN
 void RemoveCallback(void (* callback)(void));
 void AdjustCallbackTime(void (* callback)(void), double time);
 double GetTimeToNextEvent(int type = EVENT_MAIN);
+void AdvanceEventTime(double elapsed, int type = EVENT_MAIN);
+// GetTimeToNextEvent() on a list with no valid events
+#define EVENT_NEVER 1.0e12
 void HandleNextEvent(int type = EVENT_MAIN);
 
 #endif	// __EVENT_H__
