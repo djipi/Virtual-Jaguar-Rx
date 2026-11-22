@@ -6,7 +6,7 @@
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //  RG = Richard Goedeken
 //
-// WHO  WHEN        WHAT
+// WHO  MM/DD/YYYY  WHAT
 // ---  ----------  ------------------------------------------------------------
 // JPM  12/21/2016  Created this file
 // JPM              Various efforts to set the ELF format support
@@ -17,7 +17,7 @@
 // JPM    May/2021  Code refactoring for the variables
 // JPM   Dec./2024  Fix the get address in case of empty symbol name
 // JPM   Nov./2025  Added _Fract & _Accum fixed-point support
-// JPM        2026  Added char type & fixed the unsigned char for the variable, updated fixed point Q16.15 precision
+// JPM        2026  Added char type & fixed the unsigned char for the variable, add error check for unsigned _Fract, updated _Accum display precision
 //
 
 // To Do
@@ -561,7 +561,6 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 {
 	Value V;
 	char *Ptrvalue = value;
-	int32_t a32;
 
 	value[0] = 0;
 
@@ -702,7 +701,8 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 				default:
 					break;
 				}
-				(((value[0] != '-') && (value[0] != '0')) || ((value[0] == '-') && (value[1] != '0'))) ? strcpy(value, "#error"), true : false;
+				// check the string to be in the range of [-1,1[, otherwise set an error
+				(((value[0] != '-') && (value[0] != '0')) || ((value[0] == '-') && ((value[1] != '0') && (value[1] != '1')))) ? strcpy(value, "#error"), true : false;
 				break;
 
 				// _Accum types (short _Accum, _Accum, long _Accum)
@@ -716,14 +716,19 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 
 				case 4:
 					// Q16.15
-					a32 = (V.SI < 0) ? -V.SI : V.SI;
-					sprintf(value, "%s%d.%05d", (V.SI < 0) ? "-" : "", (a32 >> 15), (int)((((int64_t)(a32 & 0x7fff) * 100000) + 16384) >> 15));
+					{
+					int64_t a32 = (V.SI & 0x80000000) ? -(int64_t)V.SI : V.SI;
+					sprintf(value, "%s%d.%05d", (V.SI & 0x80000000) ? "-" : "", (int)(a32 >> 15), (int)((((a32 & 0x7fff) * 100000) + 16384) >> 15));
 					break;
+					}
 
 				case 8:
 					// Q32.31
-					(V.SL & 0x8000000000000000) ? sprintf(value, "-%lld.%03lld", (-V.SL >> 31), ((-V.SL & 0x7fffffff) * 1000 + 64) >> 31) : sprintf(value, "%lld.%03lld", (V.SL >> 31), ((V.SL & 0x7fffffff) * 1000 + 64) >> 31);
+					{
+					uint64_t a64 = (V.SL & 0x8000000000000000) ? -(uint64_t)V.SL : (uint64_t)V.SL;
+					sprintf(value, "%s%lld.%03lld", (V.SL & 0x8000000000000000) ? "-" : "", (a64 >> 31), ((a64 & 0x7fffffff) * 1000 + 64) >> 31);
 					break;
+					}
 
 				default:
 					break;
@@ -766,6 +771,7 @@ char *DBGManager_GetVariableValueFromAdr(size_t Adr, size_t TypeEncoding, size_t
 				default:
 					break;
 				}
+				// check the string to be in the range of [0,1[, otherwise set an error
 				((value[0] != '0') || (value[0] == '-')) ? strcpy(value, "#error"), true : false;
 				break;
 
