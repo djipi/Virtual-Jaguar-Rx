@@ -13,6 +13,7 @@
 void DSPInit(void);
 void DSPReset(void);
 void DSPExec(int32_t);
+uint32_t DSPCyclesRun(void);
 void DSPDone(void);
 void DSPUpdateRegisterBanks(void);
 void DSPHandleIRQs(void);
