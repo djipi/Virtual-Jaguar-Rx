@@ -10,6 +10,7 @@
 // JPM = Jean-Paul Mari <djipi.mari@gmail.com>
 //  RG = Richard Goedeken
 //  PL = PvtLewis <from Atari Age>
+// SLC = slaapliedje / Claude Code <from Github.com>
 //
 // Who  mm/dd/yyyy  What
 // ---  ----------  ------------------------------------------------------------
@@ -36,6 +37,7 @@
 // JPM        2025  Feature to turn on/off the profiler, profiler control window, and conditional compilation for the VJRx and Tracy profiler support
 // JPM    May/2026  Added remote control support, fix the fps counter
 // JPM   July/2026  Replace new function breakpoint with a new breakpoint window
+// SLC  11/21/2026  Steer the frame pacing by the queued audio, keep the deadline from drifting
 //
 
 // FIXED:
@@ -1437,6 +1439,21 @@ void MainWin::EmulationTimer(void)
 	// Pure sleep is not used because Windows timer resolution is ~15.6ms,
 	// which causes oversleeping. The spin-wait covers the final 2ms precisely.
 	targetUsecs = vjs.hardwareTypeNTSC ? NTSC_FRAME_USECS : PAL_FRAME_USECS;
+
+	// The sound card plays the emulated audio at its own clock, so steer the
+	// frame period by how much audio is queued: more than the set point
+	// means the emulation is ahead and waits a little longer, less means it
+	// is behind and waits less. At most 1% either way, which is inaudible.
+	const int queued = DACQueuedFrames();
+	if (queued >= 0)
+	{
+		const int setPoint = 4096;				// 2 host buffers of 2048 frames
+		int error = queued - setPoint;
+		if (error > 2048) error = 2048;
+		if (error < -2048) error = -2048;
+		targetUsecs += (targetUsecs * error) / 204800;
+	}
+
 	const qint64 deadlineUsecs = lastFrameUsecs + targetUsecs;
 
 	// Phase 1: coarse sleep - only if enough headroom to avoid over-sleeping
@@ -1455,7 +1472,9 @@ void MainWin::EmulationTimer(void)
 	// FPS handling: uses a ring buffer to store times (in microseconds) between frames
 	const qint64 frameUsecs = frameTimer.nsecsElapsed() / 1000LL;
 	const qint64 frameDelta = frameUsecs - lastFrameUsecs;
-	lastFrameUsecs = frameUsecs;
+	// Count the next period from this deadline, not from when the wait
+	// actually ended, so oversleeping isn't added to every frame.
+	lastFrameUsecs = deadlineUsecs;
 
 	ringBufferPointer = (ringBufferPointer + 1) % RING_BUFFER_SIZE;
 	ringBuffer[ringBufferPointer] = (uint32_t)(frameDelta > 0 ? frameDelta : 1);

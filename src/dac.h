@@ -11,6 +11,7 @@ void DACInit(void);
 void DACReset(void);
 void DACPauseAudioThread(bool state = true);
 void DACDone(void);
+int DACQueuedFrames(void);
 //int GetCalculatedFrequency(void);
 
 // DAC memory access
